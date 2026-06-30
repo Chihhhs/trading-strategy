@@ -1,6 +1,6 @@
-# FVG Strategy — Hyperliquid 趨勢交易策略
+# Trading Strategy — Hyperliquid 多策略交易系統
 
-> 基於 FVG（Fair Value Gap）+ 趨勢跟隨的雙策略系統，支援回測與實盤執行。
+> 趨勢跟隨 + FVG + 多幣種掃描，支援回測與實盤執行。
 
 ## 分支結構
 
