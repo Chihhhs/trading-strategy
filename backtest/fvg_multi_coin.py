@@ -7,8 +7,8 @@ import sys, os, json, statistics
 from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(__file__))
 
-from indicators_v3 import adx, atr, ema
-from live_monitor import get_binance_klines
+from indicators_v3 import trend_strength_score as adx, atr, ema
+# from live_monitor import get_binance_klines  # optional, for live data only
 import urllib.request
 
 # ══════════════════════════════════════════════════════════════

@@ -6,8 +6,7 @@ fvg_backtest_1000d.py - 1000天回測 + TP/SL 參數優化
 import sys, os, json, statistics
 sys.path.insert(0, os.path.dirname(__file__))
 
-from fvg_multi_coin import load_coin_list, generate_signal, get_btc_direction, calc_size
-from live_monitor import get_binance_klines
+from fvg_multi_coin import calc_size
 from datetime import datetime
 
 # ══════════════════════════════════════════════════════════════
@@ -27,18 +26,31 @@ STRATEGY_TYPES = {
     "雙策略5x": {"initial_balance": 1000.0, "leverage": 5, "risk_per_trade": 0.10, "strategy_type": "both", "max_positions": 3, "max_hold_days": 14},
 }
 
-print('📊 收集 50 幣種 1000 天數據...')
-coins = load_coin_list()
-all_data = {}
-for i, coin in enumerate(coins):
-    try:
-        d = get_binance_klines(coin['symbol'], limit=1000)
-        if d and len(d) >= 50:
-            all_data[coin['name']] = d
-    except: pass
-
-min_days = min(len(d) for d in all_data.values())
-print(f'  收集 {len(all_data)} 幣種，回測 {min_days} 天')
+# 優先使用本地快取數據
+import os as _os
+_local_data_path = _os.path.join(_os.path.dirname(__file__), '..', 'data', '1000d_50coins.json')
+if _os.path.exists(_local_data_path):
+    print(f'📂 載入本地數據: {_local_data_path}')
+    with open(_local_data_path) as _f:
+        _raw = json.load(_f)
+    # 轉換格式: {coin: [{ts, open, high, low, close, volume}, ...]}
+    all_data = {}
+    for _coin, _records in _raw.items():
+        all_data[_coin] = _records
+    min_days = min(len(d) for d in all_data.values())
+    print(f'  載入 {len(all_data)} 幣種，回測 {min_days} 天')
+else:
+    print('📊 收集 50 幣種 1000 天數據...')
+    coins = load_coin_list()
+    all_data = {}
+    for i, coin in enumerate(coins):
+        try:
+            d = get_binance_klines(coin['symbol'], limit=1000)
+            if d and len(d) >= 50:
+                all_data[coin['name']] = d
+        except: pass
+    min_days = min(len(d) for d in all_data.values())
+    print(f'  收集 {len(all_data)} 幣種，回測 {min_days} 天')
 
 # ══════════════════════════════════════════════════════════════
 # 生成含自訂 TP/SL 的信號
@@ -203,10 +215,17 @@ def run_backtest(name, params, tp_mult, sl_mult):
         
         # 每 3 天掃描
         if day_idx%3==0 and len(state['positions'])<params['max_positions']:
-            btc_dir = get_btc_direction()
-            for coin in coins:
+            # BTC direction from local data (offline backtest)
+            if 'BTC' in all_data and day_idx >= 7:
+                btc_d = all_data['BTC']
+                btc_chg = (btc_d[day_idx]['close'] / btc_d[day_idx-7]['close'] - 1) * 100
+                if btc_chg > 3: btc_dir = 'bull'
+                elif btc_chg < -3: btc_dir = 'bear'
+                else: btc_dir = 'neutral'
+            else:
+                btc_dir = 'neutral'
+            for cn in all_data:
                 if len(state['positions'])>=params['max_positions']: break
-                cn = coin['name']
                 if any(p['coin']==cn for p in state['positions']): continue
                 if cn not in all_data or day_idx>=len(all_data[cn]): continue
                 sub = all_data[cn][:day_idx+1]
