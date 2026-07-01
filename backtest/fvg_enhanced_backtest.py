@@ -10,7 +10,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from indicators_v3 import adx, atr, ema
 
 # 載入數據
-DATA_PATH = os.path.expanduser('~/.hermes/trading-knowledge/historical_prices/1000d_50coins.json')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+DATA_PATH = os.path.join(PROJECT_ROOT, 'data', 'historical_prices', '1000d_50coins.json')
 with open(DATA_PATH, 'r') as f:
     all_data = json.load(f)
 

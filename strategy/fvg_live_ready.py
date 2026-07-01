@@ -22,6 +22,7 @@ import sys, os, json, statistics, time
 from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(__file__))
 
+from hyperliquid_api import choose_limit_price
 from indicators_v3 import adx, atr, ema
 from live_monitor import get_binance_klines
 import urllib.request
@@ -46,7 +47,7 @@ STRATEGIES = {
         "initial_balance": 1000.0, "max_positions": 3, "max_hold_days": 30,
         "leverage": 5, "risk_per_trade": 0.08, "strategy_type": "trend",
         "max_daily_loss_pct": 15.0, "max_consecutive_losses": 5, "cooldown_hours": 24,
-        "min_score": 4, "min_cor_confirm": 0,
+        "min_score": 4, "min_cor_confirm": 0, "entry_order_type": "post_only",
     },
 }
 
@@ -59,7 +60,8 @@ CIRCUIT_BREAKER = {
 }
 
 # 數據
-MULTI_STATE_DIR = os.path.expanduser('~/.hermes/trading-knowledge/paper_strategies_live')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+MULTI_STATE_DIR = os.path.join(PROJECT_ROOT, 'data', 'paper_strategies_live')
 os.makedirs(MULTI_STATE_DIR, exist_ok=True)
 
 # ══════════════════════════════════════════════════════════════
@@ -302,28 +304,69 @@ def check_entries(state, coins):
         size = calc_size(state['balance'], entry, sig['sl'], p['leverage'], p['risk_per_trade'])
         if size <= 0: continue
         
+        order_meta = None
+        order_side = 'buy' if sig['direction'] == 'long' else 'sell'
+        if MODE == "live":
+            order_meta = place_hl_order(cn, order_side, round(size, 6), order_type=p.get('entry_order_type', 'post_only'))
+            if not order_meta or order_meta.get('status') == 'error':
+                print(f'  ❌ 下單失敗: {cn} {order_side} | {order_meta.get("message", "unknown") if order_meta else "unknown"}')
+                continue
+            entry = order_meta.get('resolved_price', entry)
+
         state['positions'].append({
             'coin': cn, 'direction': sig['direction'],
             'entry': entry, 'tp': sig['tp'], 'sl': sig['sl'],
             'size': round(size, 6), 'current_price': entry,
             'pnl_pnl': 0, 'entry_time': datetime.now().isoformat(),
             'sig': sig.get('reason', ''),
+            'order_type': p.get('entry_order_type', 'post_only'),
+            'order_meta': order_meta,
         })
-        print(f'  ✅ 建倉: {cn} {sig["direction"]} @ ${entry:,.2f} | {sig["reason"]} | score={sig["score"]}')
+        print(
+            f'  ✅ 建倉: {cn} {sig["direction"]} @ ${entry:,.2f}'
+            f' | {sig["reason"]} | score={sig["score"]}'
+            f' | mode={"live" if MODE == "live" else "paper"}'
+        )
 
 # ══════════════════════════════════════════════════════════════
 # 實盤交易接口（待接入）
 # ══════════════════════════════════════════════════════════════
 
-def place_hl_order(coin, side, size, price=None, order_type="limit"):
+def place_hl_order(coin, side, size, price=None, order_type="post_only"):
     """Hyperliquid 下單（需要 PRIVATE_KEY）"""
     if not PRIVATE_KEY:
         return {"status": "error", "message": "未設定私鑰"}
+
+    normalized_order_type = "post_only" if order_type in ("limit", "post_only") else order_type
+    orderbook_ref = choose_limit_price(
+        coin,
+        side,
+        base_url=HL_API_URL,
+        passive=(normalized_order_type == "post_only"),
+    )
+    resolved_price = price
+    if resolved_price is None and orderbook_ref:
+        resolved_price = orderbook_ref["price"]
+    if resolved_price is None:
+        return {"status": "error", "message": f"無法取得 {coin} 的 HL order book 價格"}
     
     # TODO: 接入 EIP-712 簽名
     # 目前為接口預留
-    print(f'  🔴 實盤下单: {coin} {side} {size} @ {price}')
-    return {"status": "dry_run", "message": "接口預留"}
+    print(
+        f'  🔴 實盤下单: {coin} {side} {size} @ {resolved_price}'
+        f' | type={normalized_order_type}'
+        f' | bid={orderbook_ref["best_bid"] if orderbook_ref else "n/a"}'
+        f' ask={orderbook_ref["best_ask"] if orderbook_ref else "n/a"}'
+    )
+    return {
+        "status": "dry_run",
+        "message": "接口預留",
+        "resolved_price": resolved_price,
+        "order_type": normalized_order_type,
+        "best_bid": orderbook_ref["best_bid"] if orderbook_ref else None,
+        "best_ask": orderbook_ref["best_ask"] if orderbook_ref else None,
+        "source": "hyperliquid_l2_book",
+    }
 
 def get_hl_balance():
     """查詢 Hyperliquid 帳戶餘額"""

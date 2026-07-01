@@ -15,7 +15,8 @@ import urllib.request
 # 配置
 # ══════════════════════════════════════════════════════════════
 
-MULTI_STATE_DIR = os.path.expanduser('~/.hermes/trading-knowledge/paper_strategies_v2')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+MULTI_STATE_DIR = os.path.join(PROJECT_ROOT, 'data', 'paper_strategies_v2')
 os.makedirs(MULTI_STATE_DIR, exist_ok=True)
 
 # 6 組策略

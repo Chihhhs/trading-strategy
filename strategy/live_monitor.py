@@ -38,7 +38,8 @@ WATCHLIST = [
 ]
 
 # 信號歷史（持久化）
-SIGNAL_LOG = os.path.expanduser('~/.hermes/trading-knowledge/signal_log.json')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+SIGNAL_LOG = os.path.join(PROJECT_ROOT, 'data', 'signal_log.json')
 
 
 # ══════════════════════════════════════════════════════════════

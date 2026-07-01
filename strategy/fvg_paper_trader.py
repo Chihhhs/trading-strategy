@@ -227,7 +227,8 @@ STRATEGIES = {
 # State 管理
 # ══════════════════════════════════════════════════════════════
 
-MULTI_STATE_DIR = os.path.expanduser('~/.hermes/trading-knowledge/paper_strategies')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+MULTI_STATE_DIR = os.path.join(PROJECT_ROOT, 'data', 'paper_strategies')
 os.makedirs(MULTI_STATE_DIR, exist_ok=True)
 
 def load_state(name):

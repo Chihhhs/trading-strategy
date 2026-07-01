@@ -5,14 +5,16 @@
 ## 分支結構
 
 ```
-main          ← 核心策略 + 回測框架（穩定版本）
-└── live      ← 實盤分支（即時數據、風控、執行器）
+main          ← 目前主要開發分支（回測 + paper + live 實盤修改）
+└── live      ← 保留分支（舊的實盤整合線）
 ```
 
 | 分支 | 用途 |
 |------|------|
-| `main` | 策略邏輯、回測、參數優化、結果紀錄 |
-| `live` | 實盤執行、即時數據串接、風控、排程 |
+| `main` | 目前主線，包含策略邏輯、回測、資料路徑調整、Hyperliquid 實盤修改 |
+| `live` | 保留舊實盤分支歷史；只有在需要回看舊整合方式、比對差異，或做隔離中的實盤實驗時才使用 |
+
+目前建議預設都在 `main` 上開發與執行。`live` 不是完全沒用，但已不再是日常主線。
 
 ## 目錄結構
 
@@ -67,10 +69,9 @@ python3 backtest/fvg_backtest_60d.py
 python3 backtest/fvg_risk_comparison.py
 ```
 
-### 實盤（live 分支）
+### 實盤（main 分支）
 
 ```bash
-git checkout live
 python3 strategy/fvg_live_strategy.py --live
 ```
 

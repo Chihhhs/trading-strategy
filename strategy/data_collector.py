@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 data_collector.py - 收集即時市場價格，存為歷史數據供回測使用
-位置: ~/.hermes/scripts/trading_lib/
+位置: strategy/
 
 功能：
 1. 定期收集所有 WATCHLIST 幣種的即時價格
@@ -19,7 +19,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from live_monitor import WATCHLIST, get_binance_klines
 
-DATA_DIR = os.path.expanduser('~/.hermes/trading-knowledge/historical_prices')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'historical_prices')
 os.makedirs(DATA_DIR, exist_ok=True)
 
 def collect_once():
