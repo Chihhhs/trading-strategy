@@ -12,3 +12,11 @@ __pycache__/
 
 # 大型數據檔案 (視情況取消註解)
 # data/*.json
+
+# 執行期資料與狀態
+data/paper_strategies/
+data/paper_strategies_live/
+data/paper_strategies_v2/
+data/signal_log.json
+data/signal_log_history.json
+data/historical_prices/prices_*.json
