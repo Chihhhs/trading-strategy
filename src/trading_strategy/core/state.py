@@ -64,6 +64,9 @@ def save_state(state_dir, state, io_lock=None, *, name="live_state"):
                 "size_decimals": order_meta.get("size_decimals"),
                 "order_summary": order_meta.get("order_summary"),
             }
+        for key in ("tp_order", "sl_order", "exchange_position_state"):
+            if isinstance(compact.get(key), dict):
+                compact[key] = dict(compact[key])
         compact_positions.append(compact)
     persistable["positions"] = compact_positions
 

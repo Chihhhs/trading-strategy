@@ -1,0 +1,68 @@
+import os
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+if load_dotenv is not None:
+    load_dotenv()
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live")
+API_LOG_PATH = os.path.join(STATE_DIR, "live_api_debug.log")
+TRADE_LOG_PATH = os.path.join(STATE_DIR, "live_trading_records.jsonl")
+BINANCE_API = "https://api.binance.com"
+
+MODE = "paper"
+
+STRATEGY = {
+    "leverage": 5,
+    "risk_per_trade": 0.08,
+    "max_positions": 3,
+    "max_hold_days": 30,
+    "min_score": 3,
+    "tp_mult": 1.5,
+    "sl_mult": 1.0,
+    "entry_order_type": "ioc",
+}
+
+CIRCUIT = {
+    "max_daily_loss_pct": 15.0,
+    "max_consecutive_losses": 5,
+    "cooldown_hours": 24,
+}
+
+os.makedirs(STATE_DIR, exist_ok=True)
+
+
+def get_env(name, default=""):
+    return os.environ.get(name, default)
+
+
+def get_private_key():
+    return get_env("HL_PRIVATE_KEY", "")
+
+
+def get_account_address():
+    return get_env("HL_ACCOUNT_ADDRESS", "") or get_env("HL_WALLET_ADDRESS", "")
+
+
+def get_api_url():
+    return get_env("HL_API_URL", "https://api.hyperliquid.xyz")
+
+
+def get_market_data_source():
+    source = get_env("MARKET_DATA_SOURCE", "auto").lower()
+    if source in ("binance", "hyperliquid"):
+        return source
+    return "hyperliquid" if MODE == "live" else "binance"
+
+
+def is_debug_api():
+    return get_env("DEBUG_API", "").lower() in ("1", "true", "yes", "on")
+
+
+def set_mode(mode):
+    global MODE
+    MODE = mode

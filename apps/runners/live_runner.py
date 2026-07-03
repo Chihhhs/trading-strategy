@@ -3,13 +3,23 @@ import os
 import sys
 
 
-CURRENT_DIR = os.path.dirname(__file__)
-PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))
-SRC_DIR = os.path.join(PROJECT_ROOT, "src")
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
+"""bash
+bash -lc '
+cd /mnt/d/code/trading-strategy
+cat /mnt/d/code/trading-strategy/.env | while read line; do     export $line; done
+python3 -m apps.runners.live_runner --live --loop
+'
+"""
 
-from trading_strategy.live import main as live_main
+CURRENT_DIR = os.path.dirname(__file__)
+APPS_DIR = os.path.dirname(CURRENT_DIR)
+if APPS_DIR not in sys.path:
+    sys.path.insert(0, APPS_DIR)
+
+from _live_bootstrap import load_live_main
+
+
+live_main = load_live_main()
 
 
 def main():

@@ -28,7 +28,6 @@ fvg-strategy/
 ├── README.md              # 本文件
 ├── .gitignore
 ├── apps/                  # CLI entrypoints / compatibility wrappers
-│   ├── fvg_live_strategy.py    # Legacy live entrypoint -> src module
 │   ├── fvg_paper_trader.py     # Legacy paper entrypoint -> src module
 │   ├── hyperliquid_api.py      # Legacy helper wrapper -> src module
 │   └── runners/
