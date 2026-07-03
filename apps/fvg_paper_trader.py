@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for the canonical backtest module in src/."""
+"""Compatibility wrapper for the canonical paper module in src/."""
 
 import os
 import sys
@@ -10,9 +10,8 @@ SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 if SRC_DIR not in sys.path:
     sys.path.insert(0, SRC_DIR)
 
-from trading_strategy.backtest import main
+from trading_strategy.paper import main
 
 
 if __name__ == "__main__":
-    print("[deprecated] backtest_v6.py now delegates to backtest_runner.py")
-    main()
+    main(sys.argv[1:])
