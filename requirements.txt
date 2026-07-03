@@ -1,0 +1,2 @@
+backtesting==0.6.5
+hyperliquid-python-sdk==0.24.0
