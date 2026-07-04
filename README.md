@@ -1,130 +1,230 @@
-# FVG Strategy — Hyperliquid 趨勢交易策略
+# Trading Strategy
 
-> 基於 FVG（Fair Value Gap）+ 趨勢跟隨的雙策略系統，支援回測與實盤執行。
+以 Hyperliquid live / paper 交易與離線 backtest 為核心的交易策略專案。現在的主線重點不是舊版單一 FVG 腳本，而是可持續執行、可排查、可接管實際持倉的策略執行流程。
 
-## 分支結構
+目前 repo 提供三種主要使用模式：
 
-```
-main          ← 目前主要開發分支（回測 + paper + live 實盤修改）
-└── live      ← 保留分支（舊的實盤整合線）
-```
+- `backtest`：使用歷史資料做離線回測。
+- `paper`：用 Binance 市場資料模擬多策略 paper trading。
+- `live`：連接 Hyperliquid 帳戶執行實盤，並在每輪執行時同步交易所持倉與保護單狀態。
 
-| 分支 | 用途 |
-|------|------|
-| `main` | 目前主線，包含策略邏輯、回測、資料路徑調整、Hyperliquid 實盤修改 |
-| `live` | 保留舊實盤分支歷史；只有在需要回看舊整合方式、比對差異，或做隔離中的實盤實驗時才使用 |
+## 主要功能
 
-目前建議預設都在 `main` 上開發與執行。`live` 不是完全沒用，但已不再是日常主線。
+- Hyperliquid live 實盤下單與持倉同步
+- live 重啟後自動接管交易所既有持倉
+- 啟動時檢查缺失的 TP/SL，必要時自動補掛
+- 若仍有未受保護持倉，阻止新開倉
+- JSONL 交易事件 log 與 API debug log，便於排查為何沒下單或下單被拒
+- Binance 資料驅動的 paper trading 與離線 backtest
 
-### `live` 分支什麼時候會用到
+## 安裝
 
-- 需要回看舊的實盤整合方式或比對歷史行為時
-- 想把高風險的實盤實驗隔離，不希望先污染 `main` 時
+### 需求
 
-## 目錄結構
+- Python 3.11+
+- [requirements.txt](/D:/code/trading-strategy/requirements.txt)
 
-```
-fvg-strategy/
-├── README.md              # 本文件
-├── .gitignore
-├── apps/                  # CLI entrypoints / compatibility wrappers
-│   ├── fvg_paper_trader.py     # Legacy paper entrypoint -> src module
-│   ├── hyperliquid_api.py      # Legacy helper wrapper -> src module
-│   └── runners/
-│       ├── live_runner.py      # Recommended live runner entrypoint
-│       └── paper_runner.py     # Recommended paper runner entrypoint
-├── backtest/              # 回測框架
-│   ├── fvg_backtest_1000d.py   # 1000天回測（主）
-│   ├── fvg_backtest_60d.py     # 60天快速回測
-│   ├── fvg_enhanced_backtest.py
-│   ├── fvg_risk_comparison.py  # 風控對比
-│   ├── fvg_multi_coin.py       # 多幣種回測
-│   ├── fvg_protection.py       # 保護機制對比
-│   ├── final_backtest_v4.py
-│   └── backtest_v6.py
-├── results/               # 回測結果
-│   └── backtest_reports/
-├── data/                  # 歷史數據
-│   └── 1000d_50coins.json      # 50幣 x 1000天
-└── docs/                  # 分析文件
-    └── backtest_results.md
-```
+主要依賴：
 
-## 快速開始
+- `backtesting`
+- `hyperliquid-python-sdk`
+- `python-dotenv`
 
-### 環境需求
+### 安裝依賴
 
 ```bash
-python3.11+
-# 無外部依賴（stdlib only: urllib, json, statistics）
+pip install -r requirements.txt
 ```
 
-### 跑回測
+## 環境變數
+
+可透過 `.env` 載入。範例可參考 [.env-template](/D:/code/trading-strategy/.env-template)。
+
+必要或常用變數：
+
+- `HL_ACCOUNT_ADDRESS`：Hyperliquid 帳戶地址
+- `HL_PRIVATE_KEY`：Hyperliquid 私鑰，live mode 必填
+- `HL_API_URL`：Hyperliquid API URL，預設 `https://api.hyperliquid.xyz`
+- `MARKET_DATA_SOURCE`：`auto` / `hyperliquid` / `binance`
+- `DEBUG_API`：設為 `1`、`true`、`yes`、`on` 時寫出 API debug log
+
+## Canonical Entrypoints
+
+### Live
 
 ```bash
-# 1000天完整回測
-python3 backtest/fvg_backtest_1000d.py
-
-# 60天快速回測
-python3 backtest/fvg_backtest_60d.py
-
-# 風控對比
-python3 backtest/fvg_risk_comparison.py
+python apps/runners/live_runner.py --live
+python apps/runners/live_runner.py --live --loop
 ```
 
-### 實盤（main 分支）
+常用附加參數：
+
+- `--report`：輸出目前 state 與部位資訊
+- `--debug-account`：檢查 Hyperliquid 帳戶資料
+- `--verify-orders`：驗證 state 中保存的 order 狀態
+- `--reset`：重置 live state
+- `--interval-minutes=5`：搭配 `--loop` 使用，調整輪詢間隔
+
+### Paper
 
 ```bash
-python3 apps/runners/live_runner.py --live
+python apps/runners/paper_runner.py
+python apps/runners/paper_runner.py --reset
 ```
 
-## `data/` 管理建議
+### Backtest
 
-- `data/historical_prices/1000d_50coins.json` 這種回測必需的基礎資料，可以推送
-- `data/paper_strategies*`、`data/signal_log*.json` 這種執行期 state / log，通常不建議推送
-- 如果是新產生的即時資料、模擬倉狀態、監控紀錄，預設視為本機執行資料，不要進版控
+```bash
+python backtest/backtest_runner.py --coins BTC,ETH,SOL --strategy both --max-days 240
+```
 
-## 策略參數
+參數摘要：
 
-| 參數 | 預設值 | 說明 |
-|------|--------|------|
-| 槓桿 | 5x | 可調 3x-10x |
-| 風險 | 8% | 每筆最大虧損 |
-| TP | 2R | 止盈 = 2x 風險 |
-| SL | 1.5R | 止損 = 1.5x 風險 |
-| 趨勢門檻 | ADX > 25 | 趨勢強度過濾 |
-| 評分 | ≥4 | 多因子綜合評分 |
+- `--coins`：逗號分隔標的，預設 `BTC,ETH,SOL,BNB`
+- `--strategy`：`fvg` / `trend` / `both`
+- `--max-days`：使用最近幾天歷史資料，預設 `240`
 
-## 回測結果
+## 專案結構
 
-見 [docs/backtest_results.md](docs/backtest_results.md)
+```text
+apps/
+  runners/
+    live_runner.py         # live 執行入口
+    paper_runner.py        # paper 執行入口
+backtest/
+  backtest_runner.py       # 離線回測入口
+src/
+  trading_strategy/
+    backtest.py            # 回測主邏輯
+    paper.py               # paper trading 主邏輯
+    hyperliquid.py         # Hyperliquid 市場價格與 tick helper
+    live/
+      config.py            # live 模式設定、狀態路徑、策略參數
+      cli.py               # live 主流程與 CLI
+      account.py           # 帳戶、資金、交易所狀態同步
+      engine.py            # 進出場、接管、保護、run summary
+      orders.py            # entry / TP / SL / close 下單邏輯
+      market.py            # 幣池與市場資料來源
+      io.py                # state / log 讀寫
+data/
+  paper_strategies_live/   # live state 與 log
+  paper_strategies/        # paper state
+  historical_prices/       # backtest 歷史資料
+tests/
+  test_live.py             # live 流程相關測試
+```
 
-### 摘要
+## Live 模式的重要行為
 
-| 版本 | PnL | PF | Max DD | Sharpe | 交易數 |
-|------|-----|-----|--------|--------|--------|
-| 基礎 5x 8% | +259% | 1.16 | 78% | — | 185 |
-| 全保護 5x 8% | +797% | 1.45 | 73% | 2.21 | 185 |
-| 趨勢優化 5x 10% | +1427% | — | — | — | 184 |
+目前 live 流程在每次 `run_once()` 會依序做這些事：
 
-## 風控機制
+1. 載入本地 state。
+2. 同步 Hyperliquid 帳戶資金、持倉與 open orders。
+3. 檢查 `perp` 可交易資金。
+4. 若交易所上有本地未知持倉，接管為本地部位。
+5. 檢查每個持倉是否缺少 reduce-only TP/SL，必要時自動補掛。
+6. 若仍存在未受保護持倉，跳過新開倉。
+7. 否則才進入掃描、訊號判定與新下單。
 
-- ✅ 趨勢反轉檢測（EMA20/EMA50 交叉自動平倉）
-- ✅ Break-even Stop（獲利達 1R 移 SL）
-- ✅ Dynamic Position Size（波動自適應）
-- ✅ Daily Risk Limit（單日虧 5% 停機）
-- ✅ BTC 方向過濾（不逆勢）
-- ✅ 熔斷（連虧 5 次 → 停 24h）
-- ✅ 持倉超時（30 天平倉）
+### Live 前置條件
+
+- 必須提供 `HL_PRIVATE_KEY`
+- 必須提供 `HL_ACCOUNT_ADDRESS`
+- Hyperliquid `perp` 帳戶必須有可交易資金
+- 只有 `spot` 餘額、不含 `perp` 可交易資金時，live 會拒絕開倉
+
+### 目前的保護機制
+
+- 啟動時會以交易所持倉為權威來源同步本地 state
+- 若本地沒有 TP/SL，會檢查交易所 open orders
+- 若 TP/SL 缺失，會嘗試自動補掛 reduce-only trigger orders
+- 若補掛失敗，`run_summary.unprotected_positions_count` 會大於 `0`
+- 只要還有未受保護持倉，系統會阻止新開倉
+
+## 重要資料檔案
+
+### Live state 與 log
+
+位於 [data/paper_strategies_live](/D:/code/trading-strategy/data/paper_strategies_live)：
+
+- [live_state.json](/D:/code/trading-strategy/data/paper_strategies_live/live_state.json)
+  - 本地保存的 live 持倉、策略快照與保護單資訊
+- [live_trading_records.jsonl](/D:/code/trading-strategy/data/paper_strategies_live/live_trading_records.jsonl)
+  - 每輪執行的事件 log，排查第一入口
+- [live_api_debug.log](/D:/code/trading-strategy/data/paper_strategies_live/live_api_debug.log)
+  - 更底層的 API debug 記錄
+- [coin_list.json](/D:/code/trading-strategy/data/paper_strategies_live/coin_list.json)
+  - live 可掃描幣池快取
+
+### Paper state
+
+位於 [data/paper_strategies](/D:/code/trading-strategy/data/paper_strategies)。
+
+### Backtest 資料
+
+預設歷史資料檔：
+
+- [data/historical_prices/1000d_50coins.json](/D:/code/trading-strategy/data/historical_prices/1000d_50coins.json)
+
+## 排查建議
+
+### 1. 沒有下單
+
+先看 [live_trading_records.jsonl](/D:/code/trading-strategy/data/paper_strategies_live/live_trading_records.jsonl)：
+
+- `entry_skipped`
+- `entry_order_rejected`
+- `run_summary`
+
+重點欄位：
+
+- `reason`
+- `message`
+- `entry_rejected_reasons`
+- `top_blockers`
+- `missing_price_count`
+- `unprotected_positions_count`
+
+### 2. 有持倉但沒有 TP/SL
+
+先看：
+
+- `tpsl_missing_detected`
+- `tpsl_repair_attempted`
+- `tpsl_repair_failed`
+- `tpsl_repaired`
+
+再對照 [live_state.json](/D:/code/trading-strategy/data/paper_strategies_live/live_state.json) 中：
+
+- `tp_order`
+- `sl_order`
+- `protection_status`
+- `position_source`
+
+### 3. 帳戶有錢但 live 不開倉
+
+檢查 `account_snapshot` 與 state 中的：
+
+- `_perp_account_value`
+- `_spot_account_value`
+- `_balance_warning`
+
+若 `perp` 為 `0`，即使 `spot` 有餘額也不會開倉。
+
+## 目前已知高風險區域
+
+- Hyperliquid tick size 與 trigger order 價格正規化
+- reduce-only TP/SL trigger orders 是否真的存在於交易所
+- `live_state.json.params` 與 runtime `config.STRATEGY` 可能漂移
+- 幣池、價格來源與交易所可交易 universe 的一致性
+
+## 相關文檔
+
+- [docs/backtest_results.md](/D:/code/trading-strategy/docs/backtest_results.md)
+- [docs/backtesting_py_usage_notes.md](/D:/code/trading-strategy/docs/backtesting_py_usage_notes.md)
+- [docs/restruct.md](/D:/code/trading-strategy/docs/restruct.md)
+- [.agents/project_detail.md](/D:/code/trading-strategy/.agents/project_detail.md)
 
 ## License
 
 MIT
-
-## Canonical Entrypoints
-
-```bash
-python apps/runners/live_runner.py --live
-python apps/runners/paper_runner.py
-python backtest/backtest_runner.py --coins BTC,ETH --strategy both --max-days 240
-```
