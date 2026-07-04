@@ -166,6 +166,18 @@ class LiveHelpersTest(unittest.TestCase):
         self.assertEqual(dummy_exchange.calls[0][0][3], 100.3)
         self.assertEqual(dummy_exchange.calls[0][0][4]["trigger"]["triggerPx"], 100.2)
 
+    @patch("trading_strategy.live.orders.get_hl_exchange_client")
+    def test_cancel_hl_order_returns_ok(self, mock_get_exchange):
+        class DummyExchange:
+            def cancel(self, coin, oid):
+                return {"status": "ok", "response": {"data": {"statuses": [{"success": {"oid": oid}}]}}}
+
+        mock_get_exchange.return_value = DummyExchange()
+        result = orders.cancel_hl_order("BTC", 123)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["cancel_status"], "canceled")
+        self.assertEqual(result["oid"], 123)
+
     @patch("trading_strategy.live.engine.record_trade_event")
     @patch("trading_strategy.live.engine.get_current_prices")
     @patch("trading_strategy.live.engine.get_btc_direction")
@@ -272,7 +284,7 @@ class LiveHelpersTest(unittest.TestCase):
             mock_get_current_prices.return_value = {"BTC": 100.0}
             mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
             state = {"balance": 100.0, "positions": [], "history": []}
-            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
             with patch("trading_strategy.live.engine.generate_signal", return_value=signal), patch(
                 "trading_strategy.live.engine.calc_position_size", return_value=0.0
             ):
@@ -284,6 +296,155 @@ class LiveHelpersTest(unittest.TestCase):
                     for call in mock_record_trade_event.call_args_list
                 )
             )
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.get_current_prices")
+    @patch("trading_strategy.live.engine.get_btc_direction")
+    @patch("trading_strategy.live.engine.get_klines")
+    def test_check_entries_opens_fourth_position_and_blocks_fifth(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        old_max_positions = live.config.STRATEGY["max_positions"]
+        live.config.set_mode("paper")
+        live.config.STRATEGY["max_positions"] = 4
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0, "ETH": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            state = {
+                "balance": 100.0,
+                "history": [],
+                "positions": [
+                    {"coin": "SOL", "direction": "long", "entry": 10.0, "size": 1.0},
+                    {"coin": "BNB", "direction": "long", "entry": 10.0, "size": 1.0},
+                    {"coin": "ADA", "direction": "long", "entry": 10.0, "size": 1.0},
+                ],
+            }
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.generate_signal", return_value=signal):
+                summary = engine.check_entries(
+                    state,
+                    [{"name": "BTC", "symbol": "BTCUSDT"}, {"name": "ETH", "symbol": "ETHUSDT"}],
+                )
+            self.assertEqual(summary["positions_opened"], 1)
+            self.assertEqual(len(state["positions"]), 4)
+            self.assertEqual(summary["top_blockers"], [{"reason": "max_positions_reached", "count": 1}])
+            self.assertTrue(
+                any(
+                    call.args[0] == "entry_skipped" and call.kwargs.get("reason") == "max_positions_reached"
+                    for call in mock_record_trade_event.call_args_list
+                )
+            )
+        finally:
+            live.config.STRATEGY["max_positions"] = old_max_positions
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.get_current_prices")
+    @patch("trading_strategy.live.engine.get_btc_direction")
+    @patch("trading_strategy.live.engine.get_klines")
+    def test_check_entries_uses_reduced_available_balance_for_live_sizing(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        _mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            state = {
+                "balance": 100.0,
+                "positions": [
+                    {"coin": "ETH", "entry": 100.0, "size": 2.0},
+                    {"coin": "SOL", "entry": 50.0, "size": 1.0},
+                ],
+                "history": [],
+            }
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.calc_position_size", return_value=0.0
+            ) as mock_calc_position_size:
+                engine.check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertEqual(mock_calc_position_size.call_args.args[0], 50.0)
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.get_current_prices")
+    @patch("trading_strategy.live.engine.get_btc_direction")
+    @patch("trading_strategy.live.engine.get_klines")
+    def test_check_entries_skips_when_reserved_margin_exhausts_balance(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            state = {
+                "balance": 100.0,
+                "positions": [{"coin": "ETH", "entry": 100.0, "size": 5.0}],
+                "history": [],
+            }
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.calc_position_size"
+            ) as mock_calc_position_size:
+                summary = engine.check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertFalse(mock_calc_position_size.called)
+            self.assertEqual(summary["positions_opened"], 0)
+            self.assertEqual(summary["top_blockers"], [{"reason": "reserved_margin_exhausted", "count": 1}])
+            self.assertTrue(
+                any(
+                    call.args[0] == "entry_skipped"
+                    and call.kwargs.get("reason") == "reserved_margin_exhausted"
+                    and call.kwargs.get("available_balance") == 0.0
+                    for call in mock_record_trade_event.call_args_list
+                )
+            )
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.get_current_prices")
+    @patch("trading_strategy.live.engine.get_btc_direction")
+    @patch("trading_strategy.live.engine.get_klines")
+    def test_check_entries_live_without_open_positions_uses_full_balance(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        _mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            state = {"balance": 100.0, "positions": [], "history": []}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.calc_position_size", return_value=0.0
+            ) as mock_calc_position_size:
+                engine.check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertEqual(mock_calc_position_size.call_args.args[0], 100.0)
         finally:
             live.config.set_mode(old_mode)
 
@@ -324,7 +485,7 @@ class LiveHelpersTest(unittest.TestCase):
                 "rejection_reason": "invalid_price",
             }
             state = {"balance": 100.0, "positions": [], "history": []}
-            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
             with patch("trading_strategy.live.engine.generate_signal", return_value=signal):
                 summary = engine.check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
             self.assertEqual(summary["entry_rejected_count"], 1)
@@ -339,20 +500,20 @@ class LiveHelpersTest(unittest.TestCase):
             live.config.set_mode(old_mode)
 
     @patch("trading_strategy.live.engine.save_state")
-    @patch("trading_strategy.live.engine.place_hl_tpsl_orders")
+    @patch("trading_strategy.live.engine.place_hl_sl_order")
     @patch("trading_strategy.live.engine.place_hl_order")
     @patch("trading_strategy.live.engine.record_trade_event")
     @patch("trading_strategy.live.engine.get_current_prices")
     @patch("trading_strategy.live.engine.get_btc_direction")
     @patch("trading_strategy.live.engine.get_klines")
-    def test_check_entries_logs_tpsl_failure(
+    def test_check_entries_logs_sl_failure_for_trend_policy(
         self,
         mock_get_klines,
         mock_get_btc_direction,
         mock_get_current_prices,
         mock_record_trade_event,
         mock_place_hl_order,
-        mock_place_hl_tpsl_orders,
+        mock_place_hl_sl_order,
         _mock_save_state,
     ):
         old_mode = live.config.MODE
@@ -370,17 +531,68 @@ class LiveHelpersTest(unittest.TestCase):
                 "resolved_price": 100.0,
                 "size": 1.0,
             }
-            mock_place_hl_tpsl_orders.return_value = {"ok": False, "message": "sl rejected"}
+            mock_place_hl_sl_order.return_value = {"ok": False, "message": "sl rejected"}
             state = {"balance": 100.0, "positions": [], "history": []}
-            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
             with patch("trading_strategy.live.engine.generate_signal", return_value=signal):
                 summary = engine.check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
             self.assertEqual(summary["orders_attempted"], 1)
             self.assertEqual(summary["positions_opened"], 0)
             self.assertEqual(state["positions"], [])
             self.assertTrue(
-                any(call.args[0] == "tpsl_submit_failed" for call in mock_record_trade_event.call_args_list)
+                any(call.args[0] == "sl_submit_failed" for call in mock_record_trade_event.call_args_list)
             )
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.save_state")
+    @patch("trading_strategy.live.engine.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.place_hl_order")
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.get_current_prices")
+    @patch("trading_strategy.live.engine.get_btc_direction")
+    @patch("trading_strategy.live.engine.get_klines")
+    def test_check_entries_opens_trend_position_without_tp_order(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        _mock_record_trade_event,
+        mock_place_hl_order,
+        mock_place_hl_sl_order,
+        _mock_save_state,
+    ):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            mock_place_hl_order.return_value = {
+                "status": "ok",
+                "normalized_status": "filled",
+                "message": "filled",
+                "verified_summary": {"verify_status": "filled"},
+                "order_summary": {"order_status": "filled", "oid": 12},
+                "resolved_price": 100.0,
+                "size": 1.0,
+            }
+            mock_place_hl_sl_order.return_value = {
+                "ok": True,
+                "message": None,
+                "tp_order": None,
+                "sl_order": {"oid": 22, "status": "ok", "trigger_px": 95.0},
+            }
+            state = {"balance": 100.0, "positions": [], "history": []}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.generate_signal", return_value=signal):
+                summary = engine.check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertEqual(summary["positions_opened"], 1)
+            self.assertEqual(len(state["positions"]), 1)
+            self.assertIsNone(state["positions"][0]["tp"])
+            self.assertIsNone(state["positions"][0]["tp_order"])
+            self.assertEqual(state["positions"][0]["sl_order"]["oid"], 22)
+            self.assertEqual(state["positions"][0]["exit_policy"]["name"], "trend_sl_only")
         finally:
             live.config.set_mode(old_mode)
 
@@ -420,6 +632,228 @@ class LiveHelpersTest(unittest.TestCase):
             self.assertIn("position_adopted", event_names)
         finally:
             live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    def test_sync_state_with_exchange_positions_attaches_existing_open_sl(self, mock_record_trade_event):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            state = {
+                "positions": [
+                    {
+                        "coin": "ETH",
+                        "direction": "long",
+                        "entry": 1755.5,
+                        "size": 0.0454,
+                        "sl": 1674.0,
+                        "sig": "TREND_BUY",
+                        "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                    }
+                ]
+            }
+            synced = engine.sync_state_with_exchange_positions(
+                state,
+                {"assetPositions": [{"position": {"coin": "ETH", "entryPx": "1755.5", "szi": "0.0454"}}]},
+                [{"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "1674.0"}],
+            )
+            self.assertEqual(synced["positions"][0]["sl_order"]["oid"], 2)
+            self.assertEqual(synced["managed_orders"][0]["order_role"], "protection_sl")
+            event_names = [call.args[0] for call in mock_record_trade_event.call_args_list]
+            self.assertIn("open_orders_synced", event_names)
+
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    def test_sync_state_with_exchange_positions_keeps_pending_entry_as_managed_order(self, mock_record_trade_event):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            state = {
+                "positions": [
+                    {
+                        "coin": "ETH",
+                        "direction": "long",
+                        "entry_oid": 99,
+                        "entry_time": "2026-07-02T23:47:02.163776",
+                    }
+                ]
+            }
+            synced = engine.sync_state_with_exchange_positions(
+                state,
+                {"assetPositions": []},
+                [{"oid": 99, "coin": "ETH", "reduceOnly": False, "side": "B", "sz": "0.0454"}],
+            )
+            self.assertEqual(len(synced["positions"]), 1)
+            self.assertEqual(synced["managed_orders"][0]["order_role"], "entry_pending")
+            self.assertEqual(synced["_orphan_orders"], [])
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.cancel_hl_order")
+    def test_cancel_orphan_orders_cancels_unknown_open_order(self, mock_cancel_hl_order, mock_record_trade_event):
+        mock_cancel_hl_order.return_value = {"status": "ok", "message": "canceled", "oid": 55, "coin": "BTC"}
+        state = {
+            "managed_orders": [{"oid": 55, "coin": "BTC", "order_role": "orphan_unknown"}],
+            "_orphan_orders": [{"oid": 55, "coin": "BTC", "order_role": "orphan_unknown"}],
+            "_frontend_open_orders": [{"oid": 55, "coin": "BTC"}],
+            "_exchange_open_orders_count": 1,
+        }
+        summary = engine.cancel_orphan_orders(state)
+        self.assertEqual(summary["orphan_orders_detected_count"], 1)
+        self.assertEqual(summary["orphan_orders_canceled_count"], 1)
+        self.assertEqual(state["managed_orders"], [])
+        event_names = [call.args[0] for call in mock_record_trade_event.call_args_list]
+        self.assertIn("orphan_order_cancel_attempted", event_names)
+        self.assertIn("orphan_order_canceled", event_names)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.cancel_hl_order")
+    def test_ensure_position_protection_replaces_trend_sl_when_more_protective(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        mock_cancel_hl_order.return_value = {"status": "ok", "message": "canceled", "oid": 2, "coin": "ETH"}
+        mock_place_hl_sl_order.return_value = {
+            "ok": True,
+            "message": None,
+            "tp_order": None,
+            "sl_order": {"oid": 3, "status": "ok", "trigger_px": 1700.0},
+        }
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 1755.5,
+                    "size": 0.0454,
+                    "sl": 1674.0,
+                    "current_price": 1878.0,
+                    "sig": "TREND_BUY",
+                    "initial_risk": 81.5,
+                    "sl_stage": 0,
+                    "best_price": 1755.5,
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "1674.0"}
+            ],
+            "managed_orders": [],
+        }
+        summary = engine.ensure_position_protection(state)
+        self.assertEqual(summary["sl_replaced_count"], 1)
+        self.assertEqual(state["positions"][0]["sl_order"]["oid"], 3)
+        event_names = [call.args[0] for call in mock_record_trade_event.call_args_list]
+        self.assertIn("sl_replace_attempted", event_names)
+        self.assertIn("sl_replaced", event_names)
+        self.assertEqual(state["positions"][0]["sl_stage"], 2)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.cancel_hl_order")
+    def test_ensure_position_protection_does_not_replace_sl_when_cancel_fails(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        mock_cancel_hl_order.return_value = {"status": "error", "message": "cancel failed", "oid": 2, "coin": "ETH"}
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 1755.5,
+                    "size": 0.0454,
+                    "sl": 1700.0,
+                    "sig": "TREND_BUY",
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "1674.0"}
+            ],
+            "managed_orders": [],
+        }
+        summary = engine.ensure_position_protection(state)
+        self.assertEqual(summary["sl_replaced_count"], 0)
+        self.assertEqual(summary["unprotected_positions_count"], 1)
+        self.assertEqual(mock_place_hl_sl_order.call_count, 0)
+        event_names = [call.args[0] for call in mock_record_trade_event.call_args_list]
+        self.assertIn("sl_replace_failed", event_names)
+
+    def test_compute_dynamic_sl_target_moves_to_break_even_at_one_r(self):
+        pos = {
+            "coin": "ETH",
+            "direction": "long",
+            "entry": 100.0,
+            "sl": 90.0,
+            "current_price": 110.0,
+            "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+            "initial_risk": 10.0,
+            "sl_stage": 0,
+            "best_price": 100.0,
+        }
+        target = engine.compute_dynamic_sl_target(pos)
+        self.assertEqual(target["stage"], 1)
+        self.assertEqual(target["sl"], 100.0)
+
+    def test_compute_dynamic_sl_target_moves_to_half_r_at_one_point_five_r(self):
+        pos = {
+            "coin": "ETH",
+            "direction": "long",
+            "entry": 100.0,
+            "sl": 90.0,
+            "current_price": 115.0,
+            "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+            "initial_risk": 10.0,
+            "sl_stage": 0,
+            "best_price": 100.0,
+        }
+        target = engine.compute_dynamic_sl_target(pos)
+        self.assertEqual(target["stage"], 2)
+        self.assertEqual(target["sl"], 105.0)
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    @patch("trading_strategy.live.engine.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.cancel_hl_order")
+    def test_ensure_position_protection_does_not_replace_trend_sl_before_one_r(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        _mock_record_trade_event,
+    ):
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 100.0,
+                    "sl": 90.0,
+                    "current_price": 108.0,
+                    "size": 1.0,
+                    "sig": "TREND_BUY",
+                    "initial_risk": 10.0,
+                    "sl_stage": 0,
+                    "best_price": 108.0,
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "90.0"}
+            ],
+            "managed_orders": [],
+        }
+        summary = engine.ensure_position_protection(state)
+        self.assertEqual(summary["sl_replaced_count"], 0)
+        self.assertEqual(summary["unprotected_positions_count"], 0)
+        self.assertEqual(mock_cancel_hl_order.call_count, 0)
+        self.assertEqual(mock_place_hl_sl_order.call_count, 0)
 
     @patch("trading_strategy.live.engine.record_trade_event")
     @patch("trading_strategy.live.engine.place_hl_tpsl_orders")
@@ -479,6 +913,30 @@ class LiveHelpersTest(unittest.TestCase):
         repaired_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "tpsl_repaired")
         self.assertEqual(repaired_call.kwargs["order_side"], "sell")
         self.assertEqual(repaired_call.kwargs["price_source"], "l2_book")
+
+    @patch("trading_strategy.live.engine.record_trade_event")
+    def test_ensure_position_protection_accepts_sl_only_for_trend_policy(self, mock_record_trade_event):
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 1755.5,
+                    "size": 0.0454,
+                    "sl": 1674.0,
+                    "sig": "TREND_BUY",
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl"}
+            ],
+        }
+        summary = engine.ensure_position_protection(state)
+        self.assertEqual(summary["tpsl_missing_count"], 0)
+        self.assertEqual(summary["protection_missing_count"], 0)
+        self.assertEqual(state["positions"][0]["protection_status"], "protected")
+        self.assertEqual(mock_record_trade_event.call_count, 0)
 
     @patch("trading_strategy.live.cli.print_report")
     @patch("trading_strategy.live.cli.save_state")

@@ -1,6 +1,7 @@
 from collections import Counter
 from datetime import datetime, timedelta
 
+from trading_strategy.core.exit_policy import build_exit_policy
 from trading_strategy.core.risk import calc_position_size, check_circuit_breaker, is_cooldown
 from trading_strategy.core.signals import generate_trend_signal
 
@@ -14,12 +15,14 @@ from .account import (
 from .io import load_state, record_trade_event, save_state
 from .market import get_btc_direction, get_current_prices, get_klines
 from .orders import (
+    cancel_hl_order,
     classify_order_rejection,
     classify_verified_order,
     close_hl_position,
     get_position_entry_oid,
     normalize_hl_order_params,
     place_hl_order,
+    place_hl_sl_order,
     place_hl_tpsl_orders,
     verify_hl_order,
 )
@@ -119,7 +122,15 @@ def build_run_summary():
         "priced_ratio": 0.0,
         "top_blockers": [],
         "adopted_positions_count": 0,
+        "exchange_open_orders_count": 0,
+        "managed_orders_count": 0,
+        "orphan_orders_detected_count": 0,
+        "orphan_orders_canceled_count": 0,
+        "orphan_order_cancel_failures": 0,
+        "sl_replaced_count": 0,
+        "protection_missing_count": 0,
         "tpsl_missing_count": 0,
+        "protection_repaired_count": 0,
         "tpsl_repaired_count": 0,
         "unprotected_positions_count": 0,
     }
@@ -140,6 +151,7 @@ def build_entry_context(state, coin_name, btc_dir, entry_order_type, **fields):
         "coin": coin_name,
         "mode": config.MODE,
         "balance": state.get("balance"),
+        "available_balance": None,
         "entry_order_type": entry_order_type,
         "btc_dir": btc_dir,
         "signal_direction": None,
@@ -209,10 +221,12 @@ def log_entry_skipped(state, coin_name, btc_dir, reason, **fields):
 
 def build_position_from_exchange(coin, position_state, existing=None):
     existing = dict(existing or {})
+    exit_policy = build_exit_policy(position=existing)
     size = abs(_safe_float(position_state.get("szi")))
     direction = "long" if _safe_float(position_state.get("szi")) >= 0 else "short"
     entry = _safe_float(position_state.get("entryPx"))
     adopted_at = datetime.now().isoformat()
+    default_protection_status = "missing_tpsl" if exit_policy.get("requires_tp") else "missing_sl"
     return {
         **existing,
         "coin": coin,
@@ -225,13 +239,56 @@ def build_position_from_exchange(coin, position_state, existing=None):
         "entry_time_source": existing.get("entry_time_source") or ("local_state" if existing else "exchange_adopted"),
         "position_source": existing.get("position_source") or ("local_state" if existing else "exchange_adopted"),
         "adopted_at": existing.get("adopted_at") or (adopted_at if not existing else None),
-        "protection_status": existing.get("protection_status", "missing_tpsl"),
+        "protection_status": existing.get("protection_status", default_protection_status),
+        "exit_policy": existing.get("exit_policy") or exit_policy,
+        "initial_risk": existing.get("initial_risk"),
+        "sl_stage": existing.get("sl_stage"),
+        "best_price": existing.get("best_price"),
         "exchange_position_state": {
             "coin": coin,
             "entryPx": position_state.get("entryPx"),
             "szi": position_state.get("szi"),
         },
     }
+
+
+def normalize_managed_order(order, *, order_role, adopted_at=None, status="open", source="exchange"):
+    order = dict(order or {})
+    return {
+        "oid": order.get("oid"),
+        "coin": order.get("coin"),
+        "reduce_only": bool(order.get("reduceOnly")),
+        "tpsl": str(order.get("tpsl") or "").lower() or None,
+        "side": order.get("side"),
+        "size": _safe_float(order.get("sz") or order.get("size") or order.get("origSz")),
+        "trigger_px": _safe_float(order.get("triggerPx") or order.get("trigger_px")),
+        "limit_px": _safe_float(order.get("limitPx") or order.get("limit_px") or order.get("limitPxRaw")),
+        "status": status,
+        "source": source,
+        "adopted_at": adopted_at or datetime.now().isoformat(),
+        "order_role": order_role,
+        "raw_order": order,
+    }
+
+
+def _position_by_coin(positions):
+    return {pos.get("coin"): pos for pos in positions if pos.get("coin")}
+
+
+def classify_exchange_order(order, positions_by_coin, pending_positions_by_oid):
+    coin = str(order.get("coin") or "")
+    reduce_only = bool(order.get("reduceOnly"))
+    tpsl = str(order.get("tpsl") or "").lower()
+    if reduce_only and tpsl == "sl":
+        pos = positions_by_coin.get(coin)
+        return ("protection_sl", pos, pos is None)
+    if reduce_only and tpsl == "tp":
+        pos = positions_by_coin.get(coin)
+        return ("protection_tp", pos, pos is None)
+    oid = order.get("oid")
+    if oid is not None and pending_positions_by_oid.get(int(oid)):
+        return ("entry_pending", pending_positions_by_oid[int(oid)], False)
+    return ("orphan_unknown", None, True)
 
 
 def _is_pending_entry_order(pos, open_orders):
@@ -260,7 +317,7 @@ def match_existing_protection_order(pos, open_orders, tpsl_kind):
     return None
 
 
-def build_tpsl_event_context(repaired):
+def build_protection_event_context(repaired):
     tp_order = (repaired or {}).get("tp_order") or {}
     sl_order = (repaired or {}).get("sl_order") or {}
     return {
@@ -281,8 +338,29 @@ def build_tpsl_event_context(repaired):
     }
 
 
+def estimate_position_margin(pos, leverage):
+    if leverage <= 0:
+        return 0.0
+    entry = _safe_float(pos.get("entry"), default=None)
+    size = _safe_float(pos.get("size"), default=None)
+    if entry is None or size is None or size <= 0:
+        return 0.0
+    return abs(entry * size) / leverage
+
+
+def get_available_entry_balance(state, leverage):
+    balance = _safe_float((state or {}).get("balance"), default=0.0)
+    if balance <= 0:
+        return 0.0
+    reserved_margin = sum(
+        estimate_position_margin(pos, leverage) for pos in (state or {}).get("positions", [])
+    )
+    return max(balance - reserved_margin, 0.0)
+
+
 def ensure_position_targets(pos, data_cache=None):
-    if pos.get("tp") is not None and pos.get("sl") is not None:
+    exit_policy = build_exit_policy(position=pos)
+    if pos.get("sl") is not None and (not exit_policy.get("requires_tp") or pos.get("tp") is not None):
         return pos.get("tp"), pos.get("sl")
     klines = None
     if isinstance(data_cache, dict):
@@ -307,30 +385,253 @@ def ensure_position_targets(pos, data_cache=None):
     else:
         tp = pos.get("tp") or (entry - atr * config.STRATEGY["tp_mult"])
         sl = pos.get("sl") or (entry + atr * config.STRATEGY["sl_mult"])
-    pos["tp"] = tp
+    pos["tp"] = tp if exit_policy.get("requires_tp") else None
     pos["sl"] = sl
-    return tp, sl
+    return pos.get("tp"), sl
+
+
+def _get_initial_sl(pos):
+    entry = _safe_float(pos.get("entry"))
+    initial_risk = _safe_float(pos.get("initial_risk"), default=None)
+    if entry is None or initial_risk is None or initial_risk <= 0:
+        return None
+    if pos.get("direction") == "long":
+        return entry - initial_risk
+    return entry + initial_risk
+
+
+def _infer_sl_stage(pos):
+    entry = _safe_float(pos.get("entry"), default=None)
+    sl = _safe_float(pos.get("sl"), default=None)
+    initial_risk = _safe_float(pos.get("initial_risk"), default=None)
+    if entry is None or sl is None or initial_risk is None or initial_risk <= 0:
+        return 0
+    half_r_target = entry + initial_risk * 0.5 if pos.get("direction") == "long" else entry - initial_risk * 0.5
+    if pos.get("direction") == "long":
+        if sl >= half_r_target:
+            return 2
+        if sl >= entry:
+            return 1
+        return 0
+    if sl <= half_r_target:
+        return 2
+    if sl <= entry:
+        return 1
+    return 0
+
+
+def initialize_dynamic_sl_state(pos):
+    exit_policy = build_exit_policy(position=pos)
+    if exit_policy.get("name") != "trend_sl_only":
+        return
+    entry = _safe_float(pos.get("entry"), default=None)
+    sl = _safe_float(pos.get("sl"), default=None)
+    current_price = _safe_float(pos.get("current_price"), default=None)
+    if pos.get("initial_risk") is None and entry is not None and sl is not None:
+        pos["initial_risk"] = abs(entry - sl)
+    if pos.get("sl_stage") is None:
+        pos["sl_stage"] = _infer_sl_stage(pos)
+    if pos.get("best_price") is None:
+        pos["best_price"] = current_price if current_price is not None else entry
+
+
+def compute_dynamic_sl_target(pos):
+    initialize_dynamic_sl_state(pos)
+    exit_policy = build_exit_policy(position=pos)
+    if exit_policy.get("name") != "trend_sl_only":
+        return None
+    entry = _safe_float(pos.get("entry"), default=None)
+    current_price = _safe_float(pos.get("current_price"), default=None)
+    initial_risk = _safe_float(pos.get("initial_risk"), default=None)
+    if entry is None or current_price is None or initial_risk is None or initial_risk <= 0:
+        return None
+
+    best_price = _safe_float(pos.get("best_price"), default=None)
+    if best_price is None:
+        best_price = current_price
+    if pos.get("direction") == "long":
+        best_price = max(best_price, current_price)
+        progress_r = (best_price - entry) / initial_risk
+    else:
+        best_price = min(best_price, current_price)
+        progress_r = (entry - best_price) / initial_risk
+    pos["best_price"] = best_price
+
+    current_stage = int(pos.get("sl_stage") or 0)
+    target_stage = current_stage
+    target_sl = _safe_float(pos.get("sl"), default=None)
+
+    if progress_r >= 1.5:
+        target_stage = max(target_stage, 2)
+    elif progress_r >= 1.0:
+        target_stage = max(target_stage, 1)
+
+    if target_stage >= 2:
+        target_sl = entry + initial_risk * 0.5 if pos.get("direction") == "long" else entry - initial_risk * 0.5
+    elif target_stage >= 1:
+        target_sl = entry
+
+    return {"sl": target_sl, "stage": target_stage, "progress_r": progress_r, "best_price": best_price}
+
+
+def submit_position_protection(pos, tp, sl):
+    exit_policy = build_exit_policy(position=pos)
+    if exit_policy.get("requires_tp"):
+        return place_hl_tpsl_orders(pos["coin"], pos["direction"], pos["size"], tp, sl)
+    return place_hl_sl_order(pos["coin"], pos["direction"], pos["size"], sl)
+
+
+def cancel_orphan_orders(state):
+    orphan_orders = list(state.get("_orphan_orders") or [])
+    summary = {
+        "orphan_orders_detected_count": len(orphan_orders),
+        "orphan_orders_canceled_count": 0,
+        "orphan_order_cancel_failures": 0,
+    }
+    if not orphan_orders:
+        return summary
+    canceled_oids = set()
+    for order in orphan_orders:
+        oid = order.get("oid")
+        coin = order.get("coin")
+        record_trade_event(
+            "orphan_order_cancel_attempted",
+            oid=oid,
+            coin=coin,
+            order_role=order.get("order_role"),
+        )
+        result = cancel_hl_order(coin, oid)
+        if result.get("status") == "ok":
+            canceled_oids.add(oid)
+            summary["orphan_orders_canceled_count"] += 1
+            record_trade_event(
+                "orphan_order_canceled",
+                oid=oid,
+                coin=coin,
+                message=result.get("message"),
+            )
+        else:
+            summary["orphan_order_cancel_failures"] += 1
+            record_trade_event(
+                "orphan_order_cancel_failed",
+                oid=oid,
+                coin=coin,
+                message=result.get("message"),
+            )
+    if canceled_oids:
+        state["managed_orders"] = [
+            order for order in (state.get("managed_orders") or []) if order.get("oid") not in canceled_oids
+        ]
+        state["_frontend_open_orders"] = [
+            order
+            for order in (state.get("_frontend_open_orders") or [])
+            if order.get("oid") not in canceled_oids
+        ]
+        state["_orphan_orders"] = [
+            order for order in orphan_orders if order.get("oid") not in canceled_oids
+        ]
+        state["_exchange_open_orders_count"] = len(state.get("managed_orders") or [])
+    return summary
+
+
+def _extract_order_trigger_px(order):
+    return _safe_float((order or {}).get("trigger_px") or (order or {}).get("triggerPx"), default=None)
+
+
+def should_replace_sl_order(pos, current_order, desired_sl):
+    current_trigger = _extract_order_trigger_px(current_order)
+    if current_trigger is None or desired_sl is None:
+        return False
+    if pos.get("direction") == "long":
+        return desired_sl > current_trigger
+    return desired_sl < current_trigger
+
+
+def replace_sl_order(pos, desired_sl):
+    current_order = pos.get("sl_order") or {}
+    oid = current_order.get("oid")
+    coin = pos.get("coin")
+    record_trade_event(
+        "sl_replace_attempted",
+        coin=coin,
+        oid=oid,
+        previous_trigger_px=_extract_order_trigger_px(current_order),
+        new_trigger_px=desired_sl,
+    )
+    cancel_result = cancel_hl_order(coin, oid)
+    if cancel_result.get("status") != "ok":
+        record_trade_event(
+            "sl_replace_failed",
+            coin=coin,
+            oid=oid,
+            message=cancel_result.get("message"),
+        )
+        return {"ok": False, "message": cancel_result.get("message"), "cancel_result": cancel_result}
+    replacement = place_hl_sl_order(coin, pos["direction"], pos["size"], desired_sl)
+    if replacement.get("ok"):
+        pos["sl"] = desired_sl
+        pos["sl_order"] = replacement.get("sl_order")
+        record_trade_event(
+            "sl_replaced",
+            coin=coin,
+            canceled_oid=oid,
+            new_oid=((replacement.get("sl_order") or {}).get("oid")),
+            new_trigger_px=desired_sl,
+        )
+        return {"ok": True, "replacement": replacement}
+    record_trade_event(
+        "sl_replace_failed",
+        coin=coin,
+        oid=oid,
+        message=replacement.get("message"),
+    )
+    return {"ok": False, "message": replacement.get("message"), "replacement": replacement}
 
 
 def ensure_position_protection(state):
     open_orders = extract_open_order_map(state.get("_frontend_open_orders") or [])
     summary = {
         "adopted_positions_count": len(state.get("_adopted_positions") or []),
+        "exchange_open_orders_count": state.get("_exchange_open_orders_count", 0),
+        "managed_orders_count": len(state.get("managed_orders") or []),
+        "protection_missing_count": 0,
         "tpsl_missing_count": 0,
+        "protection_repaired_count": 0,
         "tpsl_repaired_count": 0,
+        "sl_replaced_count": 0,
         "unprotected_positions_count": 0,
     }
     for pos in state.get("positions", []):
+        exit_policy = build_exit_policy(position=pos)
+        prefix = exit_policy.get("protection_event_prefix", "tpsl")
         tp_open = match_existing_protection_order(pos, open_orders, "tp")
         sl_open = match_existing_protection_order(pos, open_orders, "sl")
-        if tp_open and sl_open:
+        pos["tp_order"] = tp_open if tp_open else pos.get("tp_order")
+        pos["sl_order"] = sl_open if sl_open else pos.get("sl_order")
+        tp, sl = ensure_position_targets(pos, state.setdefault("_data_cache", {}))
+        dynamic_target = compute_dynamic_sl_target(pos)
+        if dynamic_target and dynamic_target.get("sl") is not None:
+            sl = dynamic_target.get("sl")
+        if exit_policy.get("name") == "trend_sl_only" and sl_open and should_replace_sl_order(pos, sl_open, sl):
+            replaced = replace_sl_order(pos, sl)
+            if replaced.get("ok"):
+                summary["sl_replaced_count"] += 1
+                pos["sl_stage"] = dynamic_target.get("stage") if dynamic_target else pos.get("sl_stage")
+                pos["protection_status"] = "protected"
+                continue
+            pos["protection_status"] = "update_failed"
+            summary["unprotected_positions_count"] += 1
+            continue
+        is_protected = bool(sl_open) and (not exit_policy.get("requires_tp") or bool(tp_open))
+        if is_protected:
             pos["protection_status"] = "protected"
             continue
+        missing_status = "missing_tpsl" if exit_policy.get("requires_tp") else "missing_sl"
+        summary["protection_missing_count"] += 1
         summary["tpsl_missing_count"] += 1
-        pos["protection_status"] = "missing_tpsl"
-        tp, sl = ensure_position_targets(pos, state.setdefault("_data_cache", {}))
+        pos["protection_status"] = missing_status
         record_trade_event(
-            "tpsl_missing_detected",
+            f"{prefix}_missing_detected",
             coin=pos.get("coin"),
             tp_present=bool(tp_open),
             sl_present=bool(sl_open),
@@ -338,28 +639,32 @@ def ensure_position_protection(state):
             sl=sl,
             position_source=pos.get("position_source"),
         )
-        repaired = place_hl_tpsl_orders(pos["coin"], pos["direction"], pos["size"], tp, sl)
-        tpsl_context = build_tpsl_event_context(repaired)
+        repaired = submit_position_protection(pos, tp, sl)
+        protection_context = build_protection_event_context(repaired)
         record_trade_event(
-            "tpsl_repair_attempted",
+            f"{prefix}_repair_attempted",
             coin=pos.get("coin"),
             size=pos.get("size"),
             direction=pos.get("direction"),
             tp=tp,
             sl=sl,
-            **tpsl_context,
+            **protection_context,
         )
         if repaired.get("ok"):
+            pos["sl"] = sl
+            if dynamic_target:
+                pos["sl_stage"] = dynamic_target.get("stage")
             pos["tp_order"] = repaired.get("tp_order")
             pos["sl_order"] = repaired.get("sl_order")
             pos["protection_status"] = "protected"
+            summary["protection_repaired_count"] += 1
             summary["tpsl_repaired_count"] += 1
             record_trade_event(
-                "tpsl_repaired",
+                f"{prefix}_repaired",
                 coin=pos.get("coin"),
                 tp_order=repaired.get("tp_order"),
                 sl_order=repaired.get("sl_order"),
-                **tpsl_context,
+                **protection_context,
             )
         else:
             pos["tp_order"] = repaired.get("tp_order")
@@ -367,17 +672,17 @@ def ensure_position_protection(state):
             pos["protection_status"] = "repair_failed"
             summary["unprotected_positions_count"] += 1
             record_trade_event(
-                "tpsl_repair_failed",
+                f"{prefix}_repair_failed",
                 coin=pos.get("coin"),
                 tp_order=repaired.get("tp_order"),
                 sl_order=repaired.get("sl_order"),
                 message=repaired.get("message"),
-                **tpsl_context,
+                **protection_context,
             )
     return summary
 
 
-def sync_state_with_exchange_positions(state, perp_state=None, frontend_open_orders=None):
+def reconcile_exchange_state(state, perp_state=None, frontend_open_orders=None):
     if config.MODE != "live":
         return state
     perp_state = perp_state if perp_state is not None else get_hl_perp_user_state()
@@ -419,10 +724,78 @@ def sync_state_with_exchange_positions(state, perp_state=None, frontend_open_ord
         for pos in original_by_coin.values()
         if not _is_pending_entry_order(pos, open_orders)
     ]
-    state["positions"] = synced_positions + pending_local_positions
+    reconciled_positions = synced_positions + pending_local_positions
+    positions_by_coin = _position_by_coin(reconciled_positions)
+    pending_positions_by_oid = {
+        int(get_position_entry_oid(pos)): pos
+        for pos in pending_local_positions
+        if get_position_entry_oid(pos) is not None
+    }
+    managed_orders = []
+    orphan_orders = []
+    for order in open_orders.values():
+        if not isinstance(order, dict):
+            continue
+        adopted_at = datetime.now().isoformat()
+        order_role, matched_position, is_orphan = classify_exchange_order(
+            order,
+            positions_by_coin,
+            pending_positions_by_oid,
+        )
+        managed_order = normalize_managed_order(order, order_role=order_role, adopted_at=adopted_at)
+        managed_orders.append(managed_order)
+        record_trade_event(
+            "order_adopted",
+            oid=managed_order.get("oid"),
+            coin=managed_order.get("coin"),
+            order_role=managed_order.get("order_role"),
+            reduce_only=managed_order.get("reduce_only"),
+            tpsl=managed_order.get("tpsl"),
+        )
+        if matched_position is not None:
+            if order_role == "protection_sl":
+                matched_position["sl_order"] = dict(matched_position.get("sl_order") or {}, **managed_order)
+            elif order_role == "protection_tp":
+                matched_position["tp_order"] = dict(matched_position.get("tp_order") or {}, **managed_order)
+        if is_orphan:
+            orphan_orders.append(managed_order)
+            record_trade_event(
+                "orphan_order_detected",
+                oid=managed_order.get("oid"),
+                coin=managed_order.get("coin"),
+                order_role=managed_order.get("order_role"),
+                reduce_only=managed_order.get("reduce_only"),
+                tpsl=managed_order.get("tpsl"),
+            )
+    for pos in reconciled_positions:
+        if (pos.get("sl_order") and not pos.get("tp_order")) and not pos.get("sig"):
+            pos["exit_policy"] = {
+                "name": "trend_sl_only",
+                "requires_tp": False,
+                "requires_sl": True,
+                "protection_event_prefix": "sl",
+            }
+        elif pos.get("sl_order") and pos.get("tp_order") and not pos.get("sig"):
+            pos["exit_policy"] = {
+                "name": "fixed_tpsl",
+                "requires_tp": True,
+                "requires_sl": True,
+                "protection_event_prefix": "tpsl",
+            }
+    state["positions"] = reconciled_positions
+    state["managed_orders"] = managed_orders
     state["_adopted_positions"] = adopted_positions
     state["_stale_positions"] = stale_positions
+    state["_orphan_orders"] = orphan_orders
     state["_frontend_open_orders"] = frontend_open_orders
+    state["_exchange_open_orders_count"] = len(managed_orders)
+    state["_reconciled_at"] = datetime.now().isoformat()
+    record_trade_event(
+        "open_orders_synced",
+        exchange_open_orders_count=len(managed_orders),
+        managed_orders_count=len(managed_orders),
+        orphan_orders_detected_count=len(orphan_orders),
+    )
     if adopted_positions or stale_positions:
         record_trade_event(
             "state_exchange_mismatch",
@@ -432,9 +805,14 @@ def sync_state_with_exchange_positions(state, perp_state=None, frontend_open_ord
     return state
 
 
+def sync_state_with_exchange_positions(state, perp_state=None, frontend_open_orders=None):
+    return reconcile_exchange_state(state, perp_state=perp_state, frontend_open_orders=frontend_open_orders)
+
+
 def update_positions(state, prices, data_cache):
     if config.MODE == "live":
-        state = sync_state_with_exchange_positions(state)
+        if not state.get("_reconciled_at"):
+            state = sync_state_with_exchange_positions(state)
         still_open = []
         for pos in state["positions"]:
             if pos["coin"] in prices:
@@ -566,6 +944,8 @@ def check_entries(state, coins):
             log_entry_skipped(state, name, btc_dir, "no_signal")
             continue
         summary["signals_found"] += 1
+        exit_policy = build_exit_policy(signal=sig)
+        target_tp = sig.get("tp") if exit_policy.get("requires_tp") else None
 
         if (btc_dir == "bull" and sig["direction"] == "short") or (
             btc_dir == "bear" and sig["direction"] == "long"
@@ -579,7 +959,7 @@ def check_entries(state, coins):
                 signal_direction=sig.get("direction"),
                 signal_score=sig.get("score"),
                 sl=sig.get("sl"),
-                tp=sig.get("tp"),
+                tp=target_tp,
             )
             continue
 
@@ -596,24 +976,34 @@ def check_entries(state, coins):
             if atr and entry and atr / entry * 100 < 2
             else config.STRATEGY["risk_per_trade"]
         )
+        available_balance = (
+            get_available_entry_balance(state, config.STRATEGY["leverage"])
+            if config.MODE == "live"
+            else state["balance"]
+        )
+        base_context = {
+            "signal_direction": sig.get("direction"),
+            "signal_score": sig.get("score"),
+            "entry": entry,
+            "sl": sig.get("sl"),
+            "tp": target_tp,
+            "risk_pct": risk_pct,
+            "available_balance": available_balance,
+        }
+        if available_balance <= 0:
+            bump_summary_blocker(summary, "reserved_margin_exhausted")
+            log_entry_skipped(state, name, btc_dir, "reserved_margin_exhausted", **base_context)
+            continue
         size = calc_position_size(
-            state["balance"],
+            available_balance,
             entry,
             sig["sl"],
             config.STRATEGY["leverage"],
             risk_pct,
         )
         preview = normalize_hl_order_params(name, size, entry)
-        base_context = {
-            "signal_direction": sig.get("direction"),
-            "signal_score": sig.get("score"),
-            "entry": entry,
-            "sl": sig.get("sl"),
-            "tp": sig.get("tp"),
-            "risk_pct": risk_pct,
-            "raw_size": size,
-            "normalized_size": preview["size"],
-        }
+        base_context["raw_size"] = size
+        base_context["normalized_size"] = preview["size"]
 
         if size <= 0:
             bump_summary_blocker(summary, "size_zero")
@@ -624,7 +1014,7 @@ def check_entries(state, coins):
             log_entry_skipped(state, name, btc_dir, "normalized_size_zero", **base_context)
             continue
 
-        order_meta, tpsl_meta = None, {"tp_order": None, "sl_order": None}
+        order_meta, protection_meta = None, {"tp_order": None, "sl_order": None}
         if config.MODE == "live":
             summary["orders_attempted"] += 1
             record_trade_event(
@@ -696,38 +1086,39 @@ def check_entries(state, coins):
                     "entry_order_not_filled",
                     **base_context,
                     **order_context,
-                )
+            )
                 continue
             entry = order_meta.get("resolved_price", entry)
-            tpsl_meta = place_hl_tpsl_orders(
-                name,
-                sig["direction"],
-                order_meta.get("size"),
-                sig["tp"],
-                sig["sl"],
-            )
-            if not tpsl_meta.get("ok"):
-                bump_summary_blocker(summary, "tpsl_submit_failed")
-                tpsl_context = dict(order_context)
-                tpsl_context["message"] = tpsl_meta.get("message")
+            position_stub = {
+                "coin": name,
+                "direction": sig["direction"],
+                "size": order_meta.get("size"),
+                "exit_policy": exit_policy,
+            }
+            protection_meta = submit_position_protection(position_stub, target_tp, sig["sl"])
+            if not protection_meta.get("ok"):
+                failure_reason = "tpsl_submit_failed" if exit_policy.get("requires_tp") else "sl_submit_failed"
+                bump_summary_blocker(summary, failure_reason)
+                protection_context = dict(order_context)
+                protection_context["message"] = protection_meta.get("message")
                 record_trade_event(
-                    "tpsl_submit_failed",
+                    failure_reason,
                     **build_entry_context(
                         state,
                         name,
                         btc_dir,
                         config.STRATEGY["entry_order_type"],
                         **base_context,
-                        **tpsl_context,
+                        **protection_context,
                     ),
                 )
                 log_entry_skipped(
                     state,
                     name,
                     btc_dir,
-                    "tpsl_submit_failed",
+                    failure_reason,
                     **base_context,
-                    **tpsl_context,
+                    **protection_context,
                 )
                 continue
 
@@ -736,20 +1127,24 @@ def check_entries(state, coins):
                 "coin": name,
                 "direction": sig["direction"],
                 "entry": entry,
-                "tp": sig["tp"],
+                "tp": target_tp,
                 "sl": sig["sl"],
+                "initial_risk": abs(entry - sig["sl"]) if entry is not None and sig.get("sl") is not None else None,
+                "sl_stage": 0 if exit_policy.get("name") == "trend_sl_only" else None,
+                "best_price": entry if exit_policy.get("name") == "trend_sl_only" else None,
                 "size": preview["size"] if config.MODE == "live" else round(size, 6),
                 "current_price": entry,
                 "pnl_pnl": 0,
                 "entry_time": datetime.now().isoformat(),
                 "sig": sig.get("reason", ""),
+                "exit_policy": exit_policy,
                 "entry_oid": ((order_meta or {}).get("order_summary") or {}).get("oid"),
                 "entry_status": (order_meta or {}).get("normalized_status"),
                 "entry_filled_size": (order_meta or {}).get("size"),
                 "order_oid": ((order_meta or {}).get("order_summary") or {}).get("oid"),
                 "order_status": ((order_meta or {}).get("order_summary") or {}).get("order_status"),
-                "tp_order": tpsl_meta.get("tp_order"),
-                "sl_order": tpsl_meta.get("sl_order"),
+                "tp_order": protection_meta.get("tp_order"),
+                "sl_order": protection_meta.get("sl_order"),
                 "exchange_position_state": None,
                 "position_source": "local_state",
                 "protection_status": "protected" if config.MODE == "live" else None,
