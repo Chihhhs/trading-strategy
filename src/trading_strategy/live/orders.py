@@ -133,6 +133,41 @@ def summarize_hl_order_result(result):
     return summary
 
 
+def summarize_hl_cancel_result(result):
+    summary = {
+        "api_status": None,
+        "cancel_status": "unknown",
+        "message": None,
+    }
+    if not isinstance(result, dict):
+        summary["message"] = "non-dict response"
+        return summary
+    summary["api_status"] = result.get("status")
+    statuses = (((result.get("response") or {}).get("data") or {}).get("statuses"))
+    if isinstance(statuses, list) and statuses:
+        first = statuses[0]
+        if isinstance(first, dict):
+            if "error" in first:
+                summary["cancel_status"] = "error"
+                summary["message"] = str(first.get("error"))
+                return summary
+            if "success" in first or "resting" in first:
+                summary["cancel_status"] = "canceled"
+                summary["message"] = json.dumps(first, ensure_ascii=False)
+                return summary
+            if first:
+                summary["cancel_status"] = "canceled"
+                summary["message"] = json.dumps(first, ensure_ascii=False)
+                return summary
+    if result.get("status") == "ok":
+        summary["cancel_status"] = "canceled"
+        summary["message"] = result.get("message") or json.dumps(result, ensure_ascii=False)
+    else:
+        summary["cancel_status"] = "error"
+        summary["message"] = result.get("message") or json.dumps(result, ensure_ascii=False)
+    return summary
+
+
 def verify_hl_order(oid):
     address = get_hl_account_address()
     client = get_hl_info_client()
@@ -293,6 +328,46 @@ def place_hl_tpsl_orders(coin, direction, size, tp_px, sl_px):
         "message": "; ".join(part for part in (sl_order.get("message"), tp_order.get("message")) if part),
         "order_side": side,
         "price_source": tp_order.get("price_source") or sl_order.get("price_source"),
+    }
+
+
+def place_hl_sl_order(coin, direction, size, sl_px):
+    side = infer_trigger_side(direction)
+    sl_order = place_hl_trigger_order(coin, side, size, sl_px, "sl")
+    return {
+        "sl_order": build_order_ref(sl_order),
+        "tp_order": None,
+        "ok": sl_order.get("status") == "ok",
+        "message": sl_order.get("message"),
+        "order_side": side,
+        "price_source": sl_order.get("price_source"),
+    }
+
+
+def cancel_hl_order(coin, oid):
+    exchange = get_hl_exchange_client()
+    if exchange is None:
+        return {"status": "error", "message": "missing Hyperliquid SDK", "oid": oid, "coin": coin}
+    try:
+        result = exchange.cancel(coin, int(oid))
+    except Exception as exc:
+        return {"status": "error", "message": str(exc), "oid": oid, "coin": coin}
+    summary = summarize_hl_cancel_result(result)
+    debug_api_log(
+        "hl_order_cancel",
+        {
+            "coin": coin,
+            "oid": oid,
+            "raw_response": result,
+            "cancel_status": summary.get("cancel_status"),
+        },
+    )
+    return {
+        "status": "ok" if summary.get("cancel_status") == "canceled" else "error",
+        "coin": coin,
+        "oid": oid,
+        "cancel_status": summary.get("cancel_status"),
+        "message": summary.get("message"),
     }
 
 
