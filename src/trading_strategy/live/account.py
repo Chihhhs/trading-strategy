@@ -250,7 +250,7 @@ def extract_hl_account_value(balance_info):
 
 
 def sync_state_with_hl_balance(state):
-    from .engine import sync_state_with_exchange_positions
+    from .engine.reconcile import sync_state_with_exchange_positions
 
     balance_info = get_hl_balance()
     account_values = extract_hl_account_values(balance_info)
