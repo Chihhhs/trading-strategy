@@ -59,6 +59,16 @@ def append_trade_record(record):
         pass
 
 
+def record_trade_event(event, **fields):
+    append_trade_record(
+        {
+            "ts": datetime.now().isoformat(),
+            "event": event,
+            **fields,
+        }
+    )
+
+
 def load_state():
     return load_state_file(config.STATE_DIR, config.STRATEGY)
 

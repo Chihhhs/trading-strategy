@@ -6,7 +6,6 @@ import sys
 """bash
 bash -lc '
 cd /mnt/d/code/trading-strategy
-cat /mnt/d/code/trading-strategy/.env | while read line; do     export $line; done
 python3 -m apps.runners.live_runner --live --loop
 '
 """
