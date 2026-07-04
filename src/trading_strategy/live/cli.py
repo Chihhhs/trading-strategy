@@ -7,9 +7,47 @@ from trading_strategy.core.state import get_state_path
 
 from . import config
 from .account import sync_state_with_hl_balance
-from .engine import check_entries, print_debug_account, print_report, update_positions, verify_saved_orders
-from .io import append_trade_record, load_state, save_state
+from .engine import (
+    build_run_summary,
+    ensure_position_protection,
+    build_strategy_snapshot,
+    check_entries,
+    print_debug_account,
+    print_report,
+    update_positions,
+    verify_saved_orders,
+)
+from .io import load_state, record_trade_event, save_state
 from .market import get_current_prices, load_coin_list
+
+
+def ensure_live_perp_balance(state):
+    if config.MODE != "live":
+        return
+    perp_balance = state.get("_perp_account_value")
+    if perp_balance is None:
+        raise RuntimeError("Unable to determine Hyperliquid perp account value for live trading")
+    if perp_balance <= 0:
+        raise RuntimeError("Hyperliquid perp tradable balance is 0; fund perp margin before live trading")
+
+
+def maybe_log_config_mismatch(state):
+    saved_params = state.get("params")
+    runtime_snapshot = build_strategy_snapshot()
+    if not isinstance(saved_params, dict):
+        return
+    mismatches = {
+        key: {"saved": saved_params.get(key), "runtime": runtime_snapshot.get(key)}
+        for key in ("entry_order_type", "leverage", "risk_per_trade", "max_positions")
+        if saved_params.get(key) != runtime_snapshot.get(key)
+    }
+    if mismatches:
+        record_trade_event(
+            "config_mismatch",
+            saved_params=saved_params,
+            strategy_snapshot=runtime_snapshot,
+            mismatches=mismatches,
+        )
 
 
 def run_once():
@@ -17,23 +55,87 @@ def run_once():
     try:
         if config.MODE == "live" or config.get_account_address():
             state = sync_state_with_hl_balance(state)
-        if config.MODE == "live" and state.get("balance", 0) <= 0:
-            raise RuntimeError("Hyperliquid perp 可用資金為 0，停止 live 下單")
+        ensure_live_perp_balance(state)
+        maybe_log_config_mismatch(state)
+        protection_summary = ensure_position_protection(state) if config.MODE == "live" else {
+            "adopted_positions_count": 0,
+            "tpsl_missing_count": 0,
+            "tpsl_repaired_count": 0,
+            "unprotected_positions_count": 0,
+        }
+
+        strategy_snapshot = build_strategy_snapshot()
+        record_trade_event(
+            "run_started",
+            mode=config.MODE,
+            entry_order_type=config.STRATEGY["entry_order_type"],
+            balance=state.get("balance"),
+            balance_source=state.get("_balance_source"),
+            positions=len(state.get("positions", [])),
+            strategy_snapshot=strategy_snapshot,
+        )
+        record_trade_event(
+            "account_snapshot",
+            mode=config.MODE,
+            entry_order_type=config.STRATEGY["entry_order_type"],
+            balance=state.get("balance"),
+            balance_source=state.get("_balance_source"),
+            perp_account_value=state.get("_perp_account_value"),
+            spot_account_value=state.get("_spot_account_value"),
+            balance_warning=state.get("_balance_warning"),
+            positions=len(state.get("positions", [])),
+            strategy_snapshot=strategy_snapshot,
+        )
+
         coins = load_coin_list()
-        print(f'\n[{datetime.now().strftime("%Y-%m-%d %H:%M")}] 餘額: ${state["balance"]:.2f} | 持倉: {len(state["positions"])}')
-        print(f"  市場資料來源: {config.get_market_data_source()}")
-        print(f'  餘額來源: {state.get("_balance_source", "local_state")}')
+        print(
+            f'\n[{datetime.now().strftime("%Y-%m-%d %H:%M")}] '
+            f'balance: ${state["balance"]:.2f} | positions: {len(state["positions"])}'
+        )
+        print(f"  market data source: {config.get_market_data_source()}")
+        print(f'  balance source: {state.get("_balance_source", "local_state")}')
+        print(f'  perp account value: {state.get("_perp_account_value")}')
+        print(f'  spot account value: {state.get("_spot_account_value")}')
+
         prices = get_current_prices(coins)
         update_positions(state, prices, state.get("_data_cache", {}))
+
         today = datetime.now().strftime("%Y-%m-%d")
-        today_pnl = sum(h.get("pnl", 0) for h in state.get("history", []) if h.get("exit_time", "").startswith(today))
+        today_pnl = sum(
+            h.get("pnl", 0)
+            for h in state.get("history", [])
+            if h.get("exit_time", "").startswith(today)
+        )
         if today_pnl < -state["balance"] * 0.05:
-            print(f"  🔴 每日虧損已達 5%（${today_pnl:.2f}），停止開倉")
+            print(f"  daily loss limit hit: {today_pnl:.2f}")
+            entry_summary = build_run_summary()
+            entry_summary["coins_scanned"] = len(coins)
+            entry_summary["priced_coins"] = len(prices)
+            if entry_summary["coins_scanned"]:
+                entry_summary["priced_ratio"] = round(
+                    entry_summary["priced_coins"] / entry_summary["coins_scanned"], 4
+                )
+            entry_summary["top_blockers"] = [{"reason": "daily_loss_limit", "count": 1}]
+        elif protection_summary["unprotected_positions_count"] > 0:
+            print("  unprotected positions detected; skipping new entries")
+            entry_summary = build_run_summary()
+            entry_summary["coins_scanned"] = len(coins)
+            entry_summary["priced_coins"] = len(prices)
+            if entry_summary["coins_scanned"]:
+                entry_summary["priced_ratio"] = round(
+                    entry_summary["priced_coins"] / entry_summary["coins_scanned"], 4
+                )
+            entry_summary["top_blockers"] = [{"reason": "unprotected_positions", "count": protection_summary["unprotected_positions_count"]}]
         else:
-            check_entries(state, coins)
+            entry_summary = check_entries(state, coins)
+
+        entry_summary.update(protection_summary)
+
         for pos in state["positions"]:
             if pos["coin"] in prices:
                 pos["current_price"] = prices[pos["coin"]]
+
+        record_trade_event("run_summary", strategy_snapshot=strategy_snapshot, **entry_summary)
         print_report(state)
         return state
     finally:
@@ -45,33 +147,36 @@ def run_loop(interval_minutes=5):
         try:
             run_once()
         except KeyboardInterrupt:
-            append_trade_record({"ts": datetime.now().isoformat(), "event": "loop_stopped", "reason": "keyboard_interrupt"})
-            print("\n已停止")
+            record_trade_event("loop_stopped", reason="keyboard_interrupt")
+            print("\nLoop stopped")
             break
         except Exception as exc:
-            append_trade_record({"ts": datetime.now().isoformat(), "event": "loop_error", "reason": str(exc)})
+            record_trade_event("loop_error", reason=str(exc))
             print(f"\n[ERROR] {exc}")
-        print(f"\n等待 {interval_minutes} 分鐘後再次執行...")
+        print(f"\nSleeping {interval_minutes} minute(s) before next run...")
         time.sleep(max(interval_minutes, 1) * 60)
 
 
 def main():
     args = sys.argv[1:]
-    interval_minutes = next((int(arg.split("=", 1)[1]) for arg in args if arg.startswith("--interval-minutes=")), 5)
+    interval_minutes = next(
+        (int(arg.split("=", 1)[1]) for arg in args if arg.startswith("--interval-minutes=")),
+        5,
+    )
     if "--live" in args:
         config.set_mode("live")
         if not config.get_private_key():
-            print("❌ 請設定 HL_PRIVATE_KEY 環境變數")
+            print("Missing HL_PRIVATE_KEY")
             sys.exit(1)
         if not config.get_account_address():
-            print("❌ live 模式需要 HL_ACCOUNT_ADDRESS 指向實際主帳戶")
+            print("Live mode requires HL_ACCOUNT_ADDRESS")
             sys.exit(1)
-        print("⚠️ 實盤模式！")
+        print("Running in live mode")
     if "--reset" in args:
         path = get_state_path(config.STATE_DIR)
         if os.path.exists(path):
             os.remove(path)
-        print("✅ 已重置")
+        print("State reset")
         return
     if "--report" in args:
         state = load_state()

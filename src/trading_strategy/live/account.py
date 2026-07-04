@@ -48,7 +48,7 @@ def get_hl_info_client():
     if _HL_INFO_CLIENT is not None:
         return _HL_INFO_CLIENT
     if Info is None:
-        _HL_CLIENT_ERROR = "未安裝 hyperliquid-python-sdk"
+        _HL_CLIENT_ERROR = "missing hyperliquid-python-sdk"
         return None
     try:
         _HL_INFO_CLIENT = Info(config.get_api_url(), skip_ws=True)
@@ -67,10 +67,10 @@ def get_hl_exchange_client():
     if _HL_EXCHANGE_CLIENT is not None:
         return _HL_EXCHANGE_CLIENT
     if not config.get_private_key():
-        _HL_CLIENT_ERROR = "未設定私鑰"
+        _HL_CLIENT_ERROR = "missing HL_PRIVATE_KEY"
         return None
     if Account is None or Exchange is None:
-        _HL_CLIENT_ERROR = "未安裝 hyperliquid-python-sdk"
+        _HL_CLIENT_ERROR = "missing hyperliquid-python-sdk"
         return None
     try:
         wallet = Account.from_key(config.get_private_key())
@@ -150,12 +150,23 @@ def get_hl_balance():
             "dex_abstraction": api_post(f"{config.get_api_url()}/info", {"type": "userDexAbstraction", "user": address}),
         }
     try:
-        return {
+        result = {
             "perp": client.user_state(address),
             "spot": client.spot_user_state(address),
             "abstraction": client.query_user_abstraction_state(address),
             "dex_abstraction": client.query_user_dex_abstraction_state(address),
         }
+        debug_api_log(
+            "hl_balance_sdk",
+            {
+                "request_user": address,
+                "response_keys": sorted(result.keys()),
+                "account_values": extract_hl_account_values(result),
+                "client_error": _HL_CLIENT_ERROR,
+                "raw_response": result,
+            },
+        )
+        return result
     except Exception as exc:
         debug_api_log("hl_balance_sdk_error", {"error": str(exc)})
         return api_post(f"{config.get_api_url()}/info", {"type": "clearinghouseState", "user": address})
@@ -168,18 +179,21 @@ def _safe_float(value):
         return None
 
 
-def extract_hl_account_value(balance_info):
+def extract_hl_perp_account_value(balance_info):
     if not isinstance(balance_info, dict):
         return None
-    if any(key in balance_info for key in ("perp", "spot", "abstraction", "dex_abstraction")):
-        return extract_hl_account_value(balance_info.get("perp"))
+    perp_info = balance_info.get("perp") if any(
+        key in balance_info for key in ("perp", "spot", "abstraction", "dex_abstraction")
+    ) else balance_info
+    if not isinstance(perp_info, dict):
+        return None
     candidates = [
-        balance_info.get("accountValue"),
-        (balance_info.get("marginSummary") or {}).get("accountValue"),
-        (balance_info.get("crossMarginSummary") or {}).get("accountValue"),
-        balance_info.get("withdrawable"),
-        balance_info.get("equity"),
-        balance_info.get("balance"),
+        perp_info.get("accountValue"),
+        (perp_info.get("marginSummary") or {}).get("accountValue"),
+        (perp_info.get("crossMarginSummary") or {}).get("accountValue"),
+        perp_info.get("withdrawable"),
+        perp_info.get("equity"),
+        perp_info.get("balance"),
     ]
     for candidate in candidates:
         numeric = _safe_float(candidate)
@@ -188,17 +202,69 @@ def extract_hl_account_value(balance_info):
     return None
 
 
+def extract_hl_spot_account_value(balance_info):
+    if not isinstance(balance_info, dict):
+        return None
+    spot_info = balance_info.get("spot") if any(
+        key in balance_info for key in ("perp", "spot", "abstraction", "dex_abstraction")
+    ) else None
+    if not isinstance(spot_info, dict):
+        return None
+    token_rows = spot_info.get("tokenToAvailableAfterMaintenance") or []
+    for row in token_rows:
+        if isinstance(row, (list, tuple)) and len(row) >= 2:
+            numeric = _safe_float(row[1])
+            if numeric is not None:
+                return numeric
+    for item in spot_info.get("balances", []):
+        if not isinstance(item, dict):
+            continue
+        if item.get("coin") not in ("USDC", "USDT", "USDT0"):
+            continue
+        numeric = _safe_float(item.get("total"))
+        if numeric is not None:
+            return numeric
+    return None
+
+
+def extract_hl_account_values(balance_info):
+    perp_value = extract_hl_perp_account_value(balance_info)
+    spot_value = extract_hl_spot_account_value(balance_info)
+    effective_balance = perp_value if perp_value is not None else spot_value
+    if perp_value is not None:
+        balance_source = "hyperliquid_perp"
+    elif spot_value is not None:
+        balance_source = "hyperliquid_spot"
+    else:
+        balance_source = "local_state"
+    return {
+        "perp_account_value": perp_value,
+        "spot_account_value": spot_value,
+        "effective_balance": effective_balance,
+        "balance_source": balance_source,
+    }
+
+
+def extract_hl_account_value(balance_info):
+    return extract_hl_account_values(balance_info)["effective_balance"]
+
+
 def sync_state_with_hl_balance(state):
     from .engine import sync_state_with_exchange_positions
 
     balance_info = get_hl_balance()
-    account_value = extract_hl_account_value(balance_info)
+    account_values = extract_hl_account_values(balance_info)
+    account_value = account_values["effective_balance"]
     state["_hl_balance_info"] = balance_info
-    state["_balance_source"] = "hyperliquid" if account_value is not None else "local_state"
+    state["_balance_source"] = account_values["balance_source"]
+    state["_perp_account_value"] = account_values["perp_account_value"]
+    state["_spot_account_value"] = account_values["spot_account_value"]
     if account_value is not None:
         state["balance"] = account_value
     if is_probably_api_wallet_mode():
-        state["_balance_warning"] = "請設定 HL_ACCOUNT_ADDRESS 指向主帳戶。"
+        state["_balance_warning"] = "Set HL_ACCOUNT_ADDRESS to the tradable main account."
+    elif account_values["perp_account_value"] is not None and account_values["perp_account_value"] <= 0:
+        state["_balance_warning"] = "Hyperliquid perp tradable balance is 0. Fund perp margin first."
     else:
         state.pop("_balance_warning", None)
     return sync_state_with_exchange_positions(
