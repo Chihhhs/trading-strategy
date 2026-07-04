@@ -275,6 +275,48 @@ def _position_by_coin(positions):
     return {pos.get("coin"): pos for pos in positions if pos.get("coin")}
 
 
+def _protection_order_oid(pos, tpsl_kind):
+    order_ref = (pos or {}).get(f"{tpsl_kind}_order") or {}
+    oid = order_ref.get("oid")
+    return int(oid) if oid is not None else None
+
+
+def _order_trigger_matches(order, candidate_order, fallback_target=None):
+    order_trigger = _extract_order_trigger_px(order)
+    candidate_trigger = _extract_order_trigger_px(candidate_order)
+    if order_trigger is None:
+        return False
+    for target in (candidate_trigger, _safe_float((candidate_order or {}).get("requested_trigger_px"), default=None), fallback_target):
+        if target is None:
+            continue
+        tolerance = max(abs(float(target)) * 0.0005, 1e-9)
+        if abs(order_trigger - float(target)) <= tolerance:
+            return True
+    return False
+
+
+def _infer_reduce_only_protection_role(order, positions_by_coin):
+    coin = str(order.get("coin") or "")
+    pos = positions_by_coin.get(coin)
+    if pos is None or not order.get("reduceOnly"):
+        return (None, None, False)
+    oid = order.get("oid")
+    if oid is not None:
+        oid = int(oid)
+        if _protection_order_oid(pos, "sl") == oid:
+            return ("protection_sl", pos, False)
+        if _protection_order_oid(pos, "tp") == oid:
+            return ("protection_tp", pos, False)
+    if _order_trigger_matches(order, pos.get("sl_order"), pos.get("sl")):
+        return ("protection_sl", pos, False)
+    if _order_trigger_matches(order, pos.get("tp_order"), pos.get("tp")):
+        return ("protection_tp", pos, False)
+    exit_policy = build_exit_policy(position=pos)
+    if exit_policy.get("name") == "trend_sl_only" and _extract_order_trigger_px(order) is not None:
+        return ("protection_sl", pos, False)
+    return (None, pos, True)
+
+
 def classify_exchange_order(order, positions_by_coin, pending_positions_by_oid):
     coin = str(order.get("coin") or "")
     reduce_only = bool(order.get("reduceOnly"))
@@ -285,6 +327,9 @@ def classify_exchange_order(order, positions_by_coin, pending_positions_by_oid):
     if reduce_only and tpsl == "tp":
         pos = positions_by_coin.get(coin)
         return ("protection_tp", pos, pos is None)
+    inferred_role, inferred_pos, inferred_orphan = _infer_reduce_only_protection_role(order, positions_by_coin)
+    if inferred_role is not None:
+        return (inferred_role, inferred_pos, inferred_orphan)
     oid = order.get("oid")
     if oid is not None and pending_positions_by_oid.get(int(oid)):
         return ("entry_pending", pending_positions_by_oid[int(oid)], False)
@@ -313,6 +358,9 @@ def match_existing_protection_order(pos, open_orders, tpsl_kind):
             continue
         order_tpsl = str(order.get("tpsl") or "").lower()
         if order_tpsl == tpsl_kind:
+            return order
+        fallback_target = pos.get(tpsl_kind)
+        if _order_trigger_matches(order, local_order, fallback_target):
             return order
     return None
 
