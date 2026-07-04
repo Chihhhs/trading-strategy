@@ -9,6 +9,7 @@ from . import config
 from .account import sync_state_with_hl_balance
 from .engine import (
     build_run_summary,
+    cancel_orphan_orders,
     ensure_position_protection,
     build_strategy_snapshot,
     check_entries,
@@ -57,9 +58,27 @@ def run_once():
             state = sync_state_with_hl_balance(state)
         ensure_live_perp_balance(state)
         maybe_log_config_mismatch(state)
+        coins = load_coin_list()
+        prices = get_current_prices(coins)
+        for pos in state.get("positions", []):
+            if pos.get("coin") in prices:
+                pos["current_price"] = prices[pos["coin"]]
+        cancel_summary = cancel_orphan_orders(state) if config.MODE == "live" else {
+            "orphan_orders_detected_count": 0,
+            "orphan_orders_canceled_count": 0,
+            "orphan_order_cancel_failures": 0,
+        }
         protection_summary = ensure_position_protection(state) if config.MODE == "live" else {
             "adopted_positions_count": 0,
+            "exchange_open_orders_count": 0,
+            "managed_orders_count": 0,
+            "orphan_orders_detected_count": 0,
+            "orphan_orders_canceled_count": 0,
+            "orphan_order_cancel_failures": 0,
+            "sl_replaced_count": 0,
+            "protection_missing_count": 0,
             "tpsl_missing_count": 0,
+            "protection_repaired_count": 0,
             "tpsl_repaired_count": 0,
             "unprotected_positions_count": 0,
         }
@@ -87,7 +106,6 @@ def run_once():
             strategy_snapshot=strategy_snapshot,
         )
 
-        coins = load_coin_list()
         print(
             f'\n[{datetime.now().strftime("%Y-%m-%d %H:%M")}] '
             f'balance: ${state["balance"]:.2f} | positions: {len(state["positions"])}'
@@ -97,7 +115,6 @@ def run_once():
         print(f'  perp account value: {state.get("_perp_account_value")}')
         print(f'  spot account value: {state.get("_spot_account_value")}')
 
-        prices = get_current_prices(coins)
         update_positions(state, prices, state.get("_data_cache", {}))
 
         today = datetime.now().strftime("%Y-%m-%d")
@@ -129,6 +146,9 @@ def run_once():
         else:
             entry_summary = check_entries(state, coins)
 
+        entry_summary.setdefault("exchange_open_orders_count", state.get("_exchange_open_orders_count", 0))
+        entry_summary.setdefault("managed_orders_count", len(state.get("managed_orders") or []))
+        entry_summary.update(cancel_summary)
         entry_summary.update(protection_summary)
 
         for pos in state["positions"]:

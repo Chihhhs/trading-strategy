@@ -224,6 +224,15 @@ tests/
 - [docs/backtesting_py_usage_notes.md](/D:/code/trading-strategy/docs/backtesting_py_usage_notes.md)
 - [docs/restruct.md](/D:/code/trading-strategy/docs/restruct.md)
 - [.agents/project_detail.md](/D:/code/trading-strategy/.agents/project_detail.md)
+- [.agents/current_progress.md](/D:/code/trading-strategy/.agents/current_progress.md)
+
+## Daily Live Reconciliation
+
+- `run_once()` now supports exchange-first daily recovery.
+- On each startup the live flow rebuilds local context from exchange positions and open orders.
+- `live_state.json` now persists `managed_orders` so adopted open orders can be tracked across runs.
+- Orphan exchange open orders are auto-canceled and logged.
+- `trend_sl_only` replaces SL with a strict sequence: cancel old SL first, then place the new SL.
 
 ## License
 

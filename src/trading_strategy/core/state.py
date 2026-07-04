@@ -17,6 +17,7 @@ def build_default_state(strategy, *, initial_balance=1000.0, strategy_name=None)
     state = {
         "balance": initial_balance,
         "positions": [],
+        "managed_orders": [],
         "history": [],
         "params": strategy,
         "stats": build_stats(),
@@ -50,6 +51,11 @@ def save_state(state_dir, state, io_lock=None, *, name="live_state"):
     persistable.pop("_hl_balance_info", None)
     persistable.pop("_balance_warning", None)
     persistable.pop("_data_cache", None)
+    persistable.pop("_frontend_open_orders", None)
+    persistable.pop("_adopted_positions", None)
+    persistable.pop("_stale_positions", None)
+    persistable.pop("_orphan_orders", None)
+    persistable.pop("_reconciled_at", None)
 
     compact_positions = []
     for pos in persistable.get("positions", []):
