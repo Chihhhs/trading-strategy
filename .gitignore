@@ -20,3 +20,5 @@ data/paper_strategies_v2/
 data/signal_log.json
 data/signal_log_history.json
 data/historical_prices/prices_*.json
+data/trade_history/*
+data/hl_api/*

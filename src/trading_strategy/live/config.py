@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 try:
     from dotenv import load_dotenv
@@ -10,9 +11,8 @@ if load_dotenv is not None:
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live")
+HL_API_LOG_DIR = os.path.join(PROJECT_ROOT, "data", "hl_api")
 TRADE_HISTORY_DIR = os.path.join(PROJECT_ROOT, "data", "trade_history")
-API_LOG_PATH = os.path.join(STATE_DIR, "live_api_debug.log")
-TRADE_LOG_PATH = os.path.join(TRADE_HISTORY_DIR, "live_trading_records.jsonl")
 BINANCE_API = "https://api.binance.com"
 
 MODE = "paper"
@@ -35,11 +35,24 @@ CIRCUIT = {
 }
 
 os.makedirs(STATE_DIR, exist_ok=True)
+os.makedirs(HL_API_LOG_DIR, exist_ok=True)
 os.makedirs(TRADE_HISTORY_DIR, exist_ok=True)
 
 
 def get_env(name, default=""):
     return os.environ.get(name, default)
+
+
+def _date_stamp(now=None):
+    return (now or datetime.now()).strftime("%Y-%m-%d")
+
+
+def get_api_log_path(now=None):
+    return os.path.join(HL_API_LOG_DIR, f"{_date_stamp(now)}.log")
+
+
+def get_trade_log_path(now=None):
+    return os.path.join(TRADE_HISTORY_DIR, f"{_date_stamp(now)}.jsonl")
 
 
 def get_private_key():

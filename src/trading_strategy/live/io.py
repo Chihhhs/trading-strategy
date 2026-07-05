@@ -44,7 +44,7 @@ def debug_api_log(event, payload):
         return
     record = {"ts": datetime.now().isoformat(), "event": event, "payload": payload}
     try:
-        with open(config.API_LOG_PATH, "a", encoding="utf-8") as handle:
+        with open(config.get_api_log_path(), "a", encoding="utf-8") as handle:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
     except Exception:
         pass
@@ -53,7 +53,7 @@ def debug_api_log(event, payload):
 def append_trade_record(record):
     try:
         with _IO_LOCK:
-            with open(config.TRADE_LOG_PATH, "a", encoding="utf-8") as handle:
+            with open(config.get_trade_log_path(), "a", encoding="utf-8") as handle:
                 handle.write(json.dumps(record, ensure_ascii=False) + "\n")
     except Exception:
         pass
