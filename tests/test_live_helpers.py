@@ -1,0 +1,165 @@
+from tests.live_test_support import account, choose_limit_price, live, orders, patch, unittest
+
+
+class LiveHelpersTest(unittest.TestCase):
+    def test_summarize_hl_order_result_filled(self):
+        result = {
+            "status": "ok",
+            "response": {"data": {"statuses": [{"filled": {"oid": 123}}]}},
+        }
+        summary = live.summarize_hl_order_result(result)
+        self.assertEqual(summary["order_status"], "filled")
+        self.assertEqual(summary["oid"], 123)
+
+    def test_normalize_order_status_unknown_without_oid(self):
+        summary = {"order_status": "unknown", "oid": None}
+        self.assertEqual(live.normalize_order_status(summary, None), "unknown")
+
+    def test_sync_state_with_exchange_positions_removes_stale(self):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            state = {
+                "positions": [
+                    {
+                        "coin": "IOTA",
+                        "entry_oid": None,
+                        "entry_time": "2026-07-02T23:47:02.163776",
+                    }
+                ]
+            }
+            synced = live.sync_state_with_exchange_positions(
+                state,
+                {"assetPositions": []},
+                [],
+            )
+            self.assertEqual(synced["positions"], [])
+        finally:
+            live.config.set_mode(old_mode)
+
+    def test_extract_hl_account_values_prefers_perp_but_keeps_spot(self):
+        balance_info = {
+            "perp": {"marginSummary": {"accountValue": "0.0"}},
+            "spot": {
+                "tokenToAvailableAfterMaintenance": [[0, "45.905278"]],
+                "balances": [{"coin": "USDC", "total": "45.905278"}],
+            },
+        }
+        values = account.extract_hl_account_values(balance_info)
+        self.assertEqual(values["perp_account_value"], 0.0)
+        self.assertEqual(values["spot_account_value"], 45.905278)
+        self.assertEqual(values["effective_balance"], 0.0)
+        self.assertEqual(values["balance_source"], "hyperliquid_perp")
+
+    def test_ensure_live_perp_balance_rejects_zero_perp_even_with_spot(self):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            state = {
+                "balance": 45.905278,
+                "_perp_account_value": 0.0,
+                "_spot_account_value": 45.905278,
+            }
+            with self.assertRaisesRegex(RuntimeError, "perp tradable balance is 0"):
+                live.cli.ensure_live_perp_balance(state)
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.hyperliquid.get_best_bid_ask")
+    def test_choose_limit_price_normalizes_to_tick(self, mock_get_best_bid_ask):
+        mock_get_best_bid_ask.return_value = {
+            "best_bid": {
+                "price": 44.48,
+                "price_decimal": orders.Decimal("44.48"),
+                "raw_price": "44.48",
+            },
+            "best_ask": {
+                "price": 44.49,
+                "price_decimal": orders.Decimal("44.49"),
+                "raw_price": "44.49",
+            },
+            "bids": [
+                {"price_decimal": orders.Decimal("44.48"), "raw_price": "44.48"},
+                {"price_decimal": orders.Decimal("44.47"), "raw_price": "44.47"},
+            ],
+            "asks": [
+                {"price_decimal": orders.Decimal("44.49"), "raw_price": "44.49"},
+                {"price_decimal": orders.Decimal("44.50"), "raw_price": "44.50"},
+            ],
+            "book": {"levels": []},
+        }
+        chosen = choose_limit_price("LTC", "buy", passive=False, price_pad_bps=5)
+        self.assertEqual(chosen["tick_size"], 0.01)
+        self.assertEqual(round(chosen["normalized_price"], 2), chosen["normalized_price"])
+        self.assertGreaterEqual(chosen["normalized_price"], chosen["best_ask"])
+
+    def test_classify_order_rejection(self):
+        self.assertEqual(orders.classify_order_rejection("Order has invalid price."), "invalid_price")
+        self.assertEqual(orders.classify_order_rejection("Insufficient margin"), "margin_insufficient")
+
+    @patch("trading_strategy.live.orders.get_best_bid_ask")
+    @patch("trading_strategy.live.orders.verify_hl_order", return_value=None)
+    @patch("trading_strategy.live.orders.get_hl_exchange_client")
+    def test_place_hl_trigger_order_rejected_returns_error(
+        self,
+        mock_get_exchange,
+        _mock_verify,
+        mock_get_best_bid_ask,
+    ):
+        class DummyExchange:
+            def __init__(self):
+                self.calls = []
+
+            def order(self, *args, **kwargs):
+                self.calls.append((args, kwargs))
+                return {
+                    "status": "ok",
+                    "response": {"data": {"statuses": [{"error": "Order has invalid price."}]}},
+                }
+
+        dummy_exchange = DummyExchange()
+        mock_get_exchange.return_value = dummy_exchange
+        mock_get_best_bid_ask.return_value = {
+            "best_bid": {
+                "price": 99.5,
+                "price_decimal": orders.Decimal("99.5"),
+                "raw_price": "99.5",
+            },
+            "best_ask": {
+                "price": 100.0,
+                "price_decimal": orders.Decimal("100.0"),
+                "raw_price": "100.0",
+            },
+            "bids": [
+                {"price_decimal": orders.Decimal("99.5"), "raw_price": "99.5"},
+                {"price_decimal": orders.Decimal("99.0"), "raw_price": "99.0"},
+            ],
+            "asks": [
+                {"price_decimal": orders.Decimal("100.0"), "raw_price": "100.0"},
+                {"price_decimal": orders.Decimal("100.5"), "raw_price": "100.5"},
+            ],
+            "book": {"levels": []},
+        }
+        with patch("trading_strategy.live.orders.get_trigger_limit_price", return_value=100.37):
+            result = orders.place_hl_trigger_order("BTC", "sell", 1.0, 100.21, "sl")
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["rejection_reason"], "invalid_price")
+        self.assertEqual(result["requested_trigger_px"], 100.21)
+        self.assertEqual(result["trigger_px"], 100.2)
+        self.assertEqual(result["requested_limit_px"], 100.37)
+        self.assertEqual(result["limit_px"], 100.3)
+        self.assertEqual(result["tick_size"], 0.1)
+        self.assertEqual(dummy_exchange.calls[0][0][3], 100.3)
+        self.assertEqual(dummy_exchange.calls[0][0][4]["trigger"]["triggerPx"], 100.2)
+
+    @patch("trading_strategy.live.orders.get_hl_exchange_client")
+    def test_cancel_hl_order_returns_ok(self, mock_get_exchange):
+        class DummyExchange:
+            def cancel(self, coin, oid):
+                return {"status": "ok", "response": {"data": {"statuses": [{"success": {"oid": oid}}]}}}
+
+        mock_get_exchange.return_value = DummyExchange()
+        result = orders.cancel_hl_order("BTC", 123)
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["cancel_status"], "canceled")
+        self.assertEqual(result["oid"], 123)
