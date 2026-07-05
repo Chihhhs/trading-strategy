@@ -276,34 +276,39 @@ def check_entries(state, coins):
                 )
                 continue
 
-        state["positions"].append(
-            {
-                "coin": name,
-                "direction": sig["direction"],
-                "entry": entry,
-                "tp": target_tp,
-                "sl": sig["sl"],
-                "initial_risk": abs(entry - sig["sl"]) if entry is not None and sig.get("sl") is not None else None,
-                "sl_stage": 0 if exit_policy.get("name") == "trend_sl_only" else None,
-                "best_price": entry if exit_policy.get("name") == "trend_sl_only" else None,
-                "size": preview["size"] if config.MODE == "live" else round(size, 6),
-                "current_price": entry,
-                "pnl_pnl": 0,
-                "entry_time": datetime.now().isoformat(),
-                "sig": sig.get("reason", ""),
-                "exit_policy": exit_policy,
-                "entry_oid": ((order_meta or {}).get("order_summary") or {}).get("oid"),
-                "entry_status": (order_meta or {}).get("normalized_status"),
-                "entry_filled_size": (order_meta or {}).get("size"),
-                "order_oid": ((order_meta or {}).get("order_summary") or {}).get("oid"),
-                "order_status": ((order_meta or {}).get("order_summary") or {}).get("order_status"),
-                "tp_order": protection_meta.get("tp_order"),
-                "sl_order": protection_meta.get("sl_order"),
-                "exchange_position_state": None,
-                "position_source": "local_state",
-                "protection_status": "protected" if config.MODE == "live" else None,
-            }
-        )
+        position = {
+            "coin": name,
+            "direction": sig["direction"],
+            "entry": entry,
+            "tp": target_tp,
+            "sl": sig["sl"],
+            "initial_risk": abs(entry - sig["sl"]) if entry is not None and sig.get("sl") is not None else None,
+            "sl_stage": 0 if exit_policy.get("name") == "trend_sl_only" else None,
+            "best_price": entry if exit_policy.get("name") == "trend_sl_only" else None,
+            "size": preview["size"] if config.MODE == "live" else round(size, 6),
+            "current_price": entry,
+            "pnl_pnl": 0,
+            "entry_time": datetime.now().isoformat(),
+            "sig": sig.get("reason", ""),
+            "signal_reason": sig.get("reason", ""),
+            "signal_score": sig.get("score"),
+            "entry_reason": sig.get("reason", ""),
+            "btc_dir_at_entry": btc_dir,
+            "risk_pct": risk_pct,
+            "entry_order_type": config.STRATEGY["entry_order_type"],
+            "exit_policy": exit_policy,
+            "entry_oid": ((order_meta or {}).get("order_summary") or {}).get("oid"),
+            "entry_status": (order_meta or {}).get("normalized_status"),
+            "entry_filled_size": (order_meta or {}).get("size"),
+            "order_oid": ((order_meta or {}).get("order_summary") or {}).get("oid"),
+            "order_status": ((order_meta or {}).get("order_summary") or {}).get("order_status"),
+            "tp_order": protection_meta.get("tp_order"),
+            "sl_order": protection_meta.get("sl_order"),
+            "exchange_position_state": None,
+            "position_source": "local_state",
+            "protection_status": "protected" if config.MODE == "live" else None,
+        }
+        state["positions"].append(position)
         summary["positions_opened"] += 1
         if config.MODE == "live":
             record_trade_event(
@@ -312,6 +317,8 @@ def check_entries(state, coins):
                 entry_oid=((order_meta or {}).get("order_summary") or {}).get("oid"),
                 order_status=(order_meta or {}).get("normalized_status"),
                 verify_status=((order_meta or {}).get("verified_summary") or {}).get("verify_status"),
+                entry_reason=position.get("entry_reason"),
+                signal_score=position.get("signal_score"),
                 strategy_snapshot=build_strategy_snapshot(),
             )
             save_state(state)

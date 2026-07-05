@@ -10,8 +10,9 @@ if load_dotenv is not None:
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live")
+TRADE_HISTORY_DIR = os.path.join(PROJECT_ROOT, "data", "trade_history")
 API_LOG_PATH = os.path.join(STATE_DIR, "live_api_debug.log")
-TRADE_LOG_PATH = os.path.join(STATE_DIR, "live_trading_records.jsonl")
+TRADE_LOG_PATH = os.path.join(TRADE_HISTORY_DIR, "live_trading_records.jsonl")
 BINANCE_API = "https://api.binance.com"
 
 MODE = "paper"
@@ -34,6 +35,7 @@ CIRCUIT = {
 }
 
 os.makedirs(STATE_DIR, exist_ok=True)
+os.makedirs(TRADE_HISTORY_DIR, exist_ok=True)
 
 
 def get_env(name, default=""):

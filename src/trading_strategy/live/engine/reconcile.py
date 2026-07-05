@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from trading_strategy.core.exit_policy import build_exit_policy
+from trading_strategy.core.trade_history import apply_closed_trade
 
 from .. import config
 from ..account import get_hl_frontend_open_orders, get_hl_perp_user_state
@@ -218,11 +219,12 @@ def reconcile_exchange_state(state, perp_state=None, frontend_open_orders=None):
     pending_local_positions = [
         pos for pos in original_by_coin.values() if _is_pending_entry_order(pos, open_orders)
     ]
-    stale_positions = [
-        pos.get("coin")
+    stale_position_records = [
+        pos
         for pos in original_by_coin.values()
         if not _is_pending_entry_order(pos, open_orders)
     ]
+    stale_positions = [pos.get("coin") for pos in stale_position_records]
     reconciled_positions = synced_positions + pending_local_positions
     positions_by_coin = _position_by_coin(reconciled_positions)
     pending_positions_by_oid = {
@@ -281,6 +283,26 @@ def reconcile_exchange_state(state, perp_state=None, frontend_open_orders=None):
         managed_orders_count=len(managed_orders),
         orphan_orders_detected_count=len(orphan_orders),
     )
+    for stale_pos in stale_position_records:
+        exit_reason = stale_pos.get("pending_exit_reason") or "EXCHANGE_CLOSED"
+        trade = apply_closed_trade(
+            state,
+            stale_pos,
+            stale_pos.get("current_price") or stale_pos.get("entry"),
+            exit_reason,
+            update_balance=False,
+            exit_context={
+                "close_status": "exchange_closed",
+                "close_reason_source": "pending_exit" if stale_pos.get("pending_exit_reason") else "exchange_reconcile",
+            },
+        )
+        record_trade_event(
+            "position_closed_reconciled",
+            coin=stale_pos.get("coin"),
+            exit_reason=trade.get("exit_reason"),
+            pnl=trade.get("pnl"),
+            outcome=trade.get("outcome"),
+        )
     if adopted_positions or stale_positions:
         record_trade_event(
             "state_exchange_mismatch",
