@@ -49,8 +49,10 @@ class LivePositionsTest(unittest.TestCase):
         mock_record_trade_event,
     ):
         old_mode = live.config.MODE
+        old_failure_exit_enabled = live.config.STRATEGY["failure_exit_enabled"]
         live.config.set_mode("live")
         try:
+            live.config.STRATEGY["failure_exit_enabled"] = True
             mock_close_hl_position.return_value = {
                 "status": "ok",
                 "order_summary": {"order_status": "filled"},
@@ -84,5 +86,114 @@ class LivePositionsTest(unittest.TestCase):
                 )
             )
         finally:
+            live.config.STRATEGY["failure_exit_enabled"] = old_failure_exit_enabled
             live.config.STRATEGY["max_hold_days"] = old_max_hold_days
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.positions.record_trade_event")
+    @patch("trading_strategy.live.engine.positions.close_hl_position")
+    def test_update_positions_marks_live_atr_trail_pending(
+        self,
+        mock_close_hl_position,
+        _mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY["atr_trailing_enabled"]
+        live.config.set_mode("live")
+        try:
+            live.config.STRATEGY["atr_trailing_enabled"] = True
+            mock_close_hl_position.return_value = {
+                "status": "ok",
+                "order_summary": {"order_status": "filled"},
+                "verified_summary": {"verify_status": "filled"},
+            }
+            state = {
+                "_reconciled_at": "2026-07-05T10:00:00",
+                "positions": [
+                    {
+                        "coin": "BTC",
+                        "direction": "long",
+                        "entry": 100.0,
+                        "sl": 90.0,
+                        "current_price": 112.0,
+                        "initial_risk": 10.0,
+                        "best_price": 120.0,
+                        "size": 1.0,
+                        "entry_time": "2026-07-05T00:00:00",
+                        "entry_klines_len": 21,
+                        "exit_policy": {"name": "trend_sl_only"},
+                    }
+                ],
+                "history": [],
+                "stats": {"total_trades": 0, "wins": 0, "losses": 0, "total_pnl": 0.0, "max_win": 0.0, "max_loss": 0.0},
+            }
+            update_positions(
+                state,
+                {"BTC": 112.0},
+                {
+                    "BTC": (
+                        [{"close": 100.0, "high": 101.0, "low": 99.0} for _ in range(20)]
+                        + [{"close": 112.0, "high": 113.0, "low": 111.0}]
+                    )
+                },
+            )
+            self.assertEqual(len(state["positions"]), 1)
+            self.assertTrue(state["positions"][0]["close_pending"])
+            self.assertEqual(state["positions"][0]["pending_exit_reason"], "ATR_TRAIL")
+            self.assertEqual(state["positions"][0]["bars_since_entry"], 0)
+        finally:
+            live.config.STRATEGY["atr_trailing_enabled"] = old_enabled
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.positions.record_trade_event")
+    @patch("trading_strategy.live.engine.positions.close_hl_position")
+    def test_update_positions_keeps_reversal_priority_over_atr_trail(
+        self,
+        mock_close_hl_position,
+        _mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY["atr_trailing_enabled"]
+        live.config.set_mode("live")
+        try:
+            live.config.STRATEGY["atr_trailing_enabled"] = True
+            mock_close_hl_position.return_value = {
+                "status": "ok",
+                "order_summary": {"order_status": "filled"},
+                "verified_summary": {"verify_status": "filled"},
+            }
+            state = {
+                "_reconciled_at": "2026-07-05T10:00:00",
+                "positions": [
+                    {
+                        "coin": "BTC",
+                        "direction": "long",
+                        "entry": 100.0,
+                        "sl": 90.0,
+                        "current_price": 112.0,
+                        "initial_risk": 10.0,
+                        "best_price": 120.0,
+                        "size": 1.0,
+                        "entry_time": "2026-07-05T00:00:00",
+                        "entry_klines_len": 21,
+                        "exit_policy": {"name": "trend_sl_only"},
+                    }
+                ],
+                "history": [],
+                "stats": {"total_trades": 0, "wins": 0, "losses": 0, "total_pnl": 0.0, "max_win": 0.0, "max_loss": 0.0},
+            }
+            with patch("trading_strategy.live.engine.positions.check_trend_reversal", return_value=True):
+                update_positions(
+                    state,
+                    {"BTC": 112.0},
+                    {
+                        "BTC": (
+                            [{"close": 100.0, "high": 101.0, "low": 99.0} for _ in range(20)]
+                            + [{"close": 112.0, "high": 113.0, "low": 111.0}]
+                        )
+                    },
+                )
+            self.assertEqual(state["positions"][0]["pending_exit_reason"], "REVERSAL")
+        finally:
+            live.config.STRATEGY["atr_trailing_enabled"] = old_enabled
             live.config.set_mode(old_mode)

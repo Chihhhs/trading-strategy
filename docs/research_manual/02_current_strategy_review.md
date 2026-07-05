@@ -54,16 +54,27 @@ The older 50-coin backtest notes in [docs/backtest_results.md](/D:/code/trading-
 - Implementation implication: Keep the idea, but align backtest and live exit semantics.
 - Decision for this repo: Keep.
 
-### Short-Term Failure Exit
+### ATR Trailing Exit
 
-- Claim: The current live implementation has protection and reversal exits, but still lacks a dedicated short-term failed-breakout / no-follow-through exit.
-- Evidence level: B
-- Market applicability: Crypto trend live trading.
-- Time horizon: Early post-entry bars.
-- Known failure modes: Giving back edge in noisy pullbacks, capital getting stuck in weak trades.
+- Claim: ATR-based trailing is a more defensible next step for trend-trade management than structure-based failed-breakout rules.
+- Evidence level: A/B
+- Market applicability: Liquid crypto trend trading.
+- Time horizon: Post-entry trend management after favorable movement.
+- Known failure modes: ATR lag, overly tight multipliers, churn if volatility spikes.
 - Cost sensitivity: Moderate.
-- Implementation implication: Add a trend-specific short-term failure exit as the next live-trading improvement.
-- Decision for this repo: Validate and implement.
+- Implementation implication: Keep as the primary short-term exit research line and validate against the BTC-only baseline first.
+- Decision for this repo: Keep and validate.
+
+### Breakout Failure Exit
+
+- Claim: The current breakout-failure experiment is not a defensible primary exit path.
+- Evidence level: C
+- Market applicability: Experimental only.
+- Time horizon: Early post-entry bars.
+- Known failure modes: Overreacting to normal pullbacks, lower win rate, more churn, worse drawdown.
+- Cost sensitivity: Moderate.
+- Implementation implication: Keep code traces only as a disabled experiment; do not optimize further unless new evidence appears.
+- Decision for this repo: Downgrade / disable.
 
 ### Leverage / Sizing Semantics
 

@@ -48,6 +48,29 @@ def get_btc_direction_from_klines(klines, lookback_days=7, threshold_pct=3):
     return "neutral"
 
 
+def get_trend_structure_context(klines):
+    if not klines:
+        return None
+    closes = [d["close"] for d in klines]
+    highs = [d["high"] for d in klines]
+    lows = [d["low"] for d in klines]
+    i = len(klines) - 1
+    current = closes[i]
+    ema20 = get_ema_value(closes, 20, current)
+    ema50 = get_ema_value(closes, 50, current)
+    context = {
+        "current": current,
+        "ema20": ema20,
+        "ema50": ema50,
+        "high_20_prev": None,
+        "low_20_prev": None,
+    }
+    if i >= 20:
+        context["high_20_prev"] = max(highs[i - 20 : i])
+        context["low_20_prev"] = min(lows[i - 20 : i])
+    return context
+
+
 def generate_trend_signal(
     klines,
     *,
@@ -64,15 +87,16 @@ def generate_trend_signal(
     lows = [d["low"] for d in klines]
     vols = [d.get("volume", 0) for d in klines]
     i = len(klines) - 1
-    current = closes[i]
+    structure = get_trend_structure_context(klines)
+    current = structure["current"]
 
     adx_val = get_adx_value(highs, lows, closes, default=20)
     atr_val = get_atr_value(highs, lows, closes, default=current * 0.03)
     if not atr_val or atr_val == 0:
         atr_val = current * 0.03
 
-    ema20 = get_ema_value(closes, 20, current)
-    ema50 = get_ema_value(closes, 50, current)
+    ema20 = structure["ema20"]
+    ema50 = structure["ema50"]
 
     if adx_val < adx_threshold:
         return None
@@ -107,8 +131,8 @@ def generate_trend_signal(
             elif v_ratio < 0.6:
                 score -= 1
 
-        high_20_prev = max(highs[i - 20 : i])
-        low_20_prev = min(lows[i - 20 : i])
+        high_20_prev = structure["high_20_prev"]
+        low_20_prev = structure["low_20_prev"]
         if current > high_20_prev:
             score += 2
         elif current < low_20_prev:
@@ -127,6 +151,12 @@ def generate_trend_signal(
             "sl": current - atr_val * sl_mult,
             "reason": "TREND_BUY",
             "adx": adx_val,
+            "atr": atr_val,
+            "ema20": ema20,
+            "ema50": ema50,
+            "high_20_prev": structure["high_20_prev"],
+            "low_20_prev": structure["low_20_prev"],
+            "breakout_level": structure["high_20_prev"],
         }
     if score <= -min_score:
         return {
@@ -136,6 +166,11 @@ def generate_trend_signal(
             "sl": current + atr_val * sl_mult,
             "reason": "TREND_SELL",
             "adx": adx_val,
+            "atr": atr_val,
+            "ema20": ema20,
+            "ema50": ema50,
+            "high_20_prev": structure["high_20_prev"],
+            "low_20_prev": structure["low_20_prev"],
+            "breakout_level": structure["low_20_prev"],
         }
     return None
-

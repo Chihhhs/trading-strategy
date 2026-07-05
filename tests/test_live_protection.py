@@ -74,6 +74,51 @@ class LiveProtectionTest(unittest.TestCase):
     @patch("trading_strategy.live.engine.protection.record_trade_event")
     @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
     @patch("trading_strategy.live.engine.protection.cancel_hl_order")
+    def test_ensure_position_protection_replaces_trend_sl_at_one_r(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        mock_cancel_hl_order.return_value = {"status": "ok", "message": "canceled", "oid": 2, "coin": "ETH"}
+        mock_place_hl_sl_order.return_value = {
+            "ok": True,
+            "message": None,
+            "tp_order": None,
+            "sl_order": {"oid": 3, "status": "ok", "trigger_px": 100.0},
+        }
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 100.0,
+                    "size": 1.0,
+                    "sl": 90.0,
+                    "current_price": 110.0,
+                    "sig": "TREND_BUY",
+                    "initial_risk": 10.0,
+                    "sl_stage": 0,
+                    "best_price": 100.0,
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "90.0"}
+            ],
+            "managed_orders": [],
+        }
+        summary = ensure_position_protection(state)
+        self.assertEqual(summary["sl_replaced_count"], 1)
+        self.assertEqual(state["positions"][0]["sl"], 100.0)
+        self.assertEqual(state["positions"][0]["sl_stage"], 1)
+        event_names = [call.args[0] for call in mock_record_trade_event.call_args_list]
+        self.assertIn("sl_replace_attempted", event_names)
+        self.assertIn("sl_replaced", event_names)
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.protection.cancel_hl_order")
     def test_ensure_position_protection_does_not_replace_sl_when_cancel_fails(
         self,
         mock_cancel_hl_order,
@@ -137,6 +182,30 @@ class LiveProtectionTest(unittest.TestCase):
         self.assertEqual(target["stage"], 2)
         self.assertEqual(target["sl"], 105.0)
 
+    def test_compute_trend_stop_target_prefers_atr_trail_when_more_protective(self):
+        old_enabled = helpers.config.STRATEGY["atr_trailing_enabled"]
+        helpers.config.STRATEGY["atr_trailing_enabled"] = True
+        try:
+            pos = {
+                "coin": "ETH",
+                "direction": "long",
+                "entry": 100.0,
+                "sl": 105.0,
+                "current_price": 116.0,
+                "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                "initial_risk": 10.0,
+                "sl_stage": 2,
+                "best_price": 120.0,
+            }
+            klines = [{"close": 100.0, "high": 101.0, "low": 99.0} for _ in range(20)] + [
+                {"close": 116.0, "high": 118.0, "low": 114.0}
+            ]
+            target = helpers.compute_trend_stop_target(pos, klines)
+            self.assertEqual(target["source"], "atr_trail")
+            self.assertGreater(target["sl"], 105.0)
+        finally:
+            helpers.config.STRATEGY["atr_trailing_enabled"] = old_enabled
+
     @patch("trading_strategy.live.engine.protection.record_trade_event")
     @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
     @patch("trading_strategy.live.engine.protection.cancel_hl_order")
@@ -144,7 +213,7 @@ class LiveProtectionTest(unittest.TestCase):
         self,
         mock_cancel_hl_order,
         mock_place_hl_sl_order,
-        _mock_record_trade_event,
+        mock_record_trade_event,
     ):
         state = {
             "positions": [
@@ -172,6 +241,144 @@ class LiveProtectionTest(unittest.TestCase):
         self.assertEqual(summary["unprotected_positions_count"], 0)
         self.assertEqual(mock_cancel_hl_order.call_count, 0)
         self.assertEqual(mock_place_hl_sl_order.call_count, 0)
+        skipped_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "sl_replace_skipped")
+        self.assertEqual(skipped_call.kwargs["reason"], "stage_not_advanced")
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.protection.cancel_hl_order")
+    def test_ensure_position_protection_does_not_replace_when_reconciled_trigger_matches_same_stage(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 1755.5,
+                    "size": 0.0454,
+                    "sl": 1674.4214285714284,
+                    "current_price": 1794.95,
+                    "sig": "TREND_BUY",
+                    "initial_risk": 81.07857142857165,
+                    "sl_stage": 0,
+                    "best_price": 1794.95,
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "triggerPx": "1674.4"}
+            ],
+            "managed_orders": [],
+        }
+        summary = ensure_position_protection(state)
+        self.assertEqual(summary["sl_replaced_count"], 0)
+        self.assertEqual(mock_cancel_hl_order.call_count, 0)
+        self.assertEqual(mock_place_hl_sl_order.call_count, 0)
+        skipped_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "sl_replace_skipped")
+        self.assertEqual(skipped_call.kwargs["reason"], "stage_not_advanced")
+
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.protection.cancel_hl_order")
+    def test_ensure_position_protection_replaces_sl_from_atr_trail(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        _mock_record_trade_event,
+    ):
+        old_enabled = helpers.config.STRATEGY["atr_trailing_enabled"]
+        helpers.config.STRATEGY["atr_trailing_enabled"] = True
+        try:
+            mock_cancel_hl_order.return_value = {"status": "ok", "message": "canceled", "oid": 2, "coin": "ETH"}
+            mock_place_hl_sl_order.return_value = {
+                "ok": True,
+                "message": None,
+                "tp_order": None,
+                "sl_order": {"oid": 3, "status": "ok", "trigger_px": 112.0},
+            }
+            state = {
+                "positions": [
+                    {
+                        "coin": "ETH",
+                        "direction": "long",
+                        "entry": 100.0,
+                        "size": 1.0,
+                        "sl": 105.0,
+                        "current_price": 116.0,
+                        "sig": "TREND_BUY",
+                        "initial_risk": 10.0,
+                        "sl_stage": 2,
+                        "best_price": 120.0,
+                        "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                    }
+                ],
+                "_data_cache": {
+                    "ETH": [{"close": 100.0, "high": 101.0, "low": 99.0} for _ in range(20)] + [
+                        {"close": 116.0, "high": 118.0, "low": 114.0}
+                    ]
+                },
+                "_frontend_open_orders": [
+                    {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "105.0"}
+                ],
+                "managed_orders": [],
+            }
+            summary = ensure_position_protection(state)
+            self.assertEqual(summary["sl_replaced_count"], 1)
+            self.assertEqual(state["positions"][0]["sl_order"]["oid"], 3)
+        finally:
+            helpers.config.STRATEGY["atr_trailing_enabled"] = old_enabled
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.protection.cancel_hl_order")
+    def test_ensure_position_protection_does_not_replace_atr_trail_when_normalized_trigger_unchanged(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        old_enabled = helpers.config.STRATEGY["atr_trailing_enabled"]
+        helpers.config.STRATEGY["atr_trailing_enabled"] = True
+        try:
+            state = {
+                "positions": [
+                    {
+                        "coin": "ETH",
+                        "direction": "long",
+                        "entry": 100.0,
+                        "size": 1.0,
+                        "sl": 105.0,
+                        "current_price": 116.0,
+                        "sig": "TREND_BUY",
+                        "initial_risk": 10.0,
+                        "sl_stage": 2,
+                        "best_price": 120.0,
+                        "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                    }
+                ],
+                "_data_cache": {
+                    "ETH": [{"close": 100.0, "high": 101.0, "low": 99.0} for _ in range(20)] + [
+                        {"close": 116.0, "high": 118.0, "low": 114.0}
+                    ]
+                },
+                "_frontend_open_orders": [
+                    {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "113.7", "tick_size": 0.1}
+                ],
+                "managed_orders": [],
+            }
+            summary = ensure_position_protection(state)
+            self.assertEqual(summary["sl_replaced_count"], 0)
+            self.assertEqual(mock_cancel_hl_order.call_count, 0)
+            self.assertEqual(mock_place_hl_sl_order.call_count, 0)
+            skipped_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "sl_replace_skipped")
+            self.assertEqual(skipped_call.kwargs["reason"], "normalized_trigger_unchanged")
+        finally:
+            helpers.config.STRATEGY["atr_trailing_enabled"] = old_enabled
 
     @patch("trading_strategy.live.engine.protection.record_trade_event")
     @patch("trading_strategy.live.engine.protection.place_hl_tpsl_orders")

@@ -248,3 +248,4 @@ MIT
 - [docs/research_manual/01_quant_research_map.md](/D:/code/trading-strategy/docs/research_manual/01_quant_research_map.md)
 - [docs/research_manual/02_current_strategy_review.md](/D:/code/trading-strategy/docs/research_manual/02_current_strategy_review.md)
 - [docs/research_manual/03_research_backlog.md](/D:/code/trading-strategy/docs/research_manual/03_research_backlog.md)
+- [docs/exit_rules.md](/D:/code/trading-strategy/docs/exit_rules.md)

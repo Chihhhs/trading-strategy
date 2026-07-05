@@ -17,6 +17,12 @@ class BacktestConfig:
     risk_pct: float = DEFAULT_RISK_PCT
     btc_filter_enabled: bool = True
     min_bars: int = 50
+    atr_trailing_enabled: bool = False
+    atr_activation_r: float = 1.5
+    atr_trailing_mult: float = 2.0
+    failure_exit_enabled: bool = False
+    failure_exit_bars: int = 3
+    failure_exit_mode: str = "breakout_failure"
 
 
 @dataclass(frozen=True)

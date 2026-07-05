@@ -3,6 +3,7 @@ from tests.live_test_support import (
     choose_limit_price,
     cli,
     config,
+    helpers,
     live,
     market,
     orders,
@@ -11,9 +12,60 @@ from tests.live_test_support import (
     tempfile,
     unittest,
 )
+from trading_strategy.core.exit_policy import build_exit_policy
 
 
 class LiveHelpersTest(unittest.TestCase):
+    def test_check_atr_trailing_exit_triggers_after_activation(self):
+        old_mode = config.MODE
+        config.set_mode("live")
+        try:
+            old_enabled = config.STRATEGY["atr_trailing_enabled"]
+            config.STRATEGY["atr_trailing_enabled"] = True
+            pos = {
+                "direction": "long",
+                "entry": 100.0,
+                "sl": 90.0,
+                "current_price": 112.0,
+                "initial_risk": 10.0,
+                "best_price": 120.0,
+                "exit_policy": build_exit_policy(signal={"reason": "TREND_BUY"}),
+            }
+            klines = [{"close": 100.0, "high": 101.0, "low": 99.0} for _ in range(20)] + [
+                {"close": 112.0, "high": 113.0, "low": 111.0}
+            ]
+            result = helpers.check_atr_trailing_exit(pos, klines)
+            self.assertTrue(result["triggered"])
+            self.assertAlmostEqual(result["target_sl"], 114.42857142857143)
+        finally:
+            config.STRATEGY["atr_trailing_enabled"] = old_enabled
+            config.set_mode(old_mode)
+
+    def test_check_atr_trailing_exit_requires_activation(self):
+        old_mode = config.MODE
+        config.set_mode("live")
+        try:
+            old_enabled = config.STRATEGY["atr_trailing_enabled"]
+            config.STRATEGY["atr_trailing_enabled"] = True
+            pos = {
+                "direction": "long",
+                "entry": 100.0,
+                "sl": 90.0,
+                "current_price": 108.0,
+                "initial_risk": 10.0,
+                "best_price": 108.0,
+                "exit_policy": build_exit_policy(signal={"reason": "TREND_BUY"}),
+            }
+            klines = [{"close": 100.0, "high": 101.0, "low": 99.0} for _ in range(20)] + [
+                {"close": 108.0, "high": 109.0, "low": 107.0}
+            ]
+            result = helpers.check_atr_trailing_exit(pos, klines)
+            self.assertFalse(result["triggered"])
+            self.assertFalse(result["active"])
+        finally:
+            config.STRATEGY["atr_trailing_enabled"] = old_enabled
+            config.set_mode(old_mode)
+
     def test_summarize_hl_order_result_filled(self):
         result = {
             "status": "ok",

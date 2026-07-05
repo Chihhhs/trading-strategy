@@ -5,7 +5,7 @@ from trading_strategy.core.trade_history import apply_closed_trade
 from .. import config
 from ..io import record_trade_event
 from ..orders import close_hl_position
-from .helpers import check_trend_reversal
+from .helpers import check_atr_trailing_exit, check_trend_reversal
 from .reconcile import sync_state_with_exchange_positions
 
 
@@ -25,12 +25,23 @@ def update_positions(state, prices, data_cache):
                     if pos["direction"] == "long"
                     else (pos["entry"] - prices[pos["coin"]]) * pos["size"]
                 )
-            should_close = (
+            klines = data_cache.get(pos["coin"])
+            if pos.get("entry_klines_len") and klines:
+                pos["bars_since_entry"] = max(len(klines) - int(pos.get("entry_klines_len") or 0), 0)
+            atr_trail_result = check_atr_trailing_exit(pos, klines) if klines else {"triggered": False}
+            reversal_close = (
                 check_trend_reversal(pos, data_cache.get(pos["coin"]))
-                if pos["coin"] in data_cache
+                if klines
                 else False
             )
             exit_reason = None
+            should_close = False
+            if reversal_close:
+                should_close = True
+                exit_reason = "REVERSAL"
+            elif atr_trail_result.get("triggered"):
+                should_close = True
+                exit_reason = "ATR_TRAIL"
             if not should_close:
                 try:
                     should_close = datetime.now() - datetime.fromisoformat(
@@ -40,8 +51,6 @@ def update_positions(state, prices, data_cache):
                         exit_reason = "TIME"
                 except Exception:
                     should_close = False
-            elif should_close:
-                exit_reason = "REVERSAL"
             if should_close:
                 exit_reason = exit_reason or "REVERSAL"
                 result = close_hl_position(pos, exit_reason)
@@ -55,6 +64,7 @@ def update_positions(state, prices, data_cache):
                         "position_close_submitted",
                         coin=pos["coin"],
                         exit_reason=exit_reason,
+                        bars_since_entry=pos.get("bars_since_entry"),
                         order_status=((result.get("order_summary") or {}).get("order_status")),
                         verify_status=((result.get("verified_summary") or {}).get("verify_status")),
                     )

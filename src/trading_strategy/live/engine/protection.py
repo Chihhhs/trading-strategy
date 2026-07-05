@@ -1,11 +1,12 @@
 from datetime import datetime
+from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR
 
 from trading_strategy.core.exit_policy import build_exit_policy
 
 from .. import config
 from ..io import record_trade_event
 from ..orders import cancel_hl_order, place_hl_sl_order, place_hl_tpsl_orders
-from .helpers import _safe_float, compute_dynamic_sl_target, ensure_position_targets
+from .helpers import _safe_float, compute_trend_stop_target, ensure_position_targets
 from .reconcile import extract_open_order_map, match_existing_protection_order
 
 
@@ -73,13 +74,73 @@ def _extract_order_trigger_px(order):
     return _safe_float((order or {}).get("trigger_px") or (order or {}).get("triggerPx"), default=None)
 
 
-def should_replace_sl_order(pos, current_order, desired_sl):
-    current_trigger = _extract_order_trigger_px(current_order)
-    if current_trigger is None or desired_sl is None:
+def _infer_trigger_side(direction):
+    return "sell" if direction == "long" else "buy"
+
+
+def _normalize_trigger_px_for_order(pos, order, trigger_px):
+    trigger_px = _safe_float(trigger_px, default=None)
+    tick_size = _safe_float((order or {}).get("tick_size"), default=None)
+    if trigger_px is None or tick_size is None or tick_size <= 0:
+        return trigger_px
+    rounding = ROUND_CEILING if _infer_trigger_side(pos.get("direction")) == "buy" else ROUND_FLOOR
+    normalized = (
+        Decimal(str(trigger_px)) / Decimal(str(tick_size))
+    ).to_integral_value(rounding=rounding) * Decimal(str(tick_size))
+    return float(normalized.normalize())
+
+
+def _is_more_protective_trigger(direction, desired_trigger, current_trigger):
+    if desired_trigger is None or current_trigger is None:
         return False
-    if pos.get("direction") == "long":
-        return desired_sl > current_trigger
-    return desired_sl < current_trigger
+    if direction == "long":
+        return desired_trigger > current_trigger
+    return desired_trigger < current_trigger
+
+
+def _is_same_trigger(desired_trigger, current_trigger):
+    if desired_trigger is None or current_trigger is None:
+        return False
+    return abs(desired_trigger - current_trigger) <= 1e-9
+
+
+def evaluate_sl_replacement(pos, current_order, desired_sl, stop_target=None):
+    desired_sl = _safe_float(desired_sl, default=None)
+    current_trigger = _extract_order_trigger_px(current_order)
+    source = (stop_target or {}).get("source")
+    dynamic_target = (stop_target or {}).get("dynamic_target") or {}
+    current_stage = int((pos or {}).get("sl_stage") or 0)
+    desired_stage = int(dynamic_target.get("stage") or current_stage)
+    normalized_trigger = _normalize_trigger_px_for_order(pos, current_order, desired_sl)
+
+    decision = {
+        "should_replace": False,
+        "reason": None,
+        "source": source,
+        "desired_sl": desired_sl,
+        "normalized_trigger_px": normalized_trigger,
+        "current_trigger_px": current_trigger,
+        "current_stage": current_stage,
+        "desired_stage": desired_stage,
+    }
+
+    if desired_sl is None or current_trigger is None:
+        return decision
+
+    if source == "dynamic_stage" and desired_stage <= current_stage:
+        decision["reason"] = "stage_not_advanced"
+        return decision
+
+    if _is_same_trigger(normalized_trigger, current_trigger):
+        decision["reason"] = "normalized_trigger_unchanged"
+        return decision
+
+    if not _is_more_protective_trigger(pos.get("direction"), normalized_trigger, current_trigger):
+        decision["reason"] = "not_more_protective_after_normalization"
+        return decision
+
+    decision["should_replace"] = True
+    return decision
 
 
 def replace_sl_order(pos, desired_sl):
@@ -165,19 +226,34 @@ def ensure_position_protection(state):
         pos["tp_order"] = tp_open if tp_open else pos.get("tp_order")
         pos["sl_order"] = sl_open if sl_open else pos.get("sl_order")
         tp, sl = ensure_position_targets(pos, state.setdefault("_data_cache", {}))
-        dynamic_target = compute_dynamic_sl_target(pos)
-        if dynamic_target and dynamic_target.get("sl") is not None:
-            sl = dynamic_target.get("sl")
-        if exit_policy.get("name") == "trend_sl_only" and sl_open and should_replace_sl_order(pos, sl_open, sl):
-            replaced = replace_sl_order(pos, sl)
-            if replaced.get("ok"):
-                summary["sl_replaced_count"] += 1
-                pos["sl_stage"] = dynamic_target.get("stage") if dynamic_target else pos.get("sl_stage")
-                pos["protection_status"] = "protected"
+        stop_target = compute_trend_stop_target(pos, state.setdefault("_data_cache", {}).get(pos.get("coin")))
+        dynamic_target = stop_target.get("dynamic_target") if isinstance(stop_target, dict) else None
+        if stop_target and stop_target.get("sl") is not None:
+            sl = stop_target.get("sl")
+        if exit_policy.get("name") == "trend_sl_only" and sl_open:
+            replacement_decision = evaluate_sl_replacement(pos, sl_open, sl, stop_target)
+            if replacement_decision.get("should_replace"):
+                replaced = replace_sl_order(pos, sl)
+                if replaced.get("ok"):
+                    summary["sl_replaced_count"] += 1
+                    pos["sl_stage"] = dynamic_target.get("stage") if dynamic_target else pos.get("sl_stage")
+                    pos["protection_status"] = "protected"
+                    continue
+                pos["protection_status"] = "update_failed"
+                summary["unprotected_positions_count"] += 1
                 continue
-            pos["protection_status"] = "update_failed"
-            summary["unprotected_positions_count"] += 1
-            continue
+            if replacement_decision.get("reason") and replacement_decision.get("source") in ("dynamic_stage", "atr_trail"):
+                record_trade_event(
+                    "sl_replace_skipped",
+                    coin=pos.get("coin"),
+                    source=replacement_decision.get("source"),
+                    current_trigger_px=replacement_decision.get("current_trigger_px"),
+                    desired_sl=replacement_decision.get("desired_sl"),
+                    normalized_trigger_px=replacement_decision.get("normalized_trigger_px"),
+                    current_stage=replacement_decision.get("current_stage"),
+                    desired_stage=replacement_decision.get("desired_stage"),
+                    reason=replacement_decision.get("reason"),
+                )
         is_protected = bool(sl_open) and (not exit_policy.get("requires_tp") or bool(tp_open))
         if is_protected:
             pos["protection_status"] = "protected"

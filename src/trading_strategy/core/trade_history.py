@@ -54,6 +54,7 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         "entry_time": entry_time,
         "exit_time": resolved_exit_time,
         "hold_minutes": hold_minutes,
+        "hold_bars": (pos or {}).get("bars_since_entry"),
         "entry_reason": (pos or {}).get("entry_reason") or (pos or {}).get("signal_reason") or (pos or {}).get("sig") or "",
         "signal_reason": (pos or {}).get("signal_reason") or (pos or {}).get("sig") or "",
         "signal_score": (pos or {}).get("signal_score"),

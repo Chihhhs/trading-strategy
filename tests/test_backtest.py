@@ -16,6 +16,7 @@ from trading_strategy.backtest import cli, load_historical_data
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
+from trading_strategy.core.trend_trade import compute_atr_trailing_result
 
 
 def build_bar(close_price, index):
@@ -40,6 +41,65 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_compute_atr_trailing_result_triggers_for_long_after_activation(self):
+        position = {
+            "direction": "long",
+            "entry": 100.0,
+            "sl": 90.0,
+            "current_price": 112.0,
+            "initial_risk": 10.0,
+            "best_price": 120.0,
+            "exit_policy": {"name": "trend_sl_only"},
+        }
+        result = compute_atr_trailing_result(
+            position,
+            current_atr=4.0,
+            enabled=True,
+            atr_activation_r=1.5,
+            atr_trailing_mult=2.0,
+        )
+        self.assertTrue(result["triggered"])
+        self.assertEqual(result["target_sl"], 112.0)
+
+    def test_compute_atr_trailing_result_does_not_activate_before_threshold(self):
+        position = {
+            "direction": "long",
+            "entry": 100.0,
+            "sl": 90.0,
+            "current_price": 108.0,
+            "initial_risk": 10.0,
+            "best_price": 108.0,
+            "exit_policy": {"name": "trend_sl_only"},
+        }
+        result = compute_atr_trailing_result(
+            position,
+            current_atr=4.0,
+            enabled=True,
+            atr_activation_r=1.5,
+            atr_trailing_mult=2.0,
+        )
+        self.assertFalse(result["triggered"])
+        self.assertFalse(result["active"])
+
+    def test_compute_atr_trailing_result_only_updates_more_protective_stop(self):
+        position = {
+            "direction": "long",
+            "entry": 100.0,
+            "sl": 113.0,
+            "current_price": 114.0,
+            "initial_risk": 10.0,
+            "best_price": 120.0,
+            "exit_policy": {"name": "trend_sl_only"},
+        }
+        result = compute_atr_trailing_result(
+            position,
+            current_atr=4.0,
+            enabled=True,
+            atr_activation_r=1.5,
+            atr_trailing_mult=2.0,
+        )
+        self.assertFalse(result["should_update"])
+
     def test_load_historical_data_respects_max_days(self):
         payload = {
             "BTC": [build_bar(100 + index, index) for index in range(5)],
@@ -97,6 +157,47 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(result.portfolio["trades"], 1)
         self.assertEqual(result.trades[0]["exit_reason"], "SL")
         self.assertLess(result.trades[0]["pnl"], 0)
+
+    def test_engine_closes_long_on_atr_trail_exit(self):
+        prices = [100] * 20 + [101, 120, 108, 107]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal(
+                "long",
+                tp=140,
+                sl=90,
+                score=5,
+                reason="TREND_BUY",
+                raw={"atr": 4.0, "breakout_level": 100.0, "ema20": 100.5, "ema50": 99.5},
+            )
+
+        config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1, atr_trailing_enabled=True)
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.portfolio["trades"], 1)
+        self.assertEqual(result.trades[0]["exit_reason"], "ATR_TRAIL")
+
+    def test_engine_tp_has_priority_over_atr_trail(self):
+        prices = [100] * 20 + [101, 120, 121]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal(
+                "long",
+                tp=110,
+                sl=90,
+                score=5,
+                reason="TREND_BUY",
+                raw={"atr": 4.0, "breakout_level": 100.0, "ema20": 100.5, "ema50": 99.5},
+            )
+
+        config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1, atr_trailing_enabled=True)
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.trades[0]["exit_reason"], "TP")
 
     def test_engine_skips_zero_size_position(self):
         data_map = {"BTC": [build_bar(100 + index, index) for index in range(4)]}
@@ -181,6 +282,9 @@ class BacktestModuleTest(unittest.TestCase):
             os.remove(path)
         rendered = output.getvalue()
         self.assertIn("Portfolio:", rendered)
+        self.assertIn("Exit reasons:", rendered)
+        self.assertIn("avg_hold_bars=", rendered)
+        self.assertIn("score=", rendered)
         self.assertIn("BTC:", rendered)
         self.assertEqual(result.coin_results[0].coin, "BTC")
 
@@ -197,8 +301,9 @@ class BacktestModuleTest(unittest.TestCase):
             leverages=(2.0, 3.0),
             risk_pcts=(0.03, 0.05),
             btc_filter_modes=(True, False),
+            atr_trailing_modes=(False, True),
         )
-        self.assertEqual(len(rows), 8)
+        self.assertEqual(len(rows), 16)
         self.assertGreaterEqual(rows[0]["score"], rows[-1]["score"])
 
     def test_cli_optimize_prints_ranked_results(self):
@@ -236,7 +341,9 @@ class BacktestModuleTest(unittest.TestCase):
             os.remove(path)
         rendered = output.getvalue()
         self.assertIn("1. strategy=", rendered)
-        self.assertEqual(len(rows), 4)
+        self.assertIn("atr_trailing=", rendered)
+        self.assertIn("atr_trail_exits=", rendered)
+        self.assertEqual(len(rows), 8)
 
 
 if __name__ == "__main__":

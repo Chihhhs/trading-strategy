@@ -26,6 +26,12 @@ STRATEGY = {
     "tp_mult": 1.5,
     "sl_mult": 1.0,
     "entry_order_type": "ioc",
+    "atr_trailing_enabled": False,
+    "atr_activation_r": 1.5,
+    "atr_trailing_mult": 2.0,
+    "failure_exit_enabled": False,
+    "failure_exit_bars": 3,
+    "failure_exit_mode": "breakout_failure",
 }
 
 CIRCUIT = {

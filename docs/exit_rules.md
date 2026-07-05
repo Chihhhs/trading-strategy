@@ -66,6 +66,32 @@ Trend positions should use staged stop management based on `R`, where:
 - Trigger condition: price reaches at least `+1.5R` in the favorable direction.
 - Action: move stop-loss to `+0.5R`.
 
+## ATR Trailing Extension For Trend Positions
+
+- ATR trailing is the current research direction for short-term trend management.
+- It is intended to replace the failed breakout-failure experiment as the primary early-exit path.
+- This rule only applies to `trend_sl_only`.
+
+### Activation
+
+- Store `entry_atr` at entry.
+- Keep the staged `R`-based stop logic before activation.
+- Activate ATR trailing only after favorable progress reaches at least `+1.5R`.
+
+### Trailing Rule
+
+- Use the latest ATR estimate from the current market window.
+- Long trailing stop: `best_price - current_atr * atr_trailing_mult`
+- Short trailing stop: `best_price + current_atr * atr_trailing_mult`
+- The default first-pass setting is `atr_trailing_mult = 2.0`.
+
+### Constraints
+
+- ATR trailing may only tighten risk.
+- If the ATR-derived stop is not more protective than the current stop, no update should occur.
+- Live protection should prefer replacing the exchange-side stop-loss order instead of market-closing immediately.
+- If price is already through the intended trailing stop, the runtime may submit a defensive close with reason `ATR_TRAIL`.
+
 ## Stop Movement Constraints
 
 - Stop-loss may only move toward lower risk.
@@ -112,4 +138,8 @@ If the strategy needs more aggressive profit capture later, prefer one of these 
 - Additional staged stop upgrades after `+2R`.
 - Volatility-sensitive trailing logic that adapts to ATR expansion and contraction.
 
-These are not part of the current documented rules yet.
+## Failed Experiment: Breakout Failure Exit
+
+- `BREAKOUT_FAILURE` remains in the repo as a disabled experiment.
+- The tested `--enable-failure-exit` path degraded win rate, total return, and drawdown in current local trend backtests.
+- It should not be treated as the recommended trend-management path unless future independent research proves otherwise.

@@ -1,5 +1,12 @@
 from trading_strategy.core.exit_policy import build_exit_policy
-from trading_strategy.core.signals import generate_trend_signal
+from trading_strategy.core.signals import generate_trend_signal, get_trend_structure_context
+from trading_strategy.core.trend_trade import (
+    compute_atr_trailing_result,
+    compute_dynamic_sl_target as compute_shared_dynamic_sl_target,
+    initialize_trend_position_state,
+    resolve_trend_stop_target,
+)
+from trading_strategy.core.trend_failure import evaluate_trend_failure_exit
 
 from .. import config
 from ..market import get_klines
@@ -114,75 +121,61 @@ def ensure_position_targets(pos, data_cache=None):
     return pos.get("tp"), sl
 
 
-def _infer_sl_stage(pos):
-    entry = _safe_float(pos.get("entry"), default=None)
-    sl = _safe_float(pos.get("sl"), default=None)
-    initial_risk = _safe_float(pos.get("initial_risk"), default=None)
-    if entry is None or sl is None or initial_risk is None or initial_risk <= 0:
-        return 0
-    half_r_target = entry + initial_risk * 0.5 if pos.get("direction") == "long" else entry - initial_risk * 0.5
-    if pos.get("direction") == "long":
-        if sl >= half_r_target:
-            return 2
-        if sl >= entry:
-            return 1
-        return 0
-    if sl <= half_r_target:
-        return 2
-    if sl <= entry:
-        return 1
-    return 0
-
-
 def initialize_dynamic_sl_state(pos):
-    exit_policy = build_exit_policy(position=pos)
-    if exit_policy.get("name") != "trend_sl_only":
-        return
-    entry = _safe_float(pos.get("entry"), default=None)
-    sl = _safe_float(pos.get("sl"), default=None)
-    current_price = _safe_float(pos.get("current_price"), default=None)
-    if pos.get("initial_risk") is None and entry is not None and sl is not None:
-        pos["initial_risk"] = abs(entry - sl)
-    if pos.get("sl_stage") is None:
-        pos["sl_stage"] = _infer_sl_stage(pos)
-    if pos.get("best_price") is None:
-        pos["best_price"] = current_price if current_price is not None else entry
+    initialize_trend_position_state(pos)
 
 
 def compute_dynamic_sl_target(pos):
-    initialize_dynamic_sl_state(pos)
-    exit_policy = build_exit_policy(position=pos)
-    if exit_policy.get("name") != "trend_sl_only":
-        return None
-    entry = _safe_float(pos.get("entry"), default=None)
+    return compute_shared_dynamic_sl_target(pos)
+
+
+def compute_trend_stop_target(pos, klines):
+    current_atr = None
+    if klines and len(klines) >= 2:
+        current_atr = calc_atr(
+            [d["high"] for d in klines],
+            [d["low"] for d in klines],
+            [d["close"] for d in klines],
+        )
+    return resolve_trend_stop_target(
+        pos,
+        current_atr=current_atr,
+        atr_trailing_enabled=config.STRATEGY.get("atr_trailing_enabled", False),
+        atr_activation_r=config.STRATEGY.get("atr_activation_r", 1.5),
+        atr_trailing_mult=config.STRATEGY.get("atr_trailing_mult", 2.0),
+    )
+
+
+def check_atr_trailing_exit(pos, klines):
+    current_atr = None
+    if klines and len(klines) >= 2:
+        current_atr = calc_atr(
+            [d["high"] for d in klines],
+            [d["low"] for d in klines],
+            [d["close"] for d in klines],
+        )
+    return compute_atr_trailing_result(
+        pos,
+        current_atr=current_atr,
+        enabled=config.STRATEGY.get("atr_trailing_enabled", False),
+        atr_activation_r=config.STRATEGY.get("atr_activation_r", 1.5),
+        atr_trailing_mult=config.STRATEGY.get("atr_trailing_mult", 2.0),
+    )
+
+
+def check_trend_failure_exit(pos, klines):
+    if not klines:
+        return {"triggered": False, "bars_since_entry": 0, "entry_breakout_level": None, "current_ema20": None}
+    entry_klines_len = int(pos.get("entry_klines_len") or 0)
+    bars_since_entry = max(len(klines) - entry_klines_len, 0) if entry_klines_len > 0 else 0
     current_price = _safe_float(pos.get("current_price"), default=None)
-    initial_risk = _safe_float(pos.get("initial_risk"), default=None)
-    if entry is None or current_price is None or initial_risk is None or initial_risk <= 0:
-        return None
-
-    best_price = _safe_float(pos.get("best_price"), default=None)
-    if best_price is None:
-        best_price = current_price
-    if pos.get("direction") == "long":
-        best_price = max(best_price, current_price)
-        progress_r = (best_price - entry) / initial_risk
-    else:
-        best_price = min(best_price, current_price)
-        progress_r = (entry - best_price) / initial_risk
-    pos["best_price"] = best_price
-
-    current_stage = int(pos.get("sl_stage") or 0)
-    target_stage = current_stage
-    target_sl = _safe_float(pos.get("sl"), default=None)
-
-    if progress_r >= 1.5:
-        target_stage = max(target_stage, 2)
-    elif progress_r >= 1.0:
-        target_stage = max(target_stage, 1)
-
-    if target_stage >= 2:
-        target_sl = entry + initial_risk * 0.5 if pos.get("direction") == "long" else entry - initial_risk * 0.5
-    elif target_stage >= 1:
-        target_sl = entry
-
-    return {"sl": target_sl, "stage": target_stage, "progress_r": progress_r, "best_price": best_price}
+    structure = get_trend_structure_context(klines)
+    return evaluate_trend_failure_exit(
+        pos,
+        bars_since_entry=bars_since_entry,
+        current_price=current_price,
+        current_ema20=(structure or {}).get("ema20"),
+        enabled=config.STRATEGY.get("failure_exit_enabled", True),
+        failure_exit_bars=config.STRATEGY.get("failure_exit_bars", 3),
+        failure_exit_mode=config.STRATEGY.get("failure_exit_mode", "breakout_failure"),
+    )
