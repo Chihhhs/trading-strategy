@@ -11,6 +11,7 @@ from trading_strategy.core.risk import (
 from trading_strategy.core.signals import generate_fvg_signal
 from trading_strategy.core.state import load_state as load_shared_state
 from trading_strategy.core.state import save_state as save_shared_state
+from trading_strategy.core.trade_history import apply_closed_trade
 from trading_strategy.market_data import WATCHLIST, get_binance_klines, get_current_prices
 
 
@@ -116,35 +117,15 @@ def is_in_cooldown(state, coin_name):
 
 
 def close_pos(state, pos, close_price, reason):
-    if pos["direction"] == "long":
-        pnl = (close_price - pos["entry"]) * pos["size"]
-    else:
-        pnl = (pos["entry"] - close_price) * pos["size"]
-
-    state["balance"] += pnl
-    stats = state["stats"]
-    stats["total_trades"] += 1
-    stats["total_pnl"] += pnl
-    if pnl > 0:
-        stats["wins"] += 1
-        stats["max_win"] = max(stats["max_win"], pnl)
-    else:
-        stats["losses"] += 1
-        stats["max_loss"] = min(stats["max_loss"], pnl)
-
-    state["history"].append(
-        {
-            "coin": pos["coin"],
-            "direction": pos["direction"],
-            "entry": pos["entry"],
-            "exit": close_price,
-            "size": pos["size"],
-            "pnl": round(pnl, 4),
-            "reason": reason,
-            "entry_time": pos["entry_time"],
-            "exit_time": datetime.now().isoformat(),
-            "signal_reason": pos.get("signal_reason", ""),
-        }
+    apply_closed_trade(
+        state,
+        pos,
+        close_price,
+        reason,
+        exit_context={
+            "close_status": "paper_closed",
+            "close_reason_source": "strategy_rule",
+        },
     )
 
 
@@ -247,7 +228,11 @@ def check_new_entries(state):
                 "pnl_pnl": 0,
                 "pnl_pct": 0,
                 "entry_time": datetime.now().isoformat(),
+                "entry_reason": signal.get("reason", ""),
                 "signal_reason": signal.get("reason", ""),
+                "signal_score": signal.get("score"),
+                "risk_pct": params["risk_per_trade"],
+                "entry_order_type": "paper",
             }
         )
 

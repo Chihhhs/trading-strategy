@@ -15,7 +15,10 @@ from trading_strategy.hyperliquid import choose_limit_price
 from trading_strategy.live import account, cli, config, market, orders
 from trading_strategy.live.engine import helpers
 from trading_strategy.live.engine.entries import check_entries
+<<<<<<< HEAD
 from trading_strategy.live.engine.positions import update_positions
+=======
+>>>>>>> main
 from trading_strategy.live.engine.protection import cancel_orphan_orders, ensure_position_protection
 from trading_strategy.live.engine.reconcile import sync_state_with_exchange_positions
 
@@ -36,5 +39,8 @@ __all__ = [
     "sync_state_with_exchange_positions",
     "tempfile",
     "unittest",
+<<<<<<< HEAD
     "update_positions",
+=======
+>>>>>>> main
 ]

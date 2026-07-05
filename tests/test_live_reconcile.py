@@ -140,6 +140,7 @@ class LiveReconcileTest(unittest.TestCase):
             self.assertEqual(synced["_orphan_orders"], [])
         finally:
             live.config.set_mode(old_mode)
+<<<<<<< HEAD
 
     @patch("trading_strategy.live.engine.reconcile.record_trade_event")
     def test_sync_state_with_exchange_positions_records_closed_trade_for_stale_position(self, mock_record_trade_event):
@@ -177,3 +178,5 @@ class LiveReconcileTest(unittest.TestCase):
             self.assertIn("position_closed_reconciled", event_names)
         finally:
             live.config.set_mode(old_mode)
+=======
+>>>>>>> main

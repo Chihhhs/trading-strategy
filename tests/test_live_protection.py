@@ -255,6 +255,7 @@ class LiveProtectionTest(unittest.TestCase):
         self.assertEqual(summary["protection_missing_count"], 0)
         self.assertEqual(state["positions"][0]["protection_status"], "protected")
         self.assertEqual(mock_record_trade_event.call_count, 0)
+<<<<<<< HEAD
 
     @patch("trading_strategy.live.engine.protection.record_trade_event")
     @patch("trading_strategy.live.engine.protection.place_hl_tpsl_orders")
@@ -302,3 +303,5 @@ class LiveProtectionTest(unittest.TestCase):
         self.assertIn("tpsl_missing_detected", event_names)
         self.assertIn("tpsl_repair_attempted", event_names)
         self.assertIn("tpsl_repaired", event_names)
+=======
+>>>>>>> main

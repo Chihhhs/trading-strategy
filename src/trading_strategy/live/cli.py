@@ -7,17 +7,11 @@ from trading_strategy.core.state import get_state_path
 
 from . import config
 from .account import sync_state_with_hl_balance
-from .engine import (
-    build_run_summary,
-    cancel_orphan_orders,
-    ensure_position_protection,
-    build_strategy_snapshot,
-    check_entries,
-    print_debug_account,
-    print_report,
-    update_positions,
-    verify_saved_orders,
-)
+from .engine.entries import check_entries
+from .engine.positions import update_positions
+from .engine.protection import cancel_orphan_orders, ensure_position_protection
+from .engine.reporting import print_debug_account, print_report, verify_saved_orders
+from .engine.summary import build_run_summary, build_strategy_snapshot
 from .io import load_state, record_trade_event, save_state
 from .market import get_current_prices, load_coin_list
 

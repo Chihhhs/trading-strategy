@@ -159,8 +159,11 @@ class LiveEntriesTest(unittest.TestCase):
                 )
             self.assertEqual(summary["positions_opened"], 1)
             self.assertEqual(len(state["positions"]), 4)
+<<<<<<< HEAD
             self.assertEqual(state["positions"][-1]["entry_reason"], "TREND_BUY")
             self.assertEqual(state["positions"][-1]["signal_score"], 4)
+=======
+>>>>>>> main
             self.assertEqual(summary["top_blockers"], [{"reason": "max_positions_reached", "count": 1}])
             self.assertTrue(
                 any(
@@ -421,6 +424,7 @@ class LiveEntriesTest(unittest.TestCase):
             self.assertEqual(state["positions"][0]["exit_policy"]["name"], "trend_sl_only")
         finally:
             live.config.set_mode(old_mode)
+<<<<<<< HEAD
 
     @patch("trading_strategy.live.engine.entries.save_state")
     @patch("trading_strategy.live.engine.protection.place_hl_tpsl_orders")
@@ -473,3 +477,5 @@ class LiveEntriesTest(unittest.TestCase):
             mock_place_hl_tpsl_orders.assert_called_once_with("BTC", "long", 1.0, 110.0, 95.0)
         finally:
             live.config.set_mode(old_mode)
+=======
+>>>>>>> main

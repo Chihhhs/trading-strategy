@@ -1,4 +1,20 @@
+<<<<<<< HEAD
 from tests.live_test_support import account, choose_limit_price, live, orders, patch, unittest
+=======
+from tests.live_test_support import (
+    account,
+    choose_limit_price,
+    cli,
+    config,
+    live,
+    market,
+    orders,
+    os,
+    patch,
+    tempfile,
+    unittest,
+)
+>>>>>>> main
 
 
 class LiveHelpersTest(unittest.TestCase):
@@ -61,7 +77,11 @@ class LiveHelpersTest(unittest.TestCase):
                 "_spot_account_value": 45.905278,
             }
             with self.assertRaisesRegex(RuntimeError, "perp tradable balance is 0"):
+<<<<<<< HEAD
                 live.cli.ensure_live_perp_balance(state)
+=======
+                cli.ensure_live_perp_balance(state)
+>>>>>>> main
         finally:
             live.config.set_mode(old_mode)
 
@@ -163,3 +183,23 @@ class LiveHelpersTest(unittest.TestCase):
         self.assertEqual(result["status"], "ok")
         self.assertEqual(result["cancel_status"], "canceled")
         self.assertEqual(result["oid"], 123)
+<<<<<<< HEAD
+=======
+
+    def test_load_coin_list_rebuilds_cache_when_metadata_mismatch(self):
+        old_mode = config.MODE
+        old_state_dir = config.STATE_DIR
+        tmpdir = tempfile.mkdtemp()
+        config.STATE_DIR = tmpdir
+        config.set_mode("live")
+        try:
+            cache_path = os.path.join(tmpdir, "coin_list.json")
+            with open(cache_path, "w", encoding="utf-8") as handle:
+                handle.write('{"metadata":{"mode":"paper","market_data_source":"binance"},"coins":[{"name":"OLD","symbol":"OLDUSDT"}]}')
+            with patch("trading_strategy.live.market._load_hyperliquid_coin_list", return_value=[{"name": "BTC", "symbol": "BTCUSDT"}]):
+                coins = market.load_coin_list()
+            self.assertEqual(coins, [{"name": "BTC", "symbol": "BTCUSDT"}])
+        finally:
+            config.STATE_DIR = old_state_dir
+            config.set_mode(old_mode)
+>>>>>>> main
