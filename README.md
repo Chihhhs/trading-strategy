@@ -1,6 +1,6 @@
 # Trading Strategy
 
-以 Hyperliquid live / paper 交易與離線 backtest 為核心的交易策略專案。現在的主線重點不是舊版單一 FVG 腳本，而是可持續執行、可排查、可接管實際持倉的策略執行流程。
+以 Hyperliquid live / paper 交易與離線 backtest 為核心的交易策略專案。現在的主線重點是以 crypto trend 為核心、可持續執行、可排查、可接管實際持倉的策略執行流程。
 
 目前 repo 提供三種主要使用模式：
 
@@ -75,13 +75,13 @@ python apps/runners/paper_runner.py --reset
 ### Backtest
 
 ```bash
-python backtest/backtest_runner.py --coins BTC,ETH,SOL --strategy both --max-days 240
+python backtest/backtest_runner.py --coins BTC,ETH,SOL --strategy trend --max-days 240
 ```
 
 參數摘要：
 
 - `--coins`：逗號分隔標的，預設 `BTC,ETH,SOL,BNB`
-- `--strategy`：`fvg` / `trend` / `both`
+- `--strategy`：`trend`
 - `--max-days`：使用最近幾天歷史資料，預設 `240`
 - `--initial-capital`：起始資金，預設 `1000`
 - `--risk-pct`：每筆交易風險比例，預設 `0.05`
@@ -241,3 +241,10 @@ tests/
 ## License
 
 MIT
+
+## Research Manual
+
+- [docs/research_manual/00_decision_framework.md](/D:/code/trading-strategy/docs/research_manual/00_decision_framework.md)
+- [docs/research_manual/01_quant_research_map.md](/D:/code/trading-strategy/docs/research_manual/01_quant_research_map.md)
+- [docs/research_manual/02_current_strategy_review.md](/D:/code/trading-strategy/docs/research_manual/02_current_strategy_review.md)
+- [docs/research_manual/03_research_backlog.md](/D:/code/trading-strategy/docs/research_manual/03_research_backlog.md)

@@ -7,7 +7,7 @@ from .strategies import resolve_strategy
 from .types import BacktestConfig, BacktestResult, CoinResult, StrategyContext, StrategySignal
 
 
-def run_backtest_for_coin(coin, data_map, strategy_type="both", max_days=None):
+def run_backtest_for_coin(coin, data_map, strategy_type="trend", max_days=None):
     config = BacktestConfig(
         coins=(coin,),
         strategy=strategy_type,

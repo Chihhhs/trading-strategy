@@ -27,7 +27,7 @@ def _parse_btc_filter_grid(raw_value):
 def build_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--coins", default=",".join(DEFAULT_COINS))
-    parser.add_argument("--strategy", choices=("fvg", "trend", "both"), default="both")
+    parser.add_argument("--strategy", choices=("trend",), default="trend")
     parser.add_argument("--max-days", type=int, default=240)
     parser.add_argument("--data-path", default=DATA_PATH)
     parser.add_argument("--initial-capital", type=float, default=1000.0)
@@ -37,7 +37,7 @@ def build_parser():
     parser.add_argument("--disable-btc-filter", action="store_true")
     parser.add_argument("--optimize", action="store_true")
     parser.add_argument("--top", type=int, default=10)
-    parser.add_argument("--strategy-grid", default="fvg,trend,both")
+    parser.add_argument("--strategy-grid", default="trend")
     parser.add_argument("--leverage-grid", default="2,3,5")
     parser.add_argument("--risk-grid", default="0.03,0.05,0.08,0.10")
     parser.add_argument("--btc-filter-grid", default="on,off")

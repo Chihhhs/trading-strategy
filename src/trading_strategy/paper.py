@@ -8,7 +8,7 @@ from trading_strategy.core.risk import (
     check_circuit_breaker,
     is_cooldown,
 )
-from trading_strategy.core.signals import generate_fvg_signal
+from trading_strategy.core.signals import generate_trend_signal
 from trading_strategy.core.state import load_state as load_shared_state
 from trading_strategy.core.state import save_state as save_shared_state
 from trading_strategy.core.trade_history import apply_closed_trade
@@ -16,69 +16,23 @@ from trading_strategy.market_data import WATCHLIST, get_binance_klines, get_curr
 
 
 STRATEGIES = {
-    "A_fvg_conservative": {
-        "initial_balance": 1000.0,
-        "max_positions": 2,
-        "max_hold_days": 7,
-        "leverage": 3,
-        "risk_per_trade": 0.08,
-        "strategy_type": "fvg",
-        "max_daily_loss_pct": 15.0,
-        "max_consecutive_losses": 5,
-        "cooldown_hours": 24,
-    },
-    "B_fvg_aggressive": {
-        "initial_balance": 1000.0,
-        "max_positions": 3,
-        "max_hold_days": 14,
-        "leverage": 5,
-        "risk_per_trade": 0.10,
-        "strategy_type": "fvg",
-        "max_daily_loss_pct": 15.0,
-        "max_consecutive_losses": 5,
-        "cooldown_hours": 24,
-    },
-    "C_trend_conservative": {
+    "A_trend_conservative": {
         "initial_balance": 1000.0,
         "max_positions": 2,
         "max_hold_days": 14,
         "leverage": 3,
         "risk_per_trade": 0.05,
-        "strategy_type": "trend",
         "max_daily_loss_pct": 10.0,
         "max_consecutive_losses": 5,
         "cooldown_hours": 24,
     },
-    "D_trend_aggressive": {
+    "B_trend_aggressive": {
         "initial_balance": 1000.0,
         "max_positions": 3,
         "max_hold_days": 30,
         "leverage": 5,
         "risk_per_trade": 0.08,
-        "strategy_type": "trend",
         "max_daily_loss_pct": 10.0,
-        "max_consecutive_losses": 5,
-        "cooldown_hours": 24,
-    },
-    "E_dual_conservative": {
-        "initial_balance": 1000.0,
-        "max_positions": 2,
-        "max_hold_days": 7,
-        "leverage": 3,
-        "risk_per_trade": 0.08,
-        "strategy_type": "both",
-        "max_daily_loss_pct": 15.0,
-        "max_consecutive_losses": 5,
-        "cooldown_hours": 24,
-    },
-    "F_dual_aggressive": {
-        "initial_balance": 1000.0,
-        "max_positions": 3,
-        "max_hold_days": 14,
-        "leverage": 5,
-        "risk_per_trade": 0.10,
-        "strategy_type": "both",
-        "max_daily_loss_pct": 15.0,
         "max_consecutive_losses": 5,
         "cooldown_hours": 24,
     },
@@ -198,7 +152,7 @@ def check_new_entries(state):
         if not data or len(data) < 50:
             continue
 
-        signal = generate_fvg_signal(data, strategy_type=params["strategy_type"])
+        signal = generate_trend_signal(data, min_score=4, tp_mult=2.0, sl_mult=1.5)
         if signal is None:
             continue
 
@@ -281,7 +235,7 @@ __all__ = [
     "STRATEGIES",
     "WATCHLIST",
     "calc_position_size",
-    "generate_fvg_signal",
+    "generate_trend_signal",
     "get_binance_klines",
     "load_state",
     "main",

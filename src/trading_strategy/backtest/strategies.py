@@ -1,15 +1,15 @@
-from trading_strategy.core.signals import generate_fvg_signal, get_btc_direction_from_klines
+from trading_strategy.core.signals import generate_trend_signal, get_btc_direction_from_klines
 
 from .types import BacktestStrategy, StrategyContext, StrategySignal
 
 
-class CoreSignalStrategy:
-    def __init__(self, strategy_type="both"):
+class TrendSignalStrategy:
+    def __init__(self, strategy_type="trend"):
         self.name = strategy_type
         self.strategy_type = strategy_type
 
     def generate_signal(self, context: StrategyContext) -> StrategySignal | None:
-        signal = generate_fvg_signal(context.window, strategy_type=self.strategy_type)
+        signal = generate_trend_signal(context.window, min_score=4, tp_mult=2.0, sl_mult=1.5)
         if signal is None:
             return None
         return StrategySignal(
@@ -22,8 +22,8 @@ class CoreSignalStrategy:
         )
 
 
-def resolve_strategy(strategy_type="both") -> BacktestStrategy:
-    return CoreSignalStrategy(strategy_type=strategy_type)
+def resolve_strategy(strategy_type="trend") -> BacktestStrategy:
+    return TrendSignalStrategy(strategy_type=strategy_type)
 
 
 def is_signal_blocked_by_btc_filter(coin, signal: StrategySignal, btc_window):

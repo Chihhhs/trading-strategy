@@ -62,7 +62,7 @@ class BacktestModuleTest(unittest.TestCase):
         def build_signal(context):
             if context.current_bar["close"] != 101:
                 return None
-            return StrategySignal("long", tp=110, sl=95, score=5, reason="FVG_BUY")
+            return StrategySignal("long", tp=110, sl=95, score=5, reason="TEST_BUY")
 
         config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1)
         result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
@@ -76,7 +76,7 @@ class BacktestModuleTest(unittest.TestCase):
         def build_signal(context):
             if context.current_bar["close"] != 101:
                 return None
-            return StrategySignal("long", tp=110, sl=96, score=5, reason="FVG_BUY")
+            return StrategySignal("long", tp=110, sl=96, score=5, reason="TEST_BUY")
 
         config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1)
         result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
@@ -102,7 +102,7 @@ class BacktestModuleTest(unittest.TestCase):
         data_map = {"BTC": [build_bar(100 + index, index) for index in range(4)]}
 
         def build_signal(context):
-            return StrategySignal("long", tp=110, sl=context.current_bar["close"], score=5, reason="FVG_BUY")
+            return StrategySignal("long", tp=110, sl=context.current_bar["close"], score=5, reason="TEST_BUY")
 
         config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1)
         result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
@@ -147,7 +147,7 @@ class BacktestModuleTest(unittest.TestCase):
         def build_signal(context):
             if context.current_bar["close"] not in (101, 51):
                 return None
-            return StrategySignal("long", tp=context.current_bar["close"] + 5, sl=context.current_bar["close"] - 4, score=5, reason="FVG_BUY")
+            return StrategySignal("long", tp=context.current_bar["close"] + 5, sl=context.current_bar["close"] - 4, score=5, reason="TEST_BUY")
 
         config = BacktestConfig(coins=("BTC", "ETH"), max_days=None, min_bars=1, btc_filter_enabled=False)
         result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
@@ -170,7 +170,7 @@ class BacktestModuleTest(unittest.TestCase):
                         "--coins",
                         "BTC",
                         "--strategy",
-                        "both",
+                        "trend",
                         "--max-days",
                         "4",
                         "--data-path",
@@ -193,7 +193,7 @@ class BacktestModuleTest(unittest.TestCase):
             coins=("BTC",),
             max_days=5,
             initial_capital=1000.0,
-            strategies=("both",),
+            strategies=("trend",),
             leverages=(2.0, 3.0),
             risk_pcts=(0.03, 0.05),
             btc_filter_modes=(True, False),
@@ -223,7 +223,7 @@ class BacktestModuleTest(unittest.TestCase):
                         "--top",
                         "2",
                         "--strategy-grid",
-                        "both",
+                        "trend",
                         "--leverage-grid",
                         "2,3",
                         "--risk-grid",

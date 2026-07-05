@@ -11,7 +11,7 @@ Create an environment and install dependencies with `pip install -r requirements
 - `python apps/runners/paper_runner.py` starts paper trading.
 - `python apps/runners/live_runner.py --live` runs one live cycle.
 - `python apps/runners/live_runner.py --live --loop` runs the live loop.
-- `python backtest/backtest_runner.py --coins BTC,ETH --strategy both --max-days 240` runs a representative backtest.
+- `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240` runs a representative backtest.
 
 ## Coding Style & Naming Conventions
 Follow existing Python style: 4-space indentation, `snake_case` for functions and variables, `UPPER_SNAKE_CASE` for module constants, and short, focused helper functions. Keep modules narrow in responsibility; live-trading exchange calls belong in `live/`, not `core/`. Match the repository preference for plain standard-library testing and minimal abstraction. There is no dedicated formatter config in the repo, so keep edits consistent with surrounding code.

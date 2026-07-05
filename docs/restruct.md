@@ -18,7 +18,7 @@
 ```bash
 python apps/runners/live_runner.py --live
 python apps/runners/paper_runner.py
-python backtest/backtest_runner.py --coins BTC,ETH --strategy both --max-days 240
+python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240
 ```
 
 ## Reusable Modules

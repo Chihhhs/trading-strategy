@@ -10,7 +10,7 @@ DEFAULT_RISK_PCT = 0.05
 @dataclass(frozen=True)
 class BacktestConfig:
     coins: tuple[str, ...]
-    strategy: str = "both"
+    strategy: str = "trend"
     max_days: int | None = 240
     initial_capital: float = DEFAULT_INITIAL_CAPITAL
     leverage: float = DEFAULT_LEVERAGE
