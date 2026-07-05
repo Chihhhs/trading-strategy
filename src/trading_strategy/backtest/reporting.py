@@ -81,3 +81,16 @@ def format_result_lines(result, *, show_trades=False):
                 f"reason={trade.get('exit_reason')}"
             )
     return lines
+
+
+def format_optimization_lines(rows, *, top_n=10):
+    lines = []
+    for index, row in enumerate(rows[:top_n], start=1):
+        lines.append(
+            f"{index}. strategy={row['strategy']} leverage={row['leverage']:.1f} "
+            f"risk={row['risk_pct']:.2f} btc_filter={'on' if row['btc_filter_enabled'] else 'off'} "
+            f"trades={row['trades']} win_rate={row['win_rate']:.1f}% "
+            f"pnl={row['total_pnl_pct']:+.1f}% drawdown={row['max_drawdown']:.1f}% "
+            f"score={row['score']:+.2f}"
+        )
+    return lines

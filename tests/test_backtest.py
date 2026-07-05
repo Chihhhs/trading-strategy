@@ -13,6 +13,7 @@ if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
 from trading_strategy.backtest import cli, load_historical_data
+from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
 
@@ -182,6 +183,60 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("Portfolio:", rendered)
         self.assertIn("BTC:", rendered)
         self.assertEqual(result.coin_results[0].coin, "BTC")
+
+    def test_optimizer_returns_ranked_rows(self):
+        payload = {
+            "BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112, 113, 114))],
+        }
+        rows = run_parameter_sweep(
+            payload,
+            coins=("BTC",),
+            max_days=5,
+            initial_capital=1000.0,
+            strategies=("both",),
+            leverages=(2.0, 3.0),
+            risk_pcts=(0.03, 0.05),
+            btc_filter_modes=(True, False),
+        )
+        self.assertEqual(len(rows), 8)
+        self.assertGreaterEqual(rows[0]["score"], rows[-1]["score"])
+
+    def test_cli_optimize_prints_ranked_results(self):
+        payload = {
+            "BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112, 113, 114))],
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                rows = cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        "5",
+                        "--data-path",
+                        path,
+                        "--optimize",
+                        "--top",
+                        "2",
+                        "--strategy-grid",
+                        "both",
+                        "--leverage-grid",
+                        "2,3",
+                        "--risk-grid",
+                        "0.03",
+                        "--btc-filter-grid",
+                        "on,off",
+                    ]
+                )
+        finally:
+            os.remove(path)
+        rendered = output.getvalue()
+        self.assertIn("1. strategy=", rendered)
+        self.assertEqual(len(rows), 4)
 
 
 if __name__ == "__main__":

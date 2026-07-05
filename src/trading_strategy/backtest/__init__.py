@@ -1,7 +1,8 @@
 from .cli import build_config, build_parser, main
 from .data import DATA_PATH, DEFAULT_COINS, get_coin_series, load_historical_data
+from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
-from .reporting import format_result_lines
+from .reporting import format_optimization_lines, format_result_lines
 from .strategies import resolve_strategy
 from .types import BacktestConfig, BacktestResult, CoinResult, StrategyContext, StrategySignal
 
@@ -27,10 +28,12 @@ __all__ = [
     "StrategySignal",
     "build_config",
     "build_parser",
+    "format_optimization_lines",
     "format_result_lines",
     "get_coin_series",
     "load_historical_data",
     "main",
     "resolve_strategy",
+    "run_parameter_sweep",
     "run_backtest_for_coin",
 ]
