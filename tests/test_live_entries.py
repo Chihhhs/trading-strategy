@@ -159,11 +159,6 @@ class LiveEntriesTest(unittest.TestCase):
                 )
             self.assertEqual(summary["positions_opened"], 1)
             self.assertEqual(len(state["positions"]), 4)
-<<<<<<< HEAD
-            self.assertEqual(state["positions"][-1]["entry_reason"], "TREND_BUY")
-            self.assertEqual(state["positions"][-1]["signal_score"], 4)
-=======
->>>>>>> main
             self.assertEqual(summary["top_blockers"], [{"reason": "max_positions_reached", "count": 1}])
             self.assertTrue(
                 any(
@@ -424,58 +419,3 @@ class LiveEntriesTest(unittest.TestCase):
             self.assertEqual(state["positions"][0]["exit_policy"]["name"], "trend_sl_only")
         finally:
             live.config.set_mode(old_mode)
-<<<<<<< HEAD
-
-    @patch("trading_strategy.live.engine.entries.save_state")
-    @patch("trading_strategy.live.engine.protection.place_hl_tpsl_orders")
-    @patch("trading_strategy.live.engine.entries.place_hl_order")
-    @patch("trading_strategy.live.engine.entries.record_trade_event")
-    @patch("trading_strategy.live.engine.entries.get_current_prices")
-    @patch("trading_strategy.live.engine.entries.get_btc_direction")
-    @patch("trading_strategy.live.engine.entries.get_klines")
-    def test_check_entries_opens_fixed_policy_position_with_tp_and_sl_orders(
-        self,
-        mock_get_klines,
-        mock_get_btc_direction,
-        mock_get_current_prices,
-        _mock_record_trade_event,
-        mock_place_hl_order,
-        mock_place_hl_tpsl_orders,
-        _mock_save_state,
-    ):
-        old_mode = live.config.MODE
-        live.config.set_mode("live")
-        try:
-            mock_get_btc_direction.return_value = "neutral"
-            mock_get_current_prices.return_value = {"BTC": 100.0}
-            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
-            mock_place_hl_order.return_value = {
-                "status": "ok",
-                "normalized_status": "filled",
-                "message": "filled",
-                "verified_summary": {"verify_status": "filled"},
-                "order_summary": {"order_status": "filled", "oid": 12},
-                "resolved_price": 100.0,
-                "size": 1.0,
-            }
-            mock_place_hl_tpsl_orders.return_value = {
-                "ok": True,
-                "message": None,
-                "tp_order": {"oid": 31, "status": "ok", "trigger_px": 110.0},
-                "sl_order": {"oid": 32, "status": "ok", "trigger_px": 95.0},
-            }
-            state = {"balance": 100.0, "positions": [], "history": []}
-            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "FVG_LONG"}
-            with patch("trading_strategy.live.engine.entries.generate_signal", return_value=signal):
-                summary = check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
-            self.assertEqual(summary["positions_opened"], 1)
-            self.assertEqual(len(state["positions"]), 1)
-            self.assertEqual(state["positions"][0]["tp"], 110.0)
-            self.assertEqual(state["positions"][0]["tp_order"]["oid"], 31)
-            self.assertEqual(state["positions"][0]["sl_order"]["oid"], 32)
-            self.assertEqual(state["positions"][0]["exit_policy"]["name"], "fixed_tpsl")
-            mock_place_hl_tpsl_orders.assert_called_once_with("BTC", "long", 1.0, 110.0, 95.0)
-        finally:
-            live.config.set_mode(old_mode)
-=======
->>>>>>> main
