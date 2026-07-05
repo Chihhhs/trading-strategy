@@ -1,0 +1,83 @@
+from .types import CoinResult
+
+
+def _calc_max_drawdown(equity_curve):
+    peak = 0.0
+    max_drawdown = 0.0
+    for balance in equity_curve:
+        peak = max(peak, balance)
+        if peak > 0:
+            drawdown = (peak - balance) / peak * 100
+            max_drawdown = max(max_drawdown, drawdown)
+    return round(max_drawdown, 1)
+
+
+def build_coin_results(state, coins):
+    initial_balance = float(state.get("initial_balance") or 0.0)
+    results = []
+    for coin in coins:
+        trades = [trade for trade in state.get("history", []) if trade.get("coin") == coin]
+        wins = sum(1 for trade in trades if float(trade.get("pnl") or 0.0) > 0)
+        total_pnl = round(sum(float(trade.get("pnl") or 0.0) for trade in trades), 2)
+        ending_balance = round(initial_balance + total_pnl, 2)
+        win_rate = round((wins / len(trades) * 100) if trades else 0.0, 1)
+        equity_curve = [initial_balance]
+        running = initial_balance
+        for trade in trades:
+            running += float(trade.get("pnl") or 0.0)
+            equity_curve.append(running)
+        results.append(
+            CoinResult(
+                coin=coin,
+                trades=len(trades),
+                wins=wins,
+                win_rate=win_rate,
+                ending_balance=ending_balance,
+                total_pnl=total_pnl,
+                total_pnl_pct=round((total_pnl / initial_balance * 100) if initial_balance else 0.0, 1),
+                max_drawdown=_calc_max_drawdown(equity_curve),
+            )
+        )
+    return results
+
+
+def build_portfolio_summary(state, equity_curve, peak_balance=None):
+    initial_balance = float(state.get("initial_balance") or 0.0)
+    ending_balance = round(float(state.get("balance") or 0.0), 2)
+    total_pnl = round(ending_balance - initial_balance, 2)
+    wins = int(state.get("stats", {}).get("wins") or 0)
+    total_trades = int(state.get("stats", {}).get("total_trades") or 0)
+    summary = {
+        "trades": total_trades,
+        "wins": wins,
+        "win_rate": round((wins / total_trades * 100) if total_trades else 0.0, 1),
+        "starting_balance": round(initial_balance, 2),
+        "ending_balance": ending_balance,
+        "total_pnl": total_pnl,
+        "total_pnl_pct": round((total_pnl / initial_balance * 100) if initial_balance else 0.0, 1),
+        "max_drawdown": _calc_max_drawdown(equity_curve),
+        "peak_balance": round(float(peak_balance or max(equity_curve or [initial_balance])), 2),
+    }
+    return summary
+
+
+def format_result_lines(result, *, show_trades=False):
+    lines = []
+    lines.append(
+        "Portfolio: trades={trades}, win_rate={win_rate:.1f}%, pnl={total_pnl_pct:+.1f}%, drawdown={max_drawdown:.1f}%".format(
+            **result.portfolio
+        )
+    )
+    for coin_result in result.coin_results:
+        lines.append(
+            f"{coin_result.coin}: trades={coin_result.trades}, win_rate={coin_result.win_rate:.1f}%, "
+            f"pnl={coin_result.total_pnl_pct:+.1f}%, drawdown={coin_result.max_drawdown:.1f}%"
+        )
+    if show_trades:
+        for trade in result.trades:
+            lines.append(
+                f"TRADE {trade.get('coin')} {trade.get('direction')} "
+                f"entry={trade.get('entry')} exit={trade.get('exit')} pnl={trade.get('pnl')} "
+                f"reason={trade.get('exit_reason')}"
+            )
+    return lines

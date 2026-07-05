@@ -30,7 +30,7 @@ python backtest/backtest_runner.py --coins BTC,ETH --strategy both --max-days 24
 - `src/trading_strategy/hyperliquid.py`
 - `src/trading_strategy/live.py`
 - `src/trading_strategy/paper.py`
-- `src/trading_strategy/backtest.py`
+- `src/trading_strategy/backtest/`
 - `src/trading_strategy/indicators.py`
 
 ## Cleanup Performed

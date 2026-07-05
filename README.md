@@ -83,6 +83,10 @@ python backtest/backtest_runner.py --coins BTC,ETH,SOL --strategy both --max-day
 - `--coins`：逗號分隔標的，預設 `BTC,ETH,SOL,BNB`
 - `--strategy`：`fvg` / `trend` / `both`
 - `--max-days`：使用最近幾天歷史資料，預設 `240`
+- `--initial-capital`：起始資金，預設 `1000`
+- `--risk-pct`：每筆交易風險比例，預設 `0.05`
+- `--disable-btc-filter`：停用 BTC 趨勢過濾
+- `--show-trades`：輸出 trade 明細
 
 ## 專案結構
 
@@ -95,7 +99,7 @@ backtest/
   backtest_runner.py       # 離線回測入口
 src/
   trading_strategy/
-    backtest.py            # 回測主邏輯
+    backtest/              # 回測 package（data / engine / portfolio / reporting / cli）
     paper.py               # paper trading 主邏輯
     hyperliquid.py         # Hyperliquid 市場價格與 tick helper
     live/
