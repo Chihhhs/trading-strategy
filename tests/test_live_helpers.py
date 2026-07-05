@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-from tests.live_test_support import account, choose_limit_price, live, orders, patch, unittest
-=======
 from tests.live_test_support import (
     account,
     choose_limit_price,
@@ -14,7 +11,6 @@ from tests.live_test_support import (
     tempfile,
     unittest,
 )
->>>>>>> main
 
 
 class LiveHelpersTest(unittest.TestCase):
@@ -77,11 +73,7 @@ class LiveHelpersTest(unittest.TestCase):
                 "_spot_account_value": 45.905278,
             }
             with self.assertRaisesRegex(RuntimeError, "perp tradable balance is 0"):
-<<<<<<< HEAD
-                live.cli.ensure_live_perp_balance(state)
-=======
                 cli.ensure_live_perp_balance(state)
->>>>>>> main
         finally:
             live.config.set_mode(old_mode)
 
@@ -183,8 +175,6 @@ class LiveHelpersTest(unittest.TestCase):
         self.assertEqual(result["status"], "ok")
         self.assertEqual(result["cancel_status"], "canceled")
         self.assertEqual(result["oid"], 123)
-<<<<<<< HEAD
-=======
 
     def test_load_coin_list_rebuilds_cache_when_metadata_mismatch(self):
         old_mode = config.MODE
@@ -202,4 +192,3 @@ class LiveHelpersTest(unittest.TestCase):
         finally:
             config.STATE_DIR = old_state_dir
             config.set_mode(old_mode)
->>>>>>> main

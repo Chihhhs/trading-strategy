@@ -1,10 +1,6 @@
 from tests.test_live_cli import *  # noqa: F401,F403
 from tests.test_live_entries import *  # noqa: F401,F403
 from tests.test_live_helpers import *  # noqa: F401,F403
-<<<<<<< HEAD
-from tests.test_live_positions import *  # noqa: F401,F403
-=======
->>>>>>> main
 from tests.test_live_protection import *  # noqa: F401,F403
 from tests.test_live_reconcile import *  # noqa: F401,F403
 
