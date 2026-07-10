@@ -19,6 +19,15 @@
 - `trend`, 240 days, `BTC,ETH,SOL,BNB`, same settings: `trades=20`, `win_rate=25.0%`, `pnl=-12.6%`, `drawdown=23.5%`, exits `{'ATR_TRAIL': 3, 'EOD': 2, 'FAILURE': 3, 'SL': 12}`.
 - Interpretation: BTC-only remains the cleaner baseline. The multi-coin universe still dilutes results after the exit semantics are corrected.
 
+## 2026-07-10 Cost-Adjusted Trend Check
+
+- Backtest now supports per-side `fee_bps` and `slippage_bps`.
+- `trend`, 240 days, `BTC`, `risk=0.03`, `leverage=2.0`, `atr_trailing=on`, `failure_exit=on`, `fee_bps=4.5`: `trades=7`, `win_rate=28.6%`, `net_pnl=+10.0%`, `gross_pnl=+10.7%`, `cost=0.6%`, `drawdown=6.3%`.
+- `trend`, 240 days, `BTC,ETH,SOL,BNB`, same settings: `trades=20`, `win_rate=25.0%`, `net_pnl=-13.8%`, `gross_pnl=-12.5%`, `cost=1.3%`, `drawdown=23.9%`.
+- `trend`, 1000 days, `BTC`, same settings: `trades=30`, `win_rate=33.3%`, `net_pnl=+14.9%`, `gross_pnl=+17.4%`, `cost=2.5%`, `drawdown=29.6%`.
+- `trend`, 1000 days, `BTC,ETH,SOL,BNB`, same settings: `trades=87`, `win_rate=35.6%`, `net_pnl=+19.9%`, `gross_pnl=+27.2%`, `cost=7.3%`, `drawdown=50.0%`.
+- Decision: Use `BTC-only trend` as the default research baseline. Multi-coin trend remains a separate universe-selection problem because it can improve gross opportunity but materially worsens drawdown.
+
 ## Historical 50-Coin Context
 
 The older 50-coin backtest notes in [docs/backtest_results.md](/D:/code/trading-strategy/docs/backtest_results.md) are still useful as context:

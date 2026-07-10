@@ -36,6 +36,8 @@ def build_parser():
     parser.add_argument("--initial-capital", type=float, default=1000.0)
     parser.add_argument("--leverage", type=float, default=3.0)
     parser.add_argument("--risk-pct", type=float, default=0.05)
+    parser.add_argument("--fee-bps", type=float, default=0.0)
+    parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--show-trades", action="store_true")
     parser.add_argument("--disable-btc-filter", action="store_true")
     parser.add_argument("--enable-atr-trailing", action="store_true")
@@ -61,6 +63,8 @@ def build_config(args):
         btc_filter_enabled=not args.disable_btc_filter,
         atr_trailing_enabled=args.enable_atr_trailing,
         failure_exit_enabled=args.enable_failure_exit,
+        fee_bps=args.fee_bps,
+        slippage_bps=args.slippage_bps,
     )
 
 
@@ -79,6 +83,8 @@ def main(argv=None):
             risk_pcts=_parse_csv_values(args.risk_grid, float),
             btc_filter_modes=_parse_btc_filter_grid(args.btc_filter_grid),
             atr_trailing_modes=(False, True),
+            fee_bps=args.fee_bps,
+            slippage_bps=args.slippage_bps,
         )
         for line in format_optimization_lines(rows, top_n=args.top):
             print(line)

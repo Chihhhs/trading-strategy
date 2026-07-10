@@ -79,6 +79,7 @@ def apply_closed_trade(
     exit_time=None,
     update_balance=True,
     exit_context=None,
+    transaction_cost=0.0,
 ):
     trade = build_trade_record(
         pos,
@@ -87,6 +88,22 @@ def apply_closed_trade(
         exit_time=exit_time,
         exit_context=exit_context,
     )
+    cost = round(max(_safe_float(transaction_cost, default=0.0) or 0.0, 0.0), 4)
+    if cost:
+        gross_pnl = trade["pnl"]
+        trade["gross_pnl"] = gross_pnl
+        trade["cost"] = cost
+        trade["pnl"] = round(gross_pnl - cost, 4)
+        notional = abs((_safe_float((pos or {}).get("entry"), default=0.0) or 0.0) * (_safe_float((pos or {}).get("size"), default=0.0) or 0.0))
+        trade["pnl_pct"] = round((trade["pnl"] / notional) * 100, 4) if notional > 0 else 0.0
+        if trade["pnl"] > 0:
+            trade["outcome"] = "win"
+        elif trade["pnl"] < 0:
+            trade["outcome"] = "loss"
+        else:
+            trade["outcome"] = "breakeven"
+    else:
+        trade["cost"] = 0.0
 
     if update_balance:
         state["balance"] = (state.get("balance") or 0.0) + trade["pnl"]

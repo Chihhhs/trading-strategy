@@ -56,6 +56,8 @@ def build_portfolio_summary(state, equity_curve, peak_balance=None):
     initial_balance = float(state.get("initial_balance") or 0.0)
     ending_balance = round(float(state.get("balance") or 0.0), 2)
     total_pnl = round(ending_balance - initial_balance, 2)
+    total_cost = round(sum(float(trade.get("cost") or 0.0) for trade in state.get("history", [])), 2)
+    gross_pnl = round(total_pnl + total_cost, 2)
     wins = int(state.get("stats", {}).get("wins") or 0)
     total_trades = int(state.get("stats", {}).get("total_trades") or 0)
     summary = {
@@ -66,6 +68,10 @@ def build_portfolio_summary(state, equity_curve, peak_balance=None):
         "ending_balance": ending_balance,
         "total_pnl": total_pnl,
         "total_pnl_pct": round((total_pnl / initial_balance * 100) if initial_balance else 0.0, 1),
+        "gross_pnl": gross_pnl,
+        "gross_pnl_pct": round((gross_pnl / initial_balance * 100) if initial_balance else 0.0, 1),
+        "total_cost": total_cost,
+        "total_cost_pct": round((total_cost / initial_balance * 100) if initial_balance else 0.0, 1),
         "max_drawdown": _calc_max_drawdown(equity_curve),
         "peak_balance": round(float(peak_balance or max(equity_curve or [initial_balance])), 2),
         "avg_hold_bars": _calc_avg_hold_bars(state.get("history", [])),
@@ -80,11 +86,18 @@ def build_portfolio_summary(state, equity_curve, peak_balance=None):
 
 def format_result_lines(result, *, show_trades=False):
     lines = []
-    lines.append(
-        "Portfolio: trades={trades}, win_rate={win_rate:.1f}%, pnl={total_pnl_pct:+.1f}%, drawdown={max_drawdown:.1f}%, avg_hold_bars={avg_hold_bars:.1f}, score={score:+.2f}".format(
-            **result.portfolio
+    if result.portfolio.get("total_cost"):
+        lines.append(
+            "Portfolio: trades={trades}, win_rate={win_rate:.1f}%, net_pnl={total_pnl_pct:+.1f}%, gross_pnl={gross_pnl_pct:+.1f}%, cost={total_cost_pct:.1f}%, drawdown={max_drawdown:.1f}%, avg_hold_bars={avg_hold_bars:.1f}, score={score:+.2f}".format(
+                **result.portfolio
+            )
         )
-    )
+    else:
+        lines.append(
+            "Portfolio: trades={trades}, win_rate={win_rate:.1f}%, pnl={total_pnl_pct:+.1f}%, drawdown={max_drawdown:.1f}%, avg_hold_bars={avg_hold_bars:.1f}, score={score:+.2f}".format(
+                **result.portfolio
+            )
+        )
     lines.append(f"Exit reasons: {result.portfolio.get('exit_reason_counts', {})}")
     for coin_result in result.coin_results:
         lines.append(
@@ -110,7 +123,7 @@ def format_optimization_lines(rows, *, top_n=10):
             f"atr_trailing={'on' if row.get('atr_trailing_enabled') else 'off'} "
             f"trades={row['trades']} atr_trail_exits={row.get('atr_trail_exits', 0)} win_rate={row['win_rate']:.1f}% "
             f"avg_hold_bars={row.get('avg_hold_bars', 0.0):.1f} "
-            f"pnl={row['total_pnl_pct']:+.1f}% drawdown={row['max_drawdown']:.1f}% "
+            f"pnl={row['total_pnl_pct']:+.1f}% cost={row.get('total_cost_pct', 0.0):.1f}% drawdown={row['max_drawdown']:.1f}% "
             f"score={row['score']:+.2f}"
         )
     return lines

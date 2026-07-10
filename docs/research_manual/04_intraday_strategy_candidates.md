@@ -116,3 +116,16 @@
 5. Add `intraday_mean_reversion` only after momentum has a reliable baseline.
 6. Build funding/basis monitoring as a separate report path.
 7. Delay order flow and market making until websocket order book capture and replay exist.
+
+## 2026-07-10 Data Check
+
+- Data source: Binance public spot klines, `15m`, BTC/ETH/SOL/BNB, 2026-04-11 12:45 UTC to 2026-07-10 12:30 UTC.
+- Local file: `data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json`.
+- Source coverage: 8640 bars per symbol.
+- `intraday_momentum`, BTC-only, 90 days, `risk=0.03`, `leverage=2`: `trades=573`, `win_rate=38.6%`, gross `pnl=-27.9%`, `drawdown=33.0%`.
+- `intraday_momentum`, BTC/ETH/SOL/BNB, same settings: `trades=2324`, `win_rate=39.5%`, gross `pnl=-59.1%`, `drawdown=77.5%`.
+- `trend`, BTC-only, same 15m data with ATR trailing and failure exit enabled: `trades=75`, `win_rate=29.3%`, gross `pnl=-5.2%`, `drawdown=8.0%`.
+- Fee sensitivity using Hyperliquid tier-0 perps rates:
+  - BTC-only 90d turnover was about `1866.7x` starting capital. Estimated taker fee drag was `84.0%`; maker fee drag was `28.0%`.
+  - Four-coin 90d turnover was about `5880.6x` starting capital. Estimated taker fee drag was `264.6%`; maker fee drag was `88.2%`.
+- Decision: The first `intraday_momentum` implementation is a wiring baseline, not a deployable strategy. It overtrades and fails before realistic costs. Next validation should focus on turnover reduction, stronger regime filters, and cost-adjusted backtest reporting before live or paper promotion.

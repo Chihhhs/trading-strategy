@@ -41,6 +41,42 @@ class LivePositionsTest(unittest.TestCase):
         finally:
             live.config.set_mode(old_mode)
 
+    def test_update_positions_paper_handles_trend_position_without_tp(self):
+        old_mode = live.config.MODE
+        live.config.set_mode("paper")
+        try:
+            state = {
+                "balance": 1000.0,
+                "positions": [
+                    {
+                        "coin": "BTC",
+                        "direction": "long",
+                        "entry": 100.0,
+                        "tp": None,
+                        "sl": 95.0,
+                        "size": 2.0,
+                        "entry_time": "2026-07-05T09:00:00",
+                        "signal_reason": "TREND_BUY",
+                        "entry_reason": "TREND_BUY",
+                        "signal_score": 5,
+                        "entry_order_type": "paper",
+                        "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True},
+                    }
+                ],
+                "history": [],
+                "stats": {"total_trades": 0, "wins": 0, "losses": 0, "total_pnl": 0.0, "max_win": 0.0, "max_loss": 0.0},
+            }
+            update_positions(state, {"BTC": 96.0}, {})
+            self.assertEqual(len(state["positions"]), 1)
+            self.assertEqual(state["history"], [])
+
+            update_positions(state, {"BTC": 94.0}, {})
+            self.assertEqual(state["positions"], [])
+            self.assertEqual(len(state["history"]), 1)
+            self.assertEqual(state["history"][0]["exit_reason"], "SL")
+        finally:
+            live.config.set_mode(old_mode)
+
     @patch("trading_strategy.live.engine.positions.record_trade_event")
     @patch("trading_strategy.live.engine.positions.close_hl_position")
     def test_update_positions_marks_live_close_pending_until_reconciled(

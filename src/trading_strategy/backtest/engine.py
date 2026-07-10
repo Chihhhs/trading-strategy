@@ -54,6 +54,18 @@ def _build_position(coin, signal, current_price, current_bar, state, config, str
     )
 
 
+def _estimate_transaction_cost(position, exit_price, config):
+    fee_bps = float(getattr(config, "fee_bps", 0.0) or 0.0)
+    slippage_bps = float(getattr(config, "slippage_bps", 0.0) or 0.0)
+    rate = (fee_bps + slippage_bps) / 10000.0
+    if rate <= 0:
+        return 0.0
+    size = abs(float(position.get("size") or 0.0))
+    entry = abs(float(position.get("entry") or 0.0))
+    exit_px = abs(float(exit_price or 0.0))
+    return (entry * size + exit_px * size) * rate
+
+
 def _close_position(state, position, exit_price, exit_reason, *, exit_time=None):
     trade = apply_closed_trade(
         state,
@@ -63,6 +75,7 @@ def _close_position(state, position, exit_price, exit_reason, *, exit_time=None)
         exit_time=exit_time,
         update_balance=True,
         exit_context={"close_status": "simulated"},
+        transaction_cost=_estimate_transaction_cost(position, exit_price, state.get("_config")),
     )
     return trade
 

@@ -24,6 +24,8 @@ class BacktestConfig:
     failure_exit_enabled: bool = False
     failure_exit_bars: int = 3
     failure_exit_mode: str = "breakout_failure"
+    fee_bps: float = 0.0
+    slippage_bps: float = 0.0
 
 
 @dataclass(frozen=True)

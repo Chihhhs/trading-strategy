@@ -76,6 +76,7 @@ class PortfolioBacktester:
         state["positions"] = []
         state["history"] = []
         state["initial_balance"] = self.config.initial_capital
+        state["_config"] = self.config
 
         max_len = max((len(series) for series in normalized.values()), default=0)
         equity_curve = [self.config.initial_capital]

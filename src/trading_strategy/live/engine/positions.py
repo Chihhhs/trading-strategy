@@ -1,12 +1,32 @@
 from datetime import datetime, timedelta
 
 from trading_strategy.core.trade_history import apply_closed_trade
+from trading_strategy.strategies import build_exit_policy
 
 from .. import config
 from ..io import record_trade_event
 from ..orders import close_hl_position
 from .helpers import check_atr_trailing_exit, check_trend_failure_exit, check_trend_reversal
 from .reconcile import sync_state_with_exchange_positions
+
+
+def _paper_exit_triggered(pos, current):
+    exit_policy = build_exit_policy(position=pos)
+    tp = pos.get("tp")
+    sl = pos.get("sl")
+    direction = pos.get("direction")
+    requires_tp = exit_policy.get("requires_tp")
+    tp_enabled = tp is not None if requires_tp is None else (bool(requires_tp) and tp is not None)
+
+    tp_hit = False
+    sl_hit = False
+    if direction == "long":
+        tp_hit = tp_enabled and current >= tp
+        sl_hit = sl is not None and current <= sl
+    else:
+        tp_hit = tp_enabled and current <= tp
+        sl_hit = sl is not None and current >= sl
+    return tp_hit, sl_hit
 
 
 def update_positions(state, prices, data_cache):
@@ -90,18 +110,9 @@ def update_positions(state, prices, data_cache):
             if pos["direction"] == "long"
             else (pos["entry"] - current) * pos["size"]
         )
-        should_close = (
-            (current >= pos["tp"] or current <= pos["sl"])
-            if pos["direction"] == "long"
-            else (current <= pos["tp"] or current >= pos["sl"])
-        )
-        if should_close:
-            exit_reason = (
-                "TP"
-                if (pos["direction"] == "long" and current >= pos["tp"])
-                or (pos["direction"] == "short" and current <= pos["tp"])
-                else "SL"
-            )
+        tp_hit, sl_hit = _paper_exit_triggered(pos, current)
+        if tp_hit or sl_hit:
+            exit_reason = "TP" if tp_hit else "SL"
             apply_closed_trade(
                 state,
                 pos,

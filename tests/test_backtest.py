@@ -144,6 +144,24 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(result.trades[0]["exit_reason"], "TP")
         self.assertGreater(result.trades[0]["pnl"], 0)
 
+    def test_backtest_transaction_cost_reduces_reported_pnl(self):
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112, 113))]}
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal("long", tp=110, sl=96, score=5, reason="TEST_BUY")
+
+        config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1, fee_bps=10.0)
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        trade = result.trades[0]
+        self.assertGreater(trade["cost"], 0)
+        self.assertGreater(trade["gross_pnl"], trade["pnl"])
+        self.assertGreater(result.portfolio["gross_pnl"], result.portfolio["total_pnl"])
+        rendered = "\n".join(cli.format_result_lines(result))
+        self.assertIn("net_pnl=", rendered)
+        self.assertIn("cost=", rendered)
+
     def test_engine_closes_short_on_sl(self):
         data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 99, 105, 106))]}
 
