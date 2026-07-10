@@ -244,8 +244,9 @@ MIT
 
 ## Research Manual
 
-- [docs/research_manual/00_decision_framework.md](/D:/code/trading-strategy/docs/research_manual/00_decision_framework.md)
-- [docs/research_manual/01_quant_research_map.md](/D:/code/trading-strategy/docs/research_manual/01_quant_research_map.md)
-- [docs/research_manual/02_current_strategy_review.md](/D:/code/trading-strategy/docs/research_manual/02_current_strategy_review.md)
-- [docs/research_manual/03_research_backlog.md](/D:/code/trading-strategy/docs/research_manual/03_research_backlog.md)
-- [docs/exit_rules.md](/D:/code/trading-strategy/docs/exit_rules.md)
+- [docs/research_manual/00_decision_framework.md](docs/research_manual/00_decision_framework.md)
+- [docs/research_manual/01_quant_research_map.md](docs/research_manual/01_quant_research_map.md)
+- [docs/research_manual/02_current_strategy_review.md](docs/research_manual/02_current_strategy_review.md)
+- [docs/research_manual/03_research_backlog.md](docs/research_manual/03_research_backlog.md)
+- [docs/research_manual/04_intraday_strategy_candidates.md](docs/research_manual/04_intraday_strategy_candidates.md)
+- [docs/exit_rules.md](docs/exit_rules.md)
