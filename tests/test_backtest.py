@@ -419,6 +419,79 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("atr_trail_exits=", rendered)
         self.assertEqual(len(rows), 8)
 
+    def test_legacy_strategy_uses_fixed_tp_policy(self):
+        prices = [100.0] * 60 + [101.0, 100.8, 101.1, 101.0, 101.2]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        config = BacktestConfig(
+            coins=("BTC",),
+            strategy="legacy_unified",
+            max_days=None,
+            min_bars=50,
+            btc_filter_enabled=False,
+            intrabar_exit_enabled=True,
+            price_position_filter_enabled=False,
+            dead_cat_filter_enabled=False,
+            max_hold_bars=2,
+        )
+        result = PortfolioBacktester(config=config).run(data_map)
+        self.assertGreaterEqual(result.portfolio["trades"], 0)
+        if result.trades:
+            self.assertEqual(result.trades[0]["exit_policy"], "legacy_fixed_tpsl")
+
+    def test_intrabar_exit_prefers_stop_first(self):
+        data_map = {
+            "BTC": [
+                build_bar(100, 0),
+                build_bar(101, 1),
+                {
+                    **build_bar(102, 2),
+                    "high": 111,
+                    "low": 94,
+                    "close": 102,
+                },
+            ]
+        }
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal("long", tp=110, sl=95, score=5, reason="TEST_BUY")
+
+        config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1, intrabar_exit_enabled=True)
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.trades[0]["exit_reason"], "SL")
+        self.assertEqual(result.trades[0]["exit"], 95.0)
+
+    def test_compare_strategies_cli_outputs_comparison(self):
+        prices = [100.0] * 60 + [101.0, 102.0, 103.0, 104.0]
+        payload = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                results = cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        str(len(prices)),
+                        "--data-path",
+                        path,
+                        "--compare-strategies",
+                        "trend,legacy_unified",
+                    ]
+                )
+        finally:
+            os.remove(path)
+        rendered = output.getvalue()
+        self.assertIn("Comparison:", rendered)
+        self.assertIn("legacy_unified:", rendered)
+        self.assertIn("trend:", rendered)
+        self.assertIn("legacy_unified", results)
+        self.assertIn("trend", results)
+
 
 if __name__ == "__main__":
     unittest.main()

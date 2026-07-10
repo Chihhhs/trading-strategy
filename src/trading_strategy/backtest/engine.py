@@ -50,6 +50,7 @@ def _build_position(coin, signal, current_price, current_bar, state, config, str
             config=config,
             mode="backtest",
             price=current_price,
+            diagnostics=state.get("_diagnostics"),
         ),
     )
 
@@ -90,7 +91,37 @@ def close_position_at_bar(state, position, current_bar, exit_reason="EOD"):
     )
 
 
-def _resolve_exit(position, current_price):
+def _intrabar_exit(position, current_bar, config):
+    if not bool(getattr(config, "intrabar_exit_enabled", False)):
+        return None
+    high = float(current_bar.get("high", current_bar.get("close")))
+    low = float(current_bar.get("low", current_bar.get("close")))
+    tp = position.get("tp")
+    sl = position.get("sl")
+    policy = str(getattr(config, "intrabar_fill_policy", "stop_first") or "stop_first")
+
+    if position["direction"] == "long":
+        sl_hit = sl is not None and low <= float(sl)
+        tp_hit = tp is not None and high >= float(tp)
+    else:
+        sl_hit = sl is not None and high >= float(sl)
+        tp_hit = tp is not None and low <= float(tp)
+
+    if sl_hit and tp_hit:
+        if policy == "target_first":
+            return float(tp), "TP"
+        return float(sl), "SL"
+    if sl_hit:
+        return float(sl), "SL"
+    if tp_hit:
+        return float(tp), "TP"
+    return None
+
+
+def _resolve_exit(position, current_price, current_bar, config):
+    intrabar_exit = _intrabar_exit(position, current_bar, config)
+    if intrabar_exit is not None:
+        return intrabar_exit
     if position["direction"] == "long":
         if position.get("tp") is not None and current_price >= position["tp"]:
             return current_price, "TP"
@@ -118,6 +149,7 @@ def _resolve_strategy_exit(position, current_price, config, current_index, windo
         config=config,
         mode="backtest",
         price=current_price,
+        diagnostics=state.get("_diagnostics"),
     )
     trail = strategy.resolve_stop_target(
         position,
@@ -149,7 +181,7 @@ class BacktestEngine:
         active_position = next((pos for pos in open_positions if pos.get("coin") == coin), None)
 
         if active_position is not None:
-            resolved_exit = _resolve_exit(active_position, current_price)
+            resolved_exit = _resolve_exit(active_position, current_price, current_bar, self.config)
             if resolved_exit is None:
                 resolved_exit = _resolve_strategy_exit(
                     active_position,
@@ -187,6 +219,7 @@ class BacktestEngine:
             balance=float(state.get("balance") or 0.0),
             open_positions=tuple(open_positions),
             config=self.config,
+            diagnostics=state.get("_diagnostics"),
         )
         signal = self.strategy.generate_signal(context)
         if signal is None:

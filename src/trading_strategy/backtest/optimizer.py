@@ -34,6 +34,9 @@ def run_parameter_sweep(
                             risk_pct=risk_pct,
                             btc_filter_enabled=btc_filter_enabled,
                             atr_trailing_enabled=atr_trailing_enabled,
+                            intrabar_exit_enabled=(strategy == "legacy_unified"),
+                            price_position_filter_enabled=(strategy == "legacy_unified"),
+                            dead_cat_filter_enabled=(strategy == "legacy_unified"),
                             fee_bps=fee_bps,
                             slippage_bps=slippage_bps,
                         )

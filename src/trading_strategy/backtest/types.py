@@ -25,6 +25,14 @@ class BacktestConfig:
     failure_exit_enabled: bool = False
     failure_exit_bars: int = 3
     failure_exit_mode: str = "breakout_failure"
+    max_hold_bars: int | None = None
+    intrabar_exit_enabled: bool = False
+    intrabar_fill_policy: str = "stop_first"
+    price_position_filter_enabled: bool = False
+    dead_cat_filter_enabled: bool = False
+    regime_mode: str = "auto"
+    long_term_min_score: float = 4.0
+    short_term_min_score: float = 5.0
     fee_bps: float = 0.0
     slippage_bps: float = 0.0
 

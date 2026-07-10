@@ -5,7 +5,7 @@ from trading_strategy.strategies import available_strategy_names
 from .data import DATA_PATH, DEFAULT_COINS, load_historical_data
 from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
-from .reporting import format_optimization_lines, format_result_lines
+from .reporting import format_comparison_lines, format_optimization_lines, format_result_lines
 from .types import BacktestConfig
 
 
@@ -40,9 +40,15 @@ def build_parser():
     parser.add_argument("--fee-bps", type=float, default=0.0)
     parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--show-trades", action="store_true")
+    parser.add_argument("--compare-strategies", default="")
     parser.add_argument("--disable-btc-filter", action="store_true")
     parser.add_argument("--enable-atr-trailing", action="store_true")
     parser.add_argument("--enable-failure-exit", action="store_true")
+    parser.add_argument("--enable-intrabar-exit", action="store_true")
+    parser.add_argument("--intrabar-fill-policy", choices=("stop_first", "target_first"), default="stop_first")
+    parser.add_argument("--max-hold-bars", type=int, default=None)
+    parser.add_argument("--disable-price-position-filter", action="store_true")
+    parser.add_argument("--disable-dead-cat-filter", action="store_true")
     parser.add_argument("--optimize", action="store_true")
     parser.add_argument("--top", type=int, default=10)
     parser.add_argument("--strategy-grid", default="trend")
@@ -54,6 +60,9 @@ def build_parser():
 
 def build_config(args):
     coins = tuple(coin.strip().upper() for coin in args.coins.split(",") if coin.strip())
+    intrabar_exit_enabled = args.enable_intrabar_exit or args.strategy == "legacy_unified"
+    price_position_filter_enabled = args.strategy == "legacy_unified" and not args.disable_price_position_filter
+    dead_cat_filter_enabled = args.strategy == "legacy_unified" and not args.disable_dead_cat_filter
     return BacktestConfig(
         coins=coins,
         strategy=args.strategy,
@@ -65,6 +74,11 @@ def build_config(args):
         btc_filter_enabled=not args.disable_btc_filter,
         atr_trailing_enabled=args.enable_atr_trailing,
         failure_exit_enabled=args.enable_failure_exit,
+        max_hold_bars=args.max_hold_bars,
+        intrabar_exit_enabled=intrabar_exit_enabled,
+        intrabar_fill_policy=args.intrabar_fill_policy,
+        price_position_filter_enabled=price_position_filter_enabled,
+        dead_cat_filter_enabled=dead_cat_filter_enabled,
         fee_bps=args.fee_bps,
         slippage_bps=args.slippage_bps,
     )
@@ -92,6 +106,16 @@ def main(argv=None):
         for line in format_optimization_lines(rows, top_n=args.top):
             print(line)
         return rows
+    compare_strategies = tuple(item.strip() for item in str(args.compare_strategies or "").split(",") if item.strip())
+    if compare_strategies:
+        results = {}
+        for strategy_name in compare_strategies:
+            args.strategy = strategy_name
+            config = build_config(args)
+            results[strategy_name] = PortfolioBacktester(config=config).run(data_map)
+        for line in format_comparison_lines(results):
+            print(line)
+        return results
     config = build_config(args)
     result = PortfolioBacktester(config=config).run(data_map)
     for line in format_result_lines(result, show_trades=args.show_trades):

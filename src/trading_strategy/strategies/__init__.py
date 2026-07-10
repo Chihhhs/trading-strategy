@@ -2,6 +2,7 @@
 
 from .base import BaseStrategy, Strategy, StrategyContext, StrategySignal
 from .intraday_momentum import IntradayMomentumStrategy
+from .legacy_unified import LegacyUnifiedStrategy
 from .trend import (
     TrendStrategy,
     build_exit_policy,
@@ -14,6 +15,7 @@ from .trend import (
 
 _STRATEGIES = {
     "intraday_momentum": IntradayMomentumStrategy(),
+    "legacy_unified": LegacyUnifiedStrategy(),
     "trend": TrendStrategy(),
 }
 
@@ -37,6 +39,7 @@ def resolve_strategy(name="trend"):
 __all__ = [
     "BaseStrategy",
     "IntradayMomentumStrategy",
+    "LegacyUnifiedStrategy",
     "Strategy",
     "StrategyContext",
     "StrategySignal",

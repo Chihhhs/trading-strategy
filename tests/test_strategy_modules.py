@@ -9,6 +9,7 @@ if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
 from trading_strategy.core.exit_policy import build_exit_policy
+from trading_strategy.core.legacy_unified import analyze_market_regime, is_dead_cat_bounce, is_price_position_blocked
 from trading_strategy.positions import build_position_snapshot, build_position_status_counts
 from trading_strategy.strategies import available_strategy_names, resolve_strategy
 from trading_strategy.strategies.base import StrategyContext
@@ -34,6 +35,11 @@ class StrategyModulesTest(unittest.TestCase):
         self.assertIn("intraday_momentum", available_strategy_names())
         strategy = resolve_strategy("intraday_momentum")
         self.assertEqual(strategy.name, "intraday_momentum")
+
+    def test_resolve_strategy_returns_legacy_unified(self):
+        self.assertIn("legacy_unified", available_strategy_names())
+        strategy = resolve_strategy("legacy_unified")
+        self.assertEqual(strategy.name, "legacy_unified")
 
     def test_resolve_strategy_rejects_unknown_name(self):
         with self.assertRaisesRegex(ValueError, "Unknown strategy 'unknown'"):
@@ -61,6 +67,18 @@ class StrategyModulesTest(unittest.TestCase):
         exit_policy = build_exit_policy(signal={"reason": "TREND_BUY"})
         self.assertEqual(exit_policy["name"], "trend_sl_only")
         self.assertFalse(exit_policy["requires_tp"])
+
+    def test_legacy_core_market_regime_and_filters(self):
+        bars = [build_bar(100 + index * 0.6, index, volume=1200 + index * 10) for index in range(70)]
+        regime = analyze_market_regime(bars)
+        self.assertIsNotNone(regime)
+        self.assertIn(regime["regime"], ("long_term", "short_term"))
+        self.assertTrue(is_price_position_blocked("long", regime, enabled=True))
+
+        bear_bounce_bars = [build_bar(100 - index * 0.8, index, volume=1000) for index in range(60)]
+        bear_bounce_bars.extend(build_bar(53 + (index * 1.5), 60 + index, volume=1100) for index in range(10))
+        bounce_regime = analyze_market_regime(bear_bounce_bars)
+        self.assertTrue(is_dead_cat_bounce("long", bounce_regime, enabled=True, bounce_threshold_pct=15))
 
     def test_position_snapshot_marks_live_protected_position(self):
         snapshot = build_position_snapshot(

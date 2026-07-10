@@ -23,6 +23,7 @@ class StrategyContext:
     config: Any = None
     mode: str = "paper"
     price: float | None = None
+    diagnostics: dict[str, Any] | None = None
 
 
 class Strategy(Protocol):

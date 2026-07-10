@@ -26,6 +26,9 @@ class PortfolioBacktester:
                 if signal is None:
                     return None
                 if config.btc_filter_enabled and self.should_block_for_btc(context.coin, signal, context.btc_window):
+                    diagnostics = context.diagnostics
+                    if diagnostics is not None:
+                        diagnostics["btc_filtered_signals"] = int(diagnostics.get("btc_filtered_signals") or 0) + 1
                     return None
                 return signal
 
@@ -77,10 +80,12 @@ class PortfolioBacktester:
         state["history"] = []
         state["initial_balance"] = self.config.initial_capital
         state["_config"] = self.config
+        state["_diagnostics"] = {}
 
         max_len = max((len(series) for series in normalized.values()), default=0)
         equity_curve = [self.config.initial_capital]
         peak_balance = self.config.initial_capital
+        state["_diagnostics"]["missing_data_coins"] = [coin for coin, series in normalized.items() if not series]
 
         for index in range(self.config.min_bars, max_len):
             for coin in self.config.coins:
