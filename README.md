@@ -96,6 +96,7 @@ python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid tr
 - `--max-days`：使用最近幾天歷史資料，預設 `240`
 - `--initial-capital`：起始資金，預設 `1000`
 - `--risk-pct`：每筆交易風險比例，預設 `0.05`
+- `--max-positions`：回測同時最大持倉數，預設不限制；多幣 trend 建議設 `2`
 - `--fee-bps`：每邊交易費用，單位 bps，預設 `0`
 - `--slippage-bps`：每邊滑價估計，單位 bps，預設 `0`
 - `--disable-btc-filter`：停用 BTC 趨勢過濾
@@ -105,6 +106,12 @@ python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid tr
 
 ```bash
 python backtest/backtest_runner.py --coins BTC --strategy trend --max-days 240 --risk-pct 0.03 --leverage 2 --enable-atr-trailing --enable-failure-exit --fee-bps 4.5
+```
+
+多幣 trend 研究時，避免直接把每個幣都用同一個高 `risk-pct` 疊上去；先用較低單幣風險與持倉上限：
+
+```bash
+python backtest/backtest_runner.py --coins BTC,BNB,ETH --strategy trend --max-days 1000 --risk-pct 0.015 --max-positions 2 --enable-atr-trailing --enable-failure-exit --fee-bps 4.5
 ```
 
 ### Strategy Selection

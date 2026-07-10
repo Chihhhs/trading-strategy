@@ -16,6 +16,7 @@ class BacktestConfig:
     initial_capital: float = DEFAULT_INITIAL_CAPITAL
     leverage: float = DEFAULT_LEVERAGE
     risk_pct: float = DEFAULT_RISK_PCT
+    max_positions: int | None = None
     btc_filter_enabled: bool = True
     min_bars: int = 50
     atr_trailing_enabled: bool = False

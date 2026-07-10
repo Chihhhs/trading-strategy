@@ -28,6 +28,24 @@
 - `trend`, 1000 days, `BTC,ETH,SOL,BNB`, same settings: `trades=87`, `win_rate=35.6%`, `net_pnl=+19.9%`, `gross_pnl=+27.2%`, `cost=7.3%`, `drawdown=50.0%`.
 - Decision: Use `BTC-only trend` as the default research baseline. Multi-coin trend remains a separate universe-selection problem because it can improve gross opportunity but materially worsens drawdown.
 
+## 2026-07-10 Multi-Coin Diagnosis
+
+- The issue is not only signal quality. It is also portfolio construction.
+- Single-coin 1000-day cost-adjusted checks with `risk=0.03`, `leverage=2`, `fee_bps=4.5`:
+  - `BTC`: `net_pnl=+14.9%`, `drawdown=29.6%`.
+  - `BNB`: `net_pnl=+15.8%`, `drawdown=25.7%`.
+  - `ETH`: `net_pnl=+1.7%`, `drawdown=29.1%`.
+  - `SOL`: no trades in the sampled data.
+- Multi-coin 1000-day checks:
+  - `BTC,BNB`, `risk=0.03`: `net_pnl=+25.3%`, `drawdown=31.4%`.
+  - `BTC,BNB`, `risk=0.015`: `net_pnl=+18.1%`, `drawdown=16.1%`.
+  - `BTC,ETH,SOL,BNB`, `risk=0.01`: `net_pnl=+13.7%`, `drawdown=19.9%`.
+  - `BTC,BNB,ETH`, `risk=0.015`, `max_positions=2`: `net_pnl=+21.8%`, `drawdown=22.6%`.
+- Recent-window checks are weaker:
+  - `BTC,BNB`, 240 days, `risk=0.015`: `net_pnl=-1.5%`, `drawdown=6.8%`.
+  - `BTC,BNB,ETH`, 240 days, `risk=0.015`, `max_positions=2`: `net_pnl=-3.5%`, `drawdown=11.2%`.
+- Decision: Multi-coin trend is viable only as a controlled portfolio. Do not use the full coin basket with the same per-trade risk. Use lower per-coin risk, `max_positions`, and a rolling universe filter that can remove weak recent coins.
+
 ## Historical 50-Coin Context
 
 The older 50-coin backtest notes in [docs/backtest_results.md](/D:/code/trading-strategy/docs/backtest_results.md) are still useful as context:

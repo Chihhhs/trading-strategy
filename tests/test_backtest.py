@@ -274,6 +274,28 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(len(result.coin_results), 2)
         self.assertGreater(result.portfolio["ending_balance"], result.portfolio["starting_balance"])
 
+    def test_backtest_respects_max_positions_for_new_entries(self):
+        data_map = {
+            "BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 102, 103))],
+            "ETH": [build_bar(price, index) for index, price in enumerate((50, 51, 52, 53))],
+        }
+
+        def build_signal(context):
+            if context.current_bar["time"].endswith("02T00:00:00"):
+                return StrategySignal("long", tp=999, sl=context.current_bar["close"] - 10, score=5, reason="TEST_BUY")
+            return None
+
+        config = BacktestConfig(
+            coins=("BTC", "ETH"),
+            max_days=None,
+            min_bars=1,
+            max_positions=1,
+            btc_filter_enabled=False,
+        )
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.portfolio["trades"], 1)
+        self.assertEqual(result.trades[0]["coin"], "BTC")
+
     def test_cli_returns_portfolio_and_coin_summaries(self):
         payload = {
             "BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112, 113))],

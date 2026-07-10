@@ -36,6 +36,7 @@ def build_parser():
     parser.add_argument("--initial-capital", type=float, default=1000.0)
     parser.add_argument("--leverage", type=float, default=3.0)
     parser.add_argument("--risk-pct", type=float, default=0.05)
+    parser.add_argument("--max-positions", type=int, default=None)
     parser.add_argument("--fee-bps", type=float, default=0.0)
     parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--show-trades", action="store_true")
@@ -60,6 +61,7 @@ def build_config(args):
         initial_capital=args.initial_capital,
         leverage=args.leverage,
         risk_pct=args.risk_pct,
+        max_positions=args.max_positions,
         btc_filter_enabled=not args.disable_btc_filter,
         atr_trailing_enabled=args.enable_atr_trailing,
         failure_exit_enabled=args.enable_failure_exit,
@@ -78,6 +80,7 @@ def main(argv=None):
             coins=tuple(coin.strip().upper() for coin in args.coins.split(",") if coin.strip()),
             max_days=args.max_days,
             initial_capital=args.initial_capital,
+            max_positions=args.max_positions,
             strategies=_parse_csv_values(args.strategy_grid, str),
             leverages=_parse_csv_values(args.leverage_grid, float),
             risk_pcts=_parse_csv_values(args.risk_grid, float),

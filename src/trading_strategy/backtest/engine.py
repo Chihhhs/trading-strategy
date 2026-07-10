@@ -175,6 +175,9 @@ class BacktestEngine:
 
         if active_position is not None:
             return None
+        max_positions = getattr(self.config, "max_positions", None)
+        if max_positions is not None and len(open_positions) >= int(max_positions):
+            return None
 
         context = StrategyContext(
             coin=coin,
