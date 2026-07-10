@@ -3,13 +3,21 @@
 - Date: 2026-07-05
 - Data range: Current repo code, local 240-day backtest snapshots, and historical 50-coin notes in `docs/backtest_results.md`
 - Applicable markets: BTC, ETH, SOL, BNB plus prior 50-coin research context
-- Last updated: 2026-07-05
+- Last updated: 2026-07-10
 
 ## Current Local Baseline
 
 - `trend`, 240 days, `BTC,ETH,SOL,BNB`, `risk=0.03`, `leverage=2.0`: `trades=21`, `win_rate=42.9%`, `pnl=+9.5%`, `drawdown=13.8%`
 - `trend`, 240 days, `BTC` only, `risk=0.03`, `leverage=2.0`: `trades=9`, `win_rate=55.6%`, `pnl=+15.8%`, `drawdown=3.6%`
 - Optimizer snapshot: top-ranked combinations were all `trend + btc_filter_on + risk_pct 0.03`, and `leverage=2/3/5` showed nearly identical results under the current sizing model.
+
+## 2026-07-10 Refactor Check
+
+- `trend_sl_only` backtest behavior now matches live semantics more closely: fixed TP is no longer used as the default trend exit.
+- Backtest strategy hooks now exercise `ATR_TRAIL` and `FAILURE` exits when enabled.
+- `trend`, 240 days, `BTC`, `risk=0.03`, `leverage=2.0`, `atr_trailing=on`, `failure_exit=on`: `trades=7`, `win_rate=28.6%`, `pnl=+10.7%`, `drawdown=6.1%`, exits `{'ATR_TRAIL': 1, 'EOD': 1, 'FAILURE': 1, 'SL': 4}`.
+- `trend`, 240 days, `BTC,ETH,SOL,BNB`, same settings: `trades=20`, `win_rate=25.0%`, `pnl=-12.6%`, `drawdown=23.5%`, exits `{'ATR_TRAIL': 3, 'EOD': 2, 'FAILURE': 3, 'SL': 12}`.
+- Interpretation: BTC-only remains the cleaner baseline. The multi-coin universe still dilutes results after the exit semantics are corrected.
 
 ## Historical 50-Coin Context
 

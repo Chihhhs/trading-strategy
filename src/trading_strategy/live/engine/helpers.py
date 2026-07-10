@@ -1,12 +1,5 @@
-from trading_strategy.core.exit_policy import build_exit_policy
-from trading_strategy.core.signals import generate_trend_signal, get_trend_structure_context
-from trading_strategy.core.trend_trade import (
-    compute_atr_trailing_result,
-    compute_dynamic_sl_target as compute_shared_dynamic_sl_target,
-    initialize_trend_position_state,
-    resolve_trend_stop_target,
-)
-from trading_strategy.core.trend_failure import evaluate_trend_failure_exit
+from trading_strategy.strategies import get_strategy, get_trend_structure_context
+from trading_strategy.strategies.base import StrategyContext
 
 from .. import config
 from ..market import get_klines
@@ -17,6 +10,34 @@ def _safe_float(value, default=0.0):
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def get_active_strategy_name():
+    return str(config.STRATEGY.get("name") or "trend")
+
+
+def get_active_strategy():
+    return get_strategy(get_active_strategy_name())
+
+
+def get_position_strategy(pos):
+    strategy_name = (pos or {}).get("strategy_name") or get_active_strategy_name()
+    return get_strategy(strategy_name)
+
+
+def build_strategy_context(coin, klines, *, price=None, balance=0.0, open_positions=()):
+    window = list(klines or [])
+    current_bar = window[-1] if window else None
+    return StrategyContext(
+        coin=coin,
+        window=window,
+        current_bar=current_bar,
+        balance=float(balance or 0.0),
+        open_positions=tuple(open_positions or ()),
+        config=config.STRATEGY,
+        mode=config.MODE,
+        price=price,
+    )
 
 
 def calc_ema(closes, period):
@@ -47,26 +68,31 @@ def calc_atr(highs, lows, closes, period=14):
 
 
 def generate_signal(klines, min_score=4):
-    return generate_trend_signal(
-        klines,
-        min_score=min_score,
-        tp_mult=config.STRATEGY["tp_mult"],
-        sl_mult=config.STRATEGY["sl_mult"],
+    strategy = get_active_strategy()
+    strategy_config = dict(config.STRATEGY)
+    strategy_config["min_score"] = min_score
+    return strategy.generate_signal(
+        StrategyContext(
+            coin="",
+            window=list(klines or []),
+            current_bar=(klines or [None])[-1],
+            config=strategy_config,
+            mode=config.MODE,
+        )
     )
 
 
 def check_trend_reversal(pos, klines):
-    if not klines or len(klines) < 30:
-        return False
-    closes = [d["close"] for d in klines]
-    e20 = calc_ema(closes, 20)
-    e50 = calc_ema(closes, 50)
-    e20_prev = calc_ema(closes[:-1], 20)
-    e50_prev = calc_ema(closes[:-1], 50) if len(closes) > 50 else e50
-    cur = closes[-1]
-    if pos["direction"] == "long":
-        return cur < e20 and e20 < e50 and e20_prev >= e50_prev
-    return cur > e20 and e20 > e50 and e20_prev <= e50_prev
+    strategy = get_position_strategy(pos)
+    evaluation = strategy.evaluate_open_position(
+        pos,
+        build_strategy_context(
+            pos.get("coin", ""),
+            klines,
+            price=pos.get("current_price"),
+        ),
+    )
+    return bool(evaluation.get("reversal_detected"))
 
 
 def estimate_position_margin(pos, leverage):
@@ -90,7 +116,8 @@ def get_available_entry_balance(state, leverage):
 
 
 def ensure_position_targets(pos, data_cache=None):
-    exit_policy = build_exit_policy(position=pos)
+    strategy = get_position_strategy(pos)
+    exit_policy = strategy.build_exit_policy(position=pos)
     if pos.get("sl") is not None and (not exit_policy.get("requires_tp") or pos.get("tp") is not None):
         return pos.get("tp"), pos.get("sl")
     klines = None
@@ -122,60 +149,69 @@ def ensure_position_targets(pos, data_cache=None):
 
 
 def initialize_dynamic_sl_state(pos):
-    initialize_trend_position_state(pos)
+    strategy = get_position_strategy(pos)
+    strategy.initialize_position(
+        pos,
+        None,
+        build_strategy_context(
+            pos.get("coin", ""),
+            [],
+            price=pos.get("current_price") or pos.get("entry"),
+        ),
+    )
 
 
 def compute_dynamic_sl_target(pos):
-    return compute_shared_dynamic_sl_target(pos)
+    strategy = get_position_strategy(pos)
+    stop_target = strategy.resolve_stop_target(
+        pos,
+        build_strategy_context(
+            pos.get("coin", ""),
+            [],
+            price=pos.get("current_price"),
+        ),
+    )
+    return (stop_target or {}).get("dynamic_target")
 
 
 def compute_trend_stop_target(pos, klines):
-    current_atr = None
-    if klines and len(klines) >= 2:
-        current_atr = calc_atr(
-            [d["high"] for d in klines],
-            [d["low"] for d in klines],
-            [d["close"] for d in klines],
-        )
-    return resolve_trend_stop_target(
+    strategy = get_position_strategy(pos)
+    return strategy.resolve_stop_target(
         pos,
-        current_atr=current_atr,
-        atr_trailing_enabled=config.STRATEGY.get("atr_trailing_enabled", False),
-        atr_activation_r=config.STRATEGY.get("atr_activation_r", 1.5),
-        atr_trailing_mult=config.STRATEGY.get("atr_trailing_mult", 2.0),
+        build_strategy_context(
+            pos.get("coin", ""),
+            klines,
+            price=pos.get("current_price"),
+        ),
     )
 
 
 def check_atr_trailing_exit(pos, klines):
-    current_atr = None
-    if klines and len(klines) >= 2:
-        current_atr = calc_atr(
-            [d["high"] for d in klines],
-            [d["low"] for d in klines],
-            [d["close"] for d in klines],
-        )
-    return compute_atr_trailing_result(
+    strategy = get_position_strategy(pos)
+    evaluation = strategy.evaluate_open_position(
         pos,
-        current_atr=current_atr,
-        enabled=config.STRATEGY.get("atr_trailing_enabled", False),
-        atr_activation_r=config.STRATEGY.get("atr_activation_r", 1.5),
-        atr_trailing_mult=config.STRATEGY.get("atr_trailing_mult", 2.0),
+        build_strategy_context(
+            pos.get("coin", ""),
+            klines,
+            price=pos.get("current_price"),
+        ),
     )
+    return evaluation.get("atr_trail_result") or {"triggered": False}
 
 
 def check_trend_failure_exit(pos, klines):
-    if not klines:
-        return {"triggered": False, "bars_since_entry": 0, "entry_breakout_level": None, "current_ema20": None}
-    entry_klines_len = int(pos.get("entry_klines_len") or 0)
-    bars_since_entry = max(len(klines) - entry_klines_len, 0) if entry_klines_len > 0 else 0
-    current_price = _safe_float(pos.get("current_price"), default=None)
-    structure = get_trend_structure_context(klines)
-    return evaluate_trend_failure_exit(
+    strategy = get_position_strategy(pos)
+    evaluation = strategy.evaluate_open_position(
         pos,
-        bars_since_entry=bars_since_entry,
-        current_price=current_price,
-        current_ema20=(structure or {}).get("ema20"),
-        enabled=config.STRATEGY.get("failure_exit_enabled", True),
-        failure_exit_bars=config.STRATEGY.get("failure_exit_bars", 3),
-        failure_exit_mode=config.STRATEGY.get("failure_exit_mode", "breakout_failure"),
+        build_strategy_context(
+            pos.get("coin", ""),
+            klines,
+            price=pos.get("current_price"),
+        ),
     )
+    return evaluation.get("failure_exit") or {
+        "triggered": False,
+        "bars_since_entry": 0,
+        "entry_breakout_level": None,
+        "current_ema20": None,
+    }

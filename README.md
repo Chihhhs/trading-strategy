@@ -8,6 +8,15 @@
 - `paper`：用 Binance 市場資料模擬多策略 paper trading。
 - `live`：連接 Hyperliquid 帳戶執行實盤，並在每輪執行時同步交易所持倉與保護單狀態。
 
+## Module 使用原則
+
+- `apps/` 是入口與包裝層，仍然會 import `src/trading_strategy/` 內的 package，但不應承載可重用業務邏輯。
+- 新的可重用邏輯請優先放在：
+  - `trading_strategy.shared`
+  - `trading_strategy.strategies`
+  - `trading_strategy.positions`
+- `trading_strategy.core` 現在是相容層；舊 import 仍可用，但不應再把新實作寫進去。
+
 ## 主要功能
 
 - Hyperliquid live 實盤下單與持倉同步
@@ -76,17 +85,34 @@ python apps/runners/paper_runner.py --reset
 
 ```bash
 python backtest/backtest_runner.py --coins BTC,ETH,SOL --strategy trend --max-days 240
+python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --max-days 240
+python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid trend,intraday_momentum
 ```
 
 參數摘要：
 
 - `--coins`：逗號分隔標的，預設 `BTC,ETH,SOL,BNB`
-- `--strategy`：`trend`
+- `--strategy`：`trend` / `intraday_momentum`
 - `--max-days`：使用最近幾天歷史資料，預設 `240`
 - `--initial-capital`：起始資金，預設 `1000`
 - `--risk-pct`：每筆交易風險比例，預設 `0.05`
 - `--disable-btc-filter`：停用 BTC 趨勢過濾
 - `--show-trades`：輸出 trade 明細
+
+### Strategy Selection
+
+- `trend`：主線日線 / 較低頻趨勢策略。使用 `trend_sl_only` 出場語義，live 預設只要求 SL，並透過策略 hook 管理動態 stop / failure exit。
+- `intraday_momentum`：第一版短週期動能 / 波動突破策略。策略本身是 candle-based，可用在 5m / 15m / 1h K 線；目前預設 historical data 仍是日線，所以要做真正 intraday 回測時需要提供 intraday candle JSON。
+- live 若要切短週期，請在 [apps/live_config.py](apps/live_config.py) 覆寫：
+
+```python
+STRATEGY_OVERRIDES = {
+    "name": "intraday_momentum",
+    "timeframe": "15m",
+    "max_positions": 2,
+    "risk_per_trade": 0.03,
+}
+```
 
 ## 專案結構
 
@@ -99,14 +125,18 @@ backtest/
   backtest_runner.py       # 離線回測入口
 src/
   trading_strategy/
+    shared/                # 共用 risk / state / trade history helper
+    strategies/            # strategy registry / interface / trend strategy
+    positions/             # position snapshot / lifecycle / trend stop helper
     backtest/              # 回測 package（data / engine / portfolio / reporting / cli）
     paper.py               # paper trading 主邏輯
     hyperliquid.py         # Hyperliquid 市場價格與 tick helper
+    core/                  # 相容層，re-export 到新模組
     live/
       config.py            # live 模式設定、狀態路徑、策略參數
       cli.py               # live 主流程與 CLI
       account.py           # 帳戶、資金、交易所狀態同步
-      engine.py            # 進出場、接管、保護、run summary
+      engine/              # 進出場、接管、保護、run summary
       orders.py            # entry / TP / SL / close 下單邏輯
       market.py            # 幣池與市場資料來源
       io.py                # state / log 讀寫
@@ -117,6 +147,16 @@ data/
 tests/
   test_live.py             # live 流程相關測試
 ```
+
+## Apps 與 Import 入口
+
+- `apps/runners/live_runner.py` 透過 `apps/_live_bootstrap.py` 啟動 `trading_strategy.live.main`
+- `apps/runners/paper_runner.py` 直接 import `trading_strategy.paper.main`
+- `apps/fvg_paper_trader.py` 是 `trading_strategy.paper.main` 的相容入口
+- `apps/hyperliquid_api.py` 是 `trading_strategy.hyperliquid` 的相容入口
+- `apps/live_config.py` 用來覆寫 `trading_strategy.live.config`
+
+這表示 `apps` import 還在，而且是刻意保留的，但它們只應該當 entrypoint / wrapper，不是新 module 的落點。
 
 ## Live 模式的重要行為
 

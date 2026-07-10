@@ -1,5 +1,7 @@
 import argparse
 
+from trading_strategy.strategies import available_strategy_names
+
 from .data import DATA_PATH, DEFAULT_COINS, load_historical_data
 from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
@@ -26,8 +28,9 @@ def _parse_btc_filter_grid(raw_value):
 
 def build_parser():
     parser = argparse.ArgumentParser()
+    strategy_names = available_strategy_names()
     parser.add_argument("--coins", default=",".join(DEFAULT_COINS))
-    parser.add_argument("--strategy", choices=("trend",), default="trend")
+    parser.add_argument("--strategy", choices=strategy_names, default="trend")
     parser.add_argument("--max-days", type=int, default=240)
     parser.add_argument("--data-path", default=DATA_PATH)
     parser.add_argument("--initial-capital", type=float, default=1000.0)

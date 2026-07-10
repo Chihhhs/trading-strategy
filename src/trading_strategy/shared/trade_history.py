@@ -1,0 +1,109 @@
+from datetime import datetime
+
+
+def _safe_float(value, default=None):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _parse_iso_datetime(value):
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_context=None):
+    exit_context = dict(exit_context or {})
+    entry = _safe_float((pos or {}).get("entry"), default=0.0) or 0.0
+    size = _safe_float((pos or {}).get("size"), default=0.0) or 0.0
+    exit_px = _safe_float(exit_price, default=entry)
+    direction = (pos or {}).get("direction")
+    pnl = (exit_px - entry) * size if direction == "long" else (entry - exit_px) * size
+
+    entry_time = (pos or {}).get("entry_time")
+    resolved_exit_time = exit_time or datetime.now().isoformat()
+    entry_dt = _parse_iso_datetime(entry_time)
+    exit_dt = _parse_iso_datetime(resolved_exit_time)
+    hold_minutes = None
+    if entry_dt is not None and exit_dt is not None:
+        hold_minutes = round(max((exit_dt - entry_dt).total_seconds(), 0) / 60.0, 2)
+
+    notional = abs(entry * size)
+    pnl_pct = round((pnl / notional) * 100, 4) if notional > 0 else 0.0
+    if pnl > 0:
+        outcome = "win"
+    elif pnl < 0:
+        outcome = "loss"
+    else:
+        outcome = "breakeven"
+
+    return {
+        "coin": (pos or {}).get("coin"),
+        "direction": direction,
+        "entry": entry,
+        "exit": exit_px,
+        "size": size,
+        "pnl": round(pnl, 4),
+        "pnl_pct": pnl_pct,
+        "outcome": outcome,
+        "entry_time": entry_time,
+        "exit_time": resolved_exit_time,
+        "hold_minutes": hold_minutes,
+        "hold_bars": (pos or {}).get("bars_since_entry"),
+        "entry_reason": (pos or {}).get("entry_reason") or (pos or {}).get("signal_reason") or (pos or {}).get("sig") or "",
+        "signal_reason": (pos or {}).get("signal_reason") or (pos or {}).get("sig") or "",
+        "signal_score": (pos or {}).get("signal_score"),
+        "btc_dir_at_entry": (pos or {}).get("btc_dir_at_entry"),
+        "risk_pct": (pos or {}).get("risk_pct"),
+        "entry_order_type": (pos or {}).get("entry_order_type"),
+        "exit_reason": exit_reason,
+        "exit_policy": ((pos or {}).get("exit_policy") or {}).get("name"),
+        "position_source": (pos or {}).get("position_source"),
+        "close_status": exit_context.get("close_status"),
+        "close_reason_source": exit_context.get("close_reason_source"),
+        "close_submitted_at": (pos or {}).get("close_submitted_at"),
+    }
+
+
+def apply_closed_trade(
+    state,
+    pos,
+    exit_price,
+    exit_reason,
+    *,
+    exit_time=None,
+    update_balance=True,
+    exit_context=None,
+):
+    trade = build_trade_record(
+        pos,
+        exit_price,
+        exit_reason,
+        exit_time=exit_time,
+        exit_context=exit_context,
+    )
+
+    if update_balance:
+        state["balance"] = (state.get("balance") or 0.0) + trade["pnl"]
+
+    stats = state.setdefault("stats", {})
+    stats["total_trades"] = int(stats.get("total_trades") or 0) + 1
+    stats["total_pnl"] = round(float(stats.get("total_pnl") or 0.0) + trade["pnl"], 4)
+    stats.setdefault("wins", 0)
+    stats.setdefault("losses", 0)
+    stats.setdefault("max_win", 0.0)
+    stats.setdefault("max_loss", 0.0)
+    if trade["outcome"] == "win":
+        stats["wins"] += 1
+        stats["max_win"] = max(float(stats.get("max_win") or 0.0), trade["pnl"])
+    elif trade["outcome"] == "loss":
+        stats["losses"] += 1
+        stats["max_loss"] = min(float(stats.get("max_loss") or 0.0), trade["pnl"])
+
+    state.setdefault("history", []).append(trade)
+    return trade

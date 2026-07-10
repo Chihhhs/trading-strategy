@@ -104,5 +104,8 @@ class LiveCliTest(unittest.TestCase):
             event_names = [call.args[0] for call in mock_record_trade_event.call_args_list]
             self.assertIn("config_mismatch", event_names)
             self.assertIn("run_summary", event_names)
+            run_summary_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "run_summary")
+            self.assertEqual(run_summary_call.kwargs["position_status_counts"], {})
+            self.assertEqual(run_summary_call.kwargs["position_snapshots"], [])
         finally:
             live.config.set_mode(old_mode)

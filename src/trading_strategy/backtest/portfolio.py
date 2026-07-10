@@ -1,4 +1,4 @@
-from trading_strategy.core.state import build_default_state
+from trading_strategy.shared.state import build_default_state
 
 from .data import get_coin_series
 from .engine import BacktestEngine, close_position_at_bar
@@ -16,6 +16,7 @@ class PortfolioBacktester:
     def _wrap_strategy(self):
         config = self.config
         strategy = self.strategy
+        fallback_strategy = resolve_strategy(config.strategy)
 
         class FilteringStrategy:
             name = getattr(strategy, "name", config.strategy)
@@ -24,13 +25,40 @@ class PortfolioBacktester:
                 signal = strategy.generate_signal(context)
                 if signal is None:
                     return None
-                if config.btc_filter_enabled and is_signal_blocked_by_btc_filter(
-                    context.coin,
-                    signal,
-                    context.btc_window,
-                ):
+                if config.btc_filter_enabled and self.should_block_for_btc(context.coin, signal, context.btc_window):
                     return None
                 return signal
+
+            def build_exit_policy(self, *, signal=None, position=None):
+                if hasattr(strategy, "build_exit_policy"):
+                    return strategy.build_exit_policy(signal=signal, position=position)
+                return fallback_strategy.build_exit_policy(signal=signal, position=position)
+
+            def initialize_position(self, position, signal, context):
+                if hasattr(strategy, "initialize_position"):
+                    return strategy.initialize_position(position, signal, context)
+                explicit_tp = position.get("tp")
+                initialized = fallback_strategy.initialize_position(position, signal, context)
+                if explicit_tp is not None:
+                    initialized["tp"] = explicit_tp
+                return initialized
+
+            def should_block_for_btc(self, coin, signal, btc_window):
+                if hasattr(strategy, "should_block_for_btc"):
+                    return strategy.should_block_for_btc(coin, signal, btc_window)
+                if hasattr(fallback_strategy, "should_block_for_btc"):
+                    return fallback_strategy.should_block_for_btc(coin, signal, btc_window)
+                return is_signal_blocked_by_btc_filter(coin, signal, btc_window)
+
+            def evaluate_open_position(self, position, context):
+                if hasattr(strategy, "evaluate_open_position"):
+                    return strategy.evaluate_open_position(position, context)
+                return fallback_strategy.evaluate_open_position(position, context)
+
+            def resolve_stop_target(self, position, context):
+                if hasattr(strategy, "resolve_stop_target"):
+                    return strategy.resolve_stop_target(position, context)
+                return fallback_strategy.resolve_stop_target(position, context)
 
         return FilteringStrategy()
 

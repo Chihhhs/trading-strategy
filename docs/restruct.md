@@ -10,7 +10,7 @@
 
 - `src/trading_strategy/` remains a package folder because Python's `src` layout needs a package root.
 - The old top-level `strategy/` folder was renamed in role to `apps/` to avoid confusion with the package name.
-- `apps/` now contains only thin runners and compatibility wrappers.
+- `apps/` now contains only thin runners, bootstrap glue, and compatibility wrappers.
 - `backtest/` now contains only the canonical runner and one legacy wrapper.
 
 ## Canonical Entry Points
@@ -21,17 +21,45 @@ python apps/runners/paper_runner.py
 python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240
 ```
 
+## App Imports
+
+- `apps/runners/live_runner.py` does not implement trading logic itself; it bootstraps `trading_strategy.live.main`.
+- `apps/runners/paper_runner.py` imports `trading_strategy.paper.main`.
+- `apps/fvg_paper_trader.py` is a compatibility wrapper around `trading_strategy.paper.main`.
+- `apps/hyperliquid_api.py` is a compatibility wrapper around `trading_strategy.hyperliquid`.
+- `apps/live_config.py` remains an app-side override file and mutates `trading_strategy.live.config`.
+
+In other words: `apps/` still imports from `src/trading_strategy/`, but it should stay thin and not become the home for reusable business logic.
+
 ## Reusable Modules
 
-- `src/trading_strategy/core/signals.py`
-- `src/trading_strategy/core/risk.py`
-- `src/trading_strategy/core/state.py`
+Current reusable module layout:
+
+- `src/trading_strategy/shared/`
+  - generic reusable helpers
+  - `risk.py`
+  - `state.py`
+  - `trade_history.py`
+- `src/trading_strategy/strategies/`
+  - strategy registry and shared strategy interface
+  - trend strategy implementation
+- `src/trading_strategy/positions/`
+  - position lifecycle snapshots / status
+  - trend stop, trailing, and failure helpers
+- `src/trading_strategy/backtest/`
+  - reusable backtest package
+- `src/trading_strategy/live/`
+  - live runtime package
 - `src/trading_strategy/market_data.py`
 - `src/trading_strategy/hyperliquid.py`
-- `src/trading_strategy/live.py`
-- `src/trading_strategy/paper.py`
-- `src/trading_strategy/backtest/`
 - `src/trading_strategy/indicators.py`
+
+## Compatibility Layer
+
+- `src/trading_strategy/core/` is now transitional.
+- Existing imports such as `trading_strategy.core.risk` and `trading_strategy.core.signals` still work.
+- New reusable code should go into `shared/`, `strategies/`, or `positions/` instead of `core/`.
+- `paper.py` still uses some `core/*` imports today, but those modules now re-export from the new locations.
 
 ## Cleanup Performed
 
@@ -42,7 +70,7 @@ python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 2
 
 ## Validation
 
-- Imported `trading_strategy.core.signals`, `trading_strategy.live`, `trading_strategy.paper`, `trading_strategy.backtest`.
+- Imported `trading_strategy.shared`, `trading_strategy.strategies`, `trading_strategy.positions`, `trading_strategy.live`, `trading_strategy.paper`, `trading_strategy.backtest`.
 - Ran paper reset through runner and legacy wrapper.
 - Ran offline backtest smoke test from local historical JSON.
 - Ran live `--report` through the runner to verify wrapper wiring.

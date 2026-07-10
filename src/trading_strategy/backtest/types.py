@@ -1,6 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Protocol
 
+from trading_strategy.strategies.base import StrategyContext, StrategySignal
 
 DEFAULT_INITIAL_CAPITAL = 1000.0
 DEFAULT_LEVERAGE = 3.0
@@ -23,27 +24,6 @@ class BacktestConfig:
     failure_exit_enabled: bool = False
     failure_exit_bars: int = 3
     failure_exit_mode: str = "breakout_failure"
-
-
-@dataclass(frozen=True)
-class StrategySignal:
-    direction: str
-    tp: float
-    sl: float
-    score: int | float
-    reason: str = ""
-    raw: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass(frozen=True)
-class StrategyContext:
-    coin: str
-    window: list[dict[str, Any]]
-    current_bar: dict[str, Any]
-    btc_window: list[dict[str, Any]] | None
-    balance: float
-    open_positions: tuple[dict[str, Any], ...]
-    config: BacktestConfig
 
 
 @dataclass(frozen=True)

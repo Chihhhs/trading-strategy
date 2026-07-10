@@ -15,6 +15,8 @@ ENV_OVERRIDES = {
 
 # Strategy overrides merged into trading_strategy.live.config.STRATEGY
 STRATEGY_OVERRIDES = {
+    # "name": "intraday_momentum",
+    # "timeframe": "15m",
     # "leverage": 5,
     # "risk_per_trade": 0.08,
     "max_positions": 4,
@@ -23,6 +25,8 @@ STRATEGY_OVERRIDES = {
     # "tp_mult": 1.5,
     # "sl_mult": 1.0,
     # "entry_order_type": "ioc",
+    # "intraday_breakout_lookback": 12,
+    # "intraday_max_hold_bars": 24,
 }
 
 # Circuit-breaker overrides merged into trading_strategy.live.config.CIRCUIT

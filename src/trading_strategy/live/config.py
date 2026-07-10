@@ -18,6 +18,8 @@ BINANCE_API = "https://api.binance.com"
 MODE = "paper"
 
 STRATEGY = {
+    "name": "trend",
+    "timeframe": "1d",
     "leverage": 5,
     "risk_per_trade": 0.08,
     "max_positions": 3,
@@ -32,6 +34,12 @@ STRATEGY = {
     "failure_exit_enabled": False,
     "failure_exit_bars": 3,
     "failure_exit_mode": "breakout_failure",
+    "intraday_breakout_lookback": 12,
+    "intraday_fast_ema": 8,
+    "intraday_slow_ema": 21,
+    "intraday_max_hold_bars": 24,
+    "intraday_momentum_threshold_pct": 0.2,
+    "intraday_volume_ratio": 1.2,
 }
 
 CIRCUIT = {

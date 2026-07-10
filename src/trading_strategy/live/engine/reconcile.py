@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from trading_strategy.core.exit_policy import build_exit_policy
-from trading_strategy.core.trade_history import apply_closed_trade
+from trading_strategy.shared.trade_history import apply_closed_trade
+from trading_strategy.strategies import build_exit_policy
 
 from .. import config
 from ..account import get_hl_frontend_open_orders, get_hl_perp_user_state
@@ -49,6 +49,7 @@ def build_position_from_exchange(coin, position_state, existing=None):
         "entry_time": existing.get("entry_time") or adopted_at,
         "entry_time_source": existing.get("entry_time_source") or ("local_state" if existing else "exchange_adopted"),
         "position_source": existing.get("position_source") or ("local_state" if existing else "exchange_adopted"),
+        "strategy_name": existing.get("strategy_name") or config.STRATEGY.get("name", "trend"),
         "adopted_at": existing.get("adopted_at") or (adopted_at if not existing else None),
         "protection_status": existing.get("protection_status", default_protection_status),
         "exit_policy": existing.get("exit_policy") or exit_policy,

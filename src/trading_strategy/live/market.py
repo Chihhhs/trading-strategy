@@ -2,23 +2,47 @@ import json
 import os
 import time
 
-from trading_strategy.core.signals import get_btc_direction_from_klines
+from trading_strategy.strategies import get_btc_direction_from_klines
 
 from . import config
 from .io import api_get, hl_info_post
 
 
-def get_klines(symbol, limit=60):
+def _interval_to_millis(interval):
+    raw = str(interval or "1d").strip()
+    if not raw:
+        raw = "1d"
+    unit = raw[-1]
+    try:
+        amount = int(raw[:-1])
+    except ValueError:
+        return 24 * 60 * 60 * 1000
+    multipliers = {
+        "m": 60 * 1000,
+        "h": 60 * 60 * 1000,
+        "d": 24 * 60 * 60 * 1000,
+        "w": 7 * 24 * 60 * 60 * 1000,
+        "M": 30 * 24 * 60 * 60 * 1000,
+    }
+    return amount * multipliers.get(unit, 24 * 60 * 60 * 1000)
+
+
+def get_market_interval():
+    return str(config.STRATEGY.get("timeframe") or "1d")
+
+
+def get_klines(symbol, limit=60, interval=None):
+    interval = interval or get_market_interval()
     if config.get_market_data_source() == "hyperliquid":
         coin = symbol.replace("USDT", "")
         end_time = int(time.time() * 1000)
-        start_time = end_time - max(limit, 1) * 24 * 60 * 60 * 1000
+        start_time = end_time - max(limit, 1) * _interval_to_millis(interval)
         data = hl_info_post(
             {
                 "type": "candleSnapshot",
                 "req": {
                     "coin": coin,
-                    "interval": "1d",
+                    "interval": interval,
                     "startTime": start_time,
                     "endTime": end_time,
                 },
@@ -36,7 +60,7 @@ def get_klines(symbol, limit=60):
                 for d in data[-limit:]
             ]
         return None
-    url = f"{config.BINANCE_API}/api/v3/klines?symbol={symbol}&interval=1d&limit={limit}"
+    url = f"{config.BINANCE_API}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
     data = api_get(url)
     if data and isinstance(data, list):
         return [

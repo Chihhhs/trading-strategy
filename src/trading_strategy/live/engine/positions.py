@@ -5,7 +5,7 @@ from trading_strategy.core.trade_history import apply_closed_trade
 from .. import config
 from ..io import record_trade_event
 from ..orders import close_hl_position
-from .helpers import check_atr_trailing_exit, check_trend_reversal
+from .helpers import check_atr_trailing_exit, check_trend_failure_exit, check_trend_reversal
 from .reconcile import sync_state_with_exchange_positions
 
 
@@ -29,6 +29,7 @@ def update_positions(state, prices, data_cache):
             if pos.get("entry_klines_len") and klines:
                 pos["bars_since_entry"] = max(len(klines) - int(pos.get("entry_klines_len") or 0), 0)
             atr_trail_result = check_atr_trailing_exit(pos, klines) if klines else {"triggered": False}
+            failure_exit = check_trend_failure_exit(pos, klines) if klines else {"triggered": False}
             reversal_close = (
                 check_trend_reversal(pos, data_cache.get(pos["coin"]))
                 if klines
@@ -42,6 +43,9 @@ def update_positions(state, prices, data_cache):
             elif atr_trail_result.get("triggered"):
                 should_close = True
                 exit_reason = "ATR_TRAIL"
+            elif failure_exit.get("triggered"):
+                should_close = True
+                exit_reason = "FAILURE"
             if not should_close:
                 try:
                     should_close = datetime.now() - datetime.fromisoformat(

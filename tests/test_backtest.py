@@ -288,6 +288,40 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("BTC:", rendered)
         self.assertEqual(result.coin_results[0].coin, "BTC")
 
+    def test_cli_accepts_intraday_momentum_strategy(self):
+        prices = [100.0] * 55 + [104.0, 105.0]
+        payload = {
+            "BTC": [
+                {
+                    **build_bar(price, index),
+                    "volume": 1600 if index >= 55 else 1000,
+                }
+                for index, price in enumerate(prices)
+            ],
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--strategy",
+                        "intraday_momentum",
+                        "--max-days",
+                        str(len(prices)),
+                        "--data-path",
+                        path,
+                    ]
+                )
+        finally:
+            os.remove(path)
+        self.assertIn("Portfolio:", output.getvalue())
+        self.assertEqual(result.config.strategy, "intraday_momentum")
+
     def test_optimizer_returns_ranked_rows(self):
         payload = {
             "BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112, 113, 114))],

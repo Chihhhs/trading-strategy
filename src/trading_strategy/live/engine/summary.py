@@ -33,11 +33,14 @@ def build_run_summary():
         "protection_repaired_count": 0,
         "tpsl_repaired_count": 0,
         "unprotected_positions_count": 0,
+        "position_status_counts": {},
+        "position_snapshots": [],
     }
 
 
 def build_strategy_snapshot():
     return {
+        "name": config.STRATEGY.get("name", "trend"),
         "entry_order_type": config.STRATEGY["entry_order_type"],
         "leverage": config.STRATEGY["leverage"],
         "risk_per_trade": config.STRATEGY["risk_per_trade"],
