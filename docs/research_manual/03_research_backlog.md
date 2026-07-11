@@ -7,6 +7,17 @@
 
 ## Priority 1: Crypto Trend Mainline
 
+### 0. Dual-Track Research Report
+
+- Claim: 現有策略優化與新策略研究應並行，但不能混在同一個 live 決策面。
+- Evidence level: B
+- Market applicability: Current repo research workflow.
+- Time horizon: Every research cycle.
+- Known failure modes: 新策略還沒證明就污染主策略；只看單一回測而忽略成本與 drawdown。
+- Cost sensitivity: High for intraday and multi-coin candidates.
+- Implementation implication: Use `python backtest/backtest_runner.py --research-report` as the standard first-pass report.
+- Decision for this repo: Required workflow.
+
 ### 1. Short-Term Failure Exit
 
 - Claim: Live trend trading needs an explicit post-entry failure exit, not only SL, reversal, and max-hold exits.

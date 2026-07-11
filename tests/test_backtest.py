@@ -15,6 +15,7 @@ if SRC not in sys.path:
 from trading_strategy.backtest import cli, load_historical_data
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
+from trading_strategy.backtest.research import format_research_report_lines, run_research_report
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
 from trading_strategy.core.trend_trade import compute_atr_trailing_result
 
@@ -418,6 +419,60 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("atr_trailing=", rendered)
         self.assertIn("atr_trail_exits=", rendered)
         self.assertEqual(len(rows), 8)
+
+    def test_research_report_groups_existing_and_new_strategy_tracks(self):
+        prices = [100.0] * 55 + [104.0, 105.0, 106.0]
+        payload = {
+            "BTC": [
+                {
+                    **build_bar(price, index),
+                    "volume": 1600 if index >= 55 else 1000,
+                }
+                for index, price in enumerate(prices)
+            ],
+            "BNB": [build_bar(50 + index * 0.2, index) for index in range(len(prices))],
+        }
+        report = run_research_report(
+            payload,
+            coins=("BTC", "BNB"),
+            max_days=len(prices),
+            fee_bps=4.5,
+        )
+        rendered = "\n".join(format_research_report_lines(report))
+        self.assertEqual(len(report["runnable"]), 3)
+        self.assertIn("[optimize_existing]", rendered)
+        self.assertIn("trend_control:", rendered)
+        self.assertIn("[new_strategy]", rendered)
+        self.assertIn("intraday_momentum_probe:", rendered)
+        self.assertIn("funding_basis_monitor:", rendered)
+
+    def test_cli_research_report_prints_dual_track_report(self):
+        prices = [100.0] * 55 + [104.0, 105.0, 106.0]
+        payload = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                report = cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        str(len(prices)),
+                        "--data-path",
+                        path,
+                        "--research-report",
+                    ]
+                )
+        finally:
+            os.remove(path)
+        rendered = output.getvalue()
+        self.assertIn("Dual-track research report", rendered)
+        self.assertIn("score_delta=", rendered)
+        self.assertIn("new_strategy_pending", rendered)
+        self.assertEqual(len(report["runnable"]), 3)
 
     def test_legacy_strategy_uses_fixed_tp_policy(self):
         prices = [100.0] * 60 + [101.0, 100.8, 101.1, 101.0, 101.2]

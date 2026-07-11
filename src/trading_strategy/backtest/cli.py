@@ -5,6 +5,7 @@ from trading_strategy.strategies import available_strategy_names
 from .data import DATA_PATH, DEFAULT_COINS, load_historical_data
 from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
+from .research import format_research_report_lines, run_research_report
 from .reporting import format_comparison_lines, format_optimization_lines, format_result_lines
 from .types import BacktestConfig
 
@@ -41,6 +42,7 @@ def build_parser():
     parser.add_argument("--slippage-bps", type=float, default=0.0)
     parser.add_argument("--show-trades", action="store_true")
     parser.add_argument("--compare-strategies", default="")
+    parser.add_argument("--research-report", action="store_true")
     parser.add_argument("--disable-btc-filter", action="store_true")
     parser.add_argument("--enable-atr-trailing", action="store_true")
     parser.add_argument("--enable-failure-exit", action="store_true")
@@ -88,10 +90,23 @@ def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
     data_map = load_historical_data(args.data_path)
+    coins = tuple(coin.strip().upper() for coin in args.coins.split(",") if coin.strip())
+    if args.research_report:
+        report = run_research_report(
+            data_map,
+            coins=coins,
+            max_days=args.max_days,
+            initial_capital=args.initial_capital,
+            fee_bps=args.fee_bps or 4.5,
+            slippage_bps=args.slippage_bps,
+        )
+        for line in format_research_report_lines(report):
+            print(line)
+        return report
     if args.optimize:
         rows = run_parameter_sweep(
             data_map,
-            coins=tuple(coin.strip().upper() for coin in args.coins.split(",") if coin.strip()),
+            coins=coins,
             max_days=args.max_days,
             initial_capital=args.initial_capital,
             max_positions=args.max_positions,
