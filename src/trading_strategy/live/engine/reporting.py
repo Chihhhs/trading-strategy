@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from trading_strategy.positions import build_position_snapshots, build_position_status_counts
+
 from .. import config
 from ..account import extract_hl_account_value, extract_hl_account_values
 from ..io import load_state
@@ -9,10 +11,47 @@ from .reconcile import extract_live_position_map
 
 def print_report(state):
     total = state["stats"]["total_trades"]
+    position_counts = build_position_status_counts(state.get("positions", []), mode=config.MODE)
+    position_snapshots = build_position_snapshots(state.get("positions", []), mode=config.MODE)
     print(f'\nStatus Report | {datetime.now().strftime("%Y-%m-%d %H:%M")}')
     print(f'   balance: ${state["balance"]:.2f} | source: {state.get("_balance_source", "local_state")}')
     print(f'   positions: {len(state["positions"])}')
     print(f'   trades: {total} | WR: {(state["stats"]["wins"] / total * 100 if total else 0):.0f}%')
+    if position_counts:
+        counts_text = ", ".join(f"{key}={value}" for key, value in sorted(position_counts.items()))
+        print(f"   position states: {counts_text}")
+    for snapshot in position_snapshots:
+        pnl_text = "n/a" if snapshot["pnl"] is None else f'{snapshot["pnl"]:+.2f}'
+        entry_text = "n/a" if snapshot["entry"] is None else f'{snapshot["entry"]:.4f}'
+        price_text = "n/a" if snapshot["current_price"] is None else f'{snapshot["current_price"]:.4f}'
+        print(
+            f'   - {snapshot["coin"]} {snapshot["direction"]} '
+            f'entry={entry_text} current={price_text} pnl={pnl_text} '
+            f'status={snapshot["lifecycle_status"]} protection={snapshot["protection_status"] or "n/a"}'
+        )
+        detail_parts = []
+        if snapshot.get("strategy_name"):
+            detail_parts.append(f'strategy={snapshot["strategy_name"]}')
+        if snapshot.get("pending_exit_reason"):
+            detail_parts.append(f'pending_exit={snapshot["pending_exit_reason"]}')
+        if snapshot.get("entry_reason"):
+            detail_parts.append(f'entry_reason={snapshot["entry_reason"]}')
+        if snapshot.get("signal_score") is not None:
+            detail_parts.append(f'score={snapshot["signal_score"]}')
+        if snapshot.get("position_source"):
+            detail_parts.append(f'source={snapshot["position_source"]}')
+        if snapshot.get("bars_since_entry") is not None:
+            detail_parts.append(f'bars={snapshot["bars_since_entry"]}')
+        if snapshot.get("sl_stage") is not None:
+            detail_parts.append(f'sl_stage={snapshot["sl_stage"]}')
+        if snapshot.get("best_price") is not None:
+            detail_parts.append(f'best={snapshot["best_price"]:.4f}')
+        if snapshot.get("sl_order_oid") is not None or snapshot.get("tp_order_oid") is not None:
+            detail_parts.append(
+                f'sl_oid={snapshot.get("sl_order_oid")} tp_oid={snapshot.get("tp_order_oid")}'
+            )
+        if detail_parts:
+            print(f'     {" | ".join(detail_parts)}')
 
 
 def print_debug_account():

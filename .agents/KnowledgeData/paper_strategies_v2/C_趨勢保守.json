@@ -1,0 +1,51 @@
+{
+  "strategy": "C_趨勢保守",
+  "balance": 1000.0,
+  "positions": [
+    {
+      "coin": "ATOM",
+      "direction": "short",
+      "entry": 1.526,
+      "tp": 1.3534285714285714,
+      "sl": 1.6554285714285715,
+      "size": 386.313466,
+      "current_price": 1.516,
+      "pnl_pnl": 3.8631346600000036,
+      "entry_time": "2026-06-29T18:01:26.061264",
+      "sig": "TREND_SELL"
+    },
+    {
+      "coin": "HOT",
+      "direction": "long",
+      "entry": 0.000302,
+      "tp": 0.0003528571428571429,
+      "sl": 0.0002638571428571429,
+      "size": 1310861.423221,
+      "current_price": 0.000301,
+      "pnl_pnl": 0,
+      "entry_time": "2026-06-30T01:32:49.491901",
+      "sig": "TREND_BUY"
+    }
+  ],
+  "history": [],
+  "params": {
+    "initial_balance": 1000.0,
+    "max_positions": 2,
+    "max_hold_days": 14,
+    "leverage": 3,
+    "risk_per_trade": 0.05,
+    "strategy_type": "trend",
+    "max_daily_loss_pct": 10.0,
+    "max_consecutive_losses": 5,
+    "cooldown_hours": 24,
+    "min_cor_confirm": 1
+  },
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "total_pnl": 0.0,
+    "max_win": 0.0,
+    "max_loss": 0.0
+  }
+}

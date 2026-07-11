@@ -1,7 +1,9 @@
 from .cli import build_config, build_parser, main
 from .data import DATA_PATH, DEFAULT_COINS, get_coin_series, load_historical_data
+from .derivatives import load_derivatives_data, normalize_derivatives_data_map
 from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
+from .research import format_research_report_lines, run_research_report
 from .reporting import format_optimization_lines, format_result_lines
 from .strategies import resolve_strategy
 from .types import BacktestConfig, BacktestResult, CoinResult, StrategyContext, StrategySignal
@@ -29,11 +31,15 @@ __all__ = [
     "build_config",
     "build_parser",
     "format_optimization_lines",
+    "format_research_report_lines",
     "format_result_lines",
     "get_coin_series",
     "load_historical_data",
+    "load_derivatives_data",
     "main",
+    "normalize_derivatives_data_map",
     "resolve_strategy",
     "run_parameter_sweep",
     "run_backtest_for_coin",
+    "run_research_report",
 ]

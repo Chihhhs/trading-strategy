@@ -1,0 +1,518 @@
+{
+  "count_stats": {
+    "20": {
+      "wins": 66,
+      "total": 124,
+      "avg_pnl": 26.63
+    },
+    "18": {
+      "wins": 35,
+      "total": 72,
+      "avg_pnl": 22.09
+    },
+    "8": {
+      "wins": 28,
+      "total": 51,
+      "avg_pnl": 23.75
+    },
+    "16": {
+      "wins": 44,
+      "total": 82,
+      "avg_pnl": 17.94
+    },
+    "13": {
+      "wins": 29,
+      "total": 43,
+      "avg_pnl": 32.69
+    },
+    "6": {
+      "wins": 15,
+      "total": 34,
+      "avg_pnl": 2.22
+    },
+    "15": {
+      "wins": 14,
+      "total": 53,
+      "avg_pnl": -9.23
+    },
+    "4": {
+      "wins": 9,
+      "total": 22,
+      "avg_pnl": 12.29
+    },
+    "17": {
+      "wins": 20,
+      "total": 72,
+      "avg_pnl": -18.28
+    },
+    "12": {
+      "wins": 32,
+      "total": 50,
+      "avg_pnl": 44.27
+    },
+    "10": {
+      "wins": 10,
+      "total": 19,
+      "avg_pnl": 51.59
+    },
+    "21": {
+      "wins": 64,
+      "total": 159,
+      "avg_pnl": -3.36
+    },
+    "19": {
+      "wins": 65,
+      "total": 125,
+      "avg_pnl": 36.37
+    },
+    "9": {
+      "wins": 9,
+      "total": 24,
+      "avg_pnl": 5.35
+    },
+    "11": {
+      "wins": 16,
+      "total": 42,
+      "avg_pnl": -4.89
+    },
+    "1": {
+      "wins": 9,
+      "total": 20,
+      "avg_pnl": 2.09
+    },
+    "5": {
+      "wins": 6,
+      "total": 16,
+      "avg_pnl": 1.85
+    },
+    "14": {
+      "wins": 25,
+      "total": 50,
+      "avg_pnl": 4.38
+    },
+    "2": {
+      "wins": 12,
+      "total": 23,
+      "avg_pnl": 28.86
+    },
+    "3": {
+      "wins": 14,
+      "total": 34,
+      "avg_pnl": 1.08
+    },
+    "7": {
+      "wins": 7,
+      "total": 21,
+      "avg_pnl": 5.43
+    },
+    "0": {
+      "wins": 4,
+      "total": 8,
+      "avg_pnl": 42.49
+    }
+  },
+  "top_pairs": [
+    {
+      "target": "WLD",
+      "conf": "SEI",
+      "corr": 0.476,
+      "cwr": 57.8,
+      "uwr": 7.1,
+      "diff": 50.6,
+      "ct": 45,
+      "ut": 14
+    },
+    {
+      "target": "AVAX",
+      "conf": "OP",
+      "corr": 0.671,
+      "cwr": 56.5,
+      "uwr": 12.5,
+      "diff": 44.0,
+      "ct": 46,
+      "ut": 8
+    },
+    {
+      "target": "AVAX",
+      "conf": "SEI",
+      "corr": 0.632,
+      "cwr": 55.3,
+      "uwr": 14.3,
+      "diff": 41.0,
+      "ct": 47,
+      "ut": 7
+    },
+    {
+      "target": "WLD",
+      "conf": "ATOM",
+      "corr": 0.561,
+      "cwr": 54.5,
+      "uwr": 20.0,
+      "diff": 34.5,
+      "ct": 44,
+      "ut": 15
+    },
+    {
+      "target": "WLD",
+      "conf": "SUI",
+      "corr": 0.496,
+      "cwr": 56.1,
+      "uwr": 22.2,
+      "diff": 33.9,
+      "ct": 41,
+      "ut": 18
+    },
+    {
+      "target": "LINK",
+      "conf": "SUI",
+      "corr": 0.607,
+      "cwr": 57.5,
+      "uwr": 25.0,
+      "diff": 32.5,
+      "ct": 40,
+      "ut": 12
+    },
+    {
+      "target": "DOGE",
+      "conf": "SEI",
+      "corr": 0.548,
+      "cwr": 52.4,
+      "uwr": 20.0,
+      "diff": 32.4,
+      "ct": 42,
+      "ut": 10
+    },
+    {
+      "target": "WLD",
+      "conf": "AVAX",
+      "corr": 0.535,
+      "cwr": 53.3,
+      "uwr": 21.4,
+      "diff": 31.9,
+      "ct": 45,
+      "ut": 14
+    },
+    {
+      "target": "BNB",
+      "conf": "SOL",
+      "corr": 0.597,
+      "cwr": 56.8,
+      "uwr": 25.0,
+      "diff": 31.8,
+      "ct": 37,
+      "ut": 12
+    },
+    {
+      "target": "NEAR",
+      "conf": "ARB",
+      "corr": 0.656,
+      "cwr": 54.8,
+      "uwr": 23.1,
+      "diff": 31.7,
+      "ct": 42,
+      "ut": 13
+    },
+    {
+      "target": "WLD",
+      "conf": "APT",
+      "corr": 0.537,
+      "cwr": 54.8,
+      "uwr": 23.5,
+      "diff": 31.2,
+      "ct": 42,
+      "ut": 17
+    },
+    {
+      "target": "WLD",
+      "conf": "FIL",
+      "corr": 0.57,
+      "cwr": 54.8,
+      "uwr": 23.5,
+      "diff": 31.2,
+      "ct": 42,
+      "ut": 17
+    },
+    {
+      "target": "DOGE",
+      "conf": "SUI",
+      "corr": 0.588,
+      "cwr": 53.8,
+      "uwr": 23.1,
+      "diff": 30.8,
+      "ct": 39,
+      "ut": 13
+    },
+    {
+      "target": "DOGE",
+      "conf": "OP",
+      "corr": 0.61,
+      "cwr": 53.8,
+      "uwr": 23.1,
+      "diff": 30.8,
+      "ct": 39,
+      "ut": 13
+    },
+    {
+      "target": "SUI",
+      "conf": "AVAX",
+      "corr": 0.622,
+      "cwr": 61.4,
+      "uwr": 30.8,
+      "diff": 30.6,
+      "ct": 44,
+      "ut": 13
+    },
+    {
+      "target": "SUI",
+      "conf": "APT",
+      "corr": 0.645,
+      "cwr": 61.4,
+      "uwr": 30.8,
+      "diff": 30.6,
+      "ct": 44,
+      "ut": 13
+    },
+    {
+      "target": "BNB",
+      "conf": "ADA",
+      "corr": 0.553,
+      "cwr": 59.4,
+      "uwr": 29.4,
+      "diff": 30.0,
+      "ct": 32,
+      "ut": 17
+    },
+    {
+      "target": "WLD",
+      "conf": "OP",
+      "corr": 0.544,
+      "cwr": 52.2,
+      "uwr": 23.1,
+      "diff": 29.1,
+      "ct": 46,
+      "ut": 13
+    },
+    {
+      "target": "LINK",
+      "conf": "OP",
+      "corr": 0.675,
+      "cwr": 56.1,
+      "uwr": 27.3,
+      "diff": 28.8,
+      "ct": 41,
+      "ut": 11
+    },
+    {
+      "target": "FIL",
+      "conf": "OP",
+      "corr": 0.648,
+      "cwr": 47.7,
+      "uwr": 20.0,
+      "diff": 27.7,
+      "ct": 44,
+      "ut": 10
+    },
+    {
+      "target": "DOGE",
+      "conf": "APT",
+      "corr": 0.646,
+      "cwr": 54.1,
+      "uwr": 26.7,
+      "diff": 27.4,
+      "ct": 37,
+      "ut": 15
+    },
+    {
+      "target": "XRP",
+      "conf": "ETH",
+      "corr": 0.622,
+      "cwr": 47.2,
+      "uwr": 21.1,
+      "diff": 26.2,
+      "ct": 36,
+      "ut": 19
+    },
+    {
+      "target": "LINK",
+      "conf": "ARB",
+      "corr": 0.74,
+      "cwr": 56.4,
+      "uwr": 30.8,
+      "diff": 25.6,
+      "ct": 39,
+      "ut": 13
+    },
+    {
+      "target": "NEAR",
+      "conf": "SEI",
+      "corr": 0.598,
+      "cwr": 53.7,
+      "uwr": 28.6,
+      "diff": 25.1,
+      "ct": 41,
+      "ut": 14
+    },
+    {
+      "target": "DOGE",
+      "conf": "AVAX",
+      "corr": 0.706,
+      "cwr": 50.0,
+      "uwr": 25.0,
+      "diff": 25.0,
+      "ct": 44,
+      "ut": 8
+    },
+    {
+      "target": "DOT",
+      "conf": "ARB",
+      "corr": 0.755,
+      "cwr": 50.0,
+      "uwr": 25.0,
+      "diff": 25.0,
+      "ct": 44,
+      "ut": 8
+    },
+    {
+      "target": "LINK",
+      "conf": "SEI",
+      "corr": 0.596,
+      "cwr": 54.8,
+      "uwr": 30.0,
+      "diff": 24.8,
+      "ct": 42,
+      "ut": 10
+    },
+    {
+      "target": "AVAX",
+      "conf": "ARB",
+      "corr": 0.715,
+      "cwr": 54.5,
+      "uwr": 30.0,
+      "diff": 24.5,
+      "ct": 44,
+      "ut": 10
+    },
+    {
+      "target": "BNB",
+      "conf": "ETH",
+      "corr": 0.668,
+      "cwr": 53.8,
+      "uwr": 30.0,
+      "diff": 23.8,
+      "ct": 39,
+      "ut": 10
+    },
+    {
+      "target": "MATIC",
+      "conf": "SEI",
+      "corr": -0.004,
+      "cwr": 62.5,
+      "uwr": 39.3,
+      "diff": 23.2,
+      "ct": 24,
+      "ut": 28
+    }
+  ],
+  "worst_pairs": [
+    {
+      "target": "SEI",
+      "conf": "SOL",
+      "corr": 0.59,
+      "cwr": 41.9,
+      "uwr": 71.4,
+      "diff": -29.6,
+      "ct": 43,
+      "ut": 14
+    },
+    {
+      "target": "AVAX",
+      "conf": "PEPE",
+      "corr": 0.576,
+      "cwr": 40.5,
+      "uwr": 70.6,
+      "diff": -30.0,
+      "ct": 37,
+      "ut": 17
+    },
+    {
+      "target": "DOT",
+      "conf": "BNB",
+      "corr": 0.601,
+      "cwr": 35.3,
+      "uwr": 66.7,
+      "diff": -31.4,
+      "ct": 34,
+      "ut": 18
+    },
+    {
+      "target": "APT",
+      "conf": "PEPE",
+      "corr": 0.553,
+      "cwr": 41.0,
+      "uwr": 75.0,
+      "diff": -34.0,
+      "ct": 39,
+      "ut": 16
+    },
+    {
+      "target": "OP",
+      "conf": "DOGE",
+      "corr": 0.61,
+      "cwr": 42.5,
+      "uwr": 76.9,
+      "diff": -34.4,
+      "ct": 40,
+      "ut": 13
+    },
+    {
+      "target": "ADA",
+      "conf": "DOGE",
+      "corr": 0.71,
+      "cwr": 39.5,
+      "uwr": 75.0,
+      "diff": -35.5,
+      "ct": 43,
+      "ut": 8
+    },
+    {
+      "target": "ATOM",
+      "conf": "PEPE",
+      "corr": 0.573,
+      "cwr": 36.4,
+      "uwr": 72.7,
+      "diff": -36.4,
+      "ct": 44,
+      "ut": 11
+    },
+    {
+      "target": "FIL",
+      "conf": "PEPE",
+      "corr": 0.54,
+      "cwr": 34.9,
+      "uwr": 72.7,
+      "diff": -37.8,
+      "ct": 43,
+      "ut": 11
+    },
+    {
+      "target": "OP",
+      "conf": "AVAX",
+      "corr": 0.671,
+      "cwr": 45.7,
+      "uwr": 85.7,
+      "diff": -40.1,
+      "ct": 46,
+      "ut": 7
+    },
+    {
+      "target": "ATOM",
+      "conf": "DOGE",
+      "corr": 0.674,
+      "cwr": 34.1,
+      "uwr": 81.8,
+      "diff": -47.7,
+      "ct": 44,
+      "ut": 11
+    }
+  ]
+}

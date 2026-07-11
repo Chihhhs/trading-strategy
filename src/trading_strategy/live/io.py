@@ -3,8 +3,8 @@ import threading
 import urllib.request
 from datetime import datetime
 
-from trading_strategy.core.state import load_state as load_state_file
-from trading_strategy.core.state import save_state as save_state_file
+from trading_strategy.shared.state import load_state as load_state_file
+from trading_strategy.shared.state import save_state as save_state_file
 
 from . import config
 

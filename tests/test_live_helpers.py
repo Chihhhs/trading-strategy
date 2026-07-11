@@ -231,8 +231,10 @@ class LiveHelpersTest(unittest.TestCase):
     def test_load_coin_list_rebuilds_cache_when_metadata_mismatch(self):
         old_mode = config.MODE
         old_state_dir = config.STATE_DIR
+        old_universe = config.STRATEGY.get("coin_universe")
         tmpdir = tempfile.mkdtemp()
         config.STATE_DIR = tmpdir
+        config.STRATEGY["coin_universe"] = None
         config.set_mode("live")
         try:
             cache_path = os.path.join(tmpdir, "coin_list.json")
@@ -242,5 +244,17 @@ class LiveHelpersTest(unittest.TestCase):
                 coins = market.load_coin_list()
             self.assertEqual(coins, [{"name": "BTC", "symbol": "BTCUSDT"}])
         finally:
+            config.STRATEGY["coin_universe"] = old_universe
             config.STATE_DIR = old_state_dir
             config.set_mode(old_mode)
+
+    def test_load_coin_list_uses_configured_universe(self):
+        old_universe = config.STRATEGY.get("coin_universe")
+        config.STRATEGY["coin_universe"] = ["btc", "ETH"]
+        try:
+            self.assertEqual(
+                market.load_coin_list(),
+                [{"name": "BTC", "symbol": "BTCUSDT"}, {"name": "ETH", "symbol": "ETHUSDT"}],
+            )
+        finally:
+            config.STRATEGY["coin_universe"] = old_universe

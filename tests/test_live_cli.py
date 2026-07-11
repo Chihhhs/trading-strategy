@@ -2,6 +2,20 @@ from tests.live_test_support import cli, live, patch, unittest
 
 
 class LiveCliTest(unittest.TestCase):
+    @patch("trading_strategy.live.cli.time.sleep")
+    @patch("trading_strategy.live.cli.record_trade_event")
+    @patch("trading_strategy.live.cli.run_once")
+    def test_run_loop_stops_after_max_runs(self, mock_run_once, mock_record_trade_event, mock_sleep):
+        cli.run_loop(interval_minutes=1, max_runs=2)
+        self.assertEqual(mock_run_once.call_count, 2)
+        mock_sleep.assert_called_once_with(60)
+        self.assertTrue(
+            any(
+                call.args[0] == "loop_completed" and call.kwargs.get("runs") == 2
+                for call in mock_record_trade_event.call_args_list
+            )
+        )
+
     @patch("trading_strategy.live.cli.print_report")
     @patch("trading_strategy.live.cli.save_state")
     @patch("trading_strategy.live.cli.load_state")
@@ -104,5 +118,8 @@ class LiveCliTest(unittest.TestCase):
             event_names = [call.args[0] for call in mock_record_trade_event.call_args_list]
             self.assertIn("config_mismatch", event_names)
             self.assertIn("run_summary", event_names)
+            run_summary_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "run_summary")
+            self.assertEqual(run_summary_call.kwargs["position_status_counts"], {})
+            self.assertEqual(run_summary_call.kwargs["position_snapshots"], [])
         finally:
             live.config.set_mode(old_mode)

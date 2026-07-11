@@ -1,0 +1,361 @@
+{
+  "date": "20260629",
+  "created": "2026-06-29 16:51:31",
+  "coins": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "AVAX",
+    "XRP",
+    "NEAR",
+    "WLD",
+    "ZEC"
+  ],
+  "data": [
+    {
+      "time": "2026-06-29 16:51:31",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 59884.01,
+          "high": 60780.57,
+          "low": 58900.01,
+          "open": 59577.01,
+          "volume": 16238.3312,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1585.29,
+          "high": 1597.28,
+          "low": 1550.43,
+          "open": 1571.96,
+          "volume": 207701.8078,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "SOL": {
+          "symbol": "SOLUSDT",
+          "price": 74.05,
+          "high": 74.55,
+          "low": 70.35,
+          "open": 71.39,
+          "volume": 2866019.092,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 557.45,
+          "high": 559.04,
+          "low": 546.17,
+          "open": 551.07,
+          "volume": 84784.901,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "AVAX": {
+          "symbol": "AVAXUSDT",
+          "price": 6.687,
+          "high": 6.714,
+          "low": 6.364,
+          "open": 6.45,
+          "volume": 2383777.92,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0521,
+          "high": 1.0663,
+          "low": 1.0322,
+          "open": 1.0485,
+          "volume": 70608435.2,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "NEAR": {
+          "symbol": "NEARUSDT",
+          "price": 1.862,
+          "high": 1.882,
+          "low": 1.807,
+          "open": 1.834,
+          "volume": 10521770.9,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "WLD": {
+          "symbol": "WLDUSDT",
+          "price": 0.4196,
+          "high": 0.444,
+          "low": 0.4156,
+          "open": 0.4423,
+          "volume": 57551485.6,
+          "timestamp": "2026-06-29 16:51:31"
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 389.65,
+          "high": 393.37,
+          "low": 369.76,
+          "open": 376.45,
+          "volume": 131746.327,
+          "timestamp": "2026-06-29 16:51:31"
+        }
+      }
+    },
+    {
+      "time": "2026-06-29 18:00:19",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 60370.01,
+          "high": 60780.57,
+          "low": 58900.01,
+          "open": 59577.01,
+          "volume": 18112.90599,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1626.64,
+          "high": 1637.58,
+          "low": 1550.43,
+          "open": 1571.96,
+          "volume": 256787.0493,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "SOL": {
+          "symbol": "SOLUSDT",
+          "price": 75.21,
+          "high": 76.49,
+          "low": 70.35,
+          "open": 71.39,
+          "volume": 3334655.184,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 560.66,
+          "high": 562.96,
+          "low": 546.17,
+          "open": 551.07,
+          "volume": 93213.792,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "AVAX": {
+          "symbol": "AVAXUSDT",
+          "price": 6.753,
+          "high": 6.822,
+          "low": 6.364,
+          "open": 6.45,
+          "volume": 2753617.16,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0651,
+          "high": 1.069,
+          "low": 1.0322,
+          "open": 1.0485,
+          "volume": 78686333.6,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "NEAR": {
+          "symbol": "NEARUSDT",
+          "price": 1.896,
+          "high": 1.914,
+          "low": 1.807,
+          "open": 1.834,
+          "volume": 12076909.9,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "WLD": {
+          "symbol": "WLDUSDT",
+          "price": 0.4272,
+          "high": 0.444,
+          "low": 0.4156,
+          "open": 0.4423,
+          "volume": 62405003.6,
+          "timestamp": "2026-06-29 18:00:19"
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 403.53,
+          "high": 404.83,
+          "low": 369.76,
+          "open": 376.45,
+          "volume": 156297.719,
+          "timestamp": "2026-06-29 18:00:19"
+        }
+      }
+    },
+    {
+      "time": "2026-06-29 20:00:21",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 60465.05,
+          "high": 60780.57,
+          "low": 58900.01,
+          "open": 59577.01,
+          "volume": 19149.54252,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1625.55,
+          "high": 1637.58,
+          "low": 1550.43,
+          "open": 1571.96,
+          "volume": 276415.7259,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "SOL": {
+          "symbol": "SOLUSDT",
+          "price": 75.92,
+          "high": 76.49,
+          "low": 70.35,
+          "open": 71.39,
+          "volume": 3558123.141,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 561.99,
+          "high": 563.16,
+          "low": 546.17,
+          "open": 551.07,
+          "volume": 99505.032,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "AVAX": {
+          "symbol": "AVAXUSDT",
+          "price": 6.722,
+          "high": 6.822,
+          "low": 6.364,
+          "open": 6.45,
+          "volume": 2908606.15,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0738,
+          "high": 1.0768,
+          "low": 1.0322,
+          "open": 1.0485,
+          "volume": 86157337.0,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "NEAR": {
+          "symbol": "NEARUSDT",
+          "price": 1.894,
+          "high": 1.916,
+          "low": 1.807,
+          "open": 1.834,
+          "volume": 13176945.3,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "WLD": {
+          "symbol": "WLDUSDT",
+          "price": 0.4273,
+          "high": 0.444,
+          "low": 0.4156,
+          "open": 0.4423,
+          "volume": 66366972.2,
+          "timestamp": "2026-06-29 20:00:21"
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 408.5,
+          "high": 409.72,
+          "low": 369.76,
+          "open": 376.45,
+          "volume": 175725.067,
+          "timestamp": "2026-06-29 20:00:21"
+        }
+      }
+    },
+    {
+      "time": "2026-06-29 22:00:23",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 60468.01,
+          "high": 60780.57,
+          "low": 58900.01,
+          "open": 59577.01,
+          "volume": 19742.98664,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1619.73,
+          "high": 1637.58,
+          "low": 1550.43,
+          "open": 1571.96,
+          "volume": 296285.8309,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "SOL": {
+          "symbol": "SOLUSDT",
+          "price": 75.48,
+          "high": 76.49,
+          "low": 70.35,
+          "open": 71.39,
+          "volume": 3714010.938,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 561.08,
+          "high": 563.16,
+          "low": 546.17,
+          "open": 551.07,
+          "volume": 103350.271,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "AVAX": {
+          "symbol": "AVAXUSDT",
+          "price": 6.697,
+          "high": 6.822,
+          "low": 6.364,
+          "open": 6.45,
+          "volume": 3037464.5,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0648,
+          "high": 1.0768,
+          "low": 1.0322,
+          "open": 1.0485,
+          "volume": 91448017.4,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "NEAR": {
+          "symbol": "NEARUSDT",
+          "price": 1.858,
+          "high": 1.916,
+          "low": 1.807,
+          "open": 1.834,
+          "volume": 15292927.7,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "WLD": {
+          "symbol": "WLDUSDT",
+          "price": 0.4255,
+          "high": 0.444,
+          "low": 0.4156,
+          "open": 0.4423,
+          "volume": 68733081.7,
+          "timestamp": "2026-06-29 22:00:23"
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 411.6,
+          "high": 412.67,
+          "low": 369.76,
+          "open": 376.45,
+          "volume": 190197.826,
+          "timestamp": "2026-06-29 22:00:23"
+        }
+      }
+    }
+  ]
+}

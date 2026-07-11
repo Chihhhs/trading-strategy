@@ -1,0 +1,368 @@
+{
+  "timestamp": "2026-06-23T07:58:35.559061",
+  "groups": {
+    "core": [
+      "BTC",
+      "ETH",
+      "DOGE"
+    ],
+    "altcoin": [
+      "SOL",
+      "BNB",
+      "AVAX",
+      "XRP",
+      "ADA",
+      "LINK",
+      "DOT",
+      "ATOM",
+      "FIL",
+      "JUP",
+      "WIF",
+      "PEPE"
+    ],
+    "l2": [
+      "APT",
+      "SUI",
+      "SEI",
+      "MATIC",
+      "ARB",
+      "NEAR",
+      "OP"
+    ],
+    "low_corr": [
+      "WLD",
+      "ZEC"
+    ]
+  },
+  "btc_correlations": {
+    "ETH": 0.807,
+    "DOGE": 0.765,
+    "SOL": 0.745,
+    "AVAX": 0.699,
+    "ADA": 0.687,
+    "LINK": 0.677,
+    "PEPE": 0.659,
+    "BNB": 0.655,
+    "DOT": 0.651,
+    "WIF": 0.641,
+    "ARB": 0.63,
+    "APT": 0.626,
+    "NEAR": 0.621,
+    "XRP": 0.62,
+    "ATOM": 0.619,
+    "JUP": 0.612,
+    "SUI": 0.601,
+    "SEI": 0.582,
+    "OP": 0.565,
+    "FIL": 0.562,
+    "WLD": 0.485,
+    "ZEC": 0.406,
+    "MATIC": -0.051
+  },
+  "results": {
+    "ETH": {
+      "trades": 15,
+      "wins": 9,
+      "win_rate": 60.0,
+      "total_pnl": 209.26,
+      "avg_pnl": 13.95,
+      "final_balance": 1880.68,
+      "confirm_stats": {
+        "btc_confirmed": 14,
+        "group_confirmed": 2,
+        "no_confirm": 0
+      }
+    },
+    "SOL": {
+      "trades": 17,
+      "wins": 10,
+      "win_rate": 58.82352941176471,
+      "total_pnl": 393.98,
+      "avg_pnl": 23.18,
+      "final_balance": 4904.82,
+      "confirm_stats": {
+        "btc_confirmed": 16,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    },
+    "BNB": {
+      "trades": 10,
+      "wins": 6,
+      "win_rate": 60.0,
+      "total_pnl": 303.81,
+      "avg_pnl": 30.38,
+      "final_balance": 5111.01,
+      "confirm_stats": {
+        "btc_confirmed": 11,
+        "group_confirmed": 0,
+        "no_confirm": 0
+      }
+    },
+    "AVAX": {
+      "trades": 16,
+      "wins": 9,
+      "win_rate": 56.25,
+      "total_pnl": 507.61,
+      "avg_pnl": 31.73,
+      "final_balance": 7975.73,
+      "confirm_stats": {
+        "btc_confirmed": 14,
+        "group_confirmed": 2,
+        "no_confirm": 0
+      }
+    },
+    "XRP": {
+      "trades": 13,
+      "wins": 7,
+      "win_rate": 53.84615384615385,
+      "total_pnl": 585.88,
+      "avg_pnl": 45.07,
+      "final_balance": 1255.77,
+      "confirm_stats": {
+        "btc_confirmed": 12,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    },
+    "DOGE": {
+      "trades": 16,
+      "wins": 9,
+      "win_rate": 56.25,
+      "total_pnl": 609.11,
+      "avg_pnl": 38.07,
+      "final_balance": 2341.82,
+      "confirm_stats": {
+        "btc_confirmed": 14,
+        "group_confirmed": 3,
+        "no_confirm": 3
+      }
+    },
+    "ADA": {
+      "trades": 17,
+      "wins": 8,
+      "win_rate": 47.05882352941176,
+      "total_pnl": 337.92,
+      "avg_pnl": 19.88,
+      "final_balance": 1149.4,
+      "confirm_stats": {
+        "btc_confirmed": 15,
+        "group_confirmed": 2,
+        "no_confirm": 0
+      }
+    },
+    "LINK": {
+      "trades": 14,
+      "wins": 8,
+      "win_rate": 57.14285714285714,
+      "total_pnl": 163.05,
+      "avg_pnl": 11.65,
+      "final_balance": 1145.03,
+      "confirm_stats": {
+        "btc_confirmed": 12,
+        "group_confirmed": 2,
+        "no_confirm": 0
+      }
+    },
+    "APT": {
+      "trades": 16,
+      "wins": 11,
+      "win_rate": 68.75,
+      "total_pnl": 466.22,
+      "avg_pnl": 29.14,
+      "final_balance": 8121.32,
+      "confirm_stats": {
+        "btc_confirmed": 16,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    },
+    "SUI": {
+      "trades": 3,
+      "wins": 2,
+      "win_rate": 66.66666666666666,
+      "total_pnl": 409.35,
+      "avg_pnl": 136.45,
+      "final_balance": -1626.06,
+      "confirm_stats": {
+        "btc_confirmed": 3,
+        "group_confirmed": 0,
+        "no_confirm": 0
+      }
+    },
+    "SEI": {
+      "trades": 15,
+      "wins": 12,
+      "win_rate": 80.0,
+      "total_pnl": 979.32,
+      "avg_pnl": 65.29,
+      "final_balance": 43997.03,
+      "confirm_stats": {
+        "btc_confirmed": 13,
+        "group_confirmed": 3,
+        "no_confirm": 1
+      }
+    },
+    "WLD": {
+      "trades": 18,
+      "wins": 11,
+      "win_rate": 61.111111111111114,
+      "total_pnl": 363.59,
+      "avg_pnl": 20.2,
+      "final_balance": 455.48,
+      "confirm_stats": {
+        "btc_confirmed": 13,
+        "group_confirmed": 5,
+        "no_confirm": 9
+      }
+    },
+    "ZEC": {
+      "trades": 12,
+      "wins": 6,
+      "win_rate": 50.0,
+      "total_pnl": 360.65,
+      "avg_pnl": 30.05,
+      "final_balance": -233.59,
+      "confirm_stats": {
+        "btc_confirmed": 7,
+        "group_confirmed": 5,
+        "no_confirm": 1
+      }
+    },
+    "MATIC": {
+      "trades": 10,
+      "wins": 6,
+      "win_rate": 60.0,
+      "total_pnl": 230.76,
+      "avg_pnl": 23.08,
+      "final_balance": 1320.16,
+      "confirm_stats": {
+        "btc_confirmed": 9,
+        "group_confirmed": 1,
+        "no_confirm": 6
+      }
+    },
+    "DOT": {
+      "trades": 16,
+      "wins": 11,
+      "win_rate": 68.75,
+      "total_pnl": 178.58,
+      "avg_pnl": 11.16,
+      "final_balance": 51.83,
+      "confirm_stats": {
+        "btc_confirmed": 15,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    },
+    "ATOM": {
+      "trades": 14,
+      "wins": 7,
+      "win_rate": 50.0,
+      "total_pnl": 60.73,
+      "avg_pnl": 4.34,
+      "final_balance": 177.23,
+      "confirm_stats": {
+        "btc_confirmed": 14,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    },
+    "ARB": {
+      "trades": 17,
+      "wins": 9,
+      "win_rate": 52.94117647058824,
+      "total_pnl": 212.67,
+      "avg_pnl": 12.51,
+      "final_balance": 415.41,
+      "confirm_stats": {
+        "btc_confirmed": 15,
+        "group_confirmed": 2,
+        "no_confirm": 1
+      }
+    },
+    "NEAR": {
+      "trades": 11,
+      "wins": 5,
+      "win_rate": 45.45454545454545,
+      "total_pnl": 237.22,
+      "avg_pnl": 21.57,
+      "final_balance": -156.82,
+      "confirm_stats": {
+        "btc_confirmed": 10,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    },
+    "OP": {
+      "trades": 15,
+      "wins": 8,
+      "win_rate": 53.333333333333336,
+      "total_pnl": 208.14,
+      "avg_pnl": 13.88,
+      "final_balance": 310.06,
+      "confirm_stats": {
+        "btc_confirmed": 14,
+        "group_confirmed": 1,
+        "no_confirm": 1
+      }
+    },
+    "FIL": {
+      "trades": 14,
+      "wins": 7,
+      "win_rate": 50.0,
+      "total_pnl": 53.42,
+      "avg_pnl": 3.82,
+      "final_balance": 14.48,
+      "confirm_stats": {
+        "btc_confirmed": 13,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    },
+    "JUP": {
+      "trades": 1,
+      "wins": 0,
+      "win_rate": 0.0,
+      "total_pnl": -120.42,
+      "avg_pnl": -120.42,
+      "final_balance": -204.23,
+      "confirm_stats": {
+        "btc_confirmed": 1,
+        "group_confirmed": 0,
+        "no_confirm": 0
+      }
+    },
+    "WIF": {
+      "trades": 9,
+      "wins": 3,
+      "win_rate": 33.33333333333333,
+      "total_pnl": -149.98,
+      "avg_pnl": -16.66,
+      "final_balance": 6.88,
+      "confirm_stats": {
+        "btc_confirmed": 7,
+        "group_confirmed": 2,
+        "no_confirm": 0
+      }
+    },
+    "PEPE": {
+      "trades": 9,
+      "wins": 3,
+      "win_rate": 33.33333333333333,
+      "total_pnl": 817.55,
+      "avg_pnl": 90.84,
+      "final_balance": 8.33,
+      "confirm_stats": {
+        "btc_confirmed": 8,
+        "group_confirmed": 1,
+        "no_confirm": 0
+      }
+    }
+  },
+  "confirm_stats": {
+    "btc_confirmed": 266,
+    "group_confirmed": 38,
+    "no_confirm": 22
+  }
+}

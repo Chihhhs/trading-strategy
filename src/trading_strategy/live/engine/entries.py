@@ -1,8 +1,8 @@
 from collections import Counter
 from datetime import datetime
 
-from trading_strategy.core.exit_policy import build_exit_policy
-from trading_strategy.core.risk import calc_position_size, check_circuit_breaker, is_cooldown
+from trading_strategy.shared.risk import calc_position_size, check_circuit_breaker, is_cooldown
+from trading_strategy.strategies.base import signal_value
 
 from .. import config
 from ..io import record_trade_event, save_state
@@ -12,7 +12,14 @@ from ..orders import (
     normalize_hl_order_params,
     place_hl_order,
 )
-from .helpers import calc_atr, generate_signal, get_available_entry_balance
+from .helpers import (
+    build_strategy_context,
+    calc_atr,
+    generate_signal,
+    get_active_strategy,
+    get_available_entry_balance,
+)
+from .execution_guard import evaluate_microstructure_guard
 from .protection import submit_position_protection
 from .summary import (
     build_entry_context,
@@ -26,10 +33,10 @@ from .summary import (
 
 def _base_entry_context(state, sig, entry, target_tp, risk_pct, available_balance):
     return {
-        "signal_direction": sig.get("direction"),
-        "signal_score": sig.get("score"),
+        "signal_direction": signal_value(sig, "direction"),
+        "signal_score": signal_value(sig, "score"),
         "entry": entry,
-        "sl": sig.get("sl"),
+        "sl": signal_value(sig, "sl"),
         "tp": target_tp,
         "risk_pct": risk_pct,
         "available_balance": available_balance,
@@ -51,6 +58,7 @@ def _build_order_context(order_meta):
 
 
 def check_entries(state, coins):
+    strategy = get_active_strategy()
     summary = build_run_summary()
     summary["coins_scanned"] = len(coins)
     if len(state["positions"]) >= config.STRATEGY["max_positions"]:
@@ -117,11 +125,11 @@ def check_entries(state, coins):
             log_entry_skipped(state, name, btc_dir, "no_signal")
             continue
         summary["signals_found"] += 1
-        exit_policy = build_exit_policy(signal=sig)
-        target_tp = sig.get("tp") if exit_policy.get("requires_tp") else None
+        exit_policy = strategy.build_exit_policy(signal=sig)
+        target_tp = signal_value(sig, "tp") if exit_policy.get("requires_tp") else None
 
-        if (btc_dir == "bull" and sig["direction"] == "short") or (
-            btc_dir == "bear" and sig["direction"] == "long"
+        if (btc_dir == "bull" and signal_value(sig, "direction") == "short") or (
+            btc_dir == "bear" and signal_value(sig, "direction") == "long"
         ):
             bump_summary_blocker(summary, "btc_filter")
             log_entry_skipped(
@@ -129,12 +137,51 @@ def check_entries(state, coins):
                 name,
                 btc_dir,
                 "btc_filter",
-                signal_direction=sig.get("direction"),
-                signal_score=sig.get("score"),
-                sl=sig.get("sl"),
+                signal_direction=signal_value(sig, "direction"),
+                signal_score=signal_value(sig, "score"),
+                sl=signal_value(sig, "sl"),
                 tp=target_tp,
             )
             continue
+
+        if config.MODE == "live":
+            guard = evaluate_microstructure_guard(name, sig)
+            if not guard.get("allowed", True):
+                reason = guard.get("reason") or "microstructure_guard"
+                if config.STRATEGY.get("microstructure_guard_observe_only", False):
+                    record_trade_event(
+                        "microstructure_guard_observed",
+                        **build_entry_context(
+                            state,
+                            name,
+                            btc_dir,
+                            config.STRATEGY["entry_order_type"],
+                            signal_direction=signal_value(sig, "direction"),
+                            signal_score=signal_value(sig, "score"),
+                            sl=signal_value(sig, "sl"),
+                            tp=target_tp,
+                            would_block_reason=reason,
+                            spread_bps=guard.get("spread_bps"),
+                            top_depth_usd=guard.get("top_depth_usd"),
+                            book_imbalance=guard.get("book_imbalance"),
+                        ),
+                    )
+                else:
+                    bump_summary_blocker(summary, reason)
+                    log_entry_skipped(
+                        state,
+                        name,
+                        btc_dir,
+                        reason,
+                        signal_direction=signal_value(sig, "direction"),
+                        signal_score=signal_value(sig, "score"),
+                        sl=signal_value(sig, "sl"),
+                        tp=target_tp,
+                        spread_bps=guard.get("spread_bps"),
+                        top_depth_usd=guard.get("top_depth_usd"),
+                        book_imbalance=guard.get("book_imbalance"),
+                    )
+                    continue
 
         entry = prices[name]
         atr = calc_atr(
@@ -162,7 +209,7 @@ def check_entries(state, coins):
         size = calc_position_size(
             available_balance,
             entry,
-            sig["sl"],
+            signal_value(sig, "sl"),
             config.STRATEGY["leverage"],
             risk_pct,
         )
@@ -194,7 +241,7 @@ def check_entries(state, coins):
             )
             order_meta = place_hl_order(
                 name,
-                "buy" if sig["direction"] == "long" else "sell",
+                "buy" if signal_value(sig, "direction") == "long" else "sell",
                 round(size, 6),
                 order_type=config.STRATEGY["entry_order_type"],
             )
@@ -245,11 +292,11 @@ def check_entries(state, coins):
             entry = order_meta.get("resolved_price", entry)
             position_stub = {
                 "coin": name,
-                "direction": sig["direction"],
+                "direction": signal_value(sig, "direction"),
                 "size": order_meta.get("size"),
                 "exit_policy": exit_policy,
             }
-            protection_meta = submit_position_protection(position_stub, target_tp, sig["sl"])
+            protection_meta = submit_position_protection(position_stub, target_tp, signal_value(sig, "sl"))
             if not protection_meta.get("ok"):
                 failure_reason = "tpsl_submit_failed" if exit_policy.get("requires_tp") else "sl_submit_failed"
                 bump_summary_blocker(summary, failure_reason)
@@ -278,31 +325,23 @@ def check_entries(state, coins):
 
         position = {
             "coin": name,
-            "direction": sig["direction"],
+            "direction": signal_value(sig, "direction"),
             "entry": entry,
             "tp": target_tp,
-            "sl": sig["sl"],
-            "initial_risk": abs(entry - sig["sl"]) if entry is not None and sig.get("sl") is not None else None,
-            "entry_atr": sig.get("atr") if exit_policy.get("name") == "trend_sl_only" else None,
-            "sl_stage": 0 if exit_policy.get("name") == "trend_sl_only" else None,
-            "best_price": entry if exit_policy.get("name") == "trend_sl_only" else None,
-            "entry_klines_len": len(klines) if exit_policy.get("name") == "trend_sl_only" else None,
-            "bars_since_entry": 0 if exit_policy.get("name") == "trend_sl_only" else None,
-            "entry_breakout_level": sig.get("breakout_level") if exit_policy.get("name") == "trend_sl_only" else None,
-            "entry_ema20": sig.get("ema20") if exit_policy.get("name") == "trend_sl_only" else None,
-            "entry_ema50": sig.get("ema50") if exit_policy.get("name") == "trend_sl_only" else None,
+            "sl": signal_value(sig, "sl"),
             "size": preview["size"] if config.MODE == "live" else round(size, 6),
             "current_price": entry,
             "pnl_pnl": 0,
             "entry_time": datetime.now().isoformat(),
-            "sig": sig.get("reason", ""),
-            "signal_reason": sig.get("reason", ""),
-            "signal_score": sig.get("score"),
-            "entry_reason": sig.get("reason", ""),
+            "sig": signal_value(sig, "reason", ""),
+            "signal_reason": signal_value(sig, "reason", ""),
+            "signal_score": signal_value(sig, "score"),
+            "entry_reason": signal_value(sig, "reason", ""),
             "btc_dir_at_entry": btc_dir,
             "risk_pct": risk_pct,
             "entry_order_type": config.STRATEGY["entry_order_type"],
             "exit_policy": exit_policy,
+            "strategy_name": strategy.name,
             "entry_oid": ((order_meta or {}).get("order_summary") or {}).get("oid"),
             "entry_status": (order_meta or {}).get("normalized_status"),
             "entry_filled_size": (order_meta or {}).get("size"),
@@ -314,6 +353,17 @@ def check_entries(state, coins):
             "position_source": "local_state",
             "protection_status": "protected" if config.MODE == "live" else None,
         }
+        position = strategy.initialize_position(
+            position,
+            sig,
+            build_strategy_context(
+                name,
+                klines,
+                price=entry,
+                balance=available_balance,
+                open_positions=state.get("positions", []),
+            ),
+        )
         state["positions"].append(position)
         summary["positions_opened"] += 1
         if config.MODE == "live":
@@ -329,8 +379,8 @@ def check_entries(state, coins):
             )
             save_state(state)
         print(
-            f'  opened: {name} {sig["direction"]} @ ${entry:,.2f} | {sig["reason"]} | '
-            f'score={sig["score"]} | mode={"live" if config.MODE == "live" else "paper"} | '
+            f'  opened: {name} {signal_value(sig, "direction")} @ ${entry:,.2f} | {signal_value(sig, "reason")} | '
+            f'score={signal_value(sig, "score")} | mode={"live" if config.MODE == "live" else "paper"} | '
             f'order_status={((order_meta or {}).get("order_summary") or {}).get("order_status", "paper")} | '
             f'verify={((order_meta or {}).get("verified_summary") or {}).get("verify_status", "n/a")}'
         )

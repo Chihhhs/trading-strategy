@@ -6,23 +6,45 @@
 
 目前 repo 的主線能力分成三塊：
 
-- `src/trading_strategy/backtest.py`：離線回測
+- `src/trading_strategy/backtest/`：離線回測
 - `src/trading_strategy/paper.py`：Binance 資料驅動的 paper trading
 - `src/trading_strategy/live/`：Hyperliquid live trading
 
-最近的變更重心集中在 `live/`：
+目前的模組邊界已重構成：
+
+- `src/trading_strategy/strategies/`：策略 registry、策略介面、`trend`、`intraday_momentum`
+- `src/trading_strategy/positions/`：position lifecycle / snapshot / trend stop helper
+- `src/trading_strategy/shared/`：risk / state / trade history 共用 helper
+- `src/trading_strategy/core/`：相容層，舊 import 仍可用，但新實作不應再放進這裡
+
+最近的變更重心集中在 live 安全性與策略架構：
 
 - 以交易所持倉為權威來源接管本地部位
 - 以 `perp` 資金而非 `spot` 餘額決定是否可 live 開倉
 - 用事件型 JSONL log 提升可觀測性
 - 啟動時自動檢查並補掛 TP/SL
+- backtest/live 透過 strategy hook 對齊出場語義
+- 第一版短週期策略 `intraday_momentum` 已接線，但資料驗證顯示不可部署
 
 ## Canonical Entrypoints
 
 - `python apps/runners/live_runner.py --live`
 - `python apps/runners/live_runner.py --live --loop`
 - `python apps/runners/paper_runner.py`
-- `python backtest/backtest_runner.py --coins BTC,ETH --strategy both --max-days 240`
+- `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
+- `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
+- `python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid trend,intraday_momentum`
+
+Live 短週期策略切換應透過 `apps/live_config.py` 覆寫：
+
+```python
+STRATEGY_OVERRIDES = {
+    "name": "intraday_momentum",
+    "timeframe": "15m",
+    "max_positions": 2,
+    "risk_per_trade": 0.03,
+}
+```
 
 ## Live 模組地圖
 
@@ -32,6 +54,8 @@
 - 定義 `STATE_DIR`、`API_LOG_PATH`、`TRADE_LOG_PATH`
 - 定義 runtime `STRATEGY` 與 `CIRCUIT`
 - `config.STRATEGY` 是 runtime 真相來源
+- `config.STRATEGY["name"]` 決定 active strategy
+- `config.STRATEGY["timeframe"]` 決定 live K 線週期，預設 `1d`
 
 重要路徑：
 
@@ -70,7 +94,7 @@
 - live 能否開倉以 `_perp_account_value` 為準
 - `spot` 僅作觀測，不代表可開 perp 部位
 
-### `src/trading_strategy/live/engine.py`
+### `src/trading_strategy/live/engine/`
 
 - 進出場主邏輯
 - 持倉接管與保護單檢查
@@ -83,8 +107,8 @@
   - 可接管本地未知部位
   - 會標記 `position_source`、`adopted_at`、`exchange_position_state`
 - `ensure_position_protection()`
-  - 檢查 TP/SL 是否已存在
-  - 若缺失則呼叫 `place_hl_tpsl_orders()`
+  - 依 strategy exit policy 檢查 TP/SL 或 SL-only 保護是否存在
+  - 若缺失則呼叫 `place_hl_tpsl_orders()` 或 `place_hl_sl_order()`
   - 若仍失敗，`unprotected_positions_count` 會上升
 - `check_entries()`
   - 只在沒有未受保護持倉時執行
@@ -116,6 +140,19 @@
 - live 幣池來源與價格抓取
 - `load_coin_list()` 會快取到 `coin_list.json`
 - live 預設市場資料來源會偏向 Hyperliquid universe
+- `get_klines()` 會讀 `config.STRATEGY["timeframe"]`
+
+### `src/trading_strategy/strategies/`
+
+- `BaseStrategy` 定義策略 hook：
+  - `generate_signal()`
+  - `build_exit_policy()`
+  - `initialize_position()`
+  - `should_block_for_btc()`
+  - `evaluate_open_position()`
+  - `resolve_stop_target()`
+- `trend` 使用 `trend_sl_only`，live 預設只要求 SL，並由 strategy hook 管理 dynamic stop / ATR trail / failure exit。
+- `intraday_momentum` 是短週期動能 / 波動突破 wiring baseline。它可在 5m / 15m / 1h K 線上運作，但目前資料驗證顯示 overtrade，不能部署。
 
 ## Runtime 真相來源
 
@@ -279,10 +316,21 @@
 以下區域改動時要特別保守：
 
 - `orders.py` 的 tick size 推導與 trigger order 價格正規化
-- `engine.py` 的持倉接管與保護單修復順序
+- `live/engine/` 的持倉接管與保護單修復順序
 - `account.py` 的 Hyperliquid balance / position / open order 同步
-- `market.py` 的幣池來源與快取策略
-- `core/state.py` 的 state 持久化欄位裁切
+- `market.py` 的幣池來源、快取策略與 `timeframe` 行為
+- `shared/state.py` 的 state 持久化欄位裁切
+- `strategies/` 的 exit policy，因為它會同時影響 backtest 與 live protection
+
+## 2026-07-10 Intraday Data Check
+
+- 下載資料：`data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json`
+- 範圍：2026-04-11 12:45 UTC 到 2026-07-10 12:30 UTC
+- 每幣：8640 根 15m bars
+- `intraday_momentum`, BTC-only, 90d, `risk=0.03`, `leverage=2`: `trades=573`, gross `pnl=-27.9%`, `drawdown=33.0%`
+- 四幣同設定：`trades=2324`, gross `pnl=-59.1%`, `drawdown=77.5%`
+- 費用估算：BTC-only turnover 約 `1866.7x` 起始資金，tier-0 taker fee drag 約 `84.0%`
+- 結論：`intraday_momentum` 目前只能視為接線與研究 baseline，不能上 paper/live。
 
 ## Agent 修改守則
 
@@ -298,7 +346,7 @@
 修改 live 流程後，至少跑：
 
 ```bash
-python -m unittest tests.test_live
+python -m unittest discover tests
 python -m compileall src tests
 ```
 

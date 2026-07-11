@@ -19,17 +19,24 @@
 - 若仍有未受保護持倉，會阻止新開倉
 - 每輪執行會寫出 `run_started`、`account_snapshot`、`run_summary`
 - entry / TP/SL / skip / reject 都有事件型 JSONL log
+- 策略架構已重構為 `trading_strategy.strategies`
+- backtest/live 已透過 strategy hook 對齊出場語義
+- live K 線週期可由 `config.STRATEGY["timeframe"]` 控制
+- 第一版短週期策略 `intraday_momentum` 已接線，但資料驗證顯示不能部署
 
 目前 canonical 入口：
 
 - `python apps/runners/live_runner.py --live`
 - `python apps/runners/live_runner.py --live --loop`
+- `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
+- `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
 
 目前主要資料檔：
 
 - `data/paper_strategies_live/live_state.json`
 - `data/paper_strategies_live/live_trading_records.jsonl`
 - `data/paper_strategies_live/live_api_debug.log`
+- `data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json`
 
 ## 2. Improvements Already Completed
 
@@ -110,6 +117,48 @@
 - `run_summary` 會聚合 blocker、missing price、reject reason、TP/SL 保護狀態
 - runtime 與 state snapshot 不一致時會寫 `config_mismatch`
 
+### 2.6 策略架構重構
+
+已完成：
+
+- 新增 `trading_strategy.strategies` 作為策略 registry 與策略介面位置
+- 新增 `BaseStrategy` / `StrategyContext` / `StrategySignal`
+- `trend` 已搬到策略模組，舊 `core.*` import 保留為相容層
+- backtest engine 會呼叫策略 hook：
+  - `build_exit_policy()`
+  - `initialize_position()`
+  - `evaluate_open_position()`
+  - `resolve_stop_target()`
+- live entry / position update 也透過 active strategy 取得 signal 與 exit 行為
+
+目的：
+
+- 讓 backtest 與 live 不再各自硬寫 trend 出場邏輯
+- 讓後續新增策略不需要修改 live 核心流程
+
+### 2.7 短週期策略接線與資料驗證
+
+已完成：
+
+- 新增 `intraday_momentum`
+- backtest CLI 支援 `--strategy intraday_momentum`
+- optimizer 可用 `--strategy-grid trend,intraday_momentum`
+- live `get_klines()` 支援 `config.STRATEGY["timeframe"]`
+- 下載 Binance 15m 90d BTC/ETH/SOL/BNB K 線到：
+  - `data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json`
+
+驗證結果：
+
+- `intraday_momentum`, BTC-only, 90d: `trades=573`, gross `pnl=-27.9%`, `drawdown=33.0%`
+- 四幣同設定: `trades=2324`, gross `pnl=-59.1%`, `drawdown=77.5%`
+- BTC-only turnover 約 `1866.7x` 起始資金，tier-0 taker fee drag 約 `84.0%`
+
+結論：
+
+- `intraday_momentum` 目前只能當 wiring baseline。
+- 不應上 paper/live。
+- 下一步應先做 cost/slippage model、turnover 限制、regime filter。
+
 ## 3. Current Observations
 
 從目前 log 可讀到幾個重要現象：
@@ -151,24 +200,56 @@
 
 這代表「沒有新單」不一定是異常，也可能只是系統按設計停止加倉。
 
+### 3.4 短週期策略目前主要問題是成本與 turnover
+
+15m 資料驗證顯示：
+
+- 交易次數太高
+- gross PnL 已經偏弱
+- 扣 maker/taker fee 後不可接受
+
+這代表短週期策略下一步不是直接調高風險或上 live，而是先降低 turnover 並加入成本模型。
+
 ## 4. Next Improvements Worth Prioritizing
 
 以下是下一輪最值得做的改善項目，依優先度排序。
 
-### P1. 把 `project_detail.md` 修成穩定 UTF-8 可讀版本
+### P1. 成本 / 滑價 / turnover 模型
 
 現況：
 
-- `.agents/project_detail.md` 目前內容可用，但閱讀結果看起來有編碼問題
+- backtest 目前沒有內建 maker/taker fee、spread、slippage
+- 15m 策略的 turnover 足以讓費用主導結果
 
 建議：
 
-- 重新以乾淨 UTF-8 重寫一遍
-- 保留現有內容結構，但確保在一般編輯器與終端都可讀
+- 在 backtest summary 補 `turnover`
+- 增加 maker/taker fee、spread、slippage 參數
+- summary 同時輸出 gross 與 net PnL
+- optimizer 排序應以 net score 為主
 
 原因：
 
-- agent 文檔是後續維護入口，若亂碼會直接拖慢接手效率
+- 沒有成本模型時，短週期策略的回測幾乎不可用
+
+### P1. 短週期策略 turnover 限制與 regime filter
+
+現況：
+
+- `intraday_momentum` 已接線，但 overtrade
+- 90d BTC-only 573 筆，四幣 2324 筆
+
+建議：
+
+- 增加最小 bar 間隔 / cooldown
+- 增加 BTC 高階 regime filter
+- 增加 ATR percentile / volatility regime filter
+- 增加成交量與趨勢品質門檻
+- 先用 BTC-only 15m 資料驗證，再擴展到四幣
+
+原因：
+
+- 第一版策略證明 wiring 可用，但不是有效 alpha
 
 ### P1. 強化 `run_summary` 的持倉上下文
 

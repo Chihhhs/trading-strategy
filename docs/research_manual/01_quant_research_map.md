@@ -3,7 +3,7 @@
 - Date: 2026-07-05
 - Data range: Research synthesis plus current repo observations through 2026-07-05
 - Applicable markets: Multi-asset quant research mapped into crypto trading decisions
-- Last updated: 2026-07-05
+- Last updated: 2026-07-10
 
 ## Three Strategic Directions To Track
 
@@ -51,6 +51,15 @@
   - [The Price Impact of Order Book Events](https://arxiv.org/abs/1011.6402)
   - [The Price Impact of Generalized Order Flow Imbalance](https://arxiv.org/abs/2112.02947)
   - [Explainable Patterns in Cryptocurrency Microstructure](https://arxiv.org/abs/2602.00776)
+
+## Intraday Automation Clarification
+
+目前 repo 不應把「短週期自動交易」和「真正 HFT」混為一談。
+
+- `Short-horizon automation`: 1m / 5m / 15m candle-based 訊號、自動掃描、自動下單、自動風控。這是目前架構可以優先延伸的方向。
+- `True HFT`: order book / trade-level / 秒級或毫秒級策略，例如 market making、order flow imbalance、跨市場套利。這需要 event-driven data capture、order book replay、撤單節奏、latency 與 queue-position 模型。
+
+Decision for this repo: 下一個非 trend 研究方向應先從 `intraday_momentum` 開始，而不是直接做 market making。詳細候選排序見 [04_intraday_strategy_candidates.md](04_intraday_strategy_candidates.md)。
 
 ## Supporting Research Areas
 

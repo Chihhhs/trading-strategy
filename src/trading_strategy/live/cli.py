@@ -3,7 +3,8 @@ import sys
 import time
 from datetime import datetime
 
-from trading_strategy.core.state import get_state_path
+from trading_strategy.positions import build_position_snapshots, build_position_status_counts
+from trading_strategy.shared.state import get_state_path
 
 from . import config
 from .account import sync_state_with_hl_balance
@@ -144,6 +145,14 @@ def run_once():
         entry_summary.setdefault("managed_orders_count", len(state.get("managed_orders") or []))
         entry_summary.update(cancel_summary)
         entry_summary.update(protection_summary)
+        entry_summary["position_status_counts"] = build_position_status_counts(
+            state.get("positions", []),
+            mode=config.MODE,
+        )
+        entry_summary["position_snapshots"] = build_position_snapshots(
+            state.get("positions", []),
+            mode=config.MODE,
+        )
 
         for pos in state["positions"]:
             if pos["coin"] in prices:
@@ -156,10 +165,16 @@ def run_once():
         save_state(state)
 
 
-def run_loop(interval_minutes=5):
+def run_loop(interval_minutes=5, max_runs=None):
+    runs = 0
     while True:
         try:
             run_once()
+            runs += 1
+            if max_runs is not None and runs >= max_runs:
+                record_trade_event("loop_completed", runs=runs)
+                print(f"\nLoop completed after {runs} run(s)")
+                break
         except KeyboardInterrupt:
             record_trade_event("loop_stopped", reason="keyboard_interrupt")
             print("\nLoop stopped")
@@ -176,6 +191,10 @@ def main():
     interval_minutes = next(
         (int(arg.split("=", 1)[1]) for arg in args if arg.startswith("--interval-minutes=")),
         5,
+    )
+    loop_runs = next(
+        (int(arg.split("=", 1)[1]) for arg in args if arg.startswith("--loop-runs=")),
+        None,
     )
     if "--live" in args:
         config.set_mode("live")
@@ -205,6 +224,6 @@ def main():
         verify_saved_orders()
         return
     if "--loop" in args:
-        run_loop(interval_minutes)
+        run_loop(interval_minutes, loop_runs)
     else:
         run_once()

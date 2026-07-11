@@ -1,0 +1,82 @@
+[
+  {
+    "time": "2026-06-20T12:07:19.568116",
+    "coin": "ETH",
+    "prev_signal": "SELL",
+    "new_signal": "STRONG_SELL",
+    "price": 1728.59,
+    "score": -9.3
+  },
+  {
+    "time": "2026-06-20T13:28:29.209008",
+    "coin": "BTC",
+    "prev_signal": "NEUTRAL",
+    "new_signal": "SELL",
+    "price": 63285.05,
+    "score": -6.6
+  },
+  {
+    "time": "2026-06-20T13:28:30.909987",
+    "coin": "NEAR",
+    "prev_signal": "NEUTRAL",
+    "new_signal": "STRONG_SELL",
+    "price": 2.128,
+    "score": -16.2
+  },
+  {
+    "time": "2026-06-20T13:50:03.908298",
+    "coin": "NEAR",
+    "prev_signal": "STRONG_SELL",
+    "new_signal": "NEUTRAL",
+    "price": 2.142,
+    "score": -14.0
+  },
+  {
+    "time": "2026-06-20T13:52:46.974657",
+    "coin": "NEAR",
+    "prev_signal": "NEUTRAL",
+    "new_signal": "STRONG_SELL",
+    "price": 2.132,
+    "score": -20.6
+  },
+  {
+    "time": "2026-06-20T13:59:53.960577",
+    "coin": "NEAR",
+    "prev_signal": "STRONG_SELL",
+    "new_signal": "NEUTRAL",
+    "price": 2.139,
+    "score": -14.0
+  },
+  {
+    "time": "2026-06-20T14:04:30.375778",
+    "coin": "NEAR",
+    "prev_signal": "NEUTRAL",
+    "new_signal": "STRONG_SELL",
+    "price": 2.129,
+    "score": -20.6
+  },
+  {
+    "time": "2026-06-20T14:05:14.981992",
+    "coin": "NEAR",
+    "prev_signal": "STRONG_SELL",
+    "new_signal": "NEUTRAL",
+    "price": 2.12,
+    "score": -2.9
+  },
+  {
+    "time": "2026-06-21T08:29:42.263090",
+    "coin": "BTC",
+    "prev_signal": "SELL",
+    "new_signal": "NEUTRAL",
+    "price": 64059.98,
+    "score": -8.9
+  },
+  {
+    "time": "2026-06-21T08:29:43.401249",
+    "coin": "ETH",
+    "prev_signal": "STRONG_SELL",
+    "new_signal": "NEUTRAL",
+    "price": 1729.49,
+    "score": -9.4
+  }
+]

@@ -1,0 +1,498 @@
+{
+  "total_trades": 144,
+  "correlations": {
+    "ATR%": 0.1248,
+    "\u78ba\u8a8d\u6578\u91cf": 0.1039,
+    "RSI": 0.0582,
+    "\u4fe1\u865f\u5206\u6578": 0.036,
+    "ADX": -0.0294
+  },
+  "score_buckets": [
+    {
+      "range": [
+        -27.8,
+        -20.1
+      ],
+      "count": 18,
+      "wins": 12,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        -19.95,
+        -15.75
+      ],
+      "count": 18,
+      "wins": 12,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        -15.65,
+        -14.25
+      ],
+      "count": 18,
+      "wins": 14,
+      "win_rate": 77.8,
+      "avg_pnl": 0.78
+    },
+    {
+      "range": [
+        -14.2,
+        -12.85
+      ],
+      "count": 18,
+      "wins": 14,
+      "win_rate": 77.8,
+      "avg_pnl": 0.78
+    },
+    {
+      "range": [
+        -12.85,
+        12.0
+      ],
+      "count": 18,
+      "wins": 13,
+      "win_rate": 72.2,
+      "avg_pnl": 0.72
+    },
+    {
+      "range": [
+        12.15,
+        14.9
+      ],
+      "count": 18,
+      "wins": 12,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        15.25,
+        20.45
+      ],
+      "count": 18,
+      "wins": 12,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        20.5,
+        23.45
+      ],
+      "count": 18,
+      "wins": 5,
+      "win_rate": 27.8,
+      "avg_pnl": 0.28
+    }
+  ],
+  "confirm_buckets": [
+    {
+      "range": [
+        0,
+        0
+      ],
+      "count": 18,
+      "wins": 9,
+      "win_rate": 50.0,
+      "avg_pnl": 0.5
+    },
+    {
+      "range": [
+        0,
+        1
+      ],
+      "count": 18,
+      "wins": 7,
+      "win_rate": 38.9,
+      "avg_pnl": 0.39
+    },
+    {
+      "range": [
+        1,
+        2
+      ],
+      "count": 18,
+      "wins": 11,
+      "win_rate": 61.1,
+      "avg_pnl": 0.61
+    },
+    {
+      "range": [
+        2,
+        3
+      ],
+      "count": 18,
+      "wins": 9,
+      "win_rate": 50.0,
+      "avg_pnl": 0.5
+    },
+    {
+      "range": [
+        3,
+        4
+      ],
+      "count": 18,
+      "wins": 15,
+      "win_rate": 83.3,
+      "avg_pnl": 0.83
+    },
+    {
+      "range": [
+        4,
+        5
+      ],
+      "count": 18,
+      "wins": 12,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        5,
+        6
+      ],
+      "count": 18,
+      "wins": 16,
+      "win_rate": 88.9,
+      "avg_pnl": 0.89
+    },
+    {
+      "range": [
+        6,
+        8
+      ],
+      "count": 18,
+      "wins": 15,
+      "win_rate": 83.3,
+      "avg_pnl": 0.83
+    }
+  ],
+  "adx_buckets": [
+    {
+      "range": [
+        10.1,
+        20.54
+      ],
+      "count": 24,
+      "wins": 16,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        20.59,
+        23.85
+      ],
+      "count": 24,
+      "wins": 17,
+      "win_rate": 70.8,
+      "avg_pnl": 0.71
+    },
+    {
+      "range": [
+        23.88,
+        26.42
+      ],
+      "count": 24,
+      "wins": 15,
+      "win_rate": 62.5,
+      "avg_pnl": 0.62
+    },
+    {
+      "range": [
+        26.53,
+        31.89
+      ],
+      "count": 24,
+      "wins": 16,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        31.96,
+        45.64
+      ],
+      "count": 24,
+      "wins": 17,
+      "win_rate": 70.8,
+      "avg_pnl": 0.71
+    },
+    {
+      "range": [
+        45.81,
+        69.45
+      ],
+      "count": 24,
+      "wins": 13,
+      "win_rate": 54.2,
+      "avg_pnl": 0.54
+    }
+  ],
+  "rsi_buckets": [
+    {
+      "range": [
+        11.16,
+        28.65
+      ],
+      "count": 24,
+      "wins": 16,
+      "win_rate": 66.7,
+      "avg_pnl": 0.67
+    },
+    {
+      "range": [
+        29.09,
+        34.75
+      ],
+      "count": 24,
+      "wins": 19,
+      "win_rate": 79.2,
+      "avg_pnl": 0.79
+    },
+    {
+      "range": [
+        35.03,
+        43.15
+      ],
+      "count": 24,
+      "wins": 19,
+      "win_rate": 79.2,
+      "avg_pnl": 0.79
+    },
+    {
+      "range": [
+        44.23,
+        61.16
+      ],
+      "count": 24,
+      "wins": 14,
+      "win_rate": 58.3,
+      "avg_pnl": 0.58
+    },
+    {
+      "range": [
+        61.36,
+        70.89
+      ],
+      "count": 24,
+      "wins": 11,
+      "win_rate": 45.8,
+      "avg_pnl": 0.46
+    },
+    {
+      "range": [
+        71.05,
+        94.09
+      ],
+      "count": 24,
+      "wins": 15,
+      "win_rate": 62.5,
+      "avg_pnl": 0.62
+    }
+  ],
+  "atr_buckets": [
+    {
+      "range": [
+        2.93,
+        5.15
+      ],
+      "count": 24,
+      "wins": 15,
+      "win_rate": 62.5,
+      "avg_pnl": 0.62
+    },
+    {
+      "range": [
+        5.16,
+        6.0
+      ],
+      "count": 24,
+      "wins": 14,
+      "win_rate": 58.3,
+      "avg_pnl": 0.58
+    },
+    {
+      "range": [
+        6.09,
+        7.11
+      ],
+      "count": 24,
+      "wins": 15,
+      "win_rate": 62.5,
+      "avg_pnl": 0.62
+    },
+    {
+      "range": [
+        7.13,
+        8.44
+      ],
+      "count": 24,
+      "wins": 15,
+      "win_rate": 62.5,
+      "avg_pnl": 0.62
+    },
+    {
+      "range": [
+        8.45,
+        10.38
+      ],
+      "count": 24,
+      "wins": 15,
+      "win_rate": 62.5,
+      "avg_pnl": 0.62
+    },
+    {
+      "range": [
+        10.41,
+        19.45
+      ],
+      "count": 24,
+      "wins": 20,
+      "win_rate": 83.3,
+      "avg_pnl": 0.83
+    }
+  ],
+  "btc_dir_stats": {
+    "long": {
+      "count": 24,
+      "wr": 83.3
+    },
+    "short": {
+      "count": 24,
+      "wr": 83.3
+    },
+    "neutral": {
+      "count": 0,
+      "wr": 0
+    }
+  },
+  "phase_stats": {
+    "pre_halving": {
+      "count": 20,
+      "wr": 80.0
+    },
+    "mid_bull": {
+      "count": 19,
+      "wr": 57.9
+    },
+    "late_bull": {
+      "count": 15,
+      "wr": 20.0
+    },
+    "early_bear": {
+      "count": 65,
+      "wr": 72.3
+    },
+    "mid_bear": {
+      "count": 9,
+      "wr": 77.8
+    },
+    "early_bull": {
+      "count": 16,
+      "wr": 62.5
+    }
+  },
+  "combo_results": [
+    {
+      "name": "\u7121\u904e\u6ffe",
+      "count": 144,
+      "wr": 65.3,
+      "avg_pnl": 29.45
+    },
+    {
+      "name": "\u78ba\u8a8d>=3",
+      "count": 86,
+      "wr": 75.6,
+      "avg_pnl": 40.72
+    },
+    {
+      "name": "\u78ba\u8a8d>=5",
+      "count": 47,
+      "wr": 78.7,
+      "avg_pnl": 29.76
+    },
+    {
+      "name": "ADX>20",
+      "count": 127,
+      "wr": 65.4,
+      "avg_pnl": 27.97
+    },
+    {
+      "name": "ADX>25",
+      "count": 89,
+      "wr": 65.2,
+      "avg_pnl": 22.56
+    },
+    {
+      "name": "RSI 30-70",
+      "count": 89,
+      "wr": 68.5,
+      "avg_pnl": 29.72
+    },
+    {
+      "name": "ATR%<5",
+      "count": 20,
+      "wr": 70.0,
+      "avg_pnl": 42.55
+    },
+    {
+      "name": "ATR% 3-8",
+      "count": 85,
+      "wr": 60.0,
+      "avg_pnl": 21.04
+    },
+    {
+      "name": "BTC\u540c\u5411",
+      "count": 144,
+      "wr": 65.3,
+      "avg_pnl": 29.45
+    },
+    {
+      "name": "\u78ba\u8a8d>=3 + ADX>20",
+      "count": 81,
+      "wr": 75.3,
+      "avg_pnl": 39.96
+    },
+    {
+      "name": "\u78ba\u8a8d>=3 + ADX>25",
+      "count": 58,
+      "wr": 74.1,
+      "avg_pnl": 37.03
+    },
+    {
+      "name": "\u78ba\u8a8d>=5 + ADX>20",
+      "count": 46,
+      "wr": 78.3,
+      "avg_pnl": 29.15
+    },
+    {
+      "name": "\u78ba\u8a8d>=3 + RSI 30-70",
+      "count": 54,
+      "wr": 77.8,
+      "avg_pnl": 32.35
+    },
+    {
+      "name": "\u78ba\u8a8d>=3 + BTC\u540c\u5411",
+      "count": 86,
+      "wr": 75.6,
+      "avg_pnl": 40.72
+    },
+    {
+      "name": "\u78ba\u8a8d>=3 + ADX>20 + BTC\u540c\u5411",
+      "count": 81,
+      "wr": 75.3,
+      "avg_pnl": 39.96
+    },
+    {
+      "name": "\u78ba\u8a8d>=5 + ADX>25 + BTC\u540c\u5411",
+      "count": 34,
+      "wr": 79.4,
+      "avg_pnl": 33.52
+    }
+  ]
+}

@@ -1,0 +1,2533 @@
+{
+  "date": "20260630",
+  "created": "2026-06-30 00:00:19",
+  "coins": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "AVAX",
+    "XRP",
+    "NEAR",
+    "WLD",
+    "ZEC"
+  ],
+  "data": [
+    {
+      "time": "2026-06-30 00:00:19",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 60202.01,
+          "high": 60260.21,
+          "low": 60199.0,
+          "open": 60260.2,
+          "volume": 48.22317,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1611.99,
+          "high": 1613.08,
+          "low": 1611.57,
+          "open": 1613.07,
+          "volume": 93.1208,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "SOL": {
+          "symbol": "SOLUSDT",
+          "price": 75.18,
+          "high": 75.18,
+          "low": 75.1,
+          "open": 75.17,
+          "volume": 11681.639,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 559.26,
+          "high": 559.51,
+          "low": 559.25,
+          "open": 559.51,
+          "volume": 7.075,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "AVAX": {
+          "symbol": "AVAXUSDT",
+          "price": 6.673,
+          "high": 6.678,
+          "low": 6.671,
+          "open": 6.678,
+          "volume": 999.01,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0582,
+          "high": 1.0589,
+          "low": 1.0581,
+          "open": 1.0589,
+          "volume": 16179.3,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "NEAR": {
+          "symbol": "NEARUSDT",
+          "price": 1.862,
+          "high": 1.865,
+          "low": 1.862,
+          "open": 1.865,
+          "volume": 4522.3,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "WLD": {
+          "symbol": "WLDUSDT",
+          "price": 0.4203,
+          "high": 0.4208,
+          "low": 0.4202,
+          "open": 0.4208,
+          "volume": 25336.3,
+          "timestamp": "2026-06-30 00:00:19"
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 406.76,
+          "high": 407.4,
+          "low": 406.54,
+          "open": 407.4,
+          "volume": 29.658,
+          "timestamp": "2026-06-30 00:00:19"
+        }
+      }
+    },
+    {
+      "time": "2026-06-30 02:00:35",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 59923.0,
+          "high": 60276.54,
+          "low": 59700.0,
+          "open": 60260.2,
+          "volume": 1055.33484
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1593.07,
+          "high": 1614.41,
+          "low": 1589.0,
+          "open": 1613.07,
+          "volume": 23206.6942
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 555.8,
+          "high": 560.4,
+          "low": 555.0,
+          "open": 559.51,
+          "volume": 5146.812
+        },
+        "NEO": {
+          "symbol": "NEOUSDT",
+          "price": 1.949,
+          "high": 1.956,
+          "low": 1.924,
+          "open": 1.927,
+          "volume": 52317.62
+        },
+        "LTC": {
+          "symbol": "LTCUSDT",
+          "price": 42.6,
+          "high": 43.21,
+          "low": 42.55,
+          "open": 43.19,
+          "volume": 14791.016
+        },
+        "QTUM": {
+          "symbol": "QTUMUSDT",
+          "price": 0.708,
+          "high": 0.711,
+          "low": 0.688,
+          "open": 0.69,
+          "volume": 94876.9
+        },
+        "ADA": {
+          "symbol": "ADAUSDT",
+          "price": 0.1443,
+          "high": 0.146,
+          "low": 0.144,
+          "open": 0.1458,
+          "volume": 6748010.6
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0499,
+          "high": 1.0595,
+          "low": 1.0475,
+          "open": 1.0589,
+          "volume": 4924445.5
+        },
+        "TUSD": {
+          "symbol": "TUSDUSDT",
+          "price": 0.9991,
+          "high": 0.9991,
+          "low": 0.9991,
+          "open": 0.9991,
+          "volume": 6.0
+        },
+        "IOTA": {
+          "symbol": "IOTAUSDT",
+          "price": 0.0349,
+          "high": 0.0351,
+          "low": 0.0342,
+          "open": 0.035,
+          "volume": 2038388.0
+        },
+        "XLM": {
+          "symbol": "XLMUSDT",
+          "price": 0.1772,
+          "high": 0.1777,
+          "low": 0.1734,
+          "open": 0.175,
+          "volume": 3951172.0
+        },
+        "ONT": {
+          "symbol": "ONTUSDT",
+          "price": 0.04489,
+          "high": 0.04562,
+          "low": 0.04301,
+          "open": 0.04307,
+          "volume": 14221149.0
+        },
+        "TRX": {
+          "symbol": "TRXUSDT",
+          "price": 0.3195,
+          "high": 0.3214,
+          "low": 0.3194,
+          "open": 0.3213,
+          "volume": 13992204.9
+        },
+        "ETC": {
+          "symbol": "ETCUSDT",
+          "price": 7.05,
+          "high": 7.16,
+          "low": 7.02,
+          "open": 7.14,
+          "volume": 9063.78
+        },
+        "ICX": {
+          "symbol": "ICXUSDT",
+          "price": 0.0243,
+          "high": 0.0246,
+          "low": 0.0243,
+          "open": 0.0246,
+          "volume": 282012.9
+        },
+        "VET": {
+          "symbol": "VETUSDT",
+          "price": 0.004415,
+          "high": 0.00449,
+          "low": 0.004413,
+          "open": 0.004485,
+          "volume": 7816088.9
+        },
+        "USDC": {
+          "symbol": "USDCUSDT",
+          "price": 1.00107,
+          "high": 1.00109,
+          "low": 1.00101,
+          "open": 1.00105,
+          "volume": 120829446.0
+        },
+        "LINK": {
+          "symbol": "LINKUSDT",
+          "price": 7.3,
+          "high": 7.397,
+          "low": 7.271,
+          "open": 7.379,
+          "volume": 609442.14
+        },
+        "ONG": {
+          "symbol": "ONGUSDT",
+          "price": 0.05447,
+          "high": 0.05568,
+          "low": 0.04648,
+          "open": 0.04648,
+          "volume": 15947915.0
+        },
+        "HOT": {
+          "symbol": "HOTUSDT",
+          "price": 0.0003,
+          "high": 0.000305,
+          "low": 0.0003,
+          "open": 0.000304,
+          "volume": 56623396.0
+        },
+        "ZIL": {
+          "symbol": "ZILUSDT",
+          "price": 0.00291,
+          "high": 0.00294,
+          "low": 0.00289,
+          "open": 0.00294,
+          "volume": 5763427.2
+        },
+        "ZRX": {
+          "symbol": "ZRXUSDT",
+          "price": 0.079,
+          "high": 0.0802,
+          "low": 0.0788,
+          "open": 0.0801,
+          "volume": 175805.0
+        },
+        "FET": {
+          "symbol": "FETUSDT",
+          "price": 0.1741,
+          "high": 0.1776,
+          "low": 0.1734,
+          "open": 0.1771,
+          "volume": 2923867.0
+        },
+        "BAT": {
+          "symbol": "BATUSDT",
+          "price": 0.0817,
+          "high": 0.0823,
+          "low": 0.0811,
+          "open": 0.0822,
+          "volume": 181122.0
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 398.18,
+          "high": 407.48,
+          "low": 396.51,
+          "open": 407.4,
+          "volume": 21802.497
+        },
+        "IOST": {
+          "symbol": "IOSTUSDT",
+          "price": 0.000703,
+          "high": 0.000714,
+          "low": 0.000701,
+          "open": 0.000713,
+          "volume": 12581282.0
+        },
+        "CELR": {
+          "symbol": "CELRUSDT",
+          "price": 0.00185,
+          "high": 0.001877,
+          "low": 0.001844,
+          "open": 0.001869,
+          "volume": 8806433.2
+        },
+        "DASH": {
+          "symbol": "DASHUSDT",
+          "price": 32.88,
+          "high": 33.63,
+          "low": 32.69,
+          "open": 33.25,
+          "volume": 10629.401
+        },
+        "THETA": {
+          "symbol": "THETAUSDT",
+          "price": 0.1309,
+          "high": 0.1323,
+          "low": 0.1306,
+          "open": 0.1322,
+          "volume": 88391.2
+        },
+        "ENJ": {
+          "symbol": "ENJUSDT",
+          "price": 0.02891,
+          "high": 0.02939,
+          "low": 0.02883,
+          "open": 0.02924,
+          "volume": 734693.8
+        },
+        "ATOM": {
+          "symbol": "ATOMUSDT",
+          "price": 1.516,
+          "high": 1.536,
+          "low": 1.509,
+          "open": 1.536,
+          "volume": 139569.76
+        },
+        "TFUEL": {
+          "symbol": "TFUELUSDT",
+          "price": 0.00753,
+          "high": 0.00777,
+          "low": 0.00752,
+          "open": 0.00777,
+          "volume": 3064721.0
+        },
+        "ONE": {
+          "symbol": "ONEUSDT",
+          "price": 0.00121,
+          "high": 0.00123,
+          "low": 0.0012,
+          "open": 0.00123,
+          "volume": 8268329.9
+        },
+        "ALGO": {
+          "symbol": "ALGOUSDT",
+          "price": 0.0852,
+          "high": 0.0859,
+          "low": 0.0849,
+          "open": 0.0856,
+          "volume": 1657739.0
+        },
+        "DOGE": {
+          "symbol": "DOGEUSDT",
+          "price": 0.07252,
+          "high": 0.07358,
+          "low": 0.07227,
+          "open": 0.07344,
+          "volume": 43066545.0
+        },
+        "DUSK": {
+          "symbol": "DUSKUSDT",
+          "price": 0.0768,
+          "high": 0.0783,
+          "low": 0.0767,
+          "open": 0.0783,
+          "volume": 385347.0
+        },
+        "ANKR": {
+          "symbol": "ANKRUSDT",
+          "price": 0.00346,
+          "high": 0.00349,
+          "low": 0.00344,
+          "open": 0.00349,
+          "volume": 2024225.4
+        },
+        "WIN": {
+          "symbol": "WINUSDT",
+          "price": 2.025e-05,
+          "high": 2.048e-05,
+          "low": 2.025e-05,
+          "open": 2.043e-05,
+          "volume": 365188604.0
+        },
+        "MTL": {
+          "symbol": "MTLUSDT",
+          "price": 0.224,
+          "high": 0.227,
+          "low": 0.222,
+          "open": 0.227,
+          "volume": 31342.0
+        },
+        "CVC": {
+          "symbol": "CVCUSDT",
+          "price": 0.02017,
+          "high": 0.02047,
+          "low": 0.02015,
+          "open": 0.02047,
+          "volume": 637142.0
+        },
+        "CHZ": {
+          "symbol": "CHZUSDT",
+          "price": 0.01907,
+          "high": 0.01922,
+          "low": 0.01856,
+          "open": 0.01912,
+          "volume": 32361741.0
+        },
+        "BAND": {
+          "symbol": "BANDUSDT",
+          "price": 0.1423,
+          "high": 0.1443,
+          "low": 0.1418,
+          "open": 0.1438,
+          "volume": 40525.9
+        },
+        "XTZ": {
+          "symbol": "XTZUSDT",
+          "price": 0.2084,
+          "high": 0.2106,
+          "low": 0.208,
+          "open": 0.2104,
+          "volume": 55348.4
+        },
+        "RVN": {
+          "symbol": "RVNUSDT",
+          "price": 0.00384,
+          "high": 0.00389,
+          "low": 0.00383,
+          "open": 0.00388,
+          "volume": 5182058.6
+        },
+        "HBAR": {
+          "symbol": "HBARUSDT",
+          "price": 0.07115,
+          "high": 0.07181,
+          "low": 0.071,
+          "open": 0.07168,
+          "volume": 2641597.0
+        },
+        "STX": {
+          "symbol": "STXUSDT",
+          "price": 0.1653,
+          "high": 0.1669,
+          "low": 0.1645,
+          "open": 0.1668,
+          "volume": 152043.1
+        },
+        "KAVA": {
+          "symbol": "KAVAUSDT",
+          "price": 0.04225,
+          "high": 0.04261,
+          "low": 0.04207,
+          "open": 0.0426,
+          "volume": 281513.4
+        },
+        "ARPA": {
+          "symbol": "ARPAUSDT",
+          "price": 0.00783,
+          "high": 0.00788,
+          "low": 0.0078,
+          "open": 0.00788,
+          "volume": 237559.4
+        },
+        "IOTX": {
+          "symbol": "IOTXUSDT",
+          "price": 0.00274,
+          "high": 0.00278,
+          "low": 0.00274,
+          "open": 0.00278,
+          "volume": 7760588.0
+        },
+        "RLC": {
+          "symbol": "RLCUSDT",
+          "price": 0.2896,
+          "high": 0.2942,
+          "low": 0.2896,
+          "open": 0.2927,
+          "volume": 42330.4
+        }
+      }
+    },
+    {
+      "time": "2026-06-30 04:00:35",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 59605.56,
+          "high": 60276.54,
+          "low": 59600.0,
+          "open": 60260.2,
+          "volume": 1864.1998
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1586.4,
+          "high": 1614.41,
+          "low": 1586.4,
+          "open": 1613.07,
+          "volume": 34973.4315
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 553.58,
+          "high": 560.4,
+          "low": 553.58,
+          "open": 559.51,
+          "volume": 13726.363
+        },
+        "NEO": {
+          "symbol": "NEOUSDT",
+          "price": 1.947,
+          "high": 1.996,
+          "low": 1.924,
+          "open": 1.927,
+          "volume": 172938.4
+        },
+        "LTC": {
+          "symbol": "LTCUSDT",
+          "price": 42.48,
+          "high": 43.21,
+          "low": 42.44,
+          "open": 43.19,
+          "volume": 25910.496
+        },
+        "QTUM": {
+          "symbol": "QTUMUSDT",
+          "price": 0.687,
+          "high": 0.722,
+          "low": 0.687,
+          "open": 0.69,
+          "volume": 271523.7
+        },
+        "ADA": {
+          "symbol": "ADAUSDT",
+          "price": 0.1444,
+          "high": 0.146,
+          "low": 0.1437,
+          "open": 0.1458,
+          "volume": 11278627.0
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.045,
+          "high": 1.0595,
+          "low": 1.0441,
+          "open": 1.0589,
+          "volume": 11345031.8
+        },
+        "TUSD": {
+          "symbol": "TUSDUSDT",
+          "price": 0.9991,
+          "high": 0.9992,
+          "low": 0.999,
+          "open": 0.9991,
+          "volume": 706.0
+        },
+        "IOTA": {
+          "symbol": "IOTAUSDT",
+          "price": 0.0349,
+          "high": 0.0353,
+          "low": 0.0342,
+          "open": 0.035,
+          "volume": 4285021.0
+        },
+        "XLM": {
+          "symbol": "XLMUSDT",
+          "price": 0.1831,
+          "high": 0.1849,
+          "low": 0.1734,
+          "open": 0.175,
+          "volume": 30454546.0
+        },
+        "ONT": {
+          "symbol": "ONTUSDT",
+          "price": 0.04427,
+          "high": 0.04635,
+          "low": 0.04301,
+          "open": 0.04307,
+          "volume": 25380538.0
+        },
+        "TRX": {
+          "symbol": "TRXUSDT",
+          "price": 0.32,
+          "high": 0.3214,
+          "low": 0.3194,
+          "open": 0.3213,
+          "volume": 20299741.4
+        },
+        "ETC": {
+          "symbol": "ETCUSDT",
+          "price": 7.06,
+          "high": 7.16,
+          "low": 7.02,
+          "open": 7.14,
+          "volume": 13435.22
+        },
+        "ICX": {
+          "symbol": "ICXUSDT",
+          "price": 0.0243,
+          "high": 0.0246,
+          "low": 0.0242,
+          "open": 0.0246,
+          "volume": 663160.2
+        },
+        "VET": {
+          "symbol": "VETUSDT",
+          "price": 0.004442,
+          "high": 0.004501,
+          "low": 0.004413,
+          "open": 0.004485,
+          "volume": 31757160.9
+        },
+        "USDC": {
+          "symbol": "USDCUSDT",
+          "price": 1.00122,
+          "high": 1.00147,
+          "low": 1.00101,
+          "open": 1.00105,
+          "volume": 305341450.0
+        },
+        "LINK": {
+          "symbol": "LINKUSDT",
+          "price": 7.287,
+          "high": 7.397,
+          "low": 7.271,
+          "open": 7.379,
+          "volume": 722311.3
+        },
+        "ONG": {
+          "symbol": "ONGUSDT",
+          "price": 0.05433,
+          "high": 0.06197,
+          "low": 0.04648,
+          "open": 0.04648,
+          "volume": 34002349.0
+        },
+        "HOT": {
+          "symbol": "HOTUSDT",
+          "price": 0.000302,
+          "high": 0.000305,
+          "low": 0.0003,
+          "open": 0.000304,
+          "volume": 121709817.0
+        },
+        "ZIL": {
+          "symbol": "ZILUSDT",
+          "price": 0.00289,
+          "high": 0.00294,
+          "low": 0.00289,
+          "open": 0.00294,
+          "volume": 10063096.2
+        },
+        "ZRX": {
+          "symbol": "ZRXUSDT",
+          "price": 0.0787,
+          "high": 0.0802,
+          "low": 0.0785,
+          "open": 0.0801,
+          "volume": 293955.0
+        },
+        "FET": {
+          "symbol": "FETUSDT",
+          "price": 0.173,
+          "high": 0.1776,
+          "low": 0.1728,
+          "open": 0.1771,
+          "volume": 4555158.3
+        },
+        "BAT": {
+          "symbol": "BATUSDT",
+          "price": 0.0819,
+          "high": 0.0826,
+          "low": 0.0811,
+          "open": 0.0822,
+          "volume": 545006.0
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 398.22,
+          "high": 407.48,
+          "low": 395.81,
+          "open": 407.4,
+          "volume": 32837.619
+        },
+        "IOST": {
+          "symbol": "IOSTUSDT",
+          "price": 0.000701,
+          "high": 0.000714,
+          "low": 0.0007,
+          "open": 0.000713,
+          "volume": 37345329.0
+        },
+        "CELR": {
+          "symbol": "CELRUSDT",
+          "price": 0.001847,
+          "high": 0.001877,
+          "low": 0.001841,
+          "open": 0.001869,
+          "volume": 16911171.7
+        },
+        "DASH": {
+          "symbol": "DASHUSDT",
+          "price": 32.76,
+          "high": 33.63,
+          "low": 32.69,
+          "open": 33.25,
+          "volume": 15317.907
+        },
+        "THETA": {
+          "symbol": "THETAUSDT",
+          "price": 0.1308,
+          "high": 0.1323,
+          "low": 0.1302,
+          "open": 0.1322,
+          "volume": 340526.6
+        },
+        "ENJ": {
+          "symbol": "ENJUSDT",
+          "price": 0.0286,
+          "high": 0.02939,
+          "low": 0.0286,
+          "open": 0.02924,
+          "volume": 1845247.7
+        },
+        "ATOM": {
+          "symbol": "ATOMUSDT",
+          "price": 1.521,
+          "high": 1.536,
+          "low": 1.509,
+          "open": 1.536,
+          "volume": 227799.72
+        },
+        "TFUEL": {
+          "symbol": "TFUELUSDT",
+          "price": 0.00752,
+          "high": 0.00777,
+          "low": 0.00751,
+          "open": 0.00777,
+          "volume": 3761716.0
+        },
+        "ONE": {
+          "symbol": "ONEUSDT",
+          "price": 0.0012,
+          "high": 0.00123,
+          "low": 0.0012,
+          "open": 0.00123,
+          "volume": 9554982.0
+        },
+        "ALGO": {
+          "symbol": "ALGOUSDT",
+          "price": 0.0852,
+          "high": 0.0859,
+          "low": 0.0849,
+          "open": 0.0856,
+          "volume": 3133874.0
+        },
+        "DOGE": {
+          "symbol": "DOGEUSDT",
+          "price": 0.07242,
+          "high": 0.07358,
+          "low": 0.07227,
+          "open": 0.07344,
+          "volume": 68907601.0
+        },
+        "DUSK": {
+          "symbol": "DUSKUSDT",
+          "price": 0.0763,
+          "high": 0.0783,
+          "low": 0.076,
+          "open": 0.0783,
+          "volume": 500556.0
+        },
+        "ANKR": {
+          "symbol": "ANKRUSDT",
+          "price": 0.00343,
+          "high": 0.00349,
+          "low": 0.00343,
+          "open": 0.00349,
+          "volume": 3461515.8
+        },
+        "WIN": {
+          "symbol": "WINUSDT",
+          "price": 2.008e-05,
+          "high": 2.048e-05,
+          "low": 2.007e-05,
+          "open": 2.043e-05,
+          "volume": 711325585.0
+        },
+        "MTL": {
+          "symbol": "MTLUSDT",
+          "price": 0.222,
+          "high": 0.227,
+          "low": 0.221,
+          "open": 0.227,
+          "volume": 79074.5
+        },
+        "CVC": {
+          "symbol": "CVCUSDT",
+          "price": 0.01995,
+          "high": 0.02047,
+          "low": 0.01995,
+          "open": 0.02047,
+          "volume": 2030010.0
+        },
+        "CHZ": {
+          "symbol": "CHZUSDT",
+          "price": 0.01857,
+          "high": 0.01959,
+          "low": 0.01853,
+          "open": 0.01912,
+          "volume": 75586084.0
+        },
+        "BAND": {
+          "symbol": "BANDUSDT",
+          "price": 0.1409,
+          "high": 0.1443,
+          "low": 0.1409,
+          "open": 0.1438,
+          "volume": 80766.2
+        },
+        "XTZ": {
+          "symbol": "XTZUSDT",
+          "price": 0.2078,
+          "high": 0.2106,
+          "low": 0.2077,
+          "open": 0.2104,
+          "volume": 111857.4
+        },
+        "RVN": {
+          "symbol": "RVNUSDT",
+          "price": 0.00383,
+          "high": 0.00389,
+          "low": 0.00383,
+          "open": 0.00388,
+          "volume": 9613938.0
+        },
+        "HBAR": {
+          "symbol": "HBARUSDT",
+          "price": 0.07086,
+          "high": 0.07181,
+          "low": 0.07082,
+          "open": 0.07168,
+          "volume": 5544234.0
+        },
+        "STX": {
+          "symbol": "STXUSDT",
+          "price": 0.1648,
+          "high": 0.1669,
+          "low": 0.1645,
+          "open": 0.1668,
+          "volume": 295232.8
+        },
+        "KAVA": {
+          "symbol": "KAVAUSDT",
+          "price": 0.04198,
+          "high": 0.04261,
+          "low": 0.04198,
+          "open": 0.0426,
+          "volume": 537929.4
+        },
+        "ARPA": {
+          "symbol": "ARPAUSDT",
+          "price": 0.00779,
+          "high": 0.00788,
+          "low": 0.00779,
+          "open": 0.00788,
+          "volume": 1153608.4
+        },
+        "IOTX": {
+          "symbol": "IOTXUSDT",
+          "price": 0.00274,
+          "high": 0.00278,
+          "low": 0.00273,
+          "open": 0.00278,
+          "volume": 9643998.0
+        },
+        "RLC": {
+          "symbol": "RLCUSDT",
+          "price": 0.2883,
+          "high": 0.2942,
+          "low": 0.2881,
+          "open": 0.2927,
+          "volume": 59461.0
+        }
+      }
+    },
+    {
+      "time": "2026-06-30 06:00:42",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 59638.02,
+          "high": 60276.54,
+          "low": 59360.0,
+          "open": 60260.2,
+          "volume": 3444.0824
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1591.3,
+          "high": 1614.41,
+          "low": 1579.79,
+          "open": 1613.07,
+          "volume": 49200.8657
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 553.98,
+          "high": 560.4,
+          "low": 551.62,
+          "open": 559.51,
+          "volume": 22082.739
+        },
+        "NEO": {
+          "symbol": "NEOUSDT",
+          "price": 1.928,
+          "high": 1.996,
+          "low": 1.919,
+          "open": 1.927,
+          "volume": 205036.71
+        },
+        "LTC": {
+          "symbol": "LTCUSDT",
+          "price": 42.62,
+          "high": 43.21,
+          "low": 42.39,
+          "open": 43.19,
+          "volume": 40087.443
+        },
+        "QTUM": {
+          "symbol": "QTUMUSDT",
+          "price": 0.69,
+          "high": 0.722,
+          "low": 0.684,
+          "open": 0.69,
+          "volume": 287588.6
+        },
+        "ADA": {
+          "symbol": "ADAUSDT",
+          "price": 0.145,
+          "high": 0.146,
+          "low": 0.1437,
+          "open": 0.1458,
+          "volume": 17399635.3
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0493,
+          "high": 1.0595,
+          "low": 1.0428,
+          "open": 1.0589,
+          "volume": 14460929.6
+        },
+        "TUSD": {
+          "symbol": "TUSDUSDT",
+          "price": 0.9992,
+          "high": 0.9992,
+          "low": 0.999,
+          "open": 0.9991,
+          "volume": 2705.0
+        },
+        "IOTA": {
+          "symbol": "IOTAUSDT",
+          "price": 0.0349,
+          "high": 0.0353,
+          "low": 0.0342,
+          "open": 0.035,
+          "volume": 5086907.0
+        },
+        "XLM": {
+          "symbol": "XLMUSDT",
+          "price": 0.1848,
+          "high": 0.1876,
+          "low": 0.1734,
+          "open": 0.175,
+          "volume": 52171455.0
+        },
+        "ONT": {
+          "symbol": "ONTUSDT",
+          "price": 0.04437,
+          "high": 0.04635,
+          "low": 0.04301,
+          "open": 0.04307,
+          "volume": 28793999.0
+        },
+        "TRX": {
+          "symbol": "TRXUSDT",
+          "price": 0.3202,
+          "high": 0.3214,
+          "low": 0.3194,
+          "open": 0.3213,
+          "volume": 24083574.3
+        },
+        "ETC": {
+          "symbol": "ETCUSDT",
+          "price": 7.03,
+          "high": 7.16,
+          "low": 7.02,
+          "open": 7.14,
+          "volume": 43065.49
+        },
+        "ICX": {
+          "symbol": "ICXUSDT",
+          "price": 0.0245,
+          "high": 0.0246,
+          "low": 0.0242,
+          "open": 0.0246,
+          "volume": 1066965.2
+        },
+        "VET": {
+          "symbol": "VETUSDT",
+          "price": 0.004443,
+          "high": 0.004501,
+          "low": 0.004413,
+          "open": 0.004485,
+          "volume": 38901787.9
+        },
+        "USDC": {
+          "symbol": "USDCUSDT",
+          "price": 1.0012,
+          "high": 1.00147,
+          "low": 1.00101,
+          "open": 1.00105,
+          "volume": 590097149.0
+        },
+        "LINK": {
+          "symbol": "LINKUSDT",
+          "price": 7.311,
+          "high": 7.397,
+          "low": 7.268,
+          "open": 7.379,
+          "volume": 808761.41
+        },
+        "ONG": {
+          "symbol": "ONGUSDT",
+          "price": 0.05514,
+          "high": 0.06197,
+          "low": 0.04648,
+          "open": 0.04648,
+          "volume": 41457893.0
+        },
+        "HOT": {
+          "symbol": "HOTUSDT",
+          "price": 0.000298,
+          "high": 0.000305,
+          "low": 0.000297,
+          "open": 0.000304,
+          "volume": 344880206.0
+        },
+        "ZIL": {
+          "symbol": "ZILUSDT",
+          "price": 0.0029,
+          "high": 0.00294,
+          "low": 0.00288,
+          "open": 0.00294,
+          "volume": 16130398.1
+        },
+        "ZRX": {
+          "symbol": "ZRXUSDT",
+          "price": 0.0789,
+          "high": 0.0802,
+          "low": 0.0784,
+          "open": 0.0801,
+          "volume": 399940.0
+        },
+        "FET": {
+          "symbol": "FETUSDT",
+          "price": 0.173,
+          "high": 0.1776,
+          "low": 0.1716,
+          "open": 0.1771,
+          "volume": 16047559.8
+        },
+        "BAT": {
+          "symbol": "BATUSDT",
+          "price": 0.0816,
+          "high": 0.0826,
+          "low": 0.0811,
+          "open": 0.0822,
+          "volume": 848722.0
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 401.5,
+          "high": 407.48,
+          "low": 395.81,
+          "open": 407.4,
+          "volume": 39400.402
+        },
+        "IOST": {
+          "symbol": "IOSTUSDT",
+          "price": 0.000704,
+          "high": 0.000714,
+          "low": 0.000699,
+          "open": 0.000713,
+          "volume": 44011681.0
+        },
+        "CELR": {
+          "symbol": "CELRUSDT",
+          "price": 0.001863,
+          "high": 0.001877,
+          "low": 0.001841,
+          "open": 0.001869,
+          "volume": 25599741.6
+        },
+        "DASH": {
+          "symbol": "DASHUSDT",
+          "price": 32.89,
+          "high": 33.63,
+          "low": 32.69,
+          "open": 33.25,
+          "volume": 19498.224
+        },
+        "THETA": {
+          "symbol": "THETAUSDT",
+          "price": 0.1312,
+          "high": 0.1323,
+          "low": 0.13,
+          "open": 0.1322,
+          "volume": 683701.9
+        },
+        "ENJ": {
+          "symbol": "ENJUSDT",
+          "price": 0.02859,
+          "high": 0.02939,
+          "low": 0.02832,
+          "open": 0.02924,
+          "volume": 2650703.6
+        },
+        "ATOM": {
+          "symbol": "ATOMUSDT",
+          "price": 1.519,
+          "high": 1.536,
+          "low": 1.509,
+          "open": 1.536,
+          "volume": 279475.76
+        },
+        "TFUEL": {
+          "symbol": "TFUELUSDT",
+          "price": 0.00752,
+          "high": 0.00777,
+          "low": 0.0075,
+          "open": 0.00777,
+          "volume": 4491373.0
+        },
+        "ONE": {
+          "symbol": "ONEUSDT",
+          "price": 0.00121,
+          "high": 0.00123,
+          "low": 0.0012,
+          "open": 0.00123,
+          "volume": 15209168.8
+        },
+        "ALGO": {
+          "symbol": "ALGOUSDT",
+          "price": 0.0864,
+          "high": 0.0867,
+          "low": 0.0849,
+          "open": 0.0856,
+          "volume": 5286471.0
+        },
+        "DOGE": {
+          "symbol": "DOGEUSDT",
+          "price": 0.07244,
+          "high": 0.07358,
+          "low": 0.07208,
+          "open": 0.07344,
+          "volume": 106698849.0
+        },
+        "DUSK": {
+          "symbol": "DUSKUSDT",
+          "price": 0.0757,
+          "high": 0.0783,
+          "low": 0.0752,
+          "open": 0.0783,
+          "volume": 990224.0
+        },
+        "ANKR": {
+          "symbol": "ANKRUSDT",
+          "price": 0.00346,
+          "high": 0.00349,
+          "low": 0.00342,
+          "open": 0.00349,
+          "volume": 4700268.4
+        },
+        "WIN": {
+          "symbol": "WINUSDT",
+          "price": 2.006e-05,
+          "high": 2.048e-05,
+          "low": 1.998e-05,
+          "open": 2.043e-05,
+          "volume": 1018869329.0
+        },
+        "MTL": {
+          "symbol": "MTLUSDT",
+          "price": 0.223,
+          "high": 0.227,
+          "low": 0.221,
+          "open": 0.227,
+          "volume": 91179.8
+        },
+        "CVC": {
+          "symbol": "CVCUSDT",
+          "price": 0.01993,
+          "high": 0.02047,
+          "low": 0.01985,
+          "open": 0.02047,
+          "volume": 3740040.0
+        },
+        "CHZ": {
+          "symbol": "CHZUSDT",
+          "price": 0.01848,
+          "high": 0.01959,
+          "low": 0.01818,
+          "open": 0.01912,
+          "volume": 104072434.0
+        },
+        "BAND": {
+          "symbol": "BANDUSDT",
+          "price": 0.1419,
+          "high": 0.1443,
+          "low": 0.1408,
+          "open": 0.1438,
+          "volume": 125266.7
+        },
+        "XTZ": {
+          "symbol": "XTZUSDT",
+          "price": 0.2079,
+          "high": 0.2106,
+          "low": 0.2072,
+          "open": 0.2104,
+          "volume": 155808.9
+        },
+        "RVN": {
+          "symbol": "RVNUSDT",
+          "price": 0.0038,
+          "high": 0.00389,
+          "low": 0.00379,
+          "open": 0.00388,
+          "volume": 12881236.7
+        },
+        "HBAR": {
+          "symbol": "HBARUSDT",
+          "price": 0.0714,
+          "high": 0.07181,
+          "low": 0.0708,
+          "open": 0.07168,
+          "volume": 7674921.0
+        },
+        "STX": {
+          "symbol": "STXUSDT",
+          "price": 0.1644,
+          "high": 0.1669,
+          "low": 0.1634,
+          "open": 0.1668,
+          "volume": 467969.1
+        },
+        "KAVA": {
+          "symbol": "KAVAUSDT",
+          "price": 0.04186,
+          "high": 0.04261,
+          "low": 0.04162,
+          "open": 0.0426,
+          "volume": 1032899.2
+        },
+        "ARPA": {
+          "symbol": "ARPAUSDT",
+          "price": 0.00776,
+          "high": 0.00788,
+          "low": 0.00772,
+          "open": 0.00788,
+          "volume": 2004553.1
+        },
+        "IOTX": {
+          "symbol": "IOTXUSDT",
+          "price": 0.00276,
+          "high": 0.00278,
+          "low": 0.00273,
+          "open": 0.00278,
+          "volume": 11094762.0
+        },
+        "RLC": {
+          "symbol": "RLCUSDT",
+          "price": 0.2908,
+          "high": 0.2942,
+          "low": 0.2881,
+          "open": 0.2927,
+          "volume": 65548.8
+        }
+      }
+    },
+    {
+      "time": "2026-06-30 08:00:47",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 59551.03,
+          "high": 60276.54,
+          "low": 59360.0,
+          "open": 60260.2,
+          "volume": 4917.83752
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1593.04,
+          "high": 1614.41,
+          "low": 1579.79,
+          "open": 1613.07,
+          "volume": 60089.1369
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 552.53,
+          "high": 560.4,
+          "low": 551.62,
+          "open": 559.51,
+          "volume": 26774.273
+        },
+        "NEO": {
+          "symbol": "NEOUSDT",
+          "price": 1.923,
+          "high": 1.996,
+          "low": 1.919,
+          "open": 1.927,
+          "volume": 245557.88
+        },
+        "LTC": {
+          "symbol": "LTCUSDT",
+          "price": 42.59,
+          "high": 43.21,
+          "low": 42.39,
+          "open": 43.19,
+          "volume": 64533.722
+        },
+        "QTUM": {
+          "symbol": "QTUMUSDT",
+          "price": 0.689,
+          "high": 0.722,
+          "low": 0.684,
+          "open": 0.69,
+          "volume": 301762.7
+        },
+        "ADA": {
+          "symbol": "ADAUSDT",
+          "price": 0.145,
+          "high": 0.146,
+          "low": 0.1437,
+          "open": 0.1458,
+          "volume": 22459937.6
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0475,
+          "high": 1.0595,
+          "low": 1.0428,
+          "open": 1.0589,
+          "volume": 17761449.1
+        },
+        "TUSD": {
+          "symbol": "TUSDUSDT",
+          "price": 0.999,
+          "high": 0.9992,
+          "low": 0.999,
+          "open": 0.9991,
+          "volume": 5268.0
+        },
+        "IOTA": {
+          "symbol": "IOTAUSDT",
+          "price": 0.0348,
+          "high": 0.0353,
+          "low": 0.0342,
+          "open": 0.035,
+          "volume": 6060737.0
+        },
+        "XLM": {
+          "symbol": "XLMUSDT",
+          "price": 0.1822,
+          "high": 0.1876,
+          "low": 0.1734,
+          "open": 0.175,
+          "volume": 64126187.0
+        },
+        "ONT": {
+          "symbol": "ONTUSDT",
+          "price": 0.0442,
+          "high": 0.04635,
+          "low": 0.04301,
+          "open": 0.04307,
+          "volume": 30771442.0
+        },
+        "TRX": {
+          "symbol": "TRXUSDT",
+          "price": 0.3194,
+          "high": 0.3214,
+          "low": 0.3192,
+          "open": 0.3213,
+          "volume": 29023889.8
+        },
+        "ETC": {
+          "symbol": "ETCUSDT",
+          "price": 7.02,
+          "high": 7.16,
+          "low": 7.01,
+          "open": 7.14,
+          "volume": 58545.1
+        },
+        "ICX": {
+          "symbol": "ICXUSDT",
+          "price": 0.0246,
+          "high": 0.0258,
+          "low": 0.0242,
+          "open": 0.0246,
+          "volume": 4700921.6
+        },
+        "VET": {
+          "symbol": "VETUSDT",
+          "price": 0.004413,
+          "high": 0.004501,
+          "low": 0.004412,
+          "open": 0.004485,
+          "volume": 46654386.3
+        },
+        "USDC": {
+          "symbol": "USDCUSDT",
+          "price": 1.00116,
+          "high": 1.00147,
+          "low": 1.00101,
+          "open": 1.00105,
+          "volume": 689970739.0
+        },
+        "LINK": {
+          "symbol": "LINKUSDT",
+          "price": 7.3,
+          "high": 7.397,
+          "low": 7.268,
+          "open": 7.379,
+          "volume": 914739.41
+        },
+        "ONG": {
+          "symbol": "ONGUSDT",
+          "price": 0.0537,
+          "high": 0.06197,
+          "low": 0.04648,
+          "open": 0.04648,
+          "volume": 46276622.0
+        },
+        "HOT": {
+          "symbol": "HOTUSDT",
+          "price": 0.000297,
+          "high": 0.000305,
+          "low": 0.000297,
+          "open": 0.000304,
+          "volume": 582639694.0
+        },
+        "ZIL": {
+          "symbol": "ZILUSDT",
+          "price": 0.00289,
+          "high": 0.00294,
+          "low": 0.00288,
+          "open": 0.00294,
+          "volume": 19802570.3
+        },
+        "ZRX": {
+          "symbol": "ZRXUSDT",
+          "price": 0.0785,
+          "high": 0.0802,
+          "low": 0.0784,
+          "open": 0.0801,
+          "volume": 506817.0
+        },
+        "FET": {
+          "symbol": "FETUSDT",
+          "price": 0.1719,
+          "high": 0.1776,
+          "low": 0.1716,
+          "open": 0.1771,
+          "volume": 18063300.7
+        },
+        "BAT": {
+          "symbol": "BATUSDT",
+          "price": 0.0816,
+          "high": 0.0826,
+          "low": 0.0811,
+          "open": 0.0822,
+          "volume": 1026684.0
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 400.08,
+          "high": 407.48,
+          "low": 395.81,
+          "open": 407.4,
+          "volume": 45244.537
+        },
+        "IOST": {
+          "symbol": "IOSTUSDT",
+          "price": 0.000699,
+          "high": 0.000714,
+          "low": 0.000699,
+          "open": 0.000713,
+          "volume": 47866071.0
+        },
+        "CELR": {
+          "symbol": "CELRUSDT",
+          "price": 0.001877,
+          "high": 0.001885,
+          "low": 0.001841,
+          "open": 0.001869,
+          "volume": 36102766.9
+        },
+        "DASH": {
+          "symbol": "DASHUSDT",
+          "price": 33.14,
+          "high": 33.63,
+          "low": 32.69,
+          "open": 33.25,
+          "volume": 26962.278
+        },
+        "THETA": {
+          "symbol": "THETAUSDT",
+          "price": 0.1306,
+          "high": 0.1323,
+          "low": 0.13,
+          "open": 0.1322,
+          "volume": 798203.0
+        },
+        "ENJ": {
+          "symbol": "ENJUSDT",
+          "price": 0.0283,
+          "high": 0.02939,
+          "low": 0.02826,
+          "open": 0.02924,
+          "volume": 3259822.1
+        },
+        "ATOM": {
+          "symbol": "ATOMUSDT",
+          "price": 1.514,
+          "high": 1.536,
+          "low": 1.509,
+          "open": 1.536,
+          "volume": 331207.47
+        },
+        "TFUEL": {
+          "symbol": "TFUELUSDT",
+          "price": 0.00755,
+          "high": 0.00777,
+          "low": 0.00748,
+          "open": 0.00777,
+          "volume": 5632261.0
+        },
+        "ONE": {
+          "symbol": "ONEUSDT",
+          "price": 0.00122,
+          "high": 0.00123,
+          "low": 0.0012,
+          "open": 0.00123,
+          "volume": 16800662.7
+        },
+        "ALGO": {
+          "symbol": "ALGOUSDT",
+          "price": 0.0859,
+          "high": 0.0868,
+          "low": 0.0849,
+          "open": 0.0856,
+          "volume": 7056899.0
+        },
+        "DOGE": {
+          "symbol": "DOGEUSDT",
+          "price": 0.07238,
+          "high": 0.07358,
+          "low": 0.07208,
+          "open": 0.07344,
+          "volume": 121830962.0
+        },
+        "DUSK": {
+          "symbol": "DUSKUSDT",
+          "price": 0.0751,
+          "high": 0.0783,
+          "low": 0.075,
+          "open": 0.0783,
+          "volume": 1104725.0
+        },
+        "ANKR": {
+          "symbol": "ANKRUSDT",
+          "price": 0.00344,
+          "high": 0.00349,
+          "low": 0.00342,
+          "open": 0.00349,
+          "volume": 5909952.0
+        },
+        "WIN": {
+          "symbol": "WINUSDT",
+          "price": 2.026e-05,
+          "high": 2.048e-05,
+          "low": 1.998e-05,
+          "open": 2.043e-05,
+          "volume": 1211922468.0
+        },
+        "MTL": {
+          "symbol": "MTLUSDT",
+          "price": 0.223,
+          "high": 0.227,
+          "low": 0.221,
+          "open": 0.227,
+          "volume": 99905.2
+        },
+        "CVC": {
+          "symbol": "CVCUSDT",
+          "price": 0.01989,
+          "high": 0.02047,
+          "low": 0.01985,
+          "open": 0.02047,
+          "volume": 4208463.0
+        },
+        "CHZ": {
+          "symbol": "CHZUSDT",
+          "price": 0.01917,
+          "high": 0.01959,
+          "low": 0.01818,
+          "open": 0.01912,
+          "volume": 151334330.0
+        },
+        "BAND": {
+          "symbol": "BANDUSDT",
+          "price": 0.1416,
+          "high": 0.1443,
+          "low": 0.1408,
+          "open": 0.1438,
+          "volume": 143291.4
+        },
+        "XTZ": {
+          "symbol": "XTZUSDT",
+          "price": 0.2068,
+          "high": 0.2106,
+          "low": 0.2065,
+          "open": 0.2104,
+          "volume": 216980.5
+        },
+        "RVN": {
+          "symbol": "RVNUSDT",
+          "price": 0.00382,
+          "high": 0.00389,
+          "low": 0.00379,
+          "open": 0.00388,
+          "volume": 18988263.9
+        },
+        "HBAR": {
+          "symbol": "HBARUSDT",
+          "price": 0.07106,
+          "high": 0.07181,
+          "low": 0.0708,
+          "open": 0.07168,
+          "volume": 14282011.0
+        },
+        "STX": {
+          "symbol": "STXUSDT",
+          "price": 0.1624,
+          "high": 0.1669,
+          "low": 0.1619,
+          "open": 0.1668,
+          "volume": 1273869.9
+        },
+        "KAVA": {
+          "symbol": "KAVAUSDT",
+          "price": 0.04182,
+          "high": 0.04261,
+          "low": 0.04162,
+          "open": 0.0426,
+          "volume": 1303628.0
+        },
+        "ARPA": {
+          "symbol": "ARPAUSDT",
+          "price": 0.00777,
+          "high": 0.00788,
+          "low": 0.00772,
+          "open": 0.00788,
+          "volume": 2273658.5
+        },
+        "IOTX": {
+          "symbol": "IOTXUSDT",
+          "price": 0.00275,
+          "high": 0.00278,
+          "low": 0.00273,
+          "open": 0.00278,
+          "volume": 13524999.0
+        },
+        "RLC": {
+          "symbol": "RLCUSDT",
+          "price": 0.2918,
+          "high": 0.2942,
+          "low": 0.2881,
+          "open": 0.2927,
+          "volume": 72273.3
+        }
+      }
+    },
+    {
+      "time": "2026-06-30 10:00:33",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 59386.22,
+          "high": 60276.54,
+          "low": 59189.0,
+          "open": 60260.2,
+          "volume": 6241.20152
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1585.47,
+          "high": 1614.41,
+          "low": 1579.54,
+          "open": 1613.07,
+          "volume": 79593.9231
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 549.99,
+          "high": 560.4,
+          "low": 549.14,
+          "open": 559.51,
+          "volume": 41728.086
+        },
+        "NEO": {
+          "symbol": "NEOUSDT",
+          "price": 1.923,
+          "high": 1.996,
+          "low": 1.908,
+          "open": 1.927,
+          "volume": 280724.72
+        },
+        "LTC": {
+          "symbol": "LTCUSDT",
+          "price": 42.5,
+          "high": 43.21,
+          "low": 42.26,
+          "open": 43.19,
+          "volume": 96521.917
+        },
+        "QTUM": {
+          "symbol": "QTUMUSDT",
+          "price": 0.693,
+          "high": 0.722,
+          "low": 0.684,
+          "open": 0.69,
+          "volume": 320256.0
+        },
+        "ADA": {
+          "symbol": "ADAUSDT",
+          "price": 0.1449,
+          "high": 0.146,
+          "low": 0.1437,
+          "open": 0.1458,
+          "volume": 30796279.5
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0441,
+          "high": 1.0595,
+          "low": 1.041,
+          "open": 1.0589,
+          "volume": 23212974.3
+        },
+        "TUSD": {
+          "symbol": "TUSDUSDT",
+          "price": 0.999,
+          "high": 0.9992,
+          "low": 0.999,
+          "open": 0.9991,
+          "volume": 8736.0
+        },
+        "IOTA": {
+          "symbol": "IOTAUSDT",
+          "price": 0.0349,
+          "high": 0.0353,
+          "low": 0.0342,
+          "open": 0.035,
+          "volume": 7393054.0
+        },
+        "XLM": {
+          "symbol": "XLMUSDT",
+          "price": 0.179,
+          "high": 0.1876,
+          "low": 0.1734,
+          "open": 0.175,
+          "volume": 74201979.0
+        },
+        "ONT": {
+          "symbol": "ONTUSDT",
+          "price": 0.04316,
+          "high": 0.04635,
+          "low": 0.04289,
+          "open": 0.04307,
+          "volume": 32677168.0
+        },
+        "TRX": {
+          "symbol": "TRXUSDT",
+          "price": 0.3183,
+          "high": 0.3214,
+          "low": 0.3183,
+          "open": 0.3213,
+          "volume": 40025026.8
+        },
+        "ETC": {
+          "symbol": "ETCUSDT",
+          "price": 7.0,
+          "high": 7.16,
+          "low": 6.96,
+          "open": 7.14,
+          "volume": 101943.74
+        },
+        "ICX": {
+          "symbol": "ICXUSDT",
+          "price": 0.025,
+          "high": 0.0258,
+          "low": 0.0242,
+          "open": 0.0246,
+          "volume": 6343960.0
+        },
+        "VET": {
+          "symbol": "VETUSDT",
+          "price": 0.004417,
+          "high": 0.004501,
+          "low": 0.004398,
+          "open": 0.004485,
+          "volume": 56077020.7
+        },
+        "USDC": {
+          "symbol": "USDCUSDT",
+          "price": 1.00114,
+          "high": 1.00147,
+          "low": 1.00101,
+          "open": 1.00105,
+          "volume": 849896626.0
+        },
+        "LINK": {
+          "symbol": "LINKUSDT",
+          "price": 7.285,
+          "high": 7.397,
+          "low": 7.248,
+          "open": 7.379,
+          "volume": 1094560.35
+        },
+        "ONG": {
+          "symbol": "ONGUSDT",
+          "price": 0.04956,
+          "high": 0.06197,
+          "low": 0.04648,
+          "open": 0.04648,
+          "volume": 52343998.0
+        },
+        "HOT": {
+          "symbol": "HOTUSDT",
+          "price": 0.000291,
+          "high": 0.000305,
+          "low": 0.00029,
+          "open": 0.000304,
+          "volume": 787343975.0
+        },
+        "ZIL": {
+          "symbol": "ZILUSDT",
+          "price": 0.00289,
+          "high": 0.00294,
+          "low": 0.00288,
+          "open": 0.00294,
+          "volume": 23379602.4
+        },
+        "ZRX": {
+          "symbol": "ZRXUSDT",
+          "price": 0.0787,
+          "high": 0.0802,
+          "low": 0.0779,
+          "open": 0.0801,
+          "volume": 739637.0
+        },
+        "FET": {
+          "symbol": "FETUSDT",
+          "price": 0.1718,
+          "high": 0.1776,
+          "low": 0.1699,
+          "open": 0.1771,
+          "volume": 24647565.0
+        },
+        "BAT": {
+          "symbol": "BATUSDT",
+          "price": 0.0814,
+          "high": 0.0826,
+          "low": 0.0809,
+          "open": 0.0822,
+          "volume": 1361228.0
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 394.35,
+          "high": 407.48,
+          "low": 391.66,
+          "open": 407.4,
+          "volume": 58112.414
+        },
+        "IOST": {
+          "symbol": "IOSTUSDT",
+          "price": 0.000707,
+          "high": 0.000714,
+          "low": 0.000699,
+          "open": 0.000713,
+          "volume": 76039274.0
+        },
+        "CELR": {
+          "symbol": "CELRUSDT",
+          "price": 0.001873,
+          "high": 0.001885,
+          "low": 0.001841,
+          "open": 0.001869,
+          "volume": 45878755.8
+        },
+        "DASH": {
+          "symbol": "DASHUSDT",
+          "price": 33.3,
+          "high": 33.63,
+          "low": 32.69,
+          "open": 33.25,
+          "volume": 32260.883
+        },
+        "THETA": {
+          "symbol": "THETAUSDT",
+          "price": 0.1295,
+          "high": 0.1323,
+          "low": 0.1292,
+          "open": 0.1322,
+          "volume": 991525.4
+        },
+        "ENJ": {
+          "symbol": "ENJUSDT",
+          "price": 0.02814,
+          "high": 0.02939,
+          "low": 0.02786,
+          "open": 0.02924,
+          "volume": 4765412.8
+        },
+        "ATOM": {
+          "symbol": "ATOMUSDT",
+          "price": 1.516,
+          "high": 1.536,
+          "low": 1.505,
+          "open": 1.536,
+          "volume": 423141.35
+        },
+        "TFUEL": {
+          "symbol": "TFUELUSDT",
+          "price": 0.00754,
+          "high": 0.00777,
+          "low": 0.00747,
+          "open": 0.00777,
+          "volume": 8340291.0
+        },
+        "ONE": {
+          "symbol": "ONEUSDT",
+          "price": 0.00121,
+          "high": 0.00123,
+          "low": 0.0012,
+          "open": 0.00123,
+          "volume": 19739249.6
+        },
+        "ALGO": {
+          "symbol": "ALGOUSDT",
+          "price": 0.0851,
+          "high": 0.0868,
+          "low": 0.0848,
+          "open": 0.0856,
+          "volume": 9107615.0
+        },
+        "DOGE": {
+          "symbol": "DOGEUSDT",
+          "price": 0.07255,
+          "high": 0.07358,
+          "low": 0.072,
+          "open": 0.07344,
+          "volume": 161405288.0
+        },
+        "DUSK": {
+          "symbol": "DUSKUSDT",
+          "price": 0.0746,
+          "high": 0.0783,
+          "low": 0.074,
+          "open": 0.0783,
+          "volume": 1343540.0
+        },
+        "ANKR": {
+          "symbol": "ANKRUSDT",
+          "price": 0.00344,
+          "high": 0.00349,
+          "low": 0.00342,
+          "open": 0.00349,
+          "volume": 7233934.3
+        },
+        "WIN": {
+          "symbol": "WINUSDT",
+          "price": 2.006e-05,
+          "high": 2.048e-05,
+          "low": 1.998e-05,
+          "open": 2.043e-05,
+          "volume": 1499659049.0
+        },
+        "MTL": {
+          "symbol": "MTLUSDT",
+          "price": 0.225,
+          "high": 0.227,
+          "low": 0.221,
+          "open": 0.227,
+          "volume": 128865.2
+        },
+        "CVC": {
+          "symbol": "CVCUSDT",
+          "price": 0.02008,
+          "high": 0.02047,
+          "low": 0.01982,
+          "open": 0.02047,
+          "volume": 5816082.0
+        },
+        "CHZ": {
+          "symbol": "CHZUSDT",
+          "price": 0.0192,
+          "high": 0.01959,
+          "low": 0.01818,
+          "open": 0.01912,
+          "volume": 200027065.0
+        },
+        "BAND": {
+          "symbol": "BANDUSDT",
+          "price": 0.1413,
+          "high": 0.1443,
+          "low": 0.1405,
+          "open": 0.1438,
+          "volume": 181941.0
+        },
+        "XTZ": {
+          "symbol": "XTZUSDT",
+          "price": 0.2083,
+          "high": 0.2106,
+          "low": 0.2057,
+          "open": 0.2104,
+          "volume": 381675.8
+        },
+        "RVN": {
+          "symbol": "RVNUSDT",
+          "price": 0.0038,
+          "high": 0.00389,
+          "low": 0.00378,
+          "open": 0.00388,
+          "volume": 22634529.8
+        },
+        "HBAR": {
+          "symbol": "HBARUSDT",
+          "price": 0.07055,
+          "high": 0.07181,
+          "low": 0.07054,
+          "open": 0.07168,
+          "volume": 19313783.0
+        },
+        "STX": {
+          "symbol": "STXUSDT",
+          "price": 0.1625,
+          "high": 0.1669,
+          "low": 0.1611,
+          "open": 0.1668,
+          "volume": 1629283.7
+        },
+        "KAVA": {
+          "symbol": "KAVAUSDT",
+          "price": 0.04189,
+          "high": 0.04261,
+          "low": 0.04162,
+          "open": 0.0426,
+          "volume": 2005224.4
+        },
+        "ARPA": {
+          "symbol": "ARPAUSDT",
+          "price": 0.00777,
+          "high": 0.00788,
+          "low": 0.00772,
+          "open": 0.00788,
+          "volume": 2521423.9
+        },
+        "IOTX": {
+          "symbol": "IOTXUSDT",
+          "price": 0.00275,
+          "high": 0.00278,
+          "low": 0.00273,
+          "open": 0.00278,
+          "volume": 15257726.0
+        },
+        "RLC": {
+          "symbol": "RLCUSDT",
+          "price": 0.2895,
+          "high": 0.2942,
+          "low": 0.2881,
+          "open": 0.2927,
+          "volume": 84575.1
+        }
+      }
+    },
+    {
+      "time": "2026-06-30 12:00:33",
+      "prices": {
+        "BTC": {
+          "symbol": "BTCUSDT",
+          "price": 59172.16,
+          "high": 60276.54,
+          "low": 59123.01,
+          "open": 60260.2,
+          "volume": 7005.35592
+        },
+        "ETH": {
+          "symbol": "ETHUSDT",
+          "price": 1577.84,
+          "high": 1614.41,
+          "low": 1575.85,
+          "open": 1613.07,
+          "volume": 93821.2442
+        },
+        "BNB": {
+          "symbol": "BNBUSDT",
+          "price": 547.47,
+          "high": 560.4,
+          "low": 547.0,
+          "open": 559.51,
+          "volume": 50037.501
+        },
+        "NEO": {
+          "symbol": "NEOUSDT",
+          "price": 1.899,
+          "high": 1.996,
+          "low": 1.896,
+          "open": 1.927,
+          "volume": 306907.01
+        },
+        "LTC": {
+          "symbol": "LTCUSDT",
+          "price": 42.36,
+          "high": 43.21,
+          "low": 42.24,
+          "open": 43.19,
+          "volume": 118292.478
+        },
+        "QTUM": {
+          "symbol": "QTUMUSDT",
+          "price": 0.681,
+          "high": 0.722,
+          "low": 0.68,
+          "open": 0.69,
+          "volume": 338397.0
+        },
+        "ADA": {
+          "symbol": "ADAUSDT",
+          "price": 0.1438,
+          "high": 0.146,
+          "low": 0.1437,
+          "open": 0.1458,
+          "volume": 36676739.8
+        },
+        "XRP": {
+          "symbol": "XRPUSDT",
+          "price": 1.0381,
+          "high": 1.0595,
+          "low": 1.0371,
+          "open": 1.0589,
+          "volume": 28154784.9
+        },
+        "TUSD": {
+          "symbol": "TUSDUSDT",
+          "price": 0.999,
+          "high": 0.9992,
+          "low": 0.999,
+          "open": 0.9991,
+          "volume": 17079.0
+        },
+        "IOTA": {
+          "symbol": "IOTAUSDT",
+          "price": 0.0348,
+          "high": 0.0353,
+          "low": 0.0342,
+          "open": 0.035,
+          "volume": 8295437.0
+        },
+        "XLM": {
+          "symbol": "XLMUSDT",
+          "price": 0.1769,
+          "high": 0.1876,
+          "low": 0.1734,
+          "open": 0.175,
+          "volume": 82397292.0
+        },
+        "ONT": {
+          "symbol": "ONTUSDT",
+          "price": 0.04248,
+          "high": 0.04635,
+          "low": 0.04231,
+          "open": 0.04307,
+          "volume": 35245840.0
+        },
+        "TRX": {
+          "symbol": "TRXUSDT",
+          "price": 0.3176,
+          "high": 0.3214,
+          "low": 0.3174,
+          "open": 0.3213,
+          "volume": 52611689.8
+        },
+        "ETC": {
+          "symbol": "ETCUSDT",
+          "price": 6.99,
+          "high": 7.16,
+          "low": 6.96,
+          "open": 7.14,
+          "volume": 114664.8
+        },
+        "ICX": {
+          "symbol": "ICXUSDT",
+          "price": 0.0243,
+          "high": 0.0261,
+          "low": 0.0242,
+          "open": 0.0246,
+          "volume": 13503741.7
+        },
+        "VET": {
+          "symbol": "VETUSDT",
+          "price": 0.004374,
+          "high": 0.004501,
+          "low": 0.004369,
+          "open": 0.004485,
+          "volume": 69106632.0
+        },
+        "USDC": {
+          "symbol": "USDCUSDT",
+          "price": 1.00119,
+          "high": 1.00147,
+          "low": 1.00101,
+          "open": 1.00105,
+          "volume": 1041614957.0
+        },
+        "LINK": {
+          "symbol": "LINKUSDT",
+          "price": 7.253,
+          "high": 7.397,
+          "low": 7.245,
+          "open": 7.379,
+          "volume": 1179136.8
+        },
+        "ONG": {
+          "symbol": "ONGUSDT",
+          "price": 0.04722,
+          "high": 0.06197,
+          "low": 0.04648,
+          "open": 0.04648,
+          "volume": 54614882.0
+        },
+        "HOT": {
+          "symbol": "HOTUSDT",
+          "price": 0.00029,
+          "high": 0.000305,
+          "low": 0.00029,
+          "open": 0.000304,
+          "volume": 860853210.0
+        },
+        "ZIL": {
+          "symbol": "ZILUSDT",
+          "price": 0.00286,
+          "high": 0.00294,
+          "low": 0.00285,
+          "open": 0.00294,
+          "volume": 28184644.5
+        },
+        "ZRX": {
+          "symbol": "ZRXUSDT",
+          "price": 0.078,
+          "high": 0.0802,
+          "low": 0.0778,
+          "open": 0.0801,
+          "volume": 861137.0
+        },
+        "FET": {
+          "symbol": "FETUSDT",
+          "price": 0.1688,
+          "high": 0.1776,
+          "low": 0.1688,
+          "open": 0.1771,
+          "volume": 27822980.0
+        },
+        "BAT": {
+          "symbol": "BATUSDT",
+          "price": 0.0807,
+          "high": 0.0826,
+          "low": 0.0806,
+          "open": 0.0822,
+          "volume": 1601999.0
+        },
+        "ZEC": {
+          "symbol": "ZECUSDT",
+          "price": 391.18,
+          "high": 407.48,
+          "low": 388.9,
+          "open": 407.4,
+          "volume": 71768.801
+        },
+        "IOST": {
+          "symbol": "IOSTUSDT",
+          "price": 0.000696,
+          "high": 0.000714,
+          "low": 0.000694,
+          "open": 0.000713,
+          "volume": 84387343.0
+        },
+        "CELR": {
+          "symbol": "CELRUSDT",
+          "price": 0.00183,
+          "high": 0.001885,
+          "low": 0.00183,
+          "open": 0.001869,
+          "volume": 54501857.8
+        },
+        "DASH": {
+          "symbol": "DASHUSDT",
+          "price": 33.07,
+          "high": 33.63,
+          "low": 32.69,
+          "open": 33.25,
+          "volume": 41691.99
+        },
+        "THETA": {
+          "symbol": "THETAUSDT",
+          "price": 0.1279,
+          "high": 0.1323,
+          "low": 0.1276,
+          "open": 0.1322,
+          "volume": 1382579.1
+        },
+        "ENJ": {
+          "symbol": "ENJUSDT",
+          "price": 0.02796,
+          "high": 0.02939,
+          "low": 0.02786,
+          "open": 0.02924,
+          "volume": 5346818.3
+        },
+        "ATOM": {
+          "symbol": "ATOMUSDT",
+          "price": 1.508,
+          "high": 1.536,
+          "low": 1.505,
+          "open": 1.536,
+          "volume": 579927.23
+        },
+        "TFUEL": {
+          "symbol": "TFUELUSDT",
+          "price": 0.0075,
+          "high": 0.00777,
+          "low": 0.00747,
+          "open": 0.00777,
+          "volume": 9485739.0
+        },
+        "ONE": {
+          "symbol": "ONEUSDT",
+          "price": 0.00119,
+          "high": 0.00123,
+          "low": 0.00119,
+          "open": 0.00123,
+          "volume": 27901593.5
+        },
+        "ALGO": {
+          "symbol": "ALGOUSDT",
+          "price": 0.0842,
+          "high": 0.0868,
+          "low": 0.0839,
+          "open": 0.0856,
+          "volume": 10514596.0
+        },
+        "DOGE": {
+          "symbol": "DOGEUSDT",
+          "price": 0.07125,
+          "high": 0.07358,
+          "low": 0.071,
+          "open": 0.07344,
+          "volume": 268227631.0
+        },
+        "DUSK": {
+          "symbol": "DUSKUSDT",
+          "price": 0.0734,
+          "high": 0.0783,
+          "low": 0.0732,
+          "open": 0.0783,
+          "volume": 1515469.0
+        },
+        "ANKR": {
+          "symbol": "ANKRUSDT",
+          "price": 0.0034,
+          "high": 0.00349,
+          "low": 0.0034,
+          "open": 0.00349,
+          "volume": 11464470.1
+        },
+        "WIN": {
+          "symbol": "WINUSDT",
+          "price": 2e-05,
+          "high": 2.048e-05,
+          "low": 1.998e-05,
+          "open": 2.043e-05,
+          "volume": 1943729620.0
+        },
+        "MTL": {
+          "symbol": "MTLUSDT",
+          "price": 0.221,
+          "high": 0.227,
+          "low": 0.22,
+          "open": 0.227,
+          "volume": 179115.1
+        },
+        "CVC": {
+          "symbol": "CVCUSDT",
+          "price": 0.01995,
+          "high": 0.02047,
+          "low": 0.01982,
+          "open": 0.02047,
+          "volume": 6454390.0
+        },
+        "CHZ": {
+          "symbol": "CHZUSDT",
+          "price": 0.01846,
+          "high": 0.01959,
+          "low": 0.01818,
+          "open": 0.01912,
+          "volume": 225847084.0
+        },
+        "BAND": {
+          "symbol": "BANDUSDT",
+          "price": 0.1392,
+          "high": 0.1443,
+          "low": 0.1392,
+          "open": 0.1438,
+          "volume": 196542.4
+        },
+        "XTZ": {
+          "symbol": "XTZUSDT",
+          "price": 0.2062,
+          "high": 0.215,
+          "low": 0.2057,
+          "open": 0.2104,
+          "volume": 1107946.7
+        },
+        "RVN": {
+          "symbol": "RVNUSDT",
+          "price": 0.00374,
+          "high": 0.00389,
+          "low": 0.00373,
+          "open": 0.00388,
+          "volume": 28113956.1
+        },
+        "HBAR": {
+          "symbol": "HBARUSDT",
+          "price": 0.07022,
+          "high": 0.07181,
+          "low": 0.07015,
+          "open": 0.07168,
+          "volume": 22427722.0
+        },
+        "STX": {
+          "symbol": "STXUSDT",
+          "price": 0.1617,
+          "high": 0.1669,
+          "low": 0.1611,
+          "open": 0.1668,
+          "volume": 1771219.6
+        },
+        "KAVA": {
+          "symbol": "KAVAUSDT",
+          "price": 0.04139,
+          "high": 0.04261,
+          "low": 0.04139,
+          "open": 0.0426,
+          "volume": 2379752.5
+        },
+        "ARPA": {
+          "symbol": "ARPAUSDT",
+          "price": 0.00768,
+          "high": 0.00788,
+          "low": 0.00768,
+          "open": 0.00788,
+          "volume": 3250320.1
+        },
+        "IOTX": {
+          "symbol": "IOTXUSDT",
+          "price": 0.0027,
+          "high": 0.00278,
+          "low": 0.0027,
+          "open": 0.00278,
+          "volume": 17155336.0
+        },
+        "RLC": {
+          "symbol": "RLCUSDT",
+          "price": 0.2857,
+          "high": 0.2942,
+          "low": 0.2852,
+          "open": 0.2927,
+          "volume": 91272.1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+[
+  {
+    "name": "BTC",
+    "symbol": "BTCUSDT"
+  },
+  {
+    "name": "ETH",
+    "symbol": "ETHUSDT"
+  },
+  {
+    "name": "BNB",
+    "symbol": "BNBUSDT"
+  },
+  {
+    "name": "NEO",
+    "symbol": "NEOUSDT"
+  },
+  {
+    "name": "LTC",
+    "symbol": "LTCUSDT"
+  },
+  {
+    "name": "QTUM",
+    "symbol": "QTUMUSDT"
+  },
+  {
+    "name": "ADA",
+    "symbol": "ADAUSDT"
+  },
+  {
+    "name": "XRP",
+    "symbol": "XRPUSDT"
+  },
+  {
+    "name": "TUSD",
+    "symbol": "TUSDUSDT"
+  },
+  {
+    "name": "IOTA",
+    "symbol": "IOTAUSDT"
+  },
+  {
+    "name": "XLM",
+    "symbol": "XLMUSDT"
+  },
+  {
+    "name": "ONT",
+    "symbol": "ONTUSDT"
+  },
+  {
+    "name": "TRX",
+    "symbol": "TRXUSDT"
+  },
+  {
+    "name": "ETC",
+    "symbol": "ETCUSDT"
+  },
+  {
+    "name": "ICX",
+    "symbol": "ICXUSDT"
+  },
+  {
+    "name": "VET",
+    "symbol": "VETUSDT"
+  },
+  {
+    "name": "USDC",
+    "symbol": "USDCUSDT"
+  },
+  {
+    "name": "LINK",
+    "symbol": "LINKUSDT"
+  },
+  {
+    "name": "ONG",
+    "symbol": "ONGUSDT"
+  },
+  {
+    "name": "HOT",
+    "symbol": "HOTUSDT"
+  },
+  {
+    "name": "ZIL",
+    "symbol": "ZILUSDT"
+  },
+  {
+    "name": "ZRX",
+    "symbol": "ZRXUSDT"
+  },
+  {
+    "name": "FET",
+    "symbol": "FETUSDT"
+  },
+  {
+    "name": "BAT",
+    "symbol": "BATUSDT"
+  },
+  {
+    "name": "ZEC",
+    "symbol": "ZECUSDT"
+  },
+  {
+    "name": "IOST",
+    "symbol": "IOSTUSDT"
+  },
+  {
+    "name": "CELR",
+    "symbol": "CELRUSDT"
+  },
+  {
+    "name": "DASH",
+    "symbol": "DASHUSDT"
+  },
+  {
+    "name": "THETA",
+    "symbol": "THETAUSDT"
+  },
+  {
+    "name": "ENJ",
+    "symbol": "ENJUSDT"
+  },
+  {
+    "name": "ATOM",
+    "symbol": "ATOMUSDT"
+  },
+  {
+    "name": "TFUEL",
+    "symbol": "TFUELUSDT"
+  },
+  {
+    "name": "ONE",
+    "symbol": "ONEUSDT"
+  },
+  {
+    "name": "ALGO",
+    "symbol": "ALGOUSDT"
+  },
+  {
+    "name": "DOGE",
+    "symbol": "DOGEUSDT"
+  },
+  {
+    "name": "DUSK",
+    "symbol": "DUSKUSDT"
+  },
+  {
+    "name": "ANKR",
+    "symbol": "ANKRUSDT"
+  },
+  {
+    "name": "WIN",
+    "symbol": "WINUSDT"
+  },
+  {
+    "name": "MTL",
+    "symbol": "MTLUSDT"
+  },
+  {
+    "name": "CVC",
+    "symbol": "CVCUSDT"
+  },
+  {
+    "name": "CHZ",
+    "symbol": "CHZUSDT"
+  },
+  {
+    "name": "BAND",
+    "symbol": "BANDUSDT"
+  },
+  {
+    "name": "XTZ",
+    "symbol": "XTZUSDT"
+  },
+  {
+    "name": "RVN",
+    "symbol": "RVNUSDT"
+  },
+  {
+    "name": "HBAR",
+    "symbol": "HBARUSDT"
+  },
+  {
+    "name": "STX",
+    "symbol": "STXUSDT"
+  },
+  {
+    "name": "KAVA",
+    "symbol": "KAVAUSDT"
+  },
+  {
+    "name": "ARPA",
+    "symbol": "ARPAUSDT"
+  },
+  {
+    "name": "IOTX",
+    "symbol": "IOTXUSDT"
+  },
+  {
+    "name": "RLC",
+    "symbol": "RLCUSDT"
+  }
+]

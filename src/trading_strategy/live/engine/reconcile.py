@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from trading_strategy.core.exit_policy import build_exit_policy
-from trading_strategy.core.trade_history import apply_closed_trade
+from trading_strategy.shared.trade_history import apply_closed_trade
+from trading_strategy.strategies import build_exit_policy
 
 from .. import config
 from ..account import get_hl_frontend_open_orders, get_hl_perp_user_state
@@ -34,21 +34,23 @@ def build_position_from_exchange(coin, position_state, existing=None):
     existing = dict(existing or {})
     exit_policy = build_exit_policy(position=existing)
     size = abs(_safe_float(position_state.get("szi")))
+    previous_size = _safe_float(existing.get("size"), default=None)
     direction = "long" if _safe_float(position_state.get("szi")) >= 0 else "short"
     entry = _safe_float(position_state.get("entryPx"))
     adopted_at = datetime.now().isoformat()
     default_protection_status = "missing_tpsl" if exit_policy.get("requires_tp") else "missing_sl"
-    return {
+    position = {
         **existing,
         "coin": coin,
         "direction": existing.get("direction") or direction,
         "entry": existing.get("entry") or entry,
-        "size": existing.get("size") or size,
+        "size": size,
         "current_price": existing.get("current_price", entry),
         "pnl_pnl": existing.get("pnl_pnl", 0),
         "entry_time": existing.get("entry_time") or adopted_at,
         "entry_time_source": existing.get("entry_time_source") or ("local_state" if existing else "exchange_adopted"),
         "position_source": existing.get("position_source") or ("local_state" if existing else "exchange_adopted"),
+        "strategy_name": existing.get("strategy_name") or config.STRATEGY.get("name", "trend"),
         "adopted_at": existing.get("adopted_at") or (adopted_at if not existing else None),
         "protection_status": existing.get("protection_status", default_protection_status),
         "exit_policy": existing.get("exit_policy") or exit_policy,
@@ -61,6 +63,14 @@ def build_position_from_exchange(coin, position_state, existing=None):
             "szi": position_state.get("szi"),
         },
     }
+    if existing.get("reduce_pending") and previous_size is not None and size < previous_size:
+        position.pop("reduce_pending", None)
+        position.pop("pending_reduce_reason", None)
+        position.pop("pending_reduce_size", None)
+        position.pop("reduce_submitted_at", None)
+        position.pop("reduce_order_summary", None)
+        position.pop("reduce_verify_summary", None)
+    return position
 
 
 def normalize_managed_order(order, *, order_role, adopted_at=None, status="open", source="exchange"):

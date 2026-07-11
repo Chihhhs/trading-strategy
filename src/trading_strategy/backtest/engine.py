@@ -1,10 +1,8 @@
-from trading_strategy.core.exit_policy import build_exit_policy
-from trading_strategy.core.risk import calc_position_size
-from trading_strategy.core.signals import get_atr_value
-from trading_strategy.core.trend_trade import resolve_trend_stop_target
-from trading_strategy.core.trade_history import apply_closed_trade
+from trading_strategy.shared.risk import calc_position_size
+from trading_strategy.shared.trade_history import apply_closed_trade
+from trading_strategy.strategies.base import StrategyContext, signal_value
 
-from .types import BacktestConfig, BacktestStrategy, StrategyContext
+from .types import BacktestConfig, BacktestStrategy
 
 
 def _append_equity(equity_curve, state, peak_balance):
@@ -13,11 +11,11 @@ def _append_equity(equity_curve, state, peak_balance):
     return max(peak_balance, current_balance)
 
 
-def _build_position(coin, signal, current_price, current_bar, state, config):
+def _build_position(coin, signal, current_price, current_bar, state, config, strategy, window):
     size = calc_position_size(
         state["balance"],
         current_price,
-        signal.sl,
+        signal_value(signal, "sl"),
         leverage=config.leverage,
         risk_pct=config.risk_pct,
     )
@@ -25,27 +23,48 @@ def _build_position(coin, signal, current_price, current_bar, state, config):
         return None
     position = {
         "coin": coin,
-        "direction": signal.direction,
+        "direction": signal_value(signal, "direction"),
         "entry": current_price,
         "size": size,
-        "tp": signal.tp,
-        "sl": signal.sl,
+        "tp": signal_value(signal, "tp"),
+        "sl": signal_value(signal, "sl"),
         "entry_time": str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
-        "entry_reason": signal.reason,
-        "signal_reason": signal.reason,
-        "signal_score": signal.score,
+        "entry_reason": signal_value(signal, "reason", ""),
+        "signal_reason": signal_value(signal, "reason", ""),
+        "signal_score": signal_value(signal, "score"),
         "risk_pct": config.risk_pct,
         "entry_bar_index": int(state.get("_bar_index") or 0),
-        "bars_since_entry": 0,
-        "best_price": current_price,
-        "entry_atr": (signal.raw or {}).get("atr"),
-        "entry_breakout_level": (signal.raw or {}).get("breakout_level"),
-        "entry_ema20": (signal.raw or {}).get("ema20"),
-        "entry_ema50": (signal.raw or {}).get("ema50"),
+        "strategy_name": getattr(strategy, "name", config.strategy),
     }
-    position["initial_risk"] = abs(current_price - signal.sl) if signal.sl is not None else None
-    position["exit_policy"] = build_exit_policy(signal={"reason": signal.reason}, position=position)
-    return position
+    position["exit_policy"] = strategy.build_exit_policy(signal=signal, position=position)
+    return strategy.initialize_position(
+        position,
+        signal,
+        StrategyContext(
+            coin=coin,
+            window=window,
+            current_bar=current_bar,
+            btc_window=None,
+            balance=float(state.get("balance") or 0.0),
+            open_positions=tuple(state.get("positions", [])),
+            config=config,
+            mode="backtest",
+            price=current_price,
+            diagnostics=state.get("_diagnostics"),
+        ),
+    )
+
+
+def _estimate_transaction_cost(position, exit_price, config):
+    fee_bps = float(getattr(config, "fee_bps", 0.0) or 0.0)
+    slippage_bps = float(getattr(config, "slippage_bps", 0.0) or 0.0)
+    rate = (fee_bps + slippage_bps) / 10000.0
+    if rate <= 0:
+        return 0.0
+    size = abs(float(position.get("size") or 0.0))
+    entry = abs(float(position.get("entry") or 0.0))
+    exit_px = abs(float(exit_price or 0.0))
+    return (entry * size + exit_px * size) * rate
 
 
 def _close_position(state, position, exit_price, exit_reason, *, exit_time=None):
@@ -57,7 +76,36 @@ def _close_position(state, position, exit_price, exit_reason, *, exit_time=None)
         exit_time=exit_time,
         update_balance=True,
         exit_context={"close_status": "simulated"},
+        transaction_cost=_estimate_transaction_cost(position, exit_price, state.get("_config")),
     )
+    return trade
+
+
+def _reduce_position(state, position, current_price, adjustment, *, exit_time=None):
+    fraction = float((adjustment or {}).get("fraction") or 0.0)
+    fraction = max(0.0, min(fraction, 1.0))
+    current_size = abs(float(position.get("size") or 0.0))
+    if fraction <= 0 or current_size <= 0:
+        return None
+    reduce_size = current_size * fraction
+    if reduce_size <= 0:
+        return None
+    partial = dict(position)
+    partial["size"] = reduce_size
+    reason = (adjustment or {}).get("reason") or "POSITION_REDUCE"
+    trade = _close_position(
+        state,
+        partial,
+        current_price,
+        reason,
+        exit_time=exit_time,
+    )
+    remaining_size = max(current_size - reduce_size, 0.0)
+    position["size"] = remaining_size
+    if (adjustment or {}).get("reduction_key"):
+        reductions = set(position.get("derivatives_crowding_reductions") or [])
+        reductions.add(adjustment["reduction_key"])
+        position["derivatives_crowding_reductions"] = sorted(reductions)
     return trade
 
 
@@ -71,46 +119,90 @@ def close_position_at_bar(state, position, current_bar, exit_reason="EOD"):
     )
 
 
-def _resolve_exit(position, current_price):
+def _intrabar_exit(position, current_bar, config):
+    if not bool(getattr(config, "intrabar_exit_enabled", False)):
+        return None
+    high = float(current_bar.get("high", current_bar.get("close")))
+    low = float(current_bar.get("low", current_bar.get("close")))
+    tp = position.get("tp")
+    sl = position.get("sl")
+    policy = str(getattr(config, "intrabar_fill_policy", "stop_first") or "stop_first")
+
     if position["direction"] == "long":
-        if current_price >= position["tp"]:
+        sl_hit = sl is not None and low <= float(sl)
+        tp_hit = tp is not None and high >= float(tp)
+    else:
+        sl_hit = sl is not None and high >= float(sl)
+        tp_hit = tp is not None and low <= float(tp)
+
+    if sl_hit and tp_hit:
+        if policy == "target_first":
+            return float(tp), "TP"
+        return float(sl), "SL"
+    if sl_hit:
+        return float(sl), "SL"
+    if tp_hit:
+        return float(tp), "TP"
+    return None
+
+
+def _resolve_exit(position, current_price, current_bar, config):
+    intrabar_exit = _intrabar_exit(position, current_bar, config)
+    if intrabar_exit is not None:
+        return intrabar_exit
+    if position["direction"] == "long":
+        if position.get("tp") is not None and current_price >= position["tp"]:
             return current_price, "TP"
-        if current_price <= position["sl"]:
+        if position.get("sl") is not None and current_price <= position["sl"]:
             return current_price, "SL"
         return None
-    if current_price <= position["tp"]:
+    if position.get("tp") is not None and current_price <= position["tp"]:
         return current_price, "TP"
-    if current_price >= position["sl"]:
+    if position.get("sl") is not None and current_price >= position["sl"]:
         return current_price, "SL"
     return None
 
 
-def _resolve_atr_trail_exit(position, current_price, config, current_index, window):
+def _resolve_strategy_exit(position, current_price, config, current_index, window, strategy, current_bar, state):
     position["current_price"] = current_price
     bars_since_entry = max(int(current_index or 0) - int(position.get("entry_bar_index") or 0), 0)
     position["bars_since_entry"] = bars_since_entry
-    highs = [bar["high"] for bar in window]
-    lows = [bar["low"] for bar in window]
-    closes = [bar["close"] for bar in window]
-    current_atr = get_atr_value(highs, lows, closes, default=current_price * 0.03)
-    trail = resolve_trend_stop_target(
-        position,
-        current_atr=current_atr,
-        atr_trailing_enabled=config.atr_trailing_enabled,
-        atr_activation_r=config.atr_activation_r,
-        atr_trailing_mult=config.atr_trailing_mult,
+    context = StrategyContext(
+        coin=position.get("coin", ""),
+        window=window,
+        current_bar=current_bar,
+        btc_window=None,
+        balance=float(state.get("balance") or 0.0),
+        open_positions=tuple(state.get("positions", [])),
+        config=config,
+        mode="backtest",
+        price=current_price,
+        diagnostics=state.get("_diagnostics"),
     )
-    if trail.get("should_update") and trail.get("sl") is not None:
-        if trail.get("source") == "atr_trail":
-            position["atr_trailing_stop"] = trail["sl"]
-        else:
+    trail = strategy.resolve_stop_target(
+        position,
+        context,
+    )
+    if trail and trail.get("should_update") and trail.get("sl") is not None:
+        if trail.get("source") == "dynamic_stage":
             position["sl"] = trail["sl"]
+        else:
+            position["atr_trailing_stop"] = trail["sl"]
         dynamic_target = trail.get("dynamic_target") or {}
         if dynamic_target.get("stage") is not None:
             position["sl_stage"] = dynamic_target.get("stage")
-    atr_result = trail.get("atr_result") or {}
-    if atr_result.get("triggered"):
-        return current_price, "ATR_TRAIL"
+    evaluation = strategy.evaluate_open_position(position, context)
+    adjustment = evaluation.get("position_adjustment")
+    if adjustment and adjustment.get("action") == "reduce":
+        _reduce_position(
+            state,
+            position,
+            current_price,
+            adjustment,
+            exit_time=str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
+        )
+    if evaluation.get("exit_reason"):
+        return current_price, evaluation["exit_reason"]
     return None
 
 
@@ -126,14 +218,17 @@ class BacktestEngine:
         active_position = next((pos for pos in open_positions if pos.get("coin") == coin), None)
 
         if active_position is not None:
-            resolved_exit = _resolve_exit(active_position, current_price)
+            resolved_exit = _resolve_exit(active_position, current_price, current_bar, self.config)
             if resolved_exit is None:
-                resolved_exit = _resolve_atr_trail_exit(
+                resolved_exit = _resolve_strategy_exit(
                     active_position,
                     current_price,
                     self.config,
                     len(window) - 1,
                     window,
+                    self.strategy,
+                    current_bar,
+                    state,
                 )
             if resolved_exit is not None:
                 exit_price, exit_reason = resolved_exit
@@ -149,6 +244,9 @@ class BacktestEngine:
 
         if active_position is not None:
             return None
+        max_positions = getattr(self.config, "max_positions", None)
+        if max_positions is not None and len(open_positions) >= int(max_positions):
+            return None
 
         context = StrategyContext(
             coin=coin,
@@ -158,11 +256,21 @@ class BacktestEngine:
             balance=float(state.get("balance") or 0.0),
             open_positions=tuple(open_positions),
             config=self.config,
+            diagnostics=state.get("_diagnostics"),
         )
         signal = self.strategy.generate_signal(context)
         if signal is None:
             return None
-        position = _build_position(coin, signal, current_price, current_bar, state, self.config)
+        position = _build_position(
+            coin,
+            signal,
+            current_price,
+            current_bar,
+            state,
+            self.config,
+            self.strategy,
+            window,
+        )
         if position is None:
             return None
         open_positions.append(position)

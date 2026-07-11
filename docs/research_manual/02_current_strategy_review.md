@@ -3,13 +3,63 @@
 - Date: 2026-07-05
 - Data range: Current repo code, local 240-day backtest snapshots, and historical 50-coin notes in `docs/backtest_results.md`
 - Applicable markets: BTC, ETH, SOL, BNB plus prior 50-coin research context
-- Last updated: 2026-07-05
+- Last updated: 2026-07-10
 
 ## Current Local Baseline
 
 - `trend`, 240 days, `BTC,ETH,SOL,BNB`, `risk=0.03`, `leverage=2.0`: `trades=21`, `win_rate=42.9%`, `pnl=+9.5%`, `drawdown=13.8%`
 - `trend`, 240 days, `BTC` only, `risk=0.03`, `leverage=2.0`: `trades=9`, `win_rate=55.6%`, `pnl=+15.8%`, `drawdown=3.6%`
 - Optimizer snapshot: top-ranked combinations were all `trend + btc_filter_on + risk_pct 0.03`, and `leverage=2/3/5` showed nearly identical results under the current sizing model.
+
+## 2026-07-10 Refactor Check
+
+- `trend_sl_only` backtest behavior now matches live semantics more closely: fixed TP is no longer used as the default trend exit.
+- Backtest strategy hooks now exercise `ATR_TRAIL` and `FAILURE` exits when enabled.
+- `trend`, 240 days, `BTC`, `risk=0.03`, `leverage=2.0`, `atr_trailing=on`, `failure_exit=on`: `trades=7`, `win_rate=28.6%`, `pnl=+10.7%`, `drawdown=6.1%`, exits `{'ATR_TRAIL': 1, 'EOD': 1, 'FAILURE': 1, 'SL': 4}`.
+- `trend`, 240 days, `BTC,ETH,SOL,BNB`, same settings: `trades=20`, `win_rate=25.0%`, `pnl=-12.6%`, `drawdown=23.5%`, exits `{'ATR_TRAIL': 3, 'EOD': 2, 'FAILURE': 3, 'SL': 12}`.
+- Interpretation: BTC-only remains the cleaner baseline. The multi-coin universe still dilutes results after the exit semantics are corrected.
+
+## 2026-07-10 Cost-Adjusted Trend Check
+
+- Backtest now supports per-side `fee_bps` and `slippage_bps`.
+- `trend`, 240 days, `BTC`, `risk=0.03`, `leverage=2.0`, `atr_trailing=on`, `failure_exit=on`, `fee_bps=4.5`: `trades=7`, `win_rate=28.6%`, `net_pnl=+10.0%`, `gross_pnl=+10.7%`, `cost=0.6%`, `drawdown=6.3%`.
+- `trend`, 240 days, `BTC,ETH,SOL,BNB`, same settings: `trades=20`, `win_rate=25.0%`, `net_pnl=-13.8%`, `gross_pnl=-12.5%`, `cost=1.3%`, `drawdown=23.9%`.
+- `trend`, 1000 days, `BTC`, same settings: `trades=30`, `win_rate=33.3%`, `net_pnl=+14.9%`, `gross_pnl=+17.4%`, `cost=2.5%`, `drawdown=29.6%`.
+- `trend`, 1000 days, `BTC,ETH,SOL,BNB`, same settings: `trades=87`, `win_rate=35.6%`, `net_pnl=+19.9%`, `gross_pnl=+27.2%`, `cost=7.3%`, `drawdown=50.0%`.
+- Decision: Use `BTC-only trend` as the default research baseline. Multi-coin trend remains a separate universe-selection problem because it can improve gross opportunity but materially worsens drawdown.
+
+## 2026-07-10 Multi-Coin Diagnosis
+
+- The issue is not only signal quality. It is also portfolio construction.
+- Single-coin 1000-day cost-adjusted checks with `risk=0.03`, `leverage=2`, `fee_bps=4.5`:
+  - `BTC`: `net_pnl=+14.9%`, `drawdown=29.6%`.
+  - `BNB`: `net_pnl=+15.8%`, `drawdown=25.7%`.
+  - `ETH`: `net_pnl=+1.7%`, `drawdown=29.1%`.
+  - `SOL`: no trades in the sampled data.
+- Multi-coin 1000-day checks:
+  - `BTC,BNB`, `risk=0.03`: `net_pnl=+25.3%`, `drawdown=31.4%`.
+  - `BTC,BNB`, `risk=0.015`: `net_pnl=+18.1%`, `drawdown=16.1%`.
+  - `BTC,ETH,SOL,BNB`, `risk=0.01`: `net_pnl=+13.7%`, `drawdown=19.9%`.
+  - `BTC,BNB,ETH`, `risk=0.015`, `max_positions=2`: `net_pnl=+21.8%`, `drawdown=22.6%`.
+- Recent-window checks are weaker:
+  - `BTC,BNB`, 240 days, `risk=0.015`: `net_pnl=-1.5%`, `drawdown=6.8%`.
+  - `BTC,BNB,ETH`, 240 days, `risk=0.015`, `max_positions=2`: `net_pnl=-3.5%`, `drawdown=11.2%`.
+- Decision: Multi-coin trend is viable only as a controlled portfolio. Do not use the full coin basket with the same per-trade risk. Use lower per-coin risk, `max_positions`, and a rolling universe filter that can remove weak recent coins.
+
+## 2026-07-11 Trend Anti-Chase Filter Check
+
+- Change: `trend` now has configurable entry filters for RSI, ATR%, 60-bar price position, and 60-bar overextension.
+- Rationale: Prior research notes warned against chasing longs near the top of the range, shorting near the bottom, and entering during volatility spikes.
+- `trend_unfiltered_reference`, 240 days, `BTC`, `risk=0.03`, `leverage=2.0`, cost-adjusted: `trades=7`, `win_rate=28.6%`, `net_pnl=+10.0%`, `drawdown=6.3%`, `score=+6.85`.
+- `trend_filtered_control`, same settings: `trades=2`, `win_rate=50.0%`, `net_pnl=+16.3%`, `drawdown=4.2%`, `score=+14.20`.
+- 1000-day retest, same settings:
+  - `trend_unfiltered_reference`: `trades=30`, `win_rate=33.3%`, `net_pnl=+14.9%`, `drawdown=29.6%`, `score=+0.10`.
+  - `trend_filtered_control`: `trades=12`, `win_rate=25.0%`, `net_pnl=+4.7%`, `drawdown=14.7%`, `score=-2.65`.
+- Diagnostics from the 1000-day filtered run: `trend_rsi_filtered_signals=33`, `trend_price_position_filtered_signals=28`.
+- Parameter retune check:
+  - Raising `trend_long_max_price_position` from `0.75` to `0.85` and `trend_rsi_max_long` from `70` to `75` kept the 240-day BTC result unchanged at `trades=2`, `net_pnl=+16.3%`, `drawdown=4.2%`, `score=+14.20`.
+  - The same change improved the 1000-day BTC result to `trades=14`, `net_pnl=+8.2%`, `drawdown=11.8%`, `score=+2.30`.
+- Interpretation: The anti-chase filter still looks directionally useful, but the original `0.75` long-entry cap and `70` RSI ceiling were too restrictive for long-horizon trend capture. The defaults have been relaxed to `0.85` and `75`; further tuning still needs walk-forward validation.
 
 ## Historical 50-Coin Context
 
