@@ -1,0 +1,63 @@
+{
+  "strategy": "D_趨勢積極",
+  "balance": 1000.0,
+  "positions": [
+    {
+      "coin": "ATOM",
+      "direction": "short",
+      "entry": 1.527,
+      "tp": 1.3554285714285714,
+      "sl": 1.6574285714285715,
+      "size": 613.362541,
+      "current_price": 1.516,
+      "pnl_pnl": 6.746987950999937,
+      "entry_time": "2026-06-29T18:01:50.895583",
+      "sig": "TREND_SELL"
+    },
+    {
+      "coin": "HOT",
+      "direction": "long",
+      "entry": 0.000302,
+      "tp": 0.0003528571428571429,
+      "sl": 0.0002638571428571429,
+      "size": 2097378.277154,
+      "current_price": 0.000302,
+      "pnl_pnl": 0,
+      "entry_time": "2026-06-30T01:33:11.491269",
+      "sig": "TREND_BUY"
+    },
+    {
+      "coin": "CVC",
+      "direction": "long",
+      "entry": 0.02021,
+      "tp": 0.023715714285714284,
+      "sl": 0.017580714285714283,
+      "size": 30426.514534,
+      "current_price": 0.02021,
+      "pnl_pnl": 0,
+      "entry_time": "2026-06-30T01:33:13.907155",
+      "sig": "TREND_BUY"
+    }
+  ],
+  "history": [],
+  "params": {
+    "initial_balance": 1000.0,
+    "max_positions": 3,
+    "max_hold_days": 30,
+    "leverage": 5,
+    "risk_per_trade": 0.08,
+    "strategy_type": "trend",
+    "max_daily_loss_pct": 10.0,
+    "max_consecutive_losses": 5,
+    "cooldown_hours": 24,
+    "min_cor_confirm": 1
+  },
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "total_pnl": 0.0,
+    "max_win": 0.0,
+    "max_loss": 0.0
+  }
+}

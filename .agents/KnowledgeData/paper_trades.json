@@ -1,0 +1,129 @@
+{
+  "balance": 1023.129172666,
+  "positions": [
+    {
+      "coin": "ETH",
+      "direction": "short",
+      "entry": 1583.15,
+      "tp": 1210.557143,
+      "sl": 1694.927857,
+      "tp_pct": 23.53,
+      "sl_pct": 7.06,
+      "size": 0.457662,
+      "entry_time": "2026-06-29T16:44:14.007126",
+      "current_price": 1583.15,
+      "pnl_pnl": 0,
+      "pnl_pct": 0,
+      "signal_score": -11.1,
+      "decision_confidence": 0.96,
+      "decision_reason": "確認=2, 品質=0.6",
+      "agent_decision": null
+    },
+    {
+      "coin": "BTC",
+      "direction": "short",
+      "entry": 59870.0,
+      "tp": 49074.264286,
+      "sl": 64188.294286,
+      "tp_pct": 18.03,
+      "sl_pct": 7.21,
+      "size": 0.011846,
+      "entry_time": "2026-06-29T16:44:14.007283",
+      "current_price": 59870.0,
+      "pnl_pnl": 0,
+      "pnl_pct": 0,
+      "signal_score": -26.5,
+      "decision_confidence": 0.66,
+      "decision_reason": "確認=2, 品質=0.6",
+      "agent_decision": null
+    }
+  ],
+  "history": [
+    {
+      "coin": "ZEC",
+      "direction": "short",
+      "entry": 466.87,
+      "exit": 463.63,
+      "size": 0.479905,
+      "pnl": 1.5549,
+      "pnl_pct": 0.16,
+      "reason": "TP 觸發",
+      "entry_time": "2026-06-21T05:48:07.553786",
+      "exit_time": "2026-06-21T08:29:19.180605",
+      "hold_days": 0
+    },
+    {
+      "coin": "ZEC",
+      "direction": "short",
+      "entry": 463.56,
+      "exit": 463.56,
+      "size": 0.479089,
+      "pnl": 0.0,
+      "pnl_pct": 0.0,
+      "reason": "TP 觸發",
+      "entry_time": "2026-06-21T08:29:33.361067",
+      "exit_time": "2026-06-21T08:29:46.541854",
+      "hold_days": 0
+    },
+    {
+      "coin": "ZEC",
+      "direction": "short",
+      "entry": 463.6,
+      "exit": 463.75,
+      "size": 0.479089,
+      "pnl": -0.0719,
+      "pnl_pct": -0.01,
+      "reason": "TP 觸發",
+      "entry_time": "2026-06-21T08:30:00.489236",
+      "exit_time": "2026-06-21T08:31:12.053194",
+      "hold_days": 0
+    },
+    {
+      "coin": "ZEC",
+      "direction": "short",
+      "entry": 463.96,
+      "exit": 454.82,
+      "size": 0.479055,
+      "pnl": 4.3786,
+      "pnl_pct": 0.44,
+      "reason": "TP 觸發",
+      "entry_time": "2026-06-21T08:31:26.032409",
+      "exit_time": "2026-06-21T15:02:22.841387",
+      "hold_days": 0
+    },
+    {
+      "coin": "AVAX",
+      "direction": "short",
+      "entry": 6.236,
+      "exit": 6.672,
+      "size": 32.540949,
+      "pnl": -14.1879,
+      "pnl_pct": -14.19,
+      "reason": "持倉超時 7天",
+      "entry_time": "2026-06-21T05:18:43.188160",
+      "exit_time": "2026-06-29T16:44:11.861882",
+      "hold_days": 8
+    },
+    {
+      "coin": "ZEC",
+      "direction": "short",
+      "entry": 455.07,
+      "exit": 388.05,
+      "size": 0.469344,
+      "pnl": 31.4554,
+      "pnl_pct": 31.46,
+      "reason": "持倉超時 7天",
+      "entry_time": "2026-06-21T15:02:36.453983",
+      "exit_time": "2026-06-29T16:44:11.862739",
+      "hold_days": 8
+    }
+  ],
+  "stats": {
+    "total_trades": 6,
+    "wins": 3,
+    "losses": 3,
+    "total_pnl": 23.129172666000002,
+    "max_win": 31.45543487999999,
+    "max_loss": -14.187853763999998
+  }
+}

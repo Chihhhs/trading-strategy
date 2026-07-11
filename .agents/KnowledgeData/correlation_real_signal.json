@@ -1,0 +1,413 @@
+{
+  "count_stats": {
+    "7": {
+      "wins": 11,
+      "total": 12,
+      "avg_pnl": 50.88
+    },
+    "3": {
+      "wins": 14,
+      "total": 22,
+      "avg_pnl": 70.43
+    },
+    "0": {
+      "wins": 12,
+      "total": 26,
+      "avg_pnl": -1.21
+    },
+    "2": {
+      "wins": 6,
+      "total": 12,
+      "avg_pnl": 25.8
+    },
+    "8": {
+      "wins": 4,
+      "total": 5,
+      "avg_pnl": 7.31
+    },
+    "1": {
+      "wins": 11,
+      "total": 20,
+      "avg_pnl": 23.03
+    },
+    "6": {
+      "wins": 15,
+      "total": 17,
+      "avg_pnl": 38.75
+    },
+    "4": {
+      "wins": 14,
+      "total": 17,
+      "avg_pnl": 32.59
+    },
+    "5": {
+      "wins": 7,
+      "total": 13,
+      "avg_pnl": 7.12
+    }
+  },
+  "top_pairs": [
+    {
+      "target": "APT",
+      "conf": "AVAX",
+      "corr": 0.698,
+      "cwr": 100.0,
+      "uwr": 37.5,
+      "diff": 62.5,
+      "ct": 8,
+      "ut": 8,
+      "avg_pnl_conf": 61.4,
+      "avg_pnl_unconf": -3.1
+    },
+    {
+      "target": "LINK",
+      "conf": "ETH",
+      "corr": 0.749,
+      "cwr": 100.0,
+      "uwr": 40.0,
+      "diff": 60.0,
+      "ct": 4,
+      "ut": 10,
+      "avg_pnl_conf": 15.4,
+      "avg_pnl_unconf": 10.6
+    },
+    {
+      "target": "ETH",
+      "conf": "SUI",
+      "corr": 0.629,
+      "cwr": 87.5,
+      "uwr": 28.6,
+      "diff": 58.9,
+      "ct": 8,
+      "ut": 7,
+      "avg_pnl_conf": 28.2,
+      "avg_pnl_unconf": -2.4
+    },
+    {
+      "target": "ETH",
+      "conf": "SOL",
+      "corr": 0.719,
+      "cwr": 100.0,
+      "uwr": 45.5,
+      "diff": 54.5,
+      "ct": 4,
+      "ut": 11,
+      "avg_pnl_conf": 25.2,
+      "avg_pnl_unconf": 9.8
+    },
+    {
+      "target": "SOL",
+      "conf": "ETH",
+      "corr": 0.719,
+      "cwr": 87.5,
+      "uwr": 33.3,
+      "diff": 54.2,
+      "ct": 8,
+      "ut": 9,
+      "avg_pnl_conf": 46.4,
+      "avg_pnl_unconf": 2.5
+    },
+    {
+      "target": "SOL",
+      "conf": "LINK",
+      "corr": 0.688,
+      "cwr": 87.5,
+      "uwr": 33.3,
+      "diff": 54.2,
+      "ct": 8,
+      "ut": 9,
+      "avg_pnl_conf": 43.7,
+      "avg_pnl_unconf": 4.9
+    },
+    {
+      "target": "SOL",
+      "conf": "WLD",
+      "corr": 0.502,
+      "cwr": 80.0,
+      "uwr": 28.6,
+      "diff": 51.4,
+      "ct": 10,
+      "ut": 7,
+      "avg_pnl_conf": 50.3,
+      "avg_pnl_unconf": -15.5
+    },
+    {
+      "target": "WLD",
+      "conf": "ETH",
+      "corr": 0.542,
+      "cwr": 100.0,
+      "uwr": 50.0,
+      "diff": 50.0,
+      "ct": 5,
+      "ut": 14,
+      "avg_pnl_conf": 76.6,
+      "avg_pnl_unconf": -2.0
+    },
+    {
+      "target": "WLD",
+      "conf": "LINK",
+      "corr": 0.507,
+      "cwr": 100.0,
+      "uwr": 50.0,
+      "diff": 50.0,
+      "ct": 5,
+      "ut": 14,
+      "avg_pnl_conf": 80.8,
+      "avg_pnl_unconf": -3.5
+    },
+    {
+      "target": "APT",
+      "conf": "LINK",
+      "corr": 0.67,
+      "cwr": 100.0,
+      "uwr": 54.5,
+      "diff": 45.5,
+      "ct": 5,
+      "ut": 11,
+      "avg_pnl_conf": 51.9,
+      "avg_pnl_unconf": 18.8
+    },
+    {
+      "target": "WLD",
+      "conf": "SOL",
+      "corr": 0.502,
+      "cwr": 100.0,
+      "uwr": 56.2,
+      "diff": 43.8,
+      "ct": 3,
+      "ut": 16,
+      "avg_pnl_conf": 15.9,
+      "avg_pnl_unconf": 19.2
+    },
+    {
+      "target": "WLD",
+      "conf": "SUI",
+      "corr": 0.496,
+      "cwr": 87.5,
+      "uwr": 45.5,
+      "diff": 42.0,
+      "ct": 8,
+      "ut": 11,
+      "avg_pnl_conf": 50.1,
+      "avg_pnl_unconf": -4.2
+    },
+    {
+      "target": "ETH",
+      "conf": "SEI",
+      "corr": 0.602,
+      "cwr": 83.3,
+      "uwr": 44.4,
+      "diff": 38.9,
+      "ct": 6,
+      "ut": 9,
+      "avg_pnl_conf": 12.7,
+      "avg_pnl_unconf": 14.8
+    },
+    {
+      "target": "LINK",
+      "conf": "SOL",
+      "corr": 0.688,
+      "cwr": 80.0,
+      "uwr": 44.4,
+      "diff": 35.6,
+      "ct": 5,
+      "ut": 9,
+      "avg_pnl_conf": 40.9,
+      "avg_pnl_unconf": -4.1
+    },
+    {
+      "target": "WLD",
+      "conf": "SEI",
+      "corr": 0.476,
+      "cwr": 80.0,
+      "uwr": 44.4,
+      "diff": 35.6,
+      "ct": 10,
+      "ut": 9,
+      "avg_pnl_conf": 47.9,
+      "avg_pnl_unconf": -13.7
+    },
+    {
+      "target": "ETH",
+      "conf": "WLD",
+      "corr": 0.542,
+      "cwr": 75.0,
+      "uwr": 42.9,
+      "diff": 32.1,
+      "ct": 8,
+      "ut": 7,
+      "avg_pnl_conf": 19.1,
+      "avg_pnl_unconf": 8.1
+    },
+    {
+      "target": "SUI",
+      "conf": "ETH",
+      "corr": 0.629,
+      "cwr": 100.0,
+      "uwr": 69.2,
+      "diff": 30.8,
+      "ct": 3,
+      "ut": 13,
+      "avg_pnl_conf": 49.2,
+      "avg_pnl_unconf": 67.7
+    },
+    {
+      "target": "SUI",
+      "conf": "LINK",
+      "corr": 0.607,
+      "cwr": 100.0,
+      "uwr": 69.2,
+      "diff": 30.8,
+      "ct": 3,
+      "ut": 13,
+      "avg_pnl_conf": 77.2,
+      "avg_pnl_unconf": 61.3
+    },
+    {
+      "target": "APT",
+      "conf": "ETH",
+      "corr": 0.664,
+      "cwr": 85.7,
+      "uwr": 55.6,
+      "diff": 30.2,
+      "ct": 7,
+      "ut": 9,
+      "avg_pnl_conf": 36.8,
+      "avg_pnl_unconf": 23.2
+    },
+    {
+      "target": "APT",
+      "conf": "SUI",
+      "corr": 0.645,
+      "cwr": 85.7,
+      "uwr": 55.6,
+      "diff": 30.2,
+      "ct": 7,
+      "ut": 9,
+      "avg_pnl_conf": 49.0,
+      "avg_pnl_unconf": 13.7
+    }
+  ],
+  "worst_pairs": [
+    {
+      "target": "AVAX",
+      "conf": "SOL",
+      "corr": 0.744,
+      "cwr": 50.0,
+      "uwr": 58.3,
+      "diff": -8.3,
+      "ct": 4,
+      "ut": 12,
+      "avg_pnl_conf": 34.0,
+      "avg_pnl_unconf": 31.0
+    },
+    {
+      "target": "AVAX",
+      "conf": "DOT",
+      "corr": 0.772,
+      "cwr": 50.0,
+      "uwr": 58.3,
+      "diff": -8.3,
+      "ct": 4,
+      "ut": 12,
+      "avg_pnl_conf": -0.6,
+      "avg_pnl_unconf": 42.5
+    },
+    {
+      "target": "SUI",
+      "conf": "SOL",
+      "corr": 0.626,
+      "cwr": 66.7,
+      "uwr": 76.9,
+      "diff": -10.3,
+      "ct": 3,
+      "ut": 13,
+      "avg_pnl_conf": -10.2,
+      "avg_pnl_unconf": 81.5
+    },
+    {
+      "target": "DOT",
+      "conf": "SUI",
+      "corr": 0.595,
+      "cwr": 62.5,
+      "uwr": 75.0,
+      "diff": -12.5,
+      "ct": 8,
+      "ut": 8,
+      "avg_pnl_conf": 10.5,
+      "avg_pnl_unconf": 11.8
+    },
+    {
+      "target": "SUI",
+      "conf": "WLD",
+      "corr": 0.496,
+      "cwr": 66.7,
+      "uwr": 80.0,
+      "diff": -13.3,
+      "ct": 6,
+      "ut": 10,
+      "avg_pnl_conf": 94.6,
+      "avg_pnl_unconf": 46.1
+    },
+    {
+      "target": "ETH",
+      "conf": "APT",
+      "corr": 0.664,
+      "cwr": 50.0,
+      "uwr": 63.6,
+      "diff": -13.6,
+      "ct": 4,
+      "ut": 11,
+      "avg_pnl_conf": 12.9,
+      "avg_pnl_unconf": 14.3
+    },
+    {
+      "target": "SEI",
+      "conf": "SUI",
+      "corr": 0.676,
+      "cwr": 71.4,
+      "uwr": 87.5,
+      "diff": -16.1,
+      "ct": 7,
+      "ut": 8,
+      "avg_pnl_conf": 89.3,
+      "avg_pnl_unconf": 38.7
+    },
+    {
+      "target": "WLD",
+      "conf": "APT",
+      "corr": 0.537,
+      "cwr": 33.3,
+      "uwr": 68.8,
+      "diff": -35.4,
+      "ct": 3,
+      "ut": 16,
+      "avg_pnl_conf": -18.8,
+      "avg_pnl_unconf": 25.7
+    },
+    {
+      "target": "SUI",
+      "conf": "SEI",
+      "corr": 0.676,
+      "cwr": 50.0,
+      "uwr": 90.0,
+      "diff": -40.0,
+      "ct": 6,
+      "ut": 10,
+      "avg_pnl_conf": 58.7,
+      "avg_pnl_unconf": 67.6
+    },
+    {
+      "target": "SEI",
+      "conf": "AVAX",
+      "corr": 0.632,
+      "cwr": 50.0,
+      "uwr": 90.9,
+      "diff": -40.9,
+      "ct": 4,
+      "ut": 11,
+      "avg_pnl_conf": 118.1,
+      "avg_pnl_unconf": 42.0
+    }
+  ]
+}

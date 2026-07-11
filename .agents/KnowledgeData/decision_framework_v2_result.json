@@ -1,0 +1,201 @@
+{
+  "results": {
+    "ETH": {
+      "trades": 13,
+      "wins": 9,
+      "win_rate": 69.23076923076923,
+      "total_pnl": 273.23,
+      "avg_pnl": 21.02,
+      "final_balance": 3999.48
+    },
+    "SOL": {
+      "trades": 14,
+      "wins": 9,
+      "win_rate": 64.28571428571429,
+      "total_pnl": 421.78,
+      "avg_pnl": 30.13,
+      "final_balance": 7771.65
+    },
+    "BNB": {
+      "trades": 7,
+      "wins": 5,
+      "win_rate": 71.42857142857143,
+      "total_pnl": 330.39,
+      "avg_pnl": 47.2,
+      "final_balance": 7015.39
+    },
+    "AVAX": {
+      "trades": 13,
+      "wins": 9,
+      "win_rate": 69.23076923076923,
+      "total_pnl": 575.37,
+      "avg_pnl": 44.26,
+      "final_balance": 18855.22
+    },
+    "XRP": {
+      "trades": 12,
+      "wins": 6,
+      "win_rate": 50.0,
+      "total_pnl": 567.27,
+      "avg_pnl": 47.27,
+      "final_balance": 1499.65
+    },
+    "DOGE": {
+      "trades": 11,
+      "wins": 9,
+      "win_rate": 81.81818181818183,
+      "total_pnl": 819.93,
+      "avg_pnl": 74.54,
+      "final_balance": 56129.44
+    },
+    "ADA": {
+      "trades": 11,
+      "wins": 8,
+      "win_rate": 72.72727272727273,
+      "total_pnl": 515.61,
+      "avg_pnl": 46.87,
+      "final_balance": 8714.28
+    },
+    "LINK": {
+      "trades": 11,
+      "wins": 7,
+      "win_rate": 63.63636363636363,
+      "total_pnl": 259.62,
+      "avg_pnl": 23.6,
+      "final_balance": 2824.34
+    },
+    "APT": {
+      "trades": 13,
+      "wins": 10,
+      "win_rate": 76.92307692307693,
+      "total_pnl": 573.33,
+      "avg_pnl": 44.1,
+      "final_balance": 36352.66
+    },
+    "SUI": {
+      "trades": 13,
+      "wins": 11,
+      "win_rate": 84.61538461538461,
+      "total_pnl": 1015.51,
+      "avg_pnl": 78.12,
+      "final_balance": 124294.52
+    },
+    "SEI": {
+      "trades": 14,
+      "wins": 9,
+      "win_rate": 64.28571428571429,
+      "total_pnl": 832.41,
+      "avg_pnl": 59.46,
+      "final_balance": 7532.85
+    },
+    "WLD": {
+      "trades": 13,
+      "wins": 8,
+      "win_rate": 61.53846153846154,
+      "total_pnl": 344.99,
+      "avg_pnl": 26.54,
+      "final_balance": 1440.87
+    },
+    "ZEC": {
+      "trades": 7,
+      "wins": 5,
+      "win_rate": 71.42857142857143,
+      "total_pnl": 133.64,
+      "avg_pnl": 19.09,
+      "final_balance": -728.5
+    },
+    "MATIC": {
+      "trades": 6,
+      "wins": 3,
+      "win_rate": 50.0,
+      "total_pnl": 193.4,
+      "avg_pnl": 32.23,
+      "final_balance": 1766.91
+    },
+    "DOT": {
+      "trades": 15,
+      "wins": 11,
+      "win_rate": 73.33333333333333,
+      "total_pnl": 248.17,
+      "avg_pnl": 16.54,
+      "final_balance": 93.98
+    },
+    "ATOM": {
+      "trades": 11,
+      "wins": 7,
+      "win_rate": 63.63636363636363,
+      "total_pnl": 221.32,
+      "avg_pnl": 20.12,
+      "final_balance": 1042.74
+    },
+    "ARB": {
+      "trades": 14,
+      "wins": 9,
+      "win_rate": 64.28571428571429,
+      "total_pnl": 312.57,
+      "avg_pnl": 22.33,
+      "final_balance": 1495.51
+    },
+    "NEAR": {
+      "trades": 8,
+      "wins": 5,
+      "win_rate": 62.5,
+      "total_pnl": 370.63,
+      "avg_pnl": 46.33,
+      "final_balance": -2760.39
+    },
+    "OP": {
+      "trades": 14,
+      "wins": 8,
+      "win_rate": 57.14285714285714,
+      "total_pnl": 265.59,
+      "avg_pnl": 18.97,
+      "final_balance": 534.78
+    },
+    "FIL": {
+      "trades": 8,
+      "wins": 4,
+      "win_rate": 50.0,
+      "total_pnl": 43.84,
+      "avg_pnl": 5.48,
+      "final_balance": -69.9
+    }
+  },
+  "skip_reasons": {
+    "ATR%=2.9 < 3\uff0c\u7121\u6ce2\u52d5": 1,
+    "\u725b\u5e02\u672b\u671f\uff0c\u5b8c\u5168\u907f\u958b": 79,
+    "0 \u500b\u78ba\u8a8d\uff0c\u4e0d\u4ea4\u6613": 65,
+    "\u78ba\u8a8d=2, \u54c1\u8cea=0.6, ADX=20, RSI=71, ATR%=5.1, \u5206\u6578=21.8, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=22, RSI=72, ATR%=5.3, \u5206\u6578=22.8, BTC=neutral": 1,
+    "BTC \u65b9\u5411\u76f8\u53cd (long vs short)": 28,
+    "ADX=13 < 15\uff0c\u7121\u8da8\u52e2": 7,
+    "ADX=12 < 15\uff0c\u7121\u8da8\u52e2": 9,
+    "ADX=11 < 15\uff0c\u7121\u8da8\u52e2": 3,
+    "\u78ba\u8a8d=3, \u54c1\u8cea=0.9, ADX=15, RSI=21, ATR%=5.6, \u5206\u6578=-21.6, BTC=neutral": 1,
+    "ADX=14 < 15\uff0c\u7121\u8da8\u52e2": 5,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=22, RSI=84, ATR%=5.2, \u5206\u6578=15.2, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=24, RSI=77, ATR%=5.7, \u5206\u6578=15.1, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=26, RSI=79, ATR%=5.5, \u5206\u6578=16.7, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=29, RSI=78, ATR%=6.0, \u5206\u6578=15.3, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=31, RSI=79, ATR%=5.8, \u5206\u6578=15.8, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=33, RSI=81, ATR%=5.8, \u5206\u6578=15.5, BTC=neutral": 1,
+    "\u78ba\u8a8d=2, \u54c1\u8cea=0.6, ADX=36, RSI=81, ATR%=6.2, \u5206\u6578=16.2, BTC=neutral": 1,
+    "\u78ba\u8a8d=2, \u54c1\u8cea=0.6, ADX=19, RSI=29, ATR%=5.5, \u5206\u6578=-22.0, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=19, RSI=34, ATR%=5.3, \u5206\u6578=-23.8, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=20, RSI=28, ATR%=5.5, \u5206\u6578=-28.1, BTC=neutral": 1,
+    "\u78ba\u8a8d=2, \u54c1\u8cea=0.6, ADX=48, RSI=62, ATR%=9.8, \u5206\u6578=13.1, BTC=neutral": 1,
+    "ADX=15 < 15\uff0c\u7121\u8da8\u52e2": 2,
+    "\u78ba\u8a8d=2, \u54c1\u8cea=0.6, ADX=38, RSI=9, ATR%=6.0, \u5206\u6578=-15.2, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=17, RSI=39, ATR%=8.4, \u5206\u6578=-25.1, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=21, RSI=27, ATR%=9.4, \u5206\u6578=-22.4, BTC=neutral": 1,
+    "ADX=10 < 15\uff0c\u7121\u8da8\u52e2": 3,
+    "ADX=9 < 15\uff0c\u7121\u8da8\u52e2": 2,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=53, RSI=34, ATR%=8.7, \u5206\u6578=-15.8, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=50, RSI=29, ATR%=8.8, \u5206\u6578=-20.7, BTC=short": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=23, RSI=67, ATR%=6.1, \u5206\u6578=16.2, BTC=neutral": 1,
+    "\u78ba\u8a8d=2, \u54c1\u8cea=0.6, ADX=16, RSI=67, ATR%=4.8, \u5206\u6578=11.9, BTC=neutral": 1,
+    "\u78ba\u8a8d=2, \u54c1\u8cea=0.6, ADX=26, RSI=73, ATR%=6.2, \u5206\u6578=20.6, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=23, RSI=27, ATR%=6.4, \u5206\u6578=-20.8, BTC=neutral": 1,
+    "\u78ba\u8a8d=1, \u54c1\u8cea=0.3, ADX=21, RSI=71, ATR%=5.8, \u5206\u6578=22.4, BTC=neutral": 1
+  }
+}

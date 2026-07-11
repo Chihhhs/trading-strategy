@@ -1,0 +1,25 @@
+{
+  "strategy": "A_FVG保守",
+  "balance": 1000.0,
+  "positions": [],
+  "history": [],
+  "params": {
+    "initial_balance": 1000.0,
+    "max_positions": 2,
+    "max_hold_days": 7,
+    "leverage": 3,
+    "risk_per_trade": 0.03,
+    "strategy_type": "fvg",
+    "max_daily_loss_pct": 10.0,
+    "max_consecutive_losses": 5,
+    "cooldown_hours": 24
+  },
+  "stats": {
+    "total_trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "total_pnl": 0.0,
+    "max_win": 0.0,
+    "max_loss": 0.0
+  }
+}

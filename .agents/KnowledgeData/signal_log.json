@@ -1,0 +1,56 @@
+{
+  "BTC": {
+    "signal": "NEUTRAL",
+    "score": -8.9,
+    "price": 64059.98,
+    "time": "2026-06-21T08:29:42.263110"
+  },
+  "ETH": {
+    "signal": "NEUTRAL",
+    "score": -9.4,
+    "price": 1729.49,
+    "time": "2026-06-21T08:29:43.401275"
+  },
+  "SOL": {
+    "signal": "NEUTRAL",
+    "score": -2.0,
+    "price": 73.01,
+    "time": "2026-06-21T08:29:43.525674"
+  },
+  "BNB": {
+    "signal": "NEUTRAL",
+    "score": -9.4,
+    "price": 589.16,
+    "time": "2026-06-21T08:29:43.652831"
+  },
+  "AVAX": {
+    "signal": "STRONG_SELL",
+    "score": -25.2,
+    "price": 6.274,
+    "time": "2026-06-21T08:29:43.788065"
+  },
+  "XRP": {
+    "signal": "NEUTRAL",
+    "score": -12.8,
+    "price": 1.1451,
+    "time": "2026-06-21T08:29:43.925628"
+  },
+  "NEAR": {
+    "signal": "NEUTRAL",
+    "score": -9.5,
+    "price": 2.225,
+    "time": "2026-06-21T08:29:44.052136"
+  },
+  "WLD": {
+    "signal": "STRONG_BUY",
+    "score": 28.4,
+    "price": 0.5998,
+    "time": "2026-06-21T08:29:44.185058"
+  },
+  "ZEC": {
+    "signal": "NEUTRAL",
+    "score": -11.3,
+    "price": 463.56,
+    "time": "2026-06-21T08:29:44.315056"
+  }
+}
