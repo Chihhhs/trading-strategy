@@ -14,6 +14,7 @@ STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live")
 HL_API_LOG_DIR = os.path.join(PROJECT_ROOT, "data", "hl_api")
 TRADE_HISTORY_DIR = os.path.join(PROJECT_ROOT, "data", "trade_history")
 BINANCE_API = "https://api.binance.com"
+BINANCE_FUTURES_API = "https://fapi.binance.com"
 
 MODE = "paper"
 
@@ -45,6 +46,12 @@ STRATEGY = {
     "trend_short_min_price_position": 0.25,
     "trend_max_roc_60_long": 120.0,
     "trend_min_roc_60_short": -120.0,
+    "derivatives_crowding_exit_enabled": False,
+    "derivatives_crowding_action": "reduce",
+    "derivatives_crowding_reduce_fraction": 0.75,
+    "derivatives_crowding_funding_z_lookback": 30,
+    "derivatives_crowding_funding_z_threshold": 0.75,
+    "derivatives_crowding_basis_abs_threshold_pct": 0.03,
     "intraday_breakout_lookback": 12,
     "intraday_fast_ema": 8,
     "intraday_slow_ema": 21,

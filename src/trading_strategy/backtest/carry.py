@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 
-from .derivatives import _safe_float
+from .data import get_coin_series
+from .derivatives import _safe_float, merge_derivatives_into_price_data
 
 
 DEFAULT_CARRY_SET = ("funding_carry", "basis_compression")
+DEFAULT_TREND_FORWARD_DAYS = (1, 3, 7, 14)
 
 
 @dataclass(frozen=True)
@@ -19,6 +21,11 @@ class CarryConfig:
     fee_bps: float = 4.5
     slippage_bps: float = 2.0
     funding_periods_per_day: int = 3
+    trend_forward_days: tuple[int, ...] = DEFAULT_TREND_FORWARD_DAYS
+    trend_price_lookback_days: int = 3
+    trend_funding_z_lookback: int = 30
+    trend_funding_z_threshold: float = 0.75
+    trend_basis_abs_threshold_pct: float = 0.03
 
 
 def parse_csv_tuple(raw_value, cast=str):
@@ -42,6 +49,30 @@ def _bar_time(bar):
 def _transaction_cost_pct(config):
     # Delta-neutral spread entry exits two legs, then closes two legs.
     return 4.0 * (float(config.fee_bps or 0.0) + float(config.slippage_bps or 0.0)) / 100.0
+
+
+def _close(bar):
+    value = _safe_float((bar or {}).get("close"))
+    return value
+
+
+def _pct_change(current, previous):
+    if current is None or previous in (None, 0):
+        return None
+    return (current / previous - 1.0) * 100.0
+
+
+def _mean(values):
+    values = [value for value in values if value is not None]
+    return sum(values) / len(values) if values else None
+
+
+def _std(values):
+    values = [value for value in values if value is not None]
+    if len(values) < 2:
+        return None
+    mean = sum(values) / len(values)
+    return (sum((value - mean) ** 2 for value in values) / len(values)) ** 0.5
 
 
 def _empty_summary(name, coin, diagnostics=None):
@@ -197,6 +228,160 @@ def _run_basis_compression_for_coin(coin, bars, config):
     return _summarize("basis_compression", coin, trades)
 
 
+def _classify_funding_trend(bar, funding_z, price_return, config):
+    funding = _safe_float((bar or {}).get("funding_rate"))
+    basis = _safe_float((bar or {}).get("basis_pct"))
+    if funding is None or funding_z is None or price_return is None:
+        return None, None
+
+    if abs(funding_z) < config.trend_funding_z_threshold:
+        label = "neutral"
+        direction = None
+    elif funding_z > 0 and price_return > 0:
+        label = "crowded_long_risk"
+        direction = "short"
+    elif funding_z < 0 and price_return < 0:
+        label = "crowded_short_risk"
+        direction = "long"
+    elif funding_z > 0 and price_return <= 0:
+        label = "short_trend_support"
+        direction = "short"
+    else:
+        label = "long_trend_support"
+        direction = "long"
+
+    if basis is not None and abs(basis) >= config.trend_basis_abs_threshold_pct:
+        if basis > 0 and direction == "long":
+            label = "long_basis_crowded"
+        elif basis < 0 and direction == "short":
+            label = "short_basis_crowded"
+        elif basis > 0 and direction == "short":
+            label = "short_basis_support"
+        elif basis < 0 and direction == "long":
+            label = "long_basis_support"
+    return label, direction
+
+
+def _signed_forward_return(bars, index, forward_days, direction):
+    current = _close(bars[index])
+    future_index = index + int(forward_days)
+    if future_index >= len(bars):
+        return None
+    forward = _pct_change(_close(bars[future_index]), current)
+    if forward is None:
+        return None
+    if direction == "short":
+        return -forward
+    return forward
+
+
+def _summarize_signal_returns(values):
+    values = [value for value in values if value is not None]
+    if not values:
+        return {"count": 0, "mean": None, "hit_rate": None}
+    return {
+        "count": len(values),
+        "mean": round(sum(values) / len(values), 4),
+        "hit_rate": round(sum(1 for value in values if value > 0) / len(values) * 100.0, 2),
+    }
+
+
+def run_funding_trend_report(price_data_map, derivatives_data_map, *, config):
+    diagnostics = {}
+    price_subset = {
+        coin: get_coin_series(price_data_map or {}, coin, max_days=config.max_days)
+        for coin in config.coins
+        if coin in (price_data_map or {})
+    }
+    merged = merge_derivatives_into_price_data(price_subset, derivatives_data_map or {}, diagnostics)
+    rows = []
+    for coin in config.coins:
+        bars = get_coin_series(merged, coin, max_days=config.max_days)
+        if not bars:
+            rows.append(
+                {
+                    "coin": coin,
+                    "signals": 0,
+                    "diagnostics": {"missing_price_data": True},
+                    "labels": [],
+                    "forward": [],
+                }
+            )
+            continue
+
+        events = []
+        start = max(config.trend_funding_z_lookback, config.trend_price_lookback_days)
+        max_forward = max(config.trend_forward_days or DEFAULT_TREND_FORWARD_DAYS)
+        for index in range(start, len(bars) - max_forward):
+            funding_window = [_safe_float(bar.get("funding_rate")) for bar in bars[index - config.trend_funding_z_lookback : index]]
+            funding_mean = _mean(funding_window)
+            funding_std = _std(funding_window)
+            funding = _safe_float(bars[index].get("funding_rate"))
+            if funding is None or funding_mean is None or not funding_std:
+                continue
+            funding_z = (funding - funding_mean) / funding_std
+            price_return = _pct_change(_close(bars[index]), _close(bars[index - config.trend_price_lookback_days]))
+            label, direction = _classify_funding_trend(bars[index], funding_z, price_return, config)
+            if label is None:
+                continue
+            events.append(
+                {
+                    "coin": coin,
+                    "index": index,
+                    "label": label,
+                    "direction": direction,
+                    "funding_z": round(funding_z, 4),
+                    "funding_rate": funding,
+                    "basis_pct": _safe_float(bars[index].get("basis_pct")),
+                    "price_return": price_return,
+                }
+            )
+
+        label_rows = []
+        for label in sorted({event["label"] for event in events}):
+            label_events = [event for event in events if event["label"] == label]
+            direction_events = [event for event in label_events if event.get("direction")]
+            label_rows.append(
+                {
+                    "label": label,
+                    "signals": len(label_events),
+                    "directional_signals": len(direction_events),
+                    "avg_funding_z": round(sum(event["funding_z"] for event in label_events) / len(label_events), 4),
+                }
+            )
+
+        forward_rows = []
+        for days in config.trend_forward_days:
+            for label in sorted({event["label"] for event in events}):
+                label_events = [event for event in events if event["label"] == label and event.get("direction")]
+                returns = [
+                    _signed_forward_return(bars, event["index"], days, event["direction"])
+                    for event in label_events
+                ]
+                forward_rows.append({"label": label, "forward_days": days, **_summarize_signal_returns(returns)})
+
+        latest_directional = next((event for event in reversed(events) if event.get("direction")), None)
+        rows.append(
+            {
+                "coin": coin,
+                "signals": len(events),
+                "diagnostics": {},
+                "labels": label_rows,
+                "forward": forward_rows,
+                "latest_context": latest_directional or (events[-1] if events else None),
+            }
+        )
+    return {
+        "coins": config.coins,
+        "max_days": config.max_days,
+        "trend_forward_days": config.trend_forward_days,
+        "trend_funding_z_threshold": config.trend_funding_z_threshold,
+        "trend_basis_abs_threshold_pct": config.trend_basis_abs_threshold_pct,
+        "diagnostics": diagnostics,
+        "rows": rows,
+    }
+
+
 def run_carry_report(derivatives_data_map, *, config):
     rows = []
     for coin in config.coins:
@@ -266,4 +451,55 @@ def format_carry_report_lines(report):
     if paper_plan:
         lines.append("[paper_trade_fallback]")
         lines.extend(f"- {item}" for item in paper_plan)
+    return lines
+
+
+def format_funding_trend_report_lines(report):
+    lines = ["Funding / Basis short-term trend report"]
+    lines.append(
+        "coins={coins}, max_days={max_days}, forward_days={forward_days}, funding_z_threshold={funding_z}, "
+        "basis_abs_threshold_pct={basis_threshold}".format(
+            coins=",".join(report.get("coins") or ()),
+            max_days=report.get("max_days"),
+            forward_days=",".join(str(day) for day in report.get("trend_forward_days") or ()),
+            funding_z=report.get("trend_funding_z_threshold"),
+            basis_threshold=report.get("trend_basis_abs_threshold_pct"),
+        )
+    )
+    if report.get("diagnostics"):
+        lines.append(f"diagnostics={report['diagnostics']}")
+    for row in report.get("rows") or []:
+        lines.append(f"[{row['coin']}] signals={row['signals']}")
+        if row.get("diagnostics"):
+            lines.append(f"{row['coin']} diagnostics={row['diagnostics']}")
+        latest = row.get("latest_context")
+        if latest:
+            lines.append(
+                "{coin} latest: label={label}, direction={direction}, funding_z={funding_z}, "
+                "funding_rate={funding_rate}, basis_pct={basis_pct}, price_return={price_return:.4f}".format(
+                    coin=row["coin"],
+                    label=latest.get("label"),
+                    direction=latest.get("direction") or "none",
+                    funding_z=latest.get("funding_z"),
+                    funding_rate=latest.get("funding_rate"),
+                    basis_pct=latest.get("basis_pct"),
+                    price_return=float(latest.get("price_return") or 0.0),
+                )
+            )
+        for label in row.get("labels") or []:
+            lines.append(
+                "{coin} label={label}, signals={signals}, directional={directional_signals}, avg_funding_z={avg_funding_z}".format(
+                    coin=row["coin"],
+                    **label,
+                )
+            )
+        for forward in row.get("forward") or []:
+            if not forward.get("count"):
+                continue
+            lines.append(
+                "{coin} forward={forward_days}d label={label}: count={count}, mean={mean}, hit_rate={hit_rate}".format(
+                    coin=row["coin"],
+                    **forward,
+                )
+            )
     return lines

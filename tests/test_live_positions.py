@@ -1,7 +1,36 @@
-from tests.live_test_support import live, patch, unittest, update_positions
+from tests.live_test_support import live, market, patch, unittest, update_positions
+
+
+def _crowded_long_risk_klines(length=35):
+    klines = []
+    for index in range(length):
+        klines.append(
+            {
+                "open": 100.0,
+                "high": 101.0,
+                "low": 99.0,
+                "close": 100.0,
+                "volume": 1000.0,
+                "funding_rate": 0.001 + index * 0.0001,
+            }
+        )
+    klines[-1]["funding_rate"] = 0.02
+    klines[-1]["basis_pct"] = -0.10
+    return klines
 
 
 class LivePositionsTest(unittest.TestCase):
+    def test_normalize_premium_index_derives_basis_pct(self):
+        result = market._normalize_premium_index(
+            {
+                "markPrice": "99.0",
+                "indexPrice": "100.0",
+                "lastFundingRate": "0.0003",
+            }
+        )
+        self.assertEqual(result["funding_rate"], 0.0003)
+        self.assertAlmostEqual(result["basis_pct"], -1.0)
+
     def test_update_positions_records_paper_trade_reason_and_outcome(self):
         old_mode = live.config.MODE
         live.config.set_mode("paper")
@@ -77,6 +106,47 @@ class LivePositionsTest(unittest.TestCase):
         finally:
             live.config.set_mode(old_mode)
 
+    def test_update_positions_paper_reduces_derivatives_crowded_trend_position(self):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY["derivatives_crowding_exit_enabled"]
+        old_action = live.config.STRATEGY["derivatives_crowding_action"]
+        old_fraction = live.config.STRATEGY["derivatives_crowding_reduce_fraction"]
+        live.config.set_mode("paper")
+        try:
+            live.config.STRATEGY["derivatives_crowding_exit_enabled"] = True
+            live.config.STRATEGY["derivatives_crowding_action"] = "reduce"
+            live.config.STRATEGY["derivatives_crowding_reduce_fraction"] = 0.5
+            state = {
+                "balance": 1000.0,
+                "positions": [
+                    {
+                        "coin": "BTC",
+                        "direction": "long",
+                        "entry": 90.0,
+                        "tp": None,
+                        "sl": 80.0,
+                        "size": 2.0,
+                        "entry_time": "2026-07-05T09:00:00",
+                        "signal_reason": "TREND_BUY",
+                        "entry_reason": "TREND_BUY",
+                        "entry_order_type": "paper",
+                        "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True},
+                    }
+                ],
+                "history": [],
+                "stats": {"total_trades": 0, "wins": 0, "losses": 0, "total_pnl": 0.0, "max_win": 0.0, "max_loss": 0.0},
+            }
+            update_positions(state, {"BTC": 100.0}, {"BTC": _crowded_long_risk_klines()})
+            self.assertEqual(len(state["positions"]), 1)
+            self.assertAlmostEqual(state["positions"][0]["size"], 1.0)
+            self.assertEqual(state["history"][0]["exit_reason"], "DERIVATIVES_CROWDING_REDUCE")
+            self.assertIn("short_basis_crowded:long", state["positions"][0]["derivatives_crowding_reductions"])
+        finally:
+            live.config.STRATEGY["derivatives_crowding_exit_enabled"] = old_enabled
+            live.config.STRATEGY["derivatives_crowding_action"] = old_action
+            live.config.STRATEGY["derivatives_crowding_reduce_fraction"] = old_fraction
+            live.config.set_mode(old_mode)
+
     @patch("trading_strategy.live.engine.positions.record_trade_event")
     @patch("trading_strategy.live.engine.positions.close_hl_position")
     def test_update_positions_marks_live_close_pending_until_reconciled(
@@ -124,6 +194,58 @@ class LivePositionsTest(unittest.TestCase):
         finally:
             live.config.STRATEGY["failure_exit_enabled"] = old_failure_exit_enabled
             live.config.STRATEGY["max_hold_days"] = old_max_hold_days
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.positions.record_trade_event")
+    @patch("trading_strategy.live.engine.positions.close_hl_position")
+    def test_update_positions_live_submits_partial_reduce_for_derivatives_crowding(
+        self,
+        mock_close_hl_position,
+        mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY["derivatives_crowding_exit_enabled"]
+        old_action = live.config.STRATEGY["derivatives_crowding_action"]
+        old_fraction = live.config.STRATEGY["derivatives_crowding_reduce_fraction"]
+        live.config.set_mode("live")
+        try:
+            live.config.STRATEGY["derivatives_crowding_exit_enabled"] = True
+            live.config.STRATEGY["derivatives_crowding_action"] = "reduce"
+            live.config.STRATEGY["derivatives_crowding_reduce_fraction"] = 0.5
+            mock_close_hl_position.return_value = {
+                "status": "ok",
+                "order_summary": {"order_status": "filled"},
+                "verified_summary": {"verify_status": "filled"},
+            }
+            state = {
+                "_reconciled_at": "2026-07-05T10:00:00",
+                "positions": [
+                    {
+                        "coin": "BTC",
+                        "direction": "long",
+                        "entry": 90.0,
+                        "size": 2.0,
+                        "entry_time": "2026-07-05T00:00:00",
+                        "signal_reason": "TREND_BUY",
+                        "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True},
+                    }
+                ],
+                "history": [],
+                "stats": {"total_trades": 0, "wins": 0, "losses": 0, "total_pnl": 0.0, "max_win": 0.0, "max_loss": 0.0},
+            }
+            update_positions(state, {"BTC": 100.0}, {"BTC": _crowded_long_risk_klines()})
+            self.assertEqual(len(state["positions"]), 1)
+            self.assertEqual(state["positions"][0]["size"], 2.0)
+            self.assertTrue(state["positions"][0]["reduce_pending"])
+            self.assertAlmostEqual(state["positions"][0]["pending_reduce_size"], 1.0)
+            self.assertAlmostEqual(mock_close_hl_position.call_args.args[0]["size"], 1.0)
+            self.assertTrue(
+                any(call.args[0] == "position_reduce_submitted" for call in mock_record_trade_event.call_args_list)
+            )
+        finally:
+            live.config.STRATEGY["derivatives_crowding_exit_enabled"] = old_enabled
+            live.config.STRATEGY["derivatives_crowding_action"] = old_action
+            live.config.STRATEGY["derivatives_crowding_reduce_fraction"] = old_fraction
             live.config.set_mode(old_mode)
 
     @patch("trading_strategy.live.engine.positions.record_trade_event")

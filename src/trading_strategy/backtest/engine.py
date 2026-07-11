@@ -81,6 +81,34 @@ def _close_position(state, position, exit_price, exit_reason, *, exit_time=None)
     return trade
 
 
+def _reduce_position(state, position, current_price, adjustment, *, exit_time=None):
+    fraction = float((adjustment or {}).get("fraction") or 0.0)
+    fraction = max(0.0, min(fraction, 1.0))
+    current_size = abs(float(position.get("size") or 0.0))
+    if fraction <= 0 or current_size <= 0:
+        return None
+    reduce_size = current_size * fraction
+    if reduce_size <= 0:
+        return None
+    partial = dict(position)
+    partial["size"] = reduce_size
+    reason = (adjustment or {}).get("reason") or "POSITION_REDUCE"
+    trade = _close_position(
+        state,
+        partial,
+        current_price,
+        reason,
+        exit_time=exit_time,
+    )
+    remaining_size = max(current_size - reduce_size, 0.0)
+    position["size"] = remaining_size
+    if (adjustment or {}).get("reduction_key"):
+        reductions = set(position.get("derivatives_crowding_reductions") or [])
+        reductions.add(adjustment["reduction_key"])
+        position["derivatives_crowding_reductions"] = sorted(reductions)
+    return trade
+
+
 def close_position_at_bar(state, position, current_bar, exit_reason="EOD"):
     return _close_position(
         state,
@@ -164,6 +192,15 @@ def _resolve_strategy_exit(position, current_price, config, current_index, windo
         if dynamic_target.get("stage") is not None:
             position["sl_stage"] = dynamic_target.get("stage")
     evaluation = strategy.evaluate_open_position(position, context)
+    adjustment = evaluation.get("position_adjustment")
+    if adjustment and adjustment.get("action") == "reduce":
+        _reduce_position(
+            state,
+            position,
+            current_price,
+            adjustment,
+            exit_time=str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
+        )
     if evaluation.get("exit_reason"):
         return current_price, evaluation["exit_reason"]
     return None

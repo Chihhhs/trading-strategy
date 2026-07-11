@@ -46,6 +46,9 @@ def build_strategy_snapshot():
         "risk_per_trade": config.STRATEGY["risk_per_trade"],
         "max_positions": config.STRATEGY["max_positions"],
         "market_data_source": config.get_market_data_source(),
+        "derivatives_crowding_exit_enabled": config.STRATEGY.get("derivatives_crowding_exit_enabled", False),
+        "derivatives_crowding_action": config.STRATEGY.get("derivatives_crowding_action"),
+        "derivatives_crowding_reduce_fraction": config.STRATEGY.get("derivatives_crowding_reduce_fraction"),
     }
 
 

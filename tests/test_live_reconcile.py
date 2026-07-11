@@ -53,6 +53,35 @@ class LiveReconcileTest(unittest.TestCase):
             live.config.set_mode(old_mode)
 
     @patch("trading_strategy.live.engine.reconcile.record_trade_event")
+    def test_sync_state_with_exchange_positions_confirms_partial_reduce_size(self, _mock_record_trade_event):
+        old_mode = live.config.MODE
+        live.config.set_mode("live")
+        try:
+            state = {
+                "positions": [
+                    {
+                        "coin": "ETH",
+                        "direction": "long",
+                        "entry": 1755.5,
+                        "size": 0.08,
+                        "reduce_pending": True,
+                        "pending_reduce_size": 0.03,
+                        "pending_reduce_reason": "DERIVATIVES_CROWDING_REDUCE",
+                    }
+                ]
+            }
+            synced = sync_state_with_exchange_positions(
+                state,
+                {"assetPositions": [{"position": {"coin": "ETH", "entryPx": "1755.5", "szi": "0.05"}}]},
+                [],
+            )
+            self.assertEqual(synced["positions"][0]["size"], 0.05)
+            self.assertNotIn("reduce_pending", synced["positions"][0])
+            self.assertNotIn("pending_reduce_size", synced["positions"][0])
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.reconcile.record_trade_event")
     def test_sync_state_with_exchange_positions_matches_reduce_only_sl_without_tpsl_by_oid(self, mock_record_trade_event):
         old_mode = live.config.MODE
         live.config.set_mode("live")

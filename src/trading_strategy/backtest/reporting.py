@@ -135,6 +135,18 @@ def format_result_lines(result, *, show_trades=False):
             "derivatives_basis_filtered_signals",
             "derivatives_oi_filtered_signals",
             "derivatives_missing_context_signals",
+            "derivatives_crowding_exit_signals",
+            "derivatives_crowding_exit_long_signals",
+            "derivatives_crowding_exit_short_signals",
+            "derivatives_crowding_reduce_signals",
+            "derivatives_crowding_reduce_long_signals",
+            "derivatives_crowding_reduce_short_signals",
+            "trend_alpha_btc_regime_boosts",
+            "trend_alpha_funding_basis_boosts",
+            "trend_alpha_oi_boosts",
+            "trend_alpha_crowded_blocks",
+            "trend_alpha_missing_derivatives_bars",
+            "trend_alpha_unconfirmed_blocks",
         )
         if diagnostics.get(key)
     }
@@ -184,6 +196,18 @@ def format_comparison_lines(results_by_strategy):
                 "derivatives_basis_filtered_signals",
                 "derivatives_oi_filtered_signals",
                 "derivatives_missing_context_signals",
+                "derivatives_crowding_exit_signals",
+                "derivatives_crowding_exit_long_signals",
+                "derivatives_crowding_exit_short_signals",
+                "derivatives_crowding_reduce_signals",
+                "derivatives_crowding_reduce_long_signals",
+                "derivatives_crowding_reduce_short_signals",
+                "trend_alpha_btc_regime_boosts",
+                "trend_alpha_funding_basis_boosts",
+                "trend_alpha_oi_boosts",
+                "trend_alpha_crowded_blocks",
+                "trend_alpha_missing_derivatives_bars",
+                "trend_alpha_unconfirmed_blocks",
             )
             if diagnostics.get(key)
         }

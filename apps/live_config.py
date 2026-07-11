@@ -25,6 +25,9 @@ STRATEGY_OVERRIDES = {
     # "tp_mult": 1.5,
     # "sl_mult": 1.0,
     # "entry_order_type": "ioc",
+    "derivatives_crowding_exit_enabled": True,
+    "derivatives_crowding_action": "reduce",
+    "derivatives_crowding_reduce_fraction": 0.75,
     # "intraday_breakout_lookback": 12,
     # "intraday_max_hold_bars": 24,
 }

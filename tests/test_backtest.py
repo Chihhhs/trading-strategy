@@ -19,7 +19,13 @@ from trading_strategy.backtest.alpha import (
     format_alpha_report_lines,
     run_alpha_report,
 )
-from trading_strategy.backtest.carry import CarryConfig, format_carry_report_lines, run_carry_report
+from trading_strategy.backtest.carry import (
+    CarryConfig,
+    format_carry_report_lines,
+    format_funding_trend_report_lines,
+    run_carry_report,
+    run_funding_trend_report,
+)
 from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
 from trading_strategy.backtest.optimizer import run_parameter_sweep
@@ -320,6 +326,230 @@ class BacktestModuleTest(unittest.TestCase):
         result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
         self.assertEqual(result.portfolio["trades"], 1)
         self.assertEqual(result.portfolio["diagnostics"]["derivatives_missing_context_signals"], 1)
+
+    def test_trend_alpha_entry_disabled_leaves_signal_unchanged(self):
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112))]}
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal("long", tp=110, sl=96, score=5, reason="TREND_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            trend_alpha_entry_enabled=False,
+        )
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.trades[0]["signal_score"], 5)
+        self.assertNotIn("trend_alpha_missing_derivatives_bars", result.portfolio["diagnostics"])
+
+    def test_trend_alpha_entry_btc_regime_boosts_supported_alt_direction(self):
+        btc = [build_bar(price, index) for index, price in enumerate((100, 101, 102, 103, 104, 105, 106, 112, 116))]
+        eth = [build_bar(price, index) for index, price in enumerate((50, 51, 52, 53, 54, 55, 56, 57, 65))]
+        data_map = {"BTC": btc, "ETH": eth}
+
+        def build_signal(context):
+            if len(context.window) != 8:
+                return None
+            return StrategySignal("long", tp=65, sl=50, score=5, reason="TREND_BUY")
+
+        config = BacktestConfig(
+            coins=("ETH",),
+            max_days=None,
+            min_bars=7,
+            btc_filter_enabled=False,
+            trend_alpha_entry_enabled=True,
+            trend_alpha_mode="combined",
+            trend_alpha_score_boost=1,
+        )
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.trades[0]["signal_score"], 6)
+        self.assertEqual(result.portfolio["diagnostics"]["trend_alpha_btc_regime_boosts"], 1)
+
+    def test_trend_alpha_entry_blocks_crowded_funding_basis_long_not_short(self):
+        prices = [100.0 + index * 0.1 for index in range(42)]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.00001 if index < 35 else 0.0002,
+                    "basis_pct": -0.05 if index >= 35 else 0.0,
+                }
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+
+        def long_signal(context):
+            if len(context.window) != 37:
+                return None
+            return StrategySignal("long", tp=120, sl=90, score=5, reason="TREND_BUY")
+
+        long_config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=36,
+            btc_filter_enabled=False,
+            trend_alpha_entry_enabled=True,
+            derivatives_crowding_funding_z_threshold=0.5,
+            derivatives_crowding_basis_abs_threshold_pct=0.03,
+        )
+        long_result = PortfolioBacktester(
+            config=long_config,
+            strategy=FakeStrategy(long_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        self.assertEqual(long_result.portfolio["trades"], 0)
+        self.assertEqual(long_result.portfolio["diagnostics"]["trend_alpha_crowded_blocks"], 1)
+
+        def short_signal(context):
+            if len(context.window) != 37:
+                return None
+            return StrategySignal("short", tp=90, sl=120, score=-5, reason="TREND_SELL")
+
+        short_result = PortfolioBacktester(
+            config=long_config,
+            strategy=FakeStrategy(short_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        self.assertGreaterEqual(short_result.portfolio["trades"], 1)
+
+    def test_trend_alpha_entry_oi_confirmation_boosts_same_direction_signal(self):
+        prices = (100, 101, 102, 103, 104, 105, 107, 110)
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "open_interest": 100 + index * 5,
+                    "funding_rate": 0.00001,
+                    "basis_pct": 0.0,
+                }
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+
+        def build_signal(context):
+            if len(context.window) != 7:
+                return None
+            return StrategySignal("long", tp=110, sl=95, score=5, reason="TREND_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=6,
+            btc_filter_enabled=False,
+            trend_alpha_entry_enabled=True,
+            trend_alpha_mode="combined",
+        )
+        result = PortfolioBacktester(
+            config=config,
+            strategy=FakeStrategy(build_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        self.assertEqual(result.trades[0]["signal_score"], 6)
+        self.assertEqual(result.portfolio["diagnostics"]["trend_alpha_oi_boosts"], 1)
+
+    def test_trend_alpha_entry_missing_derivatives_does_not_crash_or_block(self):
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112))]}
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal("long", tp=110, sl=96, score=5, reason="TREND_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            trend_alpha_entry_enabled=True,
+        )
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.portfolio["trades"], 1)
+        self.assertEqual(result.portfolio["diagnostics"]["trend_alpha_missing_derivatives_bars"], 1)
+
+    def test_derivatives_crowding_exit_closes_open_trend_long(self):
+        prices = [100.0 + index * 0.1 for index in range(45)]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.00001 if index < 35 else 0.0002,
+                    "basis_pct": -0.05 if index >= 35 else 0.0,
+                }
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+
+        def build_signal(context):
+            if context.current_bar["close"] != data_map["BTC"][2]["close"]:
+                return None
+            return StrategySignal("long", tp=None, sl=90, score=5, reason="TREND_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            derivatives_crowding_exit_enabled=True,
+            derivatives_crowding_funding_z_threshold=0.5,
+            derivatives_crowding_basis_abs_threshold_pct=0.03,
+        )
+        result = PortfolioBacktester(
+            config=config,
+            strategy=FakeStrategy(build_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        self.assertEqual(result.trades[0]["exit_reason"], "DERIVATIVES_CROWDING")
+        self.assertEqual(result.portfolio["diagnostics"]["derivatives_crowding_exit_long_signals"], 1)
+
+    def test_derivatives_crowding_reduce_partially_closes_trend_long(self):
+        prices = [100.0 + index * 0.1 for index in range(45)]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.00001 if index < 35 else 0.0002,
+                    "basis_pct": -0.05 if index >= 35 else 0.0,
+                }
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+
+        def build_signal(context):
+            if context.current_bar["close"] != data_map["BTC"][2]["close"]:
+                return None
+            return StrategySignal("long", tp=None, sl=90, score=5, reason="TREND_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            derivatives_crowding_exit_enabled=True,
+            derivatives_crowding_action="reduce",
+            derivatives_crowding_reduce_fraction=0.5,
+            derivatives_crowding_funding_z_threshold=0.5,
+            derivatives_crowding_basis_abs_threshold_pct=0.03,
+        )
+        result = PortfolioBacktester(
+            config=config,
+            strategy=FakeStrategy(build_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        reasons = [trade["exit_reason"] for trade in result.trades]
+        self.assertIn("DERIVATIVES_CROWDING_REDUCE", reasons)
+        self.assertEqual(result.portfolio["diagnostics"]["derivatives_crowding_reduce_long_signals"], 1)
+        reduce_trade = next(trade for trade in result.trades if trade["exit_reason"] == "DERIVATIVES_CROWDING_REDUCE")
+        final_trade = result.trades[-1]
+        self.assertLess(reduce_trade["size"], reduce_trade["size"] + final_trade["size"])
+        self.assertEqual(round(reduce_trade["size"], 6), round(final_trade["size"], 6))
 
     def test_trade_history_fields_align_with_core_helpers(self):
         data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112))]}
@@ -827,6 +1057,27 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("[btc_regime_trend]", rendered)
         self.assertIn("buckets", rendered)
 
+    def test_cli_trend_alpha_entry_flags_build_config(self):
+        parser = cli.build_parser()
+        args = parser.parse_args(
+            [
+                "--coins",
+                "BTC,ETH",
+                "--enable-trend-alpha-entry",
+                "--trend-alpha-mode",
+                "combined",
+                "--trend-alpha-score-boost",
+                "2",
+                "--trend-alpha-require-confirmation",
+            ]
+        )
+        config = cli.build_config(args)
+        self.assertTrue(config.trend_alpha_entry_enabled)
+        self.assertEqual(config.trend_alpha_mode, "combined")
+        self.assertEqual(config.trend_alpha_score_boost, 2)
+        self.assertTrue(config.trend_alpha_require_confirmation)
+        self.assertTrue(config.trend_alpha_block_crowded_entry)
+
     def test_carry_report_runs_funding_and_basis_backtests(self):
         derivatives_data_map = {
             "BTC": [
@@ -901,6 +1152,130 @@ class BacktestModuleTest(unittest.TestCase):
         rendered = output.getvalue()
         self.assertIn("Carry / Funding / Basis report", rendered)
         self.assertIn("[basis_compression:BTC]", rendered)
+
+    def test_cli_trend_position_control_uses_reduce_mode(self):
+        prices = [100.0 + index * 0.1 for index in range(45)]
+        payload = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.00001 if index < 35 else 0.0002,
+                    "basis_pct": -0.05 if index >= 35 else 0.0,
+                }
+                for index, bar in enumerate(payload["BTC"])
+            ]
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as price_handle:
+            json.dump(payload, price_handle)
+            price_path = price_handle.name
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as derivatives_handle:
+            json.dump(derivatives, derivatives_handle)
+            derivatives_path = derivatives_handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                result = cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        "45",
+                        "--data-path",
+                        price_path,
+                        "--derivatives-data-path",
+                        derivatives_path,
+                        "--strategy",
+                        "trend",
+                        "--enable-trend-position-control",
+                        "--derivatives-crowding-funding-z-threshold",
+                        "0.5",
+                    ]
+                )
+        finally:
+            os.remove(price_path)
+            os.remove(derivatives_path)
+        self.assertTrue(result.config.derivatives_crowding_exit_enabled)
+        self.assertEqual(result.config.derivatives_crowding_action, "reduce")
+        self.assertEqual(result.config.derivatives_crowding_reduce_fraction, 0.75)
+
+    def test_funding_trend_report_classifies_short_term_context(self):
+        prices = [100.0 + index * 0.2 for index in range(70)]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives_data_map = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.00001 if index < 35 else 0.0002,
+                    "basis_pct": 0.04,
+                }
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+        report = run_funding_trend_report(
+            data_map,
+            derivatives_data_map,
+            config=CarryConfig(
+                coins=("BTC",),
+                max_days=70,
+                trend_forward_days=(1, 3),
+                trend_funding_z_threshold=0.5,
+            ),
+        )
+        self.assertGreater(report["rows"][0]["signals"], 0)
+        self.assertIsNotNone(report["rows"][0]["latest_context"])
+        labels = {row["label"] for row in report["rows"][0]["labels"]}
+        self.assertTrue(labels)
+        rendered = "\n".join(format_funding_trend_report_lines(report))
+        self.assertIn("Funding / Basis short-term trend report", rendered)
+        self.assertIn("latest:", rendered)
+        self.assertIn("forward=1d", rendered)
+
+    def test_cli_funding_trend_report_prints_expected_sections(self):
+        prices = [100.0 + index * 0.2 for index in range(70)]
+        payload = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.00001 if index < 35 else 0.0002,
+                    "basis_pct": 0.04,
+                }
+                for index, bar in enumerate(payload["BTC"])
+            ]
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as price_handle:
+            json.dump(payload, price_handle)
+            price_path = price_handle.name
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as derivatives_handle:
+            json.dump(derivatives, derivatives_handle)
+            derivatives_path = derivatives_handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        "70",
+                        "--data-path",
+                        price_path,
+                        "--derivatives-data-path",
+                        derivatives_path,
+                        "--funding-trend-report",
+                        "--trend-forward-days",
+                        "1,3",
+                        "--trend-funding-z-threshold",
+                        "0.5",
+                    ]
+                )
+        finally:
+            os.remove(price_path)
+            os.remove(derivatives_path)
+        rendered = output.getvalue()
+        self.assertIn("Funding / Basis short-term trend report", rendered)
+        self.assertIn("[BTC]", rendered)
 
 
 if __name__ == "__main__":

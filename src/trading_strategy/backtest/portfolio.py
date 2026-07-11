@@ -1,5 +1,6 @@
 from trading_strategy.shared.state import build_default_state
 
+from .alpha_overlay import apply_trend_alpha_entry_overlay
 from .derivatives import merge_derivatives_into_price_data, should_block_signal_for_derivatives
 from .data import get_coin_series
 from .engine import BacktestEngine, close_position_at_bar
@@ -34,7 +35,7 @@ class PortfolioBacktester:
                     return None
                 if should_block_signal_for_derivatives(signal, context.window, config, context.diagnostics):
                     return None
-                return signal
+                return apply_trend_alpha_entry_overlay(signal, context, config)
 
             def build_exit_policy(self, *, signal=None, position=None):
                 if hasattr(strategy, "build_exit_policy"):

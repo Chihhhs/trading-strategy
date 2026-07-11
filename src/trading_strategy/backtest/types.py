@@ -54,6 +54,17 @@ class BacktestConfig:
     derivatives_oi_lookback: int = 5
     derivatives_min_oi_change_long: float = -10.0
     derivatives_max_oi_change_short: float = 10.0
+    derivatives_crowding_exit_enabled: bool = False
+    derivatives_crowding_action: str = "exit"
+    derivatives_crowding_reduce_fraction: float = 0.75
+    derivatives_crowding_funding_z_lookback: int = 30
+    derivatives_crowding_funding_z_threshold: float = 0.75
+    derivatives_crowding_basis_abs_threshold_pct: float = 0.03
+    trend_alpha_entry_enabled: bool = False
+    trend_alpha_mode: str = "combined"
+    trend_alpha_score_boost: float = 1.0
+    trend_alpha_require_confirmation: bool = False
+    trend_alpha_block_crowded_entry: bool = True
 
 
 @dataclass(frozen=True)

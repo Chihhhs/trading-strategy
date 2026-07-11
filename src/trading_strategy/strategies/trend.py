@@ -74,6 +74,25 @@ def _increment_counter(diagnostics, key, amount=1):
     diagnostics[key] = int(diagnostics.get(key) or 0) + amount
 
 
+def _mean(values):
+    values = [value for value in values if value is not None]
+    return sum(values) / len(values) if values else None
+
+
+def _std(values):
+    values = [value for value in values if value is not None]
+    if len(values) < 2:
+        return None
+    mean = sum(values) / len(values)
+    return (sum((value - mean) ** 2 for value in values) / len(values)) ** 0.5
+
+
+def _pct_change(current, previous):
+    if current is None or previous in (None, 0):
+        return None
+    return (current / previous - 1.0) * 100.0
+
+
 def _price_position(current, highs, lows, lookback):
     if lookback <= 1 or len(highs) < lookback + 1 or len(lows) < lookback + 1:
         return 0.5, None, None
@@ -82,6 +101,114 @@ def _price_position(current, highs, lows, lookback):
     if high_prev <= low_prev:
         return 0.5, high_prev, low_prev
     return (current - low_prev) / (high_prev - low_prev), high_prev, low_prev
+
+
+def get_derivatives_crowding_context(window, config):
+    if not window:
+        return None
+    funding_lookback = int(_config_value(config, "derivatives_crowding_funding_z_lookback", 30) or 30)
+    price_lookback = 3
+    if len(window) <= max(funding_lookback, price_lookback):
+        return None
+    current_bar = window[-1]
+    funding = _safe_float(current_bar.get("funding_rate"), default=None)
+    basis = _safe_float(current_bar.get("basis_pct"), default=None)
+    if funding is None or basis is None:
+        return None
+    funding_window = [
+        _safe_float(bar.get("funding_rate"), default=None)
+        for bar in window[-funding_lookback - 1 : -1]
+    ]
+    funding_mean = _mean(funding_window)
+    funding_std = _std(funding_window)
+    if funding_mean is None or not funding_std:
+        return None
+    funding_z = (funding - funding_mean) / funding_std
+    threshold = float(_config_value(config, "derivatives_crowding_funding_z_threshold", 0.75))
+    basis_threshold = float(_config_value(config, "derivatives_crowding_basis_abs_threshold_pct", 0.03))
+    if abs(funding_z) < threshold or abs(basis) < basis_threshold:
+        return {
+            "label": "neutral",
+            "direction": None,
+            "funding_z": funding_z,
+            "funding_rate": funding,
+            "basis_pct": basis,
+        }
+
+    current = _safe_float(current_bar.get("close"), default=None)
+    previous = _safe_float(window[-price_lookback - 1].get("close"), default=None)
+    price_return = _pct_change(current, previous)
+    direction = None
+    label = "neutral"
+    if funding_z > 0 and price_return is not None and price_return <= 0:
+        direction = "short"
+        label = "short_trend_support"
+    elif funding_z < 0 and price_return is not None and price_return >= 0:
+        direction = "long"
+        label = "long_trend_support"
+    elif funding_z > 0:
+        direction = "short"
+        label = "crowded_long_risk"
+    elif funding_z < 0:
+        direction = "long"
+        label = "crowded_short_risk"
+
+    if direction == "short" and basis < -basis_threshold:
+        label = "short_basis_crowded"
+    elif direction == "long" and basis > basis_threshold:
+        label = "long_basis_crowded"
+    elif direction == "short" and basis > basis_threshold:
+        label = "short_basis_support"
+    elif direction == "long" and basis < -basis_threshold:
+        label = "long_basis_support"
+
+    return {
+        "label": label,
+        "direction": direction,
+        "funding_z": funding_z,
+        "funding_rate": funding,
+        "basis_pct": basis,
+        "price_return": price_return,
+    }
+
+
+def evaluate_derivatives_crowding_exit(position, window, config, diagnostics=None):
+    if not bool(_config_value(config, "derivatives_crowding_exit_enabled", False)):
+        return {"triggered": False}
+    context = get_derivatives_crowding_context(window, config)
+    if not context or not context.get("direction"):
+        return {"triggered": False, "context": context}
+    direction = str(position.get("direction") or "").lower()
+    label = context.get("label")
+    should_exit = (
+        (direction == "long" and label == "short_basis_crowded")
+        or (direction == "short" and label == "long_basis_crowded")
+    )
+    action = str(_config_value(config, "derivatives_crowding_action", "exit") or "exit").lower()
+    if action not in ("exit", "reduce"):
+        action = "exit"
+    reduction_key = f"{label}:{direction}"
+    already_reduced = reduction_key in set(position.get("derivatives_crowding_reductions") or [])
+    should_reduce = should_exit and action == "reduce" and not already_reduced
+    if should_exit and action == "exit":
+        _increment_counter(diagnostics, "derivatives_crowding_exit_signals")
+        if direction == "long":
+            _increment_counter(diagnostics, "derivatives_crowding_exit_long_signals")
+        else:
+            _increment_counter(diagnostics, "derivatives_crowding_exit_short_signals")
+    if should_reduce:
+        _increment_counter(diagnostics, "derivatives_crowding_reduce_signals")
+        if direction == "long":
+            _increment_counter(diagnostics, "derivatives_crowding_reduce_long_signals")
+        else:
+            _increment_counter(diagnostics, "derivatives_crowding_reduce_short_signals")
+    return {
+        "triggered": should_exit and action == "exit",
+        "action": "reduce" if should_reduce else ("exit" if should_exit and action == "exit" else None),
+        "reduce_fraction": float(_config_value(config, "derivatives_crowding_reduce_fraction", 0.5) or 0.5),
+        "reduction_key": reduction_key,
+        "context": context,
+    }
 
 
 def get_btc_direction_from_klines(klines, lookback_days=7, threshold_pct=3):
@@ -426,6 +553,12 @@ class TrendStrategy(BaseStrategy):
         atr_result = self.check_atr_trailing_exit(position, window, context.config)
         reversal_detected = check_trend_reversal(position, window) if window else False
         failure_exit = self.check_failure_exit(position, window, context.config)
+        crowding_exit = evaluate_derivatives_crowding_exit(
+            position,
+            window,
+            context.config,
+            diagnostics=context.diagnostics,
+        )
         exit_reason = None
         if reversal_detected:
             exit_reason = "REVERSAL"
@@ -433,11 +566,22 @@ class TrendStrategy(BaseStrategy):
             exit_reason = "ATR_TRAIL"
         elif failure_exit.get("triggered"):
             exit_reason = "FAILURE"
+        elif crowding_exit.get("triggered"):
+            exit_reason = "DERIVATIVES_CROWDING"
         return {
             "exit_reason": exit_reason,
             "atr_trail_result": atr_result,
             "reversal_detected": reversal_detected,
             "failure_exit": failure_exit,
+            "derivatives_crowding_exit": crowding_exit,
+            "position_adjustment": {
+                "action": "reduce",
+                "fraction": crowding_exit.get("reduce_fraction"),
+                "reason": "DERIVATIVES_CROWDING_REDUCE",
+                "reduction_key": crowding_exit.get("reduction_key"),
+            }
+            if crowding_exit.get("action") == "reduce"
+            else None,
             "bars_since_entry": position.get("bars_since_entry"),
         }
 
@@ -504,10 +648,12 @@ __all__ = [
     "get_adx_value",
     "get_atr_value",
     "get_btc_direction_from_klines",
+    "get_derivatives_crowding_context",
     "get_ema_value",
     "get_rsi_value",
     "get_trend_structure_context",
     "is_signal_blocked_by_btc_filter",
+    "evaluate_derivatives_crowding_exit",
 ]
 
 

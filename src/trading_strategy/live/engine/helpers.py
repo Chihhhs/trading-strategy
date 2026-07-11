@@ -2,7 +2,7 @@ from trading_strategy.strategies import get_strategy, get_trend_structure_contex
 from trading_strategy.strategies.base import StrategyContext
 
 from .. import config
-from ..market import get_klines
+from ..market import enrich_klines_with_derivatives_context, get_klines
 
 
 def _safe_float(value, default=0.0):
@@ -25,7 +25,7 @@ def get_position_strategy(pos):
     return get_strategy(strategy_name)
 
 
-def build_strategy_context(coin, klines, *, price=None, balance=0.0, open_positions=()):
+def build_strategy_context(coin, klines, *, price=None, balance=0.0, open_positions=(), diagnostics=None):
     window = list(klines or [])
     current_bar = window[-1] if window else None
     return StrategyContext(
@@ -37,6 +37,7 @@ def build_strategy_context(coin, klines, *, price=None, balance=0.0, open_positi
         config=config.STRATEGY,
         mode=config.MODE,
         price=price,
+        diagnostics=diagnostics,
     )
 
 
@@ -83,16 +84,36 @@ def generate_signal(klines, min_score=4):
 
 
 def check_trend_reversal(pos, klines):
+    evaluation = evaluate_open_position(pos, klines)
+    return bool(evaluation.get("reversal_detected"))
+
+
+def should_enrich_derivatives_context():
+    return bool(config.STRATEGY.get("derivatives_crowding_exit_enabled"))
+
+
+def prepare_position_klines(pos, klines):
+    if not klines or not should_enrich_derivatives_context():
+        return klines
+    current_bar = klines[-1] if klines else {}
+    if current_bar.get("funding_rate") is not None and current_bar.get("basis_pct") is not None:
+        return klines
+    lookback = int(config.STRATEGY.get("derivatives_crowding_funding_z_lookback") or 30) + 1
+    return enrich_klines_with_derivatives_context(pos.get("coin", ""), klines, lookback=lookback)
+
+
+def evaluate_open_position(pos, klines):
     strategy = get_position_strategy(pos)
-    evaluation = strategy.evaluate_open_position(
+    diagnostics = pos.setdefault("strategy_diagnostics", {})
+    return strategy.evaluate_open_position(
         pos,
         build_strategy_context(
             pos.get("coin", ""),
             klines,
             price=pos.get("current_price"),
+            diagnostics=diagnostics,
         ),
     )
-    return bool(evaluation.get("reversal_detected"))
 
 
 def estimate_position_margin(pos, leverage):
@@ -187,28 +208,12 @@ def compute_trend_stop_target(pos, klines):
 
 
 def check_atr_trailing_exit(pos, klines):
-    strategy = get_position_strategy(pos)
-    evaluation = strategy.evaluate_open_position(
-        pos,
-        build_strategy_context(
-            pos.get("coin", ""),
-            klines,
-            price=pos.get("current_price"),
-        ),
-    )
+    evaluation = evaluate_open_position(pos, klines)
     return evaluation.get("atr_trail_result") or {"triggered": False}
 
 
 def check_trend_failure_exit(pos, klines):
-    strategy = get_position_strategy(pos)
-    evaluation = strategy.evaluate_open_position(
-        pos,
-        build_strategy_context(
-            pos.get("coin", ""),
-            klines,
-            price=pos.get("current_price"),
-        ),
-    )
+    evaluation = evaluate_open_position(pos, klines)
     return evaluation.get("failure_exit") or {
         "triggered": False,
         "bars_since_entry": 0,

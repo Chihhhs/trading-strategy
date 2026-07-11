@@ -11,9 +11,12 @@ from .alpha import (
 )
 from .carry import (
     DEFAULT_CARRY_SET,
+    DEFAULT_TREND_FORWARD_DAYS,
     CarryConfig,
     format_carry_report_lines,
+    format_funding_trend_report_lines,
     run_carry_report,
+    run_funding_trend_report,
 )
 from .data import DATA_PATH, DEFAULT_COINS, load_historical_data
 from .derivatives import load_derivatives_data
@@ -71,6 +74,12 @@ def build_parser():
     parser.add_argument("--basis-exit-abs-pct", type=float, default=0.01)
     parser.add_argument("--carry-max-hold-days", type=int, default=14)
     parser.add_argument("--funding-periods-per-day", type=int, default=3)
+    parser.add_argument("--funding-trend-report", action="store_true")
+    parser.add_argument("--trend-forward-days", default=",".join(str(value) for value in DEFAULT_TREND_FORWARD_DAYS))
+    parser.add_argument("--trend-price-lookback-days", type=int, default=3)
+    parser.add_argument("--trend-funding-z-lookback", type=int, default=30)
+    parser.add_argument("--trend-funding-z-threshold", type=float, default=0.75)
+    parser.add_argument("--trend-basis-abs-threshold-pct", type=float, default=0.03)
     parser.add_argument("--disable-btc-filter", action="store_true")
     parser.add_argument("--enable-atr-trailing", action="store_true")
     parser.add_argument("--enable-failure-exit", action="store_true")
@@ -79,6 +88,18 @@ def build_parser():
     parser.add_argument("--max-hold-bars", type=int, default=None)
     parser.add_argument("--disable-trend-entry-filter", action="store_true")
     parser.add_argument("--enable-derivatives-filter", action="store_true")
+    parser.add_argument("--enable-trend-position-control", action="store_true")
+    parser.add_argument("--enable-trend-alpha-entry", action="store_true")
+    parser.add_argument("--trend-alpha-mode", choices=("filter", "score", "combined"), default="combined")
+    parser.add_argument("--trend-alpha-score-boost", type=float, default=1.0)
+    parser.add_argument("--trend-alpha-require-confirmation", action="store_true")
+    parser.add_argument("--trend-alpha-block-crowded-entry", action="store_true", default=True)
+    parser.add_argument("--enable-derivatives-crowding-exit", action="store_true")
+    parser.add_argument("--derivatives-crowding-action", choices=("exit", "reduce"), default="exit")
+    parser.add_argument("--derivatives-crowding-reduce-fraction", type=float, default=0.75)
+    parser.add_argument("--derivatives-crowding-funding-z-lookback", type=int, default=30)
+    parser.add_argument("--derivatives-crowding-funding-z-threshold", type=float, default=0.75)
+    parser.add_argument("--derivatives-crowding-basis-abs-threshold-pct", type=float, default=0.03)
     parser.add_argument("--disable-price-position-filter", action="store_true")
     parser.add_argument("--disable-dead-cat-filter", action="store_true")
     parser.add_argument("--optimize", action="store_true")
@@ -115,6 +136,17 @@ def build_config(args):
         slippage_bps=args.slippage_bps,
         trend_entry_filter_enabled=not args.disable_trend_entry_filter,
         derivatives_filter_enabled=args.enable_derivatives_filter,
+        derivatives_crowding_exit_enabled=args.enable_derivatives_crowding_exit or args.enable_trend_position_control,
+        derivatives_crowding_action="reduce" if args.enable_trend_position_control else args.derivatives_crowding_action,
+        derivatives_crowding_reduce_fraction=args.derivatives_crowding_reduce_fraction,
+        derivatives_crowding_funding_z_lookback=args.derivatives_crowding_funding_z_lookback,
+        derivatives_crowding_funding_z_threshold=args.derivatives_crowding_funding_z_threshold,
+        derivatives_crowding_basis_abs_threshold_pct=args.derivatives_crowding_basis_abs_threshold_pct,
+        trend_alpha_entry_enabled=args.enable_trend_alpha_entry,
+        trend_alpha_mode=args.trend_alpha_mode,
+        trend_alpha_score_boost=args.trend_alpha_score_boost,
+        trend_alpha_require_confirmation=args.trend_alpha_require_confirmation,
+        trend_alpha_block_crowded_entry=args.trend_alpha_block_crowded_entry,
     )
 
 
@@ -144,6 +176,23 @@ def main(argv=None):
             print(line)
         return report
     data_map = load_historical_data(args.data_path)
+    if args.funding_trend_report:
+        report = run_funding_trend_report(
+            data_map,
+            derivatives_data_map,
+            config=CarryConfig(
+                coins=coins,
+                max_days=args.max_days,
+                trend_forward_days=parse_csv_tuple(args.trend_forward_days, int),
+                trend_price_lookback_days=args.trend_price_lookback_days,
+                trend_funding_z_lookback=args.trend_funding_z_lookback,
+                trend_funding_z_threshold=args.trend_funding_z_threshold,
+                trend_basis_abs_threshold_pct=args.trend_basis_abs_threshold_pct,
+            ),
+        )
+        for line in format_funding_trend_report_lines(report):
+            print(line)
+        return report
     if args.alpha_report:
         report = run_alpha_report(
             data_map,
