@@ -13,6 +13,13 @@ if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
 from trading_strategy.backtest import cli, load_historical_data
+from trading_strategy.backtest.alpha import (
+    _bucket_events,
+    _forward_signed_return,
+    format_alpha_report_lines,
+    run_alpha_report,
+)
+from trading_strategy.backtest.carry import CarryConfig, format_carry_report_lines, run_carry_report
 from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
 from trading_strategy.backtest.optimizer import run_parameter_sweep
@@ -683,6 +690,217 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("trend:", rendered)
         self.assertIn("legacy_unified", results)
         self.assertIn("trend", results)
+
+    def test_alpha_forward_signed_return_handles_long_and_short(self):
+        series = [build_bar(price, index) for index, price in enumerate((100.0, 110.0, 121.0))]
+        self.assertAlmostEqual(_forward_signed_return(series, 0, 1, "long"), 10.0)
+        self.assertAlmostEqual(_forward_signed_return(series, 0, 1, "short"), -10.0)
+
+    def test_alpha_bucket_events_skips_missing_features(self):
+        events = [
+            {"feature_value": 2.0},
+            {"feature_value": None},
+            {"feature_value": 1.0},
+            {"feature_value": 3.0},
+        ]
+        buckets = _bucket_events(events, 2)
+        self.assertEqual(sorted(buckets), [1, 2])
+        self.assertEqual(len(buckets[1]), 2)
+        self.assertEqual(len(buckets[2]), 1)
+
+    def test_alpha_report_runs_on_synthetic_ohlcv(self):
+        btc_prices = [100.0 + index * 0.4 for index in range(100)]
+        eth_prices = [50.0 + index * 0.3 for index in range(100)]
+        data_map = {
+            "BTC": [build_bar(price, index) for index, price in enumerate(btc_prices)],
+            "ETH": [build_bar(price, index) for index, price in enumerate(eth_prices)],
+        }
+        report = run_alpha_report(
+            data_map,
+            coins=("BTC", "ETH"),
+            max_days=100,
+            alpha_set=("btc_regime_trend",),
+            forward_bars=(1, 3),
+            bucket_count=3,
+            random_baseline_runs=5,
+            fee_bps=4.5,
+            slippage_bps=2.0,
+        )
+        self.assertEqual(report["alpha_set"], ("btc_regime_trend",))
+        self.assertGreater(report["alphas"][0]["events"], 0)
+        rendered = "\n".join(format_alpha_report_lines(report))
+        self.assertIn("Alpha signal report", rendered)
+        self.assertIn("[btc_regime_trend]", rendered)
+        self.assertIn("random_delta=", rendered)
+
+    def test_alpha_report_missing_derivatives_emits_diagnostics(self):
+        prices = [100.0 + index * 0.2 for index in range(80)]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        report = run_alpha_report(
+            data_map,
+            coins=("BTC",),
+            max_days=80,
+            alpha_set=("funding_extreme_reversion", "oi_expansion_confirmation"),
+            forward_bars=(1,),
+            random_baseline_runs=3,
+        )
+        diagnostics = report["diagnostics"]
+        self.assertIn("funding_extreme_reversion_BTC_missing_funding_bars", diagnostics)
+        self.assertIn("oi_expansion_confirmation_BTC_missing_open_interest_bars", diagnostics)
+
+    def test_alpha_report_uses_derivatives_features_when_available(self):
+        prices = [100.0 + index * 0.2 for index in range(90)]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives_data_map = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.0001 if index < 35 else (0.001 if index % 2 == 0 else -0.001),
+                    "open_interest": 1000.0 + index * 15.0,
+                }
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+        report = run_alpha_report(
+            data_map,
+            derivatives_data_map=derivatives_data_map,
+            coins=("BTC",),
+            max_days=90,
+            alpha_set=("funding_extreme_reversion", "oi_expansion_confirmation"),
+            forward_bars=(1,),
+            random_baseline_runs=3,
+        )
+        events_by_name = {alpha["name"]: alpha["events"] for alpha in report["alphas"]}
+        self.assertGreater(events_by_name["funding_extreme_reversion"], 0)
+        self.assertGreater(events_by_name["oi_expansion_confirmation"], 0)
+
+    def test_alpha_random_baseline_is_deterministic(self):
+        prices = [100.0 + index * 0.4 for index in range(100)]
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        kwargs = {
+            "coins": ("BTC",),
+            "max_days": 100,
+            "alpha_set": ("btc_regime_trend",),
+            "forward_bars": (1,),
+            "bucket_count": 4,
+            "random_baseline_runs": 10,
+            "random_seed": 42,
+        }
+        first = run_alpha_report(data_map, **kwargs)
+        second = run_alpha_report(data_map, **kwargs)
+        first_baseline = first["alphas"][0]["forward"][0]["random_baseline"]
+        second_baseline = second["alphas"][0]["forward"][0]["random_baseline"]
+        self.assertEqual(first_baseline, second_baseline)
+
+    def test_cli_alpha_report_prints_expected_sections(self):
+        prices = [100.0 + index * 0.5 for index in range(100)]
+        payload = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        "100",
+                        "--data-path",
+                        path,
+                        "--alpha-report",
+                        "--alpha-set",
+                        "btc_regime_trend",
+                        "--forward-bars",
+                        "1,3",
+                        "--bucket-count",
+                        "3",
+                        "--random-baseline-runs",
+                        "5",
+                    ]
+                )
+        finally:
+            os.remove(path)
+        rendered = output.getvalue()
+        self.assertIn("Alpha signal report", rendered)
+        self.assertIn("[btc_regime_trend]", rendered)
+        self.assertIn("buckets", rendered)
+
+    def test_carry_report_runs_funding_and_basis_backtests(self):
+        derivatives_data_map = {
+            "BTC": [
+                {
+                    "time": index,
+                    "funding_rate": 0.00012 if index < 5 else 0.00001,
+                    "basis_pct": 0.08 if index < 5 else 0.005,
+                }
+                for index in range(10)
+            ]
+        }
+        report = run_carry_report(
+            derivatives_data_map,
+            config=CarryConfig(
+                coins=("BTC",),
+                max_days=10,
+                fee_bps=0.0,
+                slippage_bps=0.0,
+                funding_entry_abs=0.00008,
+                basis_entry_abs_pct=0.04,
+            ),
+        )
+        rows = {(row["name"], row["coin"]): row for row in report["rows"]}
+        self.assertGreater(rows[("funding_carry", "BTC")]["trades"], 0)
+        self.assertGreater(rows[("basis_compression", "BTC")]["trades"], 0)
+        rendered = "\n".join(format_carry_report_lines(report))
+        self.assertIn("Carry / Funding / Basis report", rendered)
+        self.assertIn("[funding_carry:BTC]", rendered)
+
+    def test_carry_report_missing_data_produces_paper_plan(self):
+        report = run_carry_report(
+            {},
+            config=CarryConfig(coins=("BTC",), max_days=10),
+        )
+        self.assertTrue(report["paper_trade_plan"])
+        self.assertIn("missing_derivatives_data", report["rows"][0]["diagnostics"])
+
+    def test_cli_carry_report_prints_expected_sections(self):
+        derivatives = {
+            "BTC": [
+                {
+                    "time": index,
+                    "funding_rate": 0.00012 if index < 5 else 0.00001,
+                    "basis_pct": 0.08 if index < 5 else 0.005,
+                }
+                for index in range(10)
+            ]
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as derivatives_handle:
+            json.dump(derivatives, derivatives_handle)
+            derivatives_path = derivatives_handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        "10",
+                        "--derivatives-data-path",
+                        derivatives_path,
+                        "--carry-report",
+                        "--fee-bps",
+                        "0",
+                        "--slippage-bps",
+                        "0",
+                    ]
+                )
+        finally:
+            os.remove(derivatives_path)
+        rendered = output.getvalue()
+        self.assertIn("Carry / Funding / Basis report", rendered)
+        self.assertIn("[basis_compression:BTC]", rendered)
 
 
 if __name__ == "__main__":

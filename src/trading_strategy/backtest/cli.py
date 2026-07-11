@@ -2,6 +2,19 @@ import argparse
 
 from trading_strategy.strategies import available_strategy_names
 
+from .alpha import (
+    DEFAULT_ALPHA_SET,
+    DEFAULT_FORWARD_BARS,
+    format_alpha_report_lines,
+    parse_csv_tuple,
+    run_alpha_report,
+)
+from .carry import (
+    DEFAULT_CARRY_SET,
+    CarryConfig,
+    format_carry_report_lines,
+    run_carry_report,
+)
 from .data import DATA_PATH, DEFAULT_COINS, load_historical_data
 from .derivatives import load_derivatives_data
 from .optimizer import run_parameter_sweep
@@ -45,6 +58,19 @@ def build_parser():
     parser.add_argument("--show-trades", action="store_true")
     parser.add_argument("--compare-strategies", default="")
     parser.add_argument("--research-report", action="store_true")
+    parser.add_argument("--alpha-report", action="store_true")
+    parser.add_argument("--alpha-set", default=",".join(DEFAULT_ALPHA_SET))
+    parser.add_argument("--forward-bars", default=",".join(str(value) for value in DEFAULT_FORWARD_BARS))
+    parser.add_argument("--bucket-count", type=int, default=10)
+    parser.add_argument("--random-baseline-runs", type=int, default=200)
+    parser.add_argument("--carry-report", action="store_true")
+    parser.add_argument("--carry-set", default=",".join(DEFAULT_CARRY_SET))
+    parser.add_argument("--funding-entry-abs", type=float, default=0.00008)
+    parser.add_argument("--funding-exit-abs", type=float, default=0.00002)
+    parser.add_argument("--basis-entry-abs-pct", type=float, default=0.04)
+    parser.add_argument("--basis-exit-abs-pct", type=float, default=0.01)
+    parser.add_argument("--carry-max-hold-days", type=int, default=14)
+    parser.add_argument("--funding-periods-per-day", type=int, default=3)
     parser.add_argument("--disable-btc-filter", action="store_true")
     parser.add_argument("--enable-atr-trailing", action="store_true")
     parser.add_argument("--enable-failure-exit", action="store_true")
@@ -95,9 +121,45 @@ def build_config(args):
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
-    data_map = load_historical_data(args.data_path)
-    derivatives_data_map = load_derivatives_data(args.derivatives_data_path)
     coins = tuple(coin.strip().upper() for coin in args.coins.split(",") if coin.strip())
+    derivatives_data_map = load_derivatives_data(args.derivatives_data_path)
+    if args.carry_report:
+        report = run_carry_report(
+            derivatives_data_map,
+            config=CarryConfig(
+                coins=coins,
+                max_days=args.max_days,
+                carry_set=parse_csv_tuple(args.carry_set, str),
+                funding_entry_abs=args.funding_entry_abs,
+                funding_exit_abs=args.funding_exit_abs,
+                basis_entry_abs_pct=args.basis_entry_abs_pct,
+                basis_exit_abs_pct=args.basis_exit_abs_pct,
+                max_hold_days=args.carry_max_hold_days,
+                fee_bps=args.fee_bps,
+                slippage_bps=args.slippage_bps,
+                funding_periods_per_day=args.funding_periods_per_day,
+            ),
+        )
+        for line in format_carry_report_lines(report):
+            print(line)
+        return report
+    data_map = load_historical_data(args.data_path)
+    if args.alpha_report:
+        report = run_alpha_report(
+            data_map,
+            derivatives_data_map=derivatives_data_map,
+            coins=coins,
+            max_days=args.max_days,
+            alpha_set=parse_csv_tuple(args.alpha_set, str),
+            forward_bars=parse_csv_tuple(args.forward_bars, int),
+            bucket_count=args.bucket_count,
+            random_baseline_runs=args.random_baseline_runs,
+            fee_bps=args.fee_bps,
+            slippage_bps=args.slippage_bps,
+        )
+        for line in format_alpha_report_lines(report):
+            print(line)
+        return report
     if args.research_report:
         report = run_research_report(
             data_map,
