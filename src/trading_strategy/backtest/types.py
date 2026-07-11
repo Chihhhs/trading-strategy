@@ -46,6 +46,14 @@ class BacktestConfig:
     trend_short_min_price_position: float = 0.25
     trend_max_roc_60_long: float = 120.0
     trend_min_roc_60_short: float = -120.0
+    derivatives_filter_enabled: bool = False
+    derivatives_funding_upper: float = 0.0005
+    derivatives_funding_lower: float = -0.0005
+    derivatives_basis_upper: float = 1.0
+    derivatives_basis_lower: float = -1.0
+    derivatives_oi_lookback: int = 5
+    derivatives_min_oi_change_long: float = -10.0
+    derivatives_max_oi_change_short: float = 10.0
 
 
 @dataclass(frozen=True)

@@ -1,5 +1,6 @@
 from trading_strategy.shared.state import build_default_state
 
+from .derivatives import merge_derivatives_into_price_data, should_block_signal_for_derivatives
 from .data import get_coin_series
 from .engine import BacktestEngine, close_position_at_bar
 from .reporting import build_coin_results, build_portfolio_summary
@@ -8,9 +9,10 @@ from .types import BacktestConfig, BacktestResult
 
 
 class PortfolioBacktester:
-    def __init__(self, *, config: BacktestConfig, strategy=None):
+    def __init__(self, *, config: BacktestConfig, strategy=None, derivatives_data_map=None):
         self.config = config
         self.strategy = strategy or resolve_strategy(config.strategy)
+        self.derivatives_data_map = derivatives_data_map or {}
         self.engine = BacktestEngine(config=config, strategy=self._wrap_strategy())
 
     def _wrap_strategy(self):
@@ -29,6 +31,8 @@ class PortfolioBacktester:
                     diagnostics = context.diagnostics
                     if diagnostics is not None:
                         diagnostics["btc_filtered_signals"] = int(diagnostics.get("btc_filtered_signals") or 0) + 1
+                    return None
+                if should_block_signal_for_derivatives(signal, context.window, config, context.diagnostics):
                     return None
                 return signal
 
@@ -66,6 +70,16 @@ class PortfolioBacktester:
         return FilteringStrategy()
 
     def run(self, data_map) -> BacktestResult:
+        merge_diagnostics = {}
+        source_data_map = data_map or {}
+        data_map = {
+            coin: list(source_data_map.get(coin, []))
+            for coin in self.config.coins
+            if coin in source_data_map
+        }
+        if "BTC" in source_data_map:
+            data_map["BTC"] = list(source_data_map.get("BTC", []))
+        data_map = merge_derivatives_into_price_data(data_map, self.derivatives_data_map, merge_diagnostics)
         normalized = {}
         for coin in self.config.coins:
             normalized[coin] = get_coin_series(data_map, coin, max_days=self.config.max_days)
@@ -81,6 +95,7 @@ class PortfolioBacktester:
         state["initial_balance"] = self.config.initial_capital
         state["_config"] = self.config
         state["_diagnostics"] = {}
+        state["_diagnostics"].update(merge_diagnostics)
 
         max_len = max((len(series) for series in normalized.values()), default=0)
         equity_curve = [self.config.initial_capital]

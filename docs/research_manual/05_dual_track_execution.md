@@ -25,9 +25,16 @@ The report includes:
 - `trend_unfiltered_reference`: previous single-coin trend behavior without the new entry filters.
 - `trend_filtered_control`: single-coin trend baseline with RSI, ATR, price-position, and overextension filters.
 - `trend_controlled_portfolio`: lower-risk basket version with max position limits.
+- `trend_derivatives_filtered`: trend baseline with Funding / OI / Basis filters that can only block existing trend signals.
 - `intraday_momentum_probe`: first runnable new-strategy probe; only meaningful on intraday candle data.
-- `funding_basis_monitor`: pending data pipeline.
+- `funding_basis_monitor`: runnable monitor-only Funding / OI / Basis report.
 - `order_flow_imbalance`: pending L2/order-book infrastructure.
+
+Optional derivatives data:
+
+```bash
+python backtest/backtest_runner.py --coins BTC,ETH,BNB,SOL --max-days 240 --research-report --derivatives-data-path data/derivatives/example.json
+```
 
 ## Promotion Rules
 

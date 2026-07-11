@@ -13,6 +13,8 @@ if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
 from trading_strategy.backtest import cli, load_historical_data
+from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
+from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.research import format_research_report_lines, run_research_report
@@ -116,6 +118,29 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(len(data_map["BTC"]), 2)
         self.assertEqual(data_map["BTC"][0]["close"], 103)
         self.assertEqual(len(data_map["ETH"]), 2)
+
+    def test_load_derivatives_data_normalizes_coin_fields_and_max_days(self):
+        payload = {
+            "btc": [
+                {"time": "t1", "funding_rate": "0.0001", "open_interest": "100", "basis_pct": "0.2"},
+                {"time": "t2", "funding_rate": "bad", "open_interest": "110", "basis_pct": None},
+            ]
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            data_map = load_derivatives_data(path, max_days=1)
+        finally:
+            os.remove(path)
+        self.assertEqual(list(data_map), ["BTC"])
+        self.assertIsNone(data_map["BTC"][0]["funding_rate"])
+        self.assertEqual(data_map["BTC"][0]["open_interest"], 110.0)
+
+    def test_normalize_derivatives_data_map_keeps_ohlcv_contract_optional(self):
+        data_map = normalize_derivatives_data_map({"ETH": [{"timestamp": 1, "mark_price": "2000"}]})
+        self.assertEqual(data_map["ETH"][0]["time"], 1)
+        self.assertEqual(data_map["ETH"][0]["mark_price"], 2000.0)
 
     def test_engine_opens_position_from_signal(self):
         data_map = {"BTC": [build_bar(100 + index, index) for index in range(4)]}
@@ -240,6 +265,54 @@ class BacktestModuleTest(unittest.TestCase):
         config = BacktestConfig(coins=("ETH",), max_days=None, min_bars=6, btc_filter_enabled=True)
         result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
         self.assertEqual(result.portfolio["trades"], 0)
+
+    def test_derivatives_filter_blocks_existing_signal_only(self):
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112, 113))]}
+        derivatives = {
+            "BTC": [
+                {"time": bar["time"], "funding_rate": 0.001, "open_interest": 100 + index, "basis_pct": 0.2}
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal("long", tp=110, sl=96, score=5, reason="TEST_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            derivatives_filter_enabled=True,
+        )
+        result = PortfolioBacktester(
+            config=config,
+            strategy=FakeStrategy(build_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        self.assertEqual(result.portfolio["trades"], 0)
+        self.assertEqual(result.portfolio["diagnostics"]["derivatives_funding_filtered_signals"], 1)
+
+    def test_derivatives_filter_missing_data_does_not_create_or_block_trades(self):
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112, 113))]}
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal("long", tp=110, sl=96, score=5, reason="TEST_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            derivatives_filter_enabled=True,
+        )
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertEqual(result.portfolio["trades"], 1)
+        self.assertEqual(result.portfolio["diagnostics"]["derivatives_missing_context_signals"], 1)
 
     def test_trade_history_fields_align_with_core_helpers(self):
         data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112))]}
@@ -434,18 +507,21 @@ class BacktestModuleTest(unittest.TestCase):
         }
         report = run_research_report(
             payload,
+            derivatives_data_map={},
             coins=("BTC", "BNB"),
             max_days=len(prices),
             fee_bps=4.5,
         )
         rendered = "\n".join(format_research_report_lines(report))
-        self.assertEqual(len(report["runnable"]), 4)
+        self.assertEqual(len(report["runnable"]), 6)
         self.assertIn("[optimize_existing]", rendered)
         self.assertIn("trend_unfiltered_reference:", rendered)
         self.assertIn("trend_filtered_control:", rendered)
+        self.assertIn("trend_derivatives_filtered:", rendered)
         self.assertIn("[new_strategy]", rendered)
         self.assertIn("intraday_momentum_probe:", rendered)
         self.assertIn("funding_basis_monitor:", rendered)
+        self.assertIn("[portfolio_correlation]", rendered)
 
     def test_cli_research_report_prints_dual_track_report(self):
         prices = [100.0] * 55 + [104.0, 105.0, 106.0]
@@ -473,7 +549,67 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("Dual-track research report", rendered)
         self.assertIn("score_delta=", rendered)
         self.assertIn("new_strategy_pending", rendered)
-        self.assertEqual(len(report["runnable"]), 4)
+        self.assertEqual(len(report["runnable"]), 6)
+
+    def test_cli_research_report_accepts_derivatives_data_path(self):
+        prices = [100.0] * 55 + [104.0, 105.0, 106.0]
+        payload = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {
+                    "time": bar["time"],
+                    "funding_rate": 0.0001,
+                    "open_interest": 1000 + index,
+                    "basis_pct": 0.1,
+                }
+                for index, bar in enumerate(payload["BTC"])
+            ]
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as price_handle:
+            json.dump(payload, price_handle)
+            price_path = price_handle.name
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as derivatives_handle:
+            json.dump(derivatives, derivatives_handle)
+            derivatives_path = derivatives_handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        str(len(prices)),
+                        "--data-path",
+                        price_path,
+                        "--derivatives-data-path",
+                        derivatives_path,
+                        "--research-report",
+                    ]
+                )
+        finally:
+            os.remove(price_path)
+            os.remove(derivatives_path)
+        rendered = output.getvalue()
+        self.assertIn("funding_basis_monitor BTC:", rendered)
+        self.assertIn("derivative_bars=58", rendered)
+
+    def test_microstructure_replay_diagnostic_normalizes_l2_snapshots(self):
+        snapshots = normalize_l2_snapshots(
+            {
+                "btc": [
+                    {
+                        "timestamp": 1,
+                        "bids": [["99", "3"]],
+                        "asks": [["101", "1"]],
+                    }
+                ]
+            }
+        )
+        report = build_microstructure_diagnostic_report(snapshots)
+        self.assertEqual(snapshots["BTC"][0]["spread"], 2.0)
+        self.assertGreater(snapshots["BTC"][0]["book_imbalance"], 0)
+        self.assertEqual(report[0]["snapshots"], 1)
 
     def test_legacy_strategy_uses_fixed_tp_policy(self):
         prices = [100.0] * 60 + [101.0, 100.8, 101.1, 101.0, 101.2]

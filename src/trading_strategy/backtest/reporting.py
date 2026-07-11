@@ -131,6 +131,10 @@ def format_result_lines(result, *, show_trades=False):
             "trend_atr_filtered_signals",
             "trend_price_position_filtered_signals",
             "trend_overextension_filtered_signals",
+            "derivatives_funding_filtered_signals",
+            "derivatives_basis_filtered_signals",
+            "derivatives_oi_filtered_signals",
+            "derivatives_missing_context_signals",
         )
         if diagnostics.get(key)
     }
@@ -176,6 +180,10 @@ def format_comparison_lines(results_by_strategy):
                 "trend_atr_filtered_signals",
                 "trend_price_position_filtered_signals",
                 "trend_overextension_filtered_signals",
+                "derivatives_funding_filtered_signals",
+                "derivatives_basis_filtered_signals",
+                "derivatives_oi_filtered_signals",
+                "derivatives_missing_context_signals",
             )
             if diagnostics.get(key)
         }

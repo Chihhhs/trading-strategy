@@ -19,7 +19,7 @@ STRATEGY_OVERRIDES = {
     # "timeframe": "15m",
     # "leverage": 5,
     # "risk_per_trade": 0.08,
-    "max_positions": 4,
+    "max_positions": 2,
     # "max_hold_days": 30,
     # "min_score": 3,
     # "tp_mult": 1.5,

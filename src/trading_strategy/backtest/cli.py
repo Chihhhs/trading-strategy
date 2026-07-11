@@ -3,6 +3,7 @@ import argparse
 from trading_strategy.strategies import available_strategy_names
 
 from .data import DATA_PATH, DEFAULT_COINS, load_historical_data
+from .derivatives import load_derivatives_data
 from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
 from .research import format_research_report_lines, run_research_report
@@ -34,6 +35,7 @@ def build_parser():
     parser.add_argument("--strategy", choices=strategy_names, default="trend")
     parser.add_argument("--max-days", type=int, default=240)
     parser.add_argument("--data-path", default=DATA_PATH)
+    parser.add_argument("--derivatives-data-path", default="")
     parser.add_argument("--initial-capital", type=float, default=1000.0)
     parser.add_argument("--leverage", type=float, default=3.0)
     parser.add_argument("--risk-pct", type=float, default=0.05)
@@ -50,6 +52,7 @@ def build_parser():
     parser.add_argument("--intrabar-fill-policy", choices=("stop_first", "target_first"), default="stop_first")
     parser.add_argument("--max-hold-bars", type=int, default=None)
     parser.add_argument("--disable-trend-entry-filter", action="store_true")
+    parser.add_argument("--enable-derivatives-filter", action="store_true")
     parser.add_argument("--disable-price-position-filter", action="store_true")
     parser.add_argument("--disable-dead-cat-filter", action="store_true")
     parser.add_argument("--optimize", action="store_true")
@@ -85,6 +88,7 @@ def build_config(args):
         fee_bps=args.fee_bps,
         slippage_bps=args.slippage_bps,
         trend_entry_filter_enabled=not args.disable_trend_entry_filter,
+        derivatives_filter_enabled=args.enable_derivatives_filter,
     )
 
 
@@ -92,10 +96,12 @@ def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
     data_map = load_historical_data(args.data_path)
+    derivatives_data_map = load_derivatives_data(args.derivatives_data_path)
     coins = tuple(coin.strip().upper() for coin in args.coins.split(",") if coin.strip())
     if args.research_report:
         report = run_research_report(
             data_map,
+            derivatives_data_map=derivatives_data_map,
             coins=coins,
             max_days=args.max_days,
             initial_capital=args.initial_capital,
@@ -129,12 +135,12 @@ def main(argv=None):
         for strategy_name in compare_strategies:
             args.strategy = strategy_name
             config = build_config(args)
-            results[strategy_name] = PortfolioBacktester(config=config).run(data_map)
+            results[strategy_name] = PortfolioBacktester(config=config, derivatives_data_map=derivatives_data_map).run(data_map)
         for line in format_comparison_lines(results):
             print(line)
         return results
     config = build_config(args)
-    result = PortfolioBacktester(config=config).run(data_map)
+    result = PortfolioBacktester(config=config, derivatives_data_map=derivatives_data_map).run(data_map)
     for line in format_result_lines(result, show_trades=args.show_trades):
         print(line)
     return result

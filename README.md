@@ -99,6 +99,8 @@ python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid tr
 - `--max-positions`：回測同時最大持倉數，預設不限制；多幣 trend 建議設 `2`
 - `--fee-bps`：每邊交易費用，單位 bps，預設 `0`
 - `--slippage-bps`：每邊滑價估計，單位 bps，預設 `0`
+- `--derivatives-data-path`：Funding / OI / Basis JSON；格式為 `coin -> bars`，欄位可包含 `funding_rate`、`open_interest`、`basis_pct`、`mark_price`、`index_price`
+- `--enable-derivatives-filter`：讓 Funding / OI / Basis 只作為既有訊號的品質過濾器，不會自行產生交易
 - `--disable-btc-filter`：停用 BTC 趨勢過濾
 - `--show-trades`：輸出 trade 明細
 
@@ -112,6 +114,12 @@ python backtest/backtest_runner.py --coins BTC --strategy trend --max-days 240 -
 
 ```bash
 python backtest/backtest_runner.py --coins BTC,BNB,ETH --strategy trend --max-days 1000 --risk-pct 0.015 --max-positions 2 --enable-atr-trailing --enable-failure-exit --fee-bps 4.5
+```
+
+衍生資料 research report：
+
+```bash
+python backtest/backtest_runner.py --coins BTC,ETH --max-days 240 --research-report --derivatives-data-path data/derivatives/example.json
 ```
 
 ### Strategy Selection

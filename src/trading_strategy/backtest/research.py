@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from .derivatives import build_derivatives_monitor
 from .portfolio import PortfolioBacktester
 from .types import BacktestConfig
 
@@ -103,6 +104,24 @@ def build_research_candidates(
             note="Lower per-coin risk plus max positions to test whether a basket improves risk-adjusted results.",
         ),
         ResearchCandidate(
+            name="trend_derivatives_filtered",
+            track="optimize_existing",
+            decision="candidate",
+            config=BacktestConfig(
+                coins=(control_coin,),
+                strategy="trend",
+                leverage=2.0,
+                risk_pct=0.03,
+                btc_filter_enabled=True,
+                atr_trailing_enabled=True,
+                failure_exit_enabled=True,
+                trend_entry_filter_enabled=True,
+                derivatives_filter_enabled=True,
+                **shared,
+            ),
+            note="Trend signal quality filter using funding, open interest, and basis. It only blocks existing trend signals.",
+        ),
+        ResearchCandidate(
             name="intraday_momentum_probe",
             track="new_strategy",
             decision="research_only",
@@ -123,13 +142,6 @@ def build_research_candidates(
 
 def build_pending_research_tracks():
     return [
-        {
-            "name": "funding_basis_monitor",
-            "track": "new_strategy",
-            "decision": "data_pipeline_next",
-            "required_data": "perp funding history, mark/index price, and comparable spot or perp basis",
-            "note": "Build as reporting first; do not mix into directional trend execution until validated.",
-        },
         {
             "name": "order_flow_imbalance",
             "track": "new_strategy",
@@ -163,13 +175,55 @@ def _row_from_result(candidate, result, control_summary):
         "score_delta_vs_control": round(float(summary.get("score", 0.0)) - control_score, 2),
         "pnl_delta_vs_control": round(float(summary.get("total_pnl_pct", 0.0)) - control_pnl, 1),
         "exit_reason_counts": summary.get("exit_reason_counts", {}),
+        "diagnostics": summary.get("diagnostics", {}),
         "note": candidate.note,
     }
+
+
+def _equity_returns(equity_curve):
+    returns = []
+    for previous, current in zip(equity_curve, equity_curve[1:]):
+        previous = float(previous or 0.0)
+        current = float(current or 0.0)
+        returns.append((current / previous - 1.0) if previous else 0.0)
+    return returns
+
+
+def _correlation(left, right):
+    count = min(len(left), len(right))
+    if count < 2:
+        return None
+    x = left[-count:]
+    y = right[-count:]
+    mean_x = sum(x) / count
+    mean_y = sum(y) / count
+    cov = sum((a - mean_x) * (b - mean_y) for a, b in zip(x, y))
+    var_x = sum((a - mean_x) ** 2 for a in x)
+    var_y = sum((b - mean_y) ** 2 for b in y)
+    if var_x <= 0 or var_y <= 0:
+        return None
+    return round(cov / ((var_x * var_y) ** 0.5), 3)
+
+
+def _build_portfolio_correlation_report(results_by_name):
+    returns_by_name = {
+        name: _equity_returns(result.equity_curve)
+        for name, result in results_by_name.items()
+    }
+    names = list(returns_by_name)
+    rows = []
+    for left_index, left in enumerate(names):
+        for right in names[left_index + 1 :]:
+            value = _correlation(returns_by_name[left], returns_by_name[right])
+            if value is not None:
+                rows.append({"left": left, "right": right, "correlation": value})
+    return rows
 
 
 def run_research_report(
     data_map,
     *,
+    derivatives_data_map=None,
     coins,
     max_days,
     initial_capital=1000.0,
@@ -184,14 +238,54 @@ def run_research_report(
         slippage_bps=slippage_bps,
     )
     rows = []
+    results_by_name = {}
     control_summary = None
     for candidate in candidates:
-        result = PortfolioBacktester(config=candidate.config).run(data_map)
+        result = PortfolioBacktester(
+            config=candidate.config,
+            derivatives_data_map=derivatives_data_map,
+        ).run(data_map)
+        results_by_name[candidate.name] = result
         if control_summary is None:
             control_summary = result.portfolio
         rows.append(_row_from_result(candidate, result, control_summary))
+    monitor_rows = build_derivatives_monitor(
+        derivatives_data_map or {},
+        coins=coins,
+        oi_lookback=BacktestConfig(coins=coins).derivatives_oi_lookback,
+    )
+    rows.append(
+        {
+            "name": "funding_basis_monitor",
+            "track": "new_strategy",
+            "decision": "runnable_monitor",
+            "strategy": "monitor",
+            "coins": ",".join(coins),
+            "risk_pct": 0.0,
+            "max_positions": None,
+            "trades": 0,
+            "win_rate": 0.0,
+            "net_pnl_pct": 0.0,
+            "gross_pnl_pct": 0.0,
+            "cost_pct": 0.0,
+            "max_drawdown": 0.0,
+            "avg_hold_bars": 0.0,
+            "score": 0.0,
+            "score_delta_vs_control": 0.0,
+            "pnl_delta_vs_control": 0.0,
+            "exit_reason_counts": {},
+            "diagnostics": {
+                "derivatives_monitor": monitor_rows,
+                "missing_derivatives_data_coins": [
+                    row["coin"] for row in monitor_rows if not row.get("derivative_bars")
+                ],
+            },
+            "note": "Monitor-only funding, open-interest, and basis report. It does not create trades.",
+        }
+    )
     return {
         "runnable": rows,
+        "portfolio_correlations": _build_portfolio_correlation_report(results_by_name),
         "pending": build_pending_research_tracks(),
     }
 
@@ -217,8 +311,37 @@ def format_research_report_lines(report):
             )
             if row.get("exit_reason_counts"):
                 lines.append(f"{row['name']} exits: {row['exit_reason_counts']}")
+            diagnostics = row.get("diagnostics") or {}
+            relevant_diagnostics = {
+                key: diagnostics.get(key)
+                for key in (
+                    "derivatives_funding_filtered_signals",
+                    "derivatives_basis_filtered_signals",
+                    "derivatives_oi_filtered_signals",
+                    "derivatives_missing_context_signals",
+                    "missing_derivatives_data_coins",
+                )
+                if diagnostics.get(key)
+            }
+            if relevant_diagnostics:
+                lines.append(f"{row['name']} diagnostics: {relevant_diagnostics}")
+            if row.get("name") == "funding_basis_monitor":
+                for item in (diagnostics.get("derivatives_monitor") or [])[:5]:
+                    lines.append(
+                        "funding_basis_monitor {coin}: bars={bars}, derivative_bars={derivative_bars}, "
+                        "latest_funding={latest_funding_rate}, avg_funding={avg_funding_rate}, "
+                        "latest_basis={latest_basis_pct}, oi_change={oi_change_pct}".format(**item)
+                    )
             if row.get("note"):
                 lines.append(f"{row['name']} note: {row['note']}")
+    correlations = list(report.get("portfolio_correlations") or [])
+    lines.append("[portfolio_correlation]")
+    if not correlations:
+        lines.append("No non-flat candidate return pairs available.")
+    for item in correlations:
+        lines.append(
+            "{left} vs {right}: return_correlation={correlation:+.3f}".format(**item)
+        )
     pending = list(report.get("pending") or [])
     if pending:
         lines.append("[new_strategy_pending]")
