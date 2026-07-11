@@ -204,6 +204,118 @@ class LiveEntriesTest(unittest.TestCase):
         finally:
             live.config.set_mode(old_mode)
 
+    @patch("trading_strategy.live.engine.entries.evaluate_microstructure_guard")
+    @patch("trading_strategy.live.engine.entries.place_hl_order")
+    @patch("trading_strategy.live.engine.entries.get_current_prices")
+    @patch("trading_strategy.live.engine.entries.get_btc_direction")
+    @patch("trading_strategy.live.engine.entries.get_klines")
+    def test_check_entries_live_microstructure_guard_blocks_before_order(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_place_hl_order,
+        mock_evaluate_guard,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY["microstructure_guard_enabled"]
+        old_observe_only = live.config.STRATEGY["microstructure_guard_observe_only"]
+        live.config.set_mode("live")
+        live.config.STRATEGY["microstructure_guard_enabled"] = True
+        live.config.STRATEGY["microstructure_guard_observe_only"] = False
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            mock_evaluate_guard.return_value = {
+                "allowed": False,
+                "reason": "microstructure_spread_too_wide",
+                "spread_bps": 12.0,
+                "top_depth_usd": 5000.0,
+                "book_imbalance": 0.0,
+            }
+            state = {"balance": 100.0, "positions": [], "history": []}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.entries.generate_signal", return_value=signal):
+                summary = check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertEqual(summary["positions_opened"], 0)
+            self.assertEqual(summary["top_blockers"], [{"reason": "microstructure_spread_too_wide", "count": 1}])
+            self.assertFalse(mock_place_hl_order.called)
+        finally:
+            live.config.STRATEGY["microstructure_guard_enabled"] = old_enabled
+            live.config.STRATEGY["microstructure_guard_observe_only"] = old_observe_only
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.entries.submit_position_protection")
+    @patch("trading_strategy.live.engine.entries.save_state")
+    @patch("trading_strategy.live.engine.entries.record_trade_event")
+    @patch("trading_strategy.live.engine.entries.evaluate_microstructure_guard")
+    @patch("trading_strategy.live.engine.entries.place_hl_order")
+    @patch("trading_strategy.live.engine.entries.get_current_prices")
+    @patch("trading_strategy.live.engine.entries.get_btc_direction")
+    @patch("trading_strategy.live.engine.entries.get_klines")
+    def test_check_entries_live_microstructure_guard_observe_only_does_not_block_order(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_place_hl_order,
+        mock_evaluate_guard,
+        mock_record_trade_event,
+        _mock_save_state,
+        mock_submit_position_protection,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY["microstructure_guard_enabled"]
+        old_observe_only = live.config.STRATEGY["microstructure_guard_observe_only"]
+        live.config.set_mode("live")
+        live.config.STRATEGY["microstructure_guard_enabled"] = True
+        live.config.STRATEGY["microstructure_guard_observe_only"] = True
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            mock_evaluate_guard.return_value = {
+                "allowed": False,
+                "reason": "microstructure_spread_too_wide",
+                "spread_bps": 12.0,
+                "top_depth_usd": 5000.0,
+                "book_imbalance": 0.0,
+            }
+            mock_place_hl_order.return_value = {
+                "status": "ok",
+                "normalized_status": "filled",
+                "order_summary": {"order_status": "filled"},
+                "verified_summary": {"verify_status": "filled"},
+                "resolved_price": 100.0,
+                "size": 1.0,
+            }
+            mock_submit_position_protection.return_value = {
+                "ok": True,
+                "tp_order": {"status": "ok"},
+                "sl_order": {"status": "ok"},
+                "protection_status": "protected",
+            }
+            state = {"balance": 100.0, "positions": [], "history": [], "managed_orders": []}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.entries.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.entries.calc_position_size", return_value=1.0
+            ):
+                summary = check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertEqual(summary["positions_opened"], 1)
+            self.assertTrue(mock_place_hl_order.called)
+            self.assertTrue(
+                any(
+                    call.args[0] == "microstructure_guard_observed"
+                    and call.kwargs.get("would_block_reason") == "microstructure_spread_too_wide"
+                    for call in mock_record_trade_event.call_args_list
+                )
+            )
+        finally:
+            live.config.STRATEGY["microstructure_guard_enabled"] = old_enabled
+            live.config.STRATEGY["microstructure_guard_observe_only"] = old_observe_only
+            live.config.set_mode(old_mode)
+
     @patch("trading_strategy.live.engine.summary.record_trade_event")
     @patch("trading_strategy.live.engine.entries.get_current_prices")
     @patch("trading_strategy.live.engine.entries.get_btc_direction")

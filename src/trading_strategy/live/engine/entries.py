@@ -19,6 +19,7 @@ from .helpers import (
     get_active_strategy,
     get_available_entry_balance,
 )
+from .execution_guard import evaluate_microstructure_guard
 from .protection import submit_position_protection
 from .summary import (
     build_entry_context,
@@ -142,6 +143,45 @@ def check_entries(state, coins):
                 tp=target_tp,
             )
             continue
+
+        if config.MODE == "live":
+            guard = evaluate_microstructure_guard(name, sig)
+            if not guard.get("allowed", True):
+                reason = guard.get("reason") or "microstructure_guard"
+                if config.STRATEGY.get("microstructure_guard_observe_only", False):
+                    record_trade_event(
+                        "microstructure_guard_observed",
+                        **build_entry_context(
+                            state,
+                            name,
+                            btc_dir,
+                            config.STRATEGY["entry_order_type"],
+                            signal_direction=signal_value(sig, "direction"),
+                            signal_score=signal_value(sig, "score"),
+                            sl=signal_value(sig, "sl"),
+                            tp=target_tp,
+                            would_block_reason=reason,
+                            spread_bps=guard.get("spread_bps"),
+                            top_depth_usd=guard.get("top_depth_usd"),
+                            book_imbalance=guard.get("book_imbalance"),
+                        ),
+                    )
+                else:
+                    bump_summary_blocker(summary, reason)
+                    log_entry_skipped(
+                        state,
+                        name,
+                        btc_dir,
+                        reason,
+                        signal_direction=signal_value(sig, "direction"),
+                        signal_score=signal_value(sig, "score"),
+                        sl=signal_value(sig, "sl"),
+                        tp=target_tp,
+                        spread_bps=guard.get("spread_bps"),
+                        top_depth_usd=guard.get("top_depth_usd"),
+                        book_imbalance=guard.get("book_imbalance"),
+                    )
+                    continue
 
         entry = prices[name]
         atr = calc_atr(

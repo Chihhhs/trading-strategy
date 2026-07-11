@@ -16,6 +16,7 @@ ENV_OVERRIDES = {
 # Strategy overrides merged into trading_strategy.live.config.STRATEGY
 STRATEGY_OVERRIDES = {
     # "name": "intraday_momentum",
+    "coin_universe": ["BTC", "ETH", "BNB"],
     # "timeframe": "15m",
     # "leverage": 5,
     # "risk_per_trade": 0.08,
@@ -28,6 +29,11 @@ STRATEGY_OVERRIDES = {
     "derivatives_crowding_exit_enabled": True,
     "derivatives_crowding_action": "reduce",
     "derivatives_crowding_reduce_fraction": 0.75,
+    "microstructure_guard_enabled": True,
+    "microstructure_guard_observe_only": True,
+    "microstructure_max_spread_bps": 8.0,
+    "microstructure_min_top_depth_usd": 1000.0,
+    "microstructure_max_opposing_imbalance": 0.65,
     # "intraday_breakout_lookback": 12,
     # "intraday_max_hold_bars": 24,
 }

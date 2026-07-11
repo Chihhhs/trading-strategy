@@ -13,6 +13,9 @@ DEFAULT_PRICE_PATH = os.path.join(PROJECT_ROOT, "data", "historical_prices", "10
 DEFAULT_OUTPUT_PATH = os.path.join(PROJECT_ROOT, "data", "derivatives", "binance_futures_derivatives.json")
 BINANCE_FAPI = "https://fapi.binance.com"
 BINANCE_FUTURES_DATA = "https://fapi.binance.com/futures/data"
+BYBIT_API = "https://api.bybit.com"
+DAY_MS = 24 * 60 * 60 * 1000
+OI_WINDOW_MS = 30 * DAY_MS
 
 
 def _request_json(base_url, path, params):
@@ -87,24 +90,82 @@ def _fetch_funding(symbol, start, end):
     }
 
 
-def _fetch_open_interest(symbol, start, end):
-    params = {"symbol": symbol, "period": "1d", "limit": 500}
-    try:
-        rows = _request_json(
-            BINANCE_FUTURES_DATA,
-            "/openInterestHist",
-            {
-                **params,
-                "startTime": start,
-                "endTime": end,
-            },
-        )
-    except RuntimeError:
-        rows = _request_json(BINANCE_FUTURES_DATA, "/openInterestHist", params)
+def _fetch_binance_open_interest(symbol, start, end):
+    rows = []
+    cursor = int(start)
+    last_error = None
+    while cursor <= int(end):
+        chunk_end = min(cursor + OI_WINDOW_MS - 1, int(end))
+        try:
+            chunk = _request_json(
+                BINANCE_FUTURES_DATA,
+                "/openInterestHist",
+                {
+                    "symbol": symbol,
+                    "period": "1d",
+                    "limit": 500,
+                    "startTime": cursor,
+                    "endTime": chunk_end,
+                },
+            )
+        except RuntimeError as exc:
+            last_error = exc
+            chunk = []
+        if isinstance(chunk, list):
+            rows.extend(chunk)
+        cursor = chunk_end + 1
+        time.sleep(0.1)
+    if not rows:
+        try:
+            rows = _request_json(
+                BINANCE_FUTURES_DATA,
+                "/openInterestHist",
+                {"symbol": symbol, "period": "1d", "limit": 500},
+            )
+        except RuntimeError:
+            if last_error is not None:
+                raise last_error
+            raise
     return {
         _daily_key(row.get("timestamp")): _safe_float(row.get("sumOpenInterest"))
         for row in rows if isinstance(row, dict) and row.get("timestamp") is not None
     }
+
+
+def _fetch_bybit_open_interest(symbol, start, end):
+    rows = []
+    cursor = ""
+    while True:
+        params = {
+            "category": "linear",
+            "symbol": symbol,
+            "intervalTime": "1d",
+            "startTime": int(start),
+            "endTime": int(end),
+            "limit": 200,
+        }
+        if cursor:
+            params["cursor"] = cursor
+        payload = _request_json(BYBIT_API, "/v5/market/open-interest", params)
+        if not isinstance(payload, dict) or payload.get("retCode") != 0:
+            raise RuntimeError((payload or {}).get("retMsg") or "bybit_open_interest_failed")
+        result = payload.get("result") or {}
+        page = result.get("list") or []
+        rows.extend(page)
+        cursor = result.get("nextPageCursor") or ""
+        if not cursor or len(rows) >= 500:
+            break
+        time.sleep(0.1)
+    return {
+        _daily_key(row.get("timestamp")): _safe_float(row.get("openInterest"))
+        for row in rows if isinstance(row, dict) and row.get("timestamp") is not None
+    }
+
+
+def _fetch_open_interest(symbol, start, end, source="binance"):
+    if str(source).lower() == "bybit":
+        return _fetch_bybit_open_interest(symbol, start, end)
+    return _fetch_binance_open_interest(symbol, start, end)
 
 
 def _fetch_basis(symbol, start, end):
@@ -130,7 +191,7 @@ def _fetch_basis(symbol, start, end):
     return result
 
 
-def fetch_coin_derivatives(coin, window):
+def fetch_coin_derivatives(coin, window, oi_source="binance"):
     symbol = f"{coin}USDT"
     funding = {}
     open_interest = {}
@@ -142,7 +203,7 @@ def fetch_coin_derivatives(coin, window):
         errors.append(f"funding={exc}")
     time.sleep(0.25)
     try:
-        open_interest = _fetch_open_interest(symbol, window["start"], window["end"])
+        open_interest = _fetch_open_interest(symbol, window["start"], window["end"], source=oi_source)
     except RuntimeError as exc:
         errors.append(f"open_interest={exc}")
     time.sleep(0.25)
@@ -171,6 +232,8 @@ def main(argv=None):
     parser.add_argument("--price-path", default=DEFAULT_PRICE_PATH)
     parser.add_argument("--max-days", type=int, default=240)
     parser.add_argument("--output", default=DEFAULT_OUTPUT_PATH)
+    parser.add_argument("--min-oi-coverage", type=float, default=0.8)
+    parser.add_argument("--oi-source", choices=("binance", "bybit"), default="binance")
     args = parser.parse_args(argv)
 
     coins = tuple(coin.strip().upper() for coin in args.coins.split(",") if coin.strip())
@@ -181,7 +244,7 @@ def main(argv=None):
             print(f"{coin}: missing price window")
             continue
         try:
-            output[coin], errors = fetch_coin_derivatives(coin, windows[coin])
+            output[coin], errors = fetch_coin_derivatives(coin, windows[coin], oi_source=args.oi_source)
             filled = sum(
                 1
                 for row in output[coin]
@@ -189,7 +252,12 @@ def main(argv=None):
                 or row.get("open_interest") is not None
                 or row.get("basis_pct") is not None
             )
+            oi_filled = sum(1 for row in output[coin] if row.get("open_interest") is not None)
+            oi_ratio = oi_filled / len(output[coin]) if output[coin] else 0.0
             print(f"{coin}: derivative_bars={filled}/{len(output[coin])}")
+            print(f"{coin}: open_interest_bars={oi_filled}/{len(output[coin])} ({oi_ratio:.1%})")
+            if oi_ratio < float(args.min_oi_coverage):
+                print(f"{coin}: partial fetch warning: open_interest_coverage_below_threshold")
             for error in errors:
                 print(f"{coin}: partial fetch warning: {error}")
         except Exception as exc:

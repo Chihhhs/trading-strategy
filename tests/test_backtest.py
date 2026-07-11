@@ -5,6 +5,9 @@ import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
+from unittest.mock import patch
+
+from backtest import fetch_derivatives_data
 
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
@@ -154,6 +157,65 @@ class BacktestModuleTest(unittest.TestCase):
         data_map = normalize_derivatives_data_map({"ETH": [{"timestamp": 1, "mark_price": "2000"}]})
         self.assertEqual(data_map["ETH"][0]["time"], 1)
         self.assertEqual(data_map["ETH"][0]["mark_price"], 2000.0)
+
+    def test_fetch_open_interest_paginates_daily_windows(self):
+        calls = []
+
+        def fake_request(_base_url, path, params):
+            calls.append((path, params))
+            return [
+                {
+                    "timestamp": params["startTime"],
+                    "sumOpenInterest": str(100 + len(calls)),
+                }
+            ]
+
+        with patch("backtest.fetch_derivatives_data._request_json", side_effect=fake_request), patch(
+            "backtest.fetch_derivatives_data.time.sleep"
+        ):
+            result = fetch_derivatives_data._fetch_open_interest(
+                "BTCUSDT",
+                0,
+                fetch_derivatives_data.OI_WINDOW_MS * 2 + fetch_derivatives_data.DAY_MS,
+            )
+        self.assertGreaterEqual(len(calls), 3)
+        self.assertEqual(calls[0][0], "/openInterestHist")
+        self.assertEqual(len(result), len(calls))
+
+    def test_fetch_bybit_open_interest_paginates_cursor(self):
+        calls = []
+
+        def fake_request(_base_url, path, params):
+            calls.append((path, params))
+            cursor = params.get("cursor")
+            if cursor:
+                return {
+                    "retCode": 0,
+                    "result": {
+                        "list": [{"timestamp": str(fetch_derivatives_data.DAY_MS), "openInterest": "200"}],
+                        "nextPageCursor": "",
+                    },
+                }
+            return {
+                "retCode": 0,
+                "result": {
+                    "list": [{"timestamp": "0", "openInterest": "100"}],
+                    "nextPageCursor": "next",
+                },
+            }
+
+        with patch("backtest.fetch_derivatives_data._request_json", side_effect=fake_request), patch(
+            "backtest.fetch_derivatives_data.time.sleep"
+        ):
+            result = fetch_derivatives_data._fetch_open_interest(
+                "BTCUSDT",
+                0,
+                fetch_derivatives_data.DAY_MS,
+                source="bybit",
+            )
+        self.assertEqual(calls[0][0], "/v5/market/open-interest")
+        self.assertEqual(calls[1][1]["cursor"], "next")
+        self.assertEqual(result, {"1970-01-01": 100.0, "1970-01-02": 200.0})
 
     def test_engine_opens_position_from_signal(self):
         data_map = {"BTC": [build_bar(100 + index, index) for index in range(4)]}

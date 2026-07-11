@@ -247,6 +247,11 @@ def _load_binance_coin_list():
 
 
 def load_coin_list():
+    configured_universe = config.STRATEGY.get("coin_universe")
+    if configured_universe:
+        names = [str(name).upper() for name in configured_universe]
+        return [{"name": name, "symbol": f"{name}USDT"} for name in names]
+
     cache = os.path.join(config.STATE_DIR, "coin_list.json")
     if os.path.exists(cache):
         with open(cache, "r", encoding="utf-8") as handle:

@@ -20,6 +20,7 @@ MODE = "paper"
 
 STRATEGY = {
     "name": "trend",
+    "coin_universe": None,
     "timeframe": "1d",
     "leverage": 5,
     "risk_per_trade": 0.08,
@@ -52,6 +53,11 @@ STRATEGY = {
     "derivatives_crowding_funding_z_lookback": 30,
     "derivatives_crowding_funding_z_threshold": 0.75,
     "derivatives_crowding_basis_abs_threshold_pct": 0.03,
+    "microstructure_guard_enabled": False,
+    "microstructure_guard_observe_only": False,
+    "microstructure_max_spread_bps": 8.0,
+    "microstructure_min_top_depth_usd": 1000.0,
+    "microstructure_max_opposing_imbalance": 0.65,
     "intraday_breakout_lookback": 12,
     "intraday_fast_ema": 8,
     "intraday_slow_ema": 21,

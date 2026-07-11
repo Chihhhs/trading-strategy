@@ -41,6 +41,7 @@ def build_run_summary():
 def build_strategy_snapshot():
     return {
         "name": config.STRATEGY.get("name", "trend"),
+        "coin_universe": config.STRATEGY.get("coin_universe"),
         "entry_order_type": config.STRATEGY["entry_order_type"],
         "leverage": config.STRATEGY["leverage"],
         "risk_per_trade": config.STRATEGY["risk_per_trade"],
@@ -49,6 +50,11 @@ def build_strategy_snapshot():
         "derivatives_crowding_exit_enabled": config.STRATEGY.get("derivatives_crowding_exit_enabled", False),
         "derivatives_crowding_action": config.STRATEGY.get("derivatives_crowding_action"),
         "derivatives_crowding_reduce_fraction": config.STRATEGY.get("derivatives_crowding_reduce_fraction"),
+        "microstructure_guard_enabled": config.STRATEGY.get("microstructure_guard_enabled", False),
+        "microstructure_guard_observe_only": config.STRATEGY.get("microstructure_guard_observe_only", False),
+        "microstructure_max_spread_bps": config.STRATEGY.get("microstructure_max_spread_bps"),
+        "microstructure_min_top_depth_usd": config.STRATEGY.get("microstructure_min_top_depth_usd"),
+        "microstructure_max_opposing_imbalance": config.STRATEGY.get("microstructure_max_opposing_imbalance"),
     }
 
 
@@ -77,6 +83,9 @@ def build_entry_context(state, coin_name, btc_dir, entry_order_type, **fields):
         "best_bid": None,
         "best_ask": None,
         "price_source": None,
+        "spread_bps": None,
+        "top_depth_usd": None,
+        "book_imbalance": None,
         "strategy_snapshot": build_strategy_snapshot(),
     }
     context.update(fields)
