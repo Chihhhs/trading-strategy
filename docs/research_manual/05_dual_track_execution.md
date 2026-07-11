@@ -22,7 +22,8 @@ python backtest/backtest_runner.py --coins BTC,ETH,BNB,SOL --max-days 240 --rese
 
 The report includes:
 
-- `trend_control`: single-coin trend baseline, currently the control.
+- `trend_unfiltered_reference`: previous single-coin trend behavior without the new entry filters.
+- `trend_filtered_control`: single-coin trend baseline with RSI, ATR, price-position, and overextension filters.
 - `trend_controlled_portfolio`: lower-risk basket version with max position limits.
 - `intraday_momentum_probe`: first runnable new-strategy probe; only meaningful on intraday candle data.
 - `funding_basis_monitor`: pending data pipeline.
@@ -30,8 +31,7 @@ The report includes:
 
 ## Promotion Rules
 
-- Existing-strategy candidates must beat `trend_control` on score, drawdown, and net PnL before being considered for paper/live.
+- Existing-strategy candidates must beat `trend_unfiltered_reference` on score, drawdown, and net PnL before being considered for paper/live.
 - New-strategy candidates stay research-only until they pass cost-adjusted backtests on appropriate data.
 - Funding/basis and order-flow tracks should start as reports, not live execution branches.
 - Any intraday result must include realistic fee, slippage, and turnover checks.
-

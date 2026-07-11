@@ -1,6 +1,6 @@
 import statistics
 
-from trading_strategy.indicators import adx, atr, ema
+from trading_strategy.indicators import adx, atr, ema, rsi
 from trading_strategy.positions.trend import (
     compute_atr_trailing_result,
     evaluate_trend_failure_exit,
@@ -63,6 +63,27 @@ def get_ema_value(closes, period, default=None):
     return _last_numeric(result, default)
 
 
+def get_rsi_value(closes, period=14, default=50):
+    result = rsi(closes, period)
+    return _last_numeric(result, default)
+
+
+def _increment_counter(diagnostics, key, amount=1):
+    if diagnostics is None:
+        return
+    diagnostics[key] = int(diagnostics.get(key) or 0) + amount
+
+
+def _price_position(current, highs, lows, lookback):
+    if lookback <= 1 or len(highs) < lookback + 1 or len(lows) < lookback + 1:
+        return 0.5, None, None
+    high_prev = max(highs[-lookback - 1 : -1])
+    low_prev = min(lows[-lookback - 1 : -1])
+    if high_prev <= low_prev:
+        return 0.5, high_prev, low_prev
+    return (current - low_prev) / (high_prev - low_prev), high_prev, low_prev
+
+
 def get_btc_direction_from_klines(klines, lookback_days=7, threshold_pct=3):
     if not klines or len(klines) < lookback_days:
         return "neutral"
@@ -106,6 +127,18 @@ def generate_trend_signal(
     tp_mult=1.5,
     sl_mult=1.0,
     adx_threshold=25,
+    entry_filter_enabled=True,
+    rsi_min_long=45,
+    rsi_max_long=70,
+    rsi_min_short=30,
+    rsi_max_short=55,
+    max_atr_pct=8,
+    price_position_lookback=60,
+    long_max_price_position=0.75,
+    short_min_price_position=0.25,
+    max_roc_60_long=120,
+    min_roc_60_short=-120,
+    diagnostics=None,
 ):
     if not klines or len(klines) < 50:
         return None
@@ -122,6 +155,15 @@ def generate_trend_signal(
     atr_val = get_atr_value(highs, lows, closes, default=current * 0.03)
     if not atr_val or atr_val == 0:
         atr_val = current * 0.03
+    atr_pct = (atr_val / current * 100) if current else 0.0
+    rsi_val = get_rsi_value(closes, 14, 50)
+    position_60, high_60_prev, low_60_prev = _price_position(
+        current,
+        highs,
+        lows,
+        int(price_position_lookback or 60),
+    )
+    roc_60 = (current / closes[index - 60] - 1.0) * 100 if index >= 60 and closes[index - 60] else 0.0
 
     ema20 = structure["ema20"]
     ema50 = structure["ema50"]
@@ -171,34 +213,65 @@ def generate_trend_signal(
     elif current < ema20 and ema20 < ema50:
         score -= 1
 
+    raw_context = {
+        "adx": adx_val,
+        "atr": atr_val,
+        "atr_pct": atr_pct,
+        "rsi": rsi_val,
+        "ema20": ema20,
+        "ema50": ema50,
+        "high_20_prev": structure["high_20_prev"],
+        "low_20_prev": structure["low_20_prev"],
+        "high_60_prev": high_60_prev,
+        "low_60_prev": low_60_prev,
+        "price_position_60": position_60,
+        "roc60": roc_60,
+    }
+
     if score >= min_score:
+        if entry_filter_enabled:
+            if not (float(rsi_min_long) <= rsi_val <= float(rsi_max_long)):
+                _increment_counter(diagnostics, "trend_rsi_filtered_signals")
+                return None
+            if atr_pct > float(max_atr_pct):
+                _increment_counter(diagnostics, "trend_atr_filtered_signals")
+                return None
+            if position_60 > float(long_max_price_position):
+                _increment_counter(diagnostics, "trend_price_position_filtered_signals")
+                return None
+            if roc_60 > float(max_roc_60_long):
+                _increment_counter(diagnostics, "trend_overextension_filtered_signals")
+                return None
         return {
             "direction": "long",
             "score": score,
             "tp": current + atr_val * tp_mult,
             "sl": current - atr_val * sl_mult,
             "reason": "TREND_BUY",
-            "adx": adx_val,
-            "atr": atr_val,
-            "ema20": ema20,
-            "ema50": ema50,
-            "high_20_prev": structure["high_20_prev"],
-            "low_20_prev": structure["low_20_prev"],
+            **raw_context,
             "breakout_level": structure["high_20_prev"],
         }
     if score <= -min_score:
+        if entry_filter_enabled:
+            if not (float(rsi_min_short) <= rsi_val <= float(rsi_max_short)):
+                _increment_counter(diagnostics, "trend_rsi_filtered_signals")
+                return None
+            if atr_pct > float(max_atr_pct):
+                _increment_counter(diagnostics, "trend_atr_filtered_signals")
+                return None
+            if position_60 < float(short_min_price_position):
+                _increment_counter(diagnostics, "trend_price_position_filtered_signals")
+                return None
+            if roc_60 < float(min_roc_60_short):
+                _increment_counter(diagnostics, "trend_overextension_filtered_signals")
+                return None
         return {
             "direction": "short",
             "score": score,
             "tp": current - atr_val * tp_mult,
             "sl": current + atr_val * sl_mult,
             "reason": "TREND_SELL",
-            "adx": adx_val,
-            "atr": atr_val,
-            "ema20": ema20,
-            "ema50": ema50,
-            "high_20_prev": structure["high_20_prev"],
-            "low_20_prev": structure["low_20_prev"],
+            **raw_context,
             "breakout_level": structure["low_20_prev"],
         }
     return None
@@ -283,6 +356,18 @@ class TrendStrategy(BaseStrategy):
             min_score=min_score,
             tp_mult=tp_mult,
             sl_mult=sl_mult,
+            entry_filter_enabled=bool(_config_value(context.config, "trend_entry_filter_enabled", True)),
+            rsi_min_long=_config_value(context.config, "trend_rsi_min_long", 45.0),
+            rsi_max_long=_config_value(context.config, "trend_rsi_max_long", 70.0),
+            rsi_min_short=_config_value(context.config, "trend_rsi_min_short", 30.0),
+            rsi_max_short=_config_value(context.config, "trend_rsi_max_short", 55.0),
+            max_atr_pct=_config_value(context.config, "trend_max_atr_pct", 8.0),
+            price_position_lookback=_config_value(context.config, "trend_price_position_lookback", 60),
+            long_max_price_position=_config_value(context.config, "trend_long_max_price_position", 0.75),
+            short_min_price_position=_config_value(context.config, "trend_short_min_price_position", 0.25),
+            max_roc_60_long=_config_value(context.config, "trend_max_roc_60_long", 120.0),
+            min_roc_60_short=_config_value(context.config, "trend_min_roc_60_short", -120.0),
+            diagnostics=context.diagnostics,
         )
         if raw_signal is None:
             return None
@@ -420,6 +505,7 @@ __all__ = [
     "get_atr_value",
     "get_btc_direction_from_klines",
     "get_ema_value",
+    "get_rsi_value",
     "get_trend_structure_context",
     "is_signal_blocked_by_btc_filter",
 ]

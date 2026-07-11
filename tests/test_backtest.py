@@ -439,9 +439,10 @@ class BacktestModuleTest(unittest.TestCase):
             fee_bps=4.5,
         )
         rendered = "\n".join(format_research_report_lines(report))
-        self.assertEqual(len(report["runnable"]), 3)
+        self.assertEqual(len(report["runnable"]), 4)
         self.assertIn("[optimize_existing]", rendered)
-        self.assertIn("trend_control:", rendered)
+        self.assertIn("trend_unfiltered_reference:", rendered)
+        self.assertIn("trend_filtered_control:", rendered)
         self.assertIn("[new_strategy]", rendered)
         self.assertIn("intraday_momentum_probe:", rendered)
         self.assertIn("funding_basis_monitor:", rendered)
@@ -472,7 +473,7 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("Dual-track research report", rendered)
         self.assertIn("score_delta=", rendered)
         self.assertIn("new_strategy_pending", rendered)
-        self.assertEqual(len(report["runnable"]), 3)
+        self.assertEqual(len(report["runnable"]), 4)
 
     def test_legacy_strategy_uses_fixed_tp_policy(self):
         prices = [100.0] * 60 + [101.0, 100.8, 101.1, 101.0, 101.2]

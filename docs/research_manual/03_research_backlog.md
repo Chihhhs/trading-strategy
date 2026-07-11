@@ -18,6 +18,17 @@
 - Implementation implication: Use `python backtest/backtest_runner.py --research-report` as the standard first-pass report.
 - Decision for this repo: Required workflow.
 
+### 0.1 Trend Anti-Chase Entry Filters
+
+- Claim: Trend entries should avoid buying at the top of the recent range, shorting at the bottom, entering at extreme RSI, and entering during abnormal ATR spikes.
+- Evidence level: B
+- Market applicability: Liquid crypto majors and trend baskets.
+- Time horizon: Entry quality for swing trend trades.
+- Known failure modes: 過濾太嚴會錯過 breakout continuation；過濾太鬆會追高後被回調洗掉。
+- Cost sensitivity: Moderate, because lower-quality entries create avoidable stop churn.
+- Implementation implication: `trend` now supports configurable RSI, ATR%, price-position, and 60-bar overextension filters. Use `--disable-trend-entry-filter` for old-behavior A/B checks.
+- Decision for this repo: Validate further.
+
 ### 1. Short-Term Failure Exit
 
 - Claim: Live trend trading needs an explicit post-entry failure exit, not only SL, reversal, and max-hold exits.

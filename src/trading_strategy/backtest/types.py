@@ -35,6 +35,17 @@ class BacktestConfig:
     short_term_min_score: float = 5.0
     fee_bps: float = 0.0
     slippage_bps: float = 0.0
+    trend_entry_filter_enabled: bool = True
+    trend_rsi_min_long: float = 45.0
+    trend_rsi_max_long: float = 75.0
+    trend_rsi_min_short: float = 30.0
+    trend_rsi_max_short: float = 55.0
+    trend_max_atr_pct: float = 8.0
+    trend_price_position_lookback: int = 60
+    trend_long_max_price_position: float = 0.85
+    trend_short_min_price_position: float = 0.25
+    trend_max_roc_60_long: float = 120.0
+    trend_min_roc_60_short: float = -120.0
 
 
 @dataclass(frozen=True)

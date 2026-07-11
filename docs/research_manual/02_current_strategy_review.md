@@ -46,6 +46,21 @@
   - `BTC,BNB,ETH`, 240 days, `risk=0.015`, `max_positions=2`: `net_pnl=-3.5%`, `drawdown=11.2%`.
 - Decision: Multi-coin trend is viable only as a controlled portfolio. Do not use the full coin basket with the same per-trade risk. Use lower per-coin risk, `max_positions`, and a rolling universe filter that can remove weak recent coins.
 
+## 2026-07-11 Trend Anti-Chase Filter Check
+
+- Change: `trend` now has configurable entry filters for RSI, ATR%, 60-bar price position, and 60-bar overextension.
+- Rationale: Prior research notes warned against chasing longs near the top of the range, shorting near the bottom, and entering during volatility spikes.
+- `trend_unfiltered_reference`, 240 days, `BTC`, `risk=0.03`, `leverage=2.0`, cost-adjusted: `trades=7`, `win_rate=28.6%`, `net_pnl=+10.0%`, `drawdown=6.3%`, `score=+6.85`.
+- `trend_filtered_control`, same settings: `trades=2`, `win_rate=50.0%`, `net_pnl=+16.3%`, `drawdown=4.2%`, `score=+14.20`.
+- 1000-day retest, same settings:
+  - `trend_unfiltered_reference`: `trades=30`, `win_rate=33.3%`, `net_pnl=+14.9%`, `drawdown=29.6%`, `score=+0.10`.
+  - `trend_filtered_control`: `trades=12`, `win_rate=25.0%`, `net_pnl=+4.7%`, `drawdown=14.7%`, `score=-2.65`.
+- Diagnostics from the 1000-day filtered run: `trend_rsi_filtered_signals=33`, `trend_price_position_filtered_signals=28`.
+- Parameter retune check:
+  - Raising `trend_long_max_price_position` from `0.75` to `0.85` and `trend_rsi_max_long` from `70` to `75` kept the 240-day BTC result unchanged at `trades=2`, `net_pnl=+16.3%`, `drawdown=4.2%`, `score=+14.20`.
+  - The same change improved the 1000-day BTC result to `trades=14`, `net_pnl=+8.2%`, `drawdown=11.8%`, `score=+2.30`.
+- Interpretation: The anti-chase filter still looks directionally useful, but the original `0.75` long-entry cap and `70` RSI ceiling were too restrictive for long-horizon trend capture. The defaults have been relaxed to `0.85` and `75`; further tuning still needs walk-forward validation.
+
 ## Historical 50-Coin Context
 
 The older 50-coin backtest notes in [docs/backtest_results.md](/D:/code/trading-strategy/docs/backtest_results.md) are still useful as context:

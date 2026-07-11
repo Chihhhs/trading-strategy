@@ -11,7 +11,7 @@ if SRC not in sys.path:
 from trading_strategy.core.exit_policy import build_exit_policy
 from trading_strategy.core.legacy_unified import analyze_market_regime, is_dead_cat_bounce, is_price_position_blocked
 from trading_strategy.positions import build_position_snapshot, build_position_status_counts
-from trading_strategy.strategies import available_strategy_names, resolve_strategy
+from trading_strategy.strategies import available_strategy_names, generate_trend_signal, resolve_strategy
 from trading_strategy.strategies.base import StrategyContext
 
 
@@ -62,6 +62,35 @@ class StrategyModulesTest(unittest.TestCase):
         self.assertEqual(signal.reason, "INTRADAY_MOMENTUM_BUY")
         self.assertGreater(signal.tp, bars[-1]["close"])
         self.assertLess(signal.sl, bars[-1]["close"])
+
+    def test_trend_entry_filter_blocks_chasing_range_extreme(self):
+        bars = [build_bar(100.0, index, volume=1000) for index in range(40)]
+        bars.extend(build_bar(92.0 + index * 0.25, 40 + index, volume=1000) for index in range(20))
+        bars.append(build_bar(106.0, 60, volume=1800))
+        diagnostics = {}
+        signal = generate_trend_signal(
+            bars,
+            min_score=4,
+            rsi_max_long=100,
+            long_max_price_position=0.75,
+            diagnostics=diagnostics,
+        )
+        self.assertIsNone(signal)
+        self.assertEqual(diagnostics.get("trend_price_position_filtered_signals"), 1)
+
+    def test_trend_entry_filter_can_be_disabled_for_ab_tests(self):
+        bars = [build_bar(100.0, index, volume=1000) for index in range(40)]
+        bars.extend(build_bar(92.0 + index * 0.25, 40 + index, volume=1000) for index in range(20))
+        bars.append(build_bar(106.0, 60, volume=1800))
+        signal = generate_trend_signal(
+            bars,
+            min_score=4,
+            rsi_max_long=100,
+            long_max_price_position=0.75,
+            entry_filter_enabled=False,
+        )
+        self.assertIsNotNone(signal)
+        self.assertEqual(signal["direction"], "long")
 
     def test_core_exit_policy_wrapper_still_resolves_trend_policy(self):
         exit_policy = build_exit_policy(signal={"reason": "TREND_BUY"})

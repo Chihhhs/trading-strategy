@@ -51,7 +51,24 @@ def build_research_candidates(
     }
     return [
         ResearchCandidate(
-            name="trend_control",
+            name="trend_unfiltered_reference",
+            track="optimize_existing",
+            decision="reference",
+            config=BacktestConfig(
+                coins=(control_coin,),
+                strategy="trend",
+                leverage=2.0,
+                risk_pct=0.03,
+                btc_filter_enabled=True,
+                atr_trailing_enabled=True,
+                failure_exit_enabled=True,
+                trend_entry_filter_enabled=False,
+                **shared,
+            ),
+            note="Previous trend behavior without the reference-based anti-chase entry filters.",
+        ),
+        ResearchCandidate(
+            name="trend_filtered_control",
             track="optimize_existing",
             decision="control",
             config=BacktestConfig(
@@ -62,9 +79,10 @@ def build_research_candidates(
                 btc_filter_enabled=True,
                 atr_trailing_enabled=True,
                 failure_exit_enabled=True,
+                trend_entry_filter_enabled=True,
                 **shared,
             ),
-            note="Single-coin trend baseline used to judge every other candidate.",
+            note="Single-coin trend baseline with RSI, ATR, price-position, and overextension filters.",
         ),
         ResearchCandidate(
             name="trend_controlled_portfolio",
@@ -79,6 +97,7 @@ def build_research_candidates(
                 btc_filter_enabled=True,
                 atr_trailing_enabled=True,
                 failure_exit_enabled=True,
+                trend_entry_filter_enabled=True,
                 **shared,
             ),
             note="Lower per-coin risk plus max positions to test whether a basket improves risk-adjusted results.",

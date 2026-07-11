@@ -127,6 +127,10 @@ def format_result_lines(result, *, show_trades=False):
             "price_position_filtered_signals",
             "dead_cat_filtered_signals",
             "pullback_filtered_signals",
+            "trend_rsi_filtered_signals",
+            "trend_atr_filtered_signals",
+            "trend_price_position_filtered_signals",
+            "trend_overextension_filtered_signals",
         )
         if diagnostics.get(key)
     }
@@ -168,6 +172,10 @@ def format_comparison_lines(results_by_strategy):
                 "price_position_filtered_signals",
                 "dead_cat_filtered_signals",
                 "pullback_filtered_signals",
+                "trend_rsi_filtered_signals",
+                "trend_atr_filtered_signals",
+                "trend_price_position_filtered_signals",
+                "trend_overextension_filtered_signals",
             )
             if diagnostics.get(key)
         }

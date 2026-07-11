@@ -49,6 +49,7 @@ def build_parser():
     parser.add_argument("--enable-intrabar-exit", action="store_true")
     parser.add_argument("--intrabar-fill-policy", choices=("stop_first", "target_first"), default="stop_first")
     parser.add_argument("--max-hold-bars", type=int, default=None)
+    parser.add_argument("--disable-trend-entry-filter", action="store_true")
     parser.add_argument("--disable-price-position-filter", action="store_true")
     parser.add_argument("--disable-dead-cat-filter", action="store_true")
     parser.add_argument("--optimize", action="store_true")
@@ -83,6 +84,7 @@ def build_config(args):
         dead_cat_filter_enabled=dead_cat_filter_enabled,
         fee_bps=args.fee_bps,
         slippage_bps=args.slippage_bps,
+        trend_entry_filter_enabled=not args.disable_trend_entry_filter,
     )
 
 
