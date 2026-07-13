@@ -48,6 +48,9 @@ Current reusable module layout:
   - trend stop, trailing, and failure helpers
 - `src/trading_strategy/backtest/`
   - reusable backtest package
+- `src/trading_strategy/experiments/`
+  - typed experiment specs, JSON manifest validation, result and promotion contracts
+  - adapters translate one validated spec into backtest or approval-gated paper execution
 - `src/trading_strategy/live/`
   - live runtime package
 - `src/trading_strategy/market_data.py`
@@ -59,6 +62,7 @@ Current reusable module layout:
 - `src/trading_strategy/core/` is now transitional.
 - Existing imports such as `trading_strategy.core.risk` and `trading_strategy.core.signals` still work.
 - New reusable code should go into `shared/`, `strategies/`, or `positions/` instead of `core/`.
+- Experiment orchestration belongs in `experiments/`; strategy-specific parameters belong beside strategy definitions, never in `core/`.
 - `paper.py` still uses some `core/*` imports today, but those modules now re-export from the new locations.
 
 ## Cleanup Performed
@@ -74,3 +78,9 @@ Current reusable module layout:
 - Ran paper reset through runner and legacy wrapper.
 - Ran offline backtest smoke test from local historical JSON.
 - Ran live `--report` through the runner to verify wrapper wiring.
+
+## Experiment Dependency Direction
+
+`runner -> experiments -> strategies/backtest/paper` is the allowed direction. Strategies do not import experiment runners, and live does not consume research manifests. `StrategyDefinition` describes a strategy's typed parameters and capabilities; `ExperimentSpec` is the research/paper setting truth; adapters are the only layer that translates it into environment-specific configuration.
+
+Canonical experiment commands and promotion semantics are documented in `docs/experiment_workflow.md`.

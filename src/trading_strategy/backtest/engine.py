@@ -296,9 +296,10 @@ class BacktestEngine:
             return fill
         return None
 
-    def step(self, coin, current_bar, window, btc_window, state, *, defer_stop_exits=False):
+    def step(self, coin, current_bar, window, btc_window, state, *, defer_stop_exits=False, bar_index=None):
         open_positions = state.setdefault("positions", [])
-        state["_bar_index"] = len(window) - 1
+        current_index = len(window) - 1 if bar_index is None else int(bar_index)
+        state["_bar_index"] = current_index
         current_price = float(current_bar["close"])
         active_position = next((pos for pos in open_positions if pos.get("coin") == coin), None)
 
@@ -312,7 +313,7 @@ class BacktestEngine:
                     active_position,
                     current_price,
                     self.config,
-                    len(window) - 1,
+                    current_index,
                     window,
                     self.strategy,
                     current_bar,

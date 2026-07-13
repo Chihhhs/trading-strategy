@@ -12,6 +12,7 @@ DEFAULT_RISK_PCT = 0.05
 class BacktestConfig:
     coins: tuple[str, ...]
     strategy: str = "trend"
+    strategy_parameters: dict[str, Any] | None = None
     max_days: int | None = 240
     initial_capital: float = DEFAULT_INITIAL_CAPITAL
     leverage: float = DEFAULT_LEVERAGE

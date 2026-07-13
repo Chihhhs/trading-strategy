@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "name": "intraday-momentum-rejected-baseline",
+  "dataset": {
+    "id": "binance-15m-90d-btc-eth-sol-bnb",
+    "path": "data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json"
+  },
+  "coins": ["BTC", "ETH", "SOL", "BNB"],
+  "strategy": {
+    "name": "intraday_momentum",
+    "parameters": {
+      "timeframe": "15m",
+      "min_score": 4,
+      "intraday_breakout_lookback": 12,
+      "intraday_fast_ema": 8,
+      "intraday_slow_ema": 21,
+      "intraday_max_hold_bars": 24,
+      "intraday_momentum_threshold_pct": 0.2,
+      "intraday_volume_ratio": 1.2
+    }
+  },
+  "portfolio": {
+    "initial_capital": 1000.0,
+    "leverage": 3.0,
+    "risk_pct": 0.03,
+    "max_positions": 2
+  },
+  "costs": {
+    "fee_bps": 4.5,
+    "slippage_bps": 2.0
+  },
+  "evaluation": {
+    "baseline": null,
+    "windows": [2880, 5760, 8640],
+    "universes": [["BTC"], ["BTC", "ETH", "SOL", "BNB"]],
+    "min_trades": 30,
+    "min_eligible_comparisons": 3,
+    "require_majority": true
+  },
+  "target_environment": "research"
+}

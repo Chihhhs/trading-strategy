@@ -1,0 +1,68 @@
+from dataclasses import asdict, fields
+
+from trading_strategy.backtest import PortfolioBacktester, load_derivatives_data, load_historical_data
+from trading_strategy.backtest.types import BacktestConfig
+from trading_strategy.strategies import get_strategy_definition
+
+from .results import ExperimentResult
+
+
+class BacktestExperimentAdapter:
+    def build_config(self, spec, *, max_days=None, coins=None):
+        strategy_values = asdict(spec.strategy.parameters)
+        allowed = {field.name for field in fields(BacktestConfig)}
+        strategy_values = {key: value for key, value in strategy_values.items() if key in allowed}
+        definition = get_strategy_definition(spec.strategy.name)
+        return BacktestConfig(
+            coins=tuple(coins or spec.coins),
+            strategy=spec.strategy.name,
+            strategy_parameters=asdict(spec.strategy.parameters),
+            max_days=max_days if max_days is not None else max(spec.evaluation.windows),
+            initial_capital=spec.portfolio.initial_capital,
+            leverage=spec.portfolio.leverage,
+            risk_pct=spec.portfolio.risk_pct,
+            max_positions=spec.portfolio.max_positions,
+            min_bars=definition.min_bars,
+            fee_bps=spec.costs.fee_bps,
+            slippage_bps=spec.costs.slippage_bps,
+            **strategy_values,
+        )
+
+    def run(self, spec):
+        data_map = load_historical_data(spec.dataset.path)
+        derivatives = load_derivatives_data(spec.dataset.derivatives_path)
+        windows = spec.evaluation.windows
+        universes = spec.evaluation.universes or (spec.coins,)
+        rows = []
+        for window in windows:
+            for universe in universes:
+                coins = tuple(coin for coin in universe if coin in spec.coins)
+                if not coins:
+                    continue
+                config = self.build_config(spec, max_days=window, coins=coins)
+                result = PortfolioBacktester(
+                    config=config,
+                    derivatives_data_map=derivatives,
+                ).run(data_map)
+                initial = float(config.initial_capital or 1.0)
+                turnover_notional = sum(
+                    abs(float(trade.get("entry") or 0.0) * float(trade.get("size") or 0.0))
+                    + abs(float(trade.get("exit_price") or trade.get("exit") or 0.0) * float(trade.get("size") or 0.0))
+                    for trade in result.trades
+                )
+                rows.append(
+                    ExperimentResult(
+                        experiment_name=spec.name,
+                        manifest_fingerprint=spec.fingerprint,
+                        dataset_id=spec.dataset.id,
+                        strategy_name=spec.strategy.name,
+                        window=window,
+                        universe=coins,
+                        trades=int(result.portfolio.get("trades") or 0),
+                        net_pnl_pct=float(result.portfolio.get("total_pnl_pct") or 0.0),
+                        max_drawdown_pct=float(result.portfolio.get("max_drawdown") or 0.0),
+                        turnover=round(turnover_notional / initial, 6),
+                        coin_contributions={row.coin: row.total_pnl for row in result.coin_results},
+                    )
+                )
+        return rows

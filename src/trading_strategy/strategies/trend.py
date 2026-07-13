@@ -20,6 +20,9 @@ def _safe_float(value, default=None):
 def _config_value(config, key, default=None):
     if isinstance(config, dict):
         return config.get(key, default)
+    parameters = getattr(config, "strategy_parameters", None) or {}
+    if key in parameters:
+        return parameters[key]
     return getattr(config, key, default)
 
 
@@ -546,7 +549,8 @@ class TrendStrategy(BaseStrategy):
         window = context.window or []
         if position.get("current_price") is None and context.price is not None:
             position["current_price"] = context.price
-        if position.get("entry_klines_len") and window:
+        paper_bar_age_is_authoritative = context.mode == "paper" and position.get("last_evaluated_bar") is not None
+        if position.get("entry_klines_len") and window and context.mode != "backtest" and not paper_bar_age_is_authoritative:
             position["bars_since_entry"] = max(
                 len(window) - int(position.get("entry_klines_len") or 0),
                 0,

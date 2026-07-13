@@ -340,7 +340,14 @@ class LivePositionsTest(unittest.TestCase):
                 "history": [],
                 "stats": {"total_trades": 0, "wins": 0, "losses": 0, "total_pnl": 0.0, "max_win": 0.0, "max_loss": 0.0},
             }
-            with patch("trading_strategy.live.engine.positions.check_trend_reversal", return_value=True):
+            with patch(
+                "trading_strategy.live.engine.positions.evaluate_open_position",
+                return_value={
+                    "reversal_detected": True,
+                    "atr_trail_result": {"triggered": True},
+                    "failure_exit": {"triggered": False},
+                },
+            ):
                 update_positions(
                     state,
                     {"BTC": 112.0},
