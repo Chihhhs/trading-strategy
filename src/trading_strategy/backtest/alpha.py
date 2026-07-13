@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 from statistics import median
 
 from trading_strategy.indicators import atr, ema
@@ -20,6 +21,7 @@ SHORT_CYCLE_ALPHA_SET = (
 DEFAULT_FORWARD_BARS = (1, 3, 6, 12, 24, 72)
 SHORT_CYCLE_FORWARD_BARS = (1, 3, 6, 12, 24)
 DEFAULT_RANDOM_SEED = 42
+SHORT_CYCLE_BARS_PER_DAY = 96
 
 
 def parse_csv_tuple(raw_value, cast=str):
@@ -503,6 +505,145 @@ def _summarize_alpha(alpha_name, events, series_by_coin, forward_bars, bucket_co
     return {"name": alpha_name, "events": len(events), "forward": rows}
 
 
+def _dominant_value(values):
+    values = [value for value in values if value is not None]
+    if not values:
+        return None
+    value, _ = Counter(values).most_common(1)[0]
+    return value
+
+
+def _event_returns_for_bars(events, series_by_coin, forward_bars, cost_pct):
+    event_returns = []
+    for event in events:
+        value = _forward_signed_return(series_by_coin.get(event["coin"], []), event["index"], forward_bars, event["direction"])
+        if value is None:
+            continue
+        enriched = dict(event)
+        enriched["forward_return"] = value
+        enriched["net_forward_return"] = value - cost_pct
+        event_returns.append(enriched)
+    return event_returns
+
+
+def _summarize_event_subset(events, series_by_coin, forward_bars, bucket_count, cost_pct, random_runs, seed, min_events):
+    event_returns = _event_returns_for_bars(events, series_by_coin, forward_bars, cost_pct)
+    net = _summarize_returns([event["net_forward_return"] for event in event_returns])
+    baseline = _random_baseline(event_returns, series_by_coin, forward_bars, cost_pct, random_runs, seed + int(forward_bars))
+    random_delta = (
+        round(net["mean"] - baseline["mean"], 4)
+        if net["mean"] is not None and baseline["mean"] is not None
+        else None
+    )
+    buckets = _bucket_events(event_returns, bucket_count)
+    bucket_means = {}
+    for bucket, bucket_events in buckets.items():
+        bucket_summary = _summarize_returns([event["net_forward_return"] for event in bucket_events])
+        bucket_means[bucket] = bucket_summary["mean"]
+    dominant_bucket = max(bucket_means, key=bucket_means.get) if bucket_means else None
+    return {
+        "forward_bars": int(forward_bars),
+        "events": len(event_returns),
+        "eligible": len(event_returns) >= int(min_events or 1),
+        "net": net,
+        "random_baseline": baseline,
+        "random_delta": random_delta,
+        "dominant_coin": _dominant_value(event["coin"] for event in event_returns),
+        "dominant_bucket": dominant_bucket,
+    }
+
+
+def _split_ranges(split_name, total_bars, diagnostics):
+    bars_per_day = SHORT_CYCLE_BARS_PER_DAY
+    if split_name == "rolling_30":
+        window = 30 * bars_per_day
+        if total_bars < window:
+            diagnostics[f"short_cycle_{split_name}_insufficient_bars"] = total_bars
+            return []
+        ranges = []
+        start = 0
+        while start + window <= total_bars:
+            ranges.append((f"{split_name}_{len(ranges) + 1}", start, start + window))
+            start += window
+        return ranges
+    if split_name == "train60_test30":
+        train = 60 * bars_per_day
+        test = 30 * bars_per_day
+        if total_bars < train + test:
+            diagnostics[f"short_cycle_{split_name}_insufficient_bars"] = total_bars
+            return []
+        return [(split_name, train, train + test)]
+    diagnostics[f"short_cycle_{split_name}_unknown_split"] = 1
+    return []
+
+
+def _build_short_cycle_split_summary(
+    alpha_events,
+    series_by_coin,
+    *,
+    splits,
+    forward_bars,
+    bucket_count,
+    cost_pct,
+    random_runs,
+    seed,
+    min_events,
+    diagnostics,
+):
+    total_bars = min((len(series_by_coin.get(coin, [])) for coin in series_by_coin), default=0)
+    rows = []
+    for split_name in splits:
+        for label, start, end in _split_ranges(split_name, total_bars, diagnostics):
+            for alpha_name, events in alpha_events.items():
+                split_events = [event for event in events if start <= int(event.get("index", -1)) < end]
+                for bars in forward_bars:
+                    summary = _summarize_event_subset(
+                        split_events,
+                        series_by_coin,
+                        bars,
+                        bucket_count,
+                        cost_pct,
+                        random_runs,
+                        seed,
+                        min_events,
+                    )
+                    summary.update(
+                        {
+                            "split": label,
+                            "split_type": split_name,
+                            "alpha": alpha_name,
+                            "start_index": start,
+                            "end_index": end,
+                        }
+                    )
+                    rows.append(summary)
+    return rows
+
+
+def _build_short_cycle_promotion_gate(split_rows, min_events=100):
+    eligible = [row for row in split_rows if row.get("eligible") and int(row.get("events") or 0) >= int(min_events or 1)]
+    positive_delta = [
+        row for row in eligible
+        if row.get("random_delta") is not None and row["random_delta"] > 0 and (row.get("net") or {}).get("mean") is not None
+    ]
+    positive_net = [row for row in positive_delta if (row.get("net") or {}).get("mean") >= 0]
+    required = max(1, int(len(eligible) * 2 / 3 + 0.999)) if eligible else 1
+    dominant_coin = _dominant_value(row.get("dominant_coin") for row in eligible)
+    dominant_bucket = _dominant_value(row.get("dominant_bucket") for row in eligible)
+    coin_concentrated = dominant_coin is not None and sum(1 for row in eligible if row.get("dominant_coin") == dominant_coin) == len(eligible)
+    bucket_concentrated = dominant_bucket is not None and sum(1 for row in eligible if row.get("dominant_bucket") == dominant_bucket) == len(eligible)
+    passes = len(eligible) >= 3 and len(positive_delta) >= required and len(positive_net) >= required and not coin_concentrated and not bucket_concentrated
+    return {
+        "passes_signal_gate": bool(passes),
+        "eligible_splits": len(eligible),
+        "positive_random_delta_splits": len(positive_delta),
+        "positive_net_splits": len(positive_net),
+        "dominant_coin": dominant_coin,
+        "dominant_bucket": dominant_bucket,
+        "recommended_next_step": "deep_dive_vwap_reversion" if passes else "collect_more_data_or_reject",
+    }
+
+
 def run_alpha_report(
     data_map,
     *,
@@ -517,6 +658,9 @@ def run_alpha_report(
     slippage_bps=0.0,
     random_seed=DEFAULT_RANDOM_SEED,
     report_type="default",
+    short_cycle_splits=(),
+    short_cycle_min_events=100,
+    short_cycle_focus_alpha="intraday_vwap_reversion",
 ):
     alpha_set = tuple(alpha_set or DEFAULT_ALPHA_SET)
     forward_bars = tuple(int(value) for value in (forward_bars or DEFAULT_FORWARD_BARS) if int(value) > 0)
@@ -581,6 +725,27 @@ def run_alpha_report(
         )
         for name in alpha_set
     ]
+    short_cycle = None
+    if report_type == "short_cycle_15m" and short_cycle_splits:
+        split_rows = _build_short_cycle_split_summary(
+            alpha_events,
+            series_by_coin,
+            splits=tuple(short_cycle_splits),
+            forward_bars=forward_bars,
+            bucket_count=int(bucket_count or 10),
+            cost_pct=cost_pct,
+            random_runs=int(random_baseline_runs or 0),
+            seed=int(random_seed),
+            min_events=int(short_cycle_min_events or 1),
+            diagnostics=diagnostics,
+        )
+        focus_split_rows = [row for row in split_rows if row.get("alpha") == short_cycle_focus_alpha]
+        short_cycle = {
+            "focus_alpha": short_cycle_focus_alpha,
+            "splits": split_rows,
+            "min_events": int(short_cycle_min_events or 1),
+            "promotion_gate": _build_short_cycle_promotion_gate(focus_split_rows, min_events=int(short_cycle_min_events or 1)),
+        }
     return {
         "report_type": report_type,
         "alpha_set": alpha_set,
@@ -591,6 +756,7 @@ def run_alpha_report(
         "cost_pct": round(cost_pct, 6),
         "diagnostics": diagnostics,
         "alphas": reports,
+        "short_cycle": short_cycle,
     }
 
 
@@ -611,6 +777,39 @@ def format_alpha_report_lines(report):
     diagnostics = report.get("diagnostics") or {}
     if diagnostics:
         lines.append(f"diagnostics={diagnostics}")
+    short_cycle = report.get("short_cycle") or {}
+    if short_cycle:
+        gate = short_cycle.get("promotion_gate") or {}
+        lines.append(
+            "promotion_gate focus_alpha={focus_alpha}, passes_signal_gate={passes_signal_gate}, "
+            "eligible_splits={eligible_splits}, dominant_coin={dominant_coin}, dominant_bucket={dominant_bucket}, "
+            "recommended_next_step={recommended_next_step}".format(
+                focus_alpha=short_cycle.get("focus_alpha"),
+                passes_signal_gate=gate.get("passes_signal_gate"),
+                eligible_splits=gate.get("eligible_splits"),
+                dominant_coin=gate.get("dominant_coin"),
+                dominant_bucket=gate.get("dominant_bucket"),
+                recommended_next_step=gate.get("recommended_next_step"),
+            )
+        )
+        for row in short_cycle.get("splits") or []:
+            net = row.get("net") or {}
+            lines.append(
+                "split={split} alpha={alpha} forward={forward_bars}: events={events}, eligible={eligible}, "
+                "net_mean={net_mean}, hit_rate={hit_rate}, random_delta={random_delta}, "
+                "dominant_coin={dominant_coin}, dominant_bucket={dominant_bucket}".format(
+                    split=row.get("split"),
+                    alpha=row.get("alpha"),
+                    forward_bars=row.get("forward_bars"),
+                    events=row.get("events"),
+                    eligible=row.get("eligible"),
+                    net_mean=net.get("mean"),
+                    hit_rate=net.get("hit_rate"),
+                    random_delta=row.get("random_delta"),
+                    dominant_coin=row.get("dominant_coin"),
+                    dominant_bucket=row.get("dominant_bucket"),
+                )
+            )
     for alpha in report.get("alphas") or []:
         lines.append(f"[{alpha['name']}] events={alpha['events']}")
         for row in alpha.get("forward") or []:

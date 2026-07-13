@@ -86,6 +86,9 @@ def build_parser():
     parser.add_argument("--forward-bars", default=",".join(str(value) for value in DEFAULT_FORWARD_BARS))
     parser.add_argument("--bucket-count", type=int, default=10)
     parser.add_argument("--random-baseline-runs", type=int, default=200)
+    parser.add_argument("--short-cycle-splits", default="")
+    parser.add_argument("--short-cycle-min-events", type=int, default=100)
+    parser.add_argument("--short-cycle-focus-alpha", default="intraday_vwap_reversion")
     parser.add_argument("--carry-report", action="store_true")
     parser.add_argument("--carry-set", default=",".join(DEFAULT_CARRY_SET))
     parser.add_argument("--funding-entry-abs", type=float, default=0.00008)
@@ -279,6 +282,9 @@ def main(argv=None):
                 alpha_set = SHORT_CYCLE_ALPHA_SET
             if args.forward_bars == ",".join(str(value) for value in DEFAULT_FORWARD_BARS):
                 forward_bars = SHORT_CYCLE_FORWARD_BARS
+        short_cycle_splits = parse_csv_tuple(args.short_cycle_splits, str)
+        if args.short_cycle_alpha_report and not short_cycle_splits:
+            short_cycle_splits = ("rolling_30", "train60_test30")
         report = run_alpha_report(
             data_map,
             derivatives_data_map=derivatives_data_map,
@@ -291,6 +297,9 @@ def main(argv=None):
             fee_bps=args.fee_bps,
             slippage_bps=args.slippage_bps,
             report_type=report_type,
+            short_cycle_splits=short_cycle_splits,
+            short_cycle_min_events=args.short_cycle_min_events,
+            short_cycle_focus_alpha=args.short_cycle_focus_alpha,
         )
         for line in format_alpha_report_lines(report):
             print(line)

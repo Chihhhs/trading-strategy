@@ -17,6 +17,7 @@ if SRC not in sys.path:
 
 from trading_strategy.backtest import cli, load_historical_data
 from trading_strategy.backtest.alpha import (
+    _build_short_cycle_promotion_gate,
     _bucket_events,
     _forward_signed_return,
     format_alpha_report_lines,
@@ -1216,6 +1217,96 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("Alpha signal report (short_cycle_15m)", rendered)
         self.assertIn("[intraday_breakout_continuation]", rendered)
 
+    def test_short_cycle_alpha_report_outputs_split_summary_and_gate(self):
+        prices = []
+        price = 100.0
+        for index in range(9000):
+            cycle = index % 24
+            if cycle == 4:
+                price += 2.5
+            elif cycle == 12:
+                price -= 3.0
+            else:
+                price += 0.08 if cycle < 12 else -0.06
+            prices.append(price)
+        data_map = {
+            "BTC": [
+                {
+                    **build_bar(price, index),
+                    "time": f"2026-01-01T{index // 4:02d}:{(index % 4) * 15:02d}:00",
+                    "volume": 1000 + (400 if index % 24 in (4, 12) else index),
+                }
+                for index, price in enumerate(prices)
+            ]
+        }
+        report = run_alpha_report(
+            data_map,
+            coins=("BTC",),
+            max_days=9000,
+            alpha_set=(
+                "intraday_breakout_continuation",
+                "intraday_vwap_reversion",
+                "intraday_volatility_expansion",
+            ),
+            forward_bars=(12, 24),
+            bucket_count=4,
+            random_baseline_runs=5,
+            report_type="short_cycle_15m",
+            short_cycle_splits=("rolling_30", "train60_test30"),
+            short_cycle_min_events=1,
+            short_cycle_focus_alpha="intraday_vwap_reversion",
+            fee_bps=4.5,
+            slippage_bps=2.0,
+        )
+        short_cycle = report["short_cycle"]
+        self.assertEqual(short_cycle["focus_alpha"], "intraday_vwap_reversion")
+        self.assertTrue(short_cycle["splits"])
+        self.assertIn("intraday_breakout_continuation", {row["alpha"] for row in short_cycle["splits"]})
+        self.assertIn("intraday_vwap_reversion", {row["alpha"] for row in short_cycle["splits"]})
+        self.assertIn("intraday_volatility_expansion", {row["alpha"] for row in short_cycle["splits"]})
+        self.assertIn("promotion_gate", short_cycle)
+        self.assertIn("passes_signal_gate", short_cycle["promotion_gate"])
+        rendered = "\n".join(format_alpha_report_lines(report))
+        self.assertIn("promotion_gate", rendered)
+        self.assertIn("split=", rendered)
+
+    def test_short_cycle_alpha_report_insufficient_split_data_does_not_crash(self):
+        data_map = {"BTC": [build_bar(100.0 + index * 0.1, index) for index in range(50)]}
+        report = run_alpha_report(
+            data_map,
+            coins=("BTC",),
+            max_days=50,
+            alpha_set=("intraday_vwap_reversion",),
+            forward_bars=(12, 24),
+            report_type="short_cycle_15m",
+            short_cycle_splits=("rolling_30", "train60_test30"),
+            short_cycle_min_events=100,
+        )
+        diagnostics = report["diagnostics"]
+        self.assertIn("short_cycle_rolling_30_insufficient_bars", diagnostics)
+        self.assertIn("short_cycle_train60_test30_insufficient_bars", diagnostics)
+        self.assertFalse(report["short_cycle"]["promotion_gate"]["passes_signal_gate"])
+
+    def test_short_cycle_promotion_gate_classifies_positive_and_negative_split_sets(self):
+        positive_splits = [
+            {"eligible": True, "events": 120, "net": {"mean": 0.03}, "random_delta": 0.02, "dominant_coin": "BTC", "dominant_bucket": 4},
+            {"eligible": True, "events": 150, "net": {"mean": 0.02}, "random_delta": 0.01, "dominant_coin": "ETH", "dominant_bucket": 5},
+            {"eligible": True, "events": 130, "net": {"mean": -0.01}, "random_delta": -0.005, "dominant_coin": "SOL", "dominant_bucket": 4},
+        ]
+        positive = _build_short_cycle_promotion_gate(positive_splits, min_events=100)
+        self.assertTrue(positive["passes_signal_gate"])
+        self.assertEqual(positive["eligible_splits"], 3)
+        self.assertEqual(positive["recommended_next_step"], "deep_dive_vwap_reversion")
+
+        negative_splits = [
+            {"eligible": True, "events": 120, "net": {"mean": -0.02}, "random_delta": 0.01, "dominant_coin": "BTC", "dominant_bucket": 5},
+            {"eligible": True, "events": 120, "net": {"mean": -0.03}, "random_delta": 0.02, "dominant_coin": "BTC", "dominant_bucket": 5},
+            {"eligible": True, "events": 120, "net": {"mean": -0.01}, "random_delta": -0.01, "dominant_coin": "BTC", "dominant_bucket": 5},
+        ]
+        negative = _build_short_cycle_promotion_gate(negative_splits, min_events=100)
+        self.assertFalse(negative["passes_signal_gate"])
+        self.assertEqual(negative["recommended_next_step"], "collect_more_data_or_reject")
+
     def test_alpha_report_missing_derivatives_emits_diagnostics(self):
         prices = [100.0 + index * 0.2 for index in range(80)]
         data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
@@ -1335,6 +1426,12 @@ class BacktestModuleTest(unittest.TestCase):
                         "--data-path",
                         path,
                         "--short-cycle-alpha-report",
+                        "--short-cycle-splits",
+                        "rolling_30,train60_test30",
+                        "--short-cycle-min-events",
+                        "1",
+                        "--short-cycle-focus-alpha",
+                        "intraday_vwap_reversion",
                         "--bucket-count",
                         "4",
                         "--random-baseline-runs",
@@ -1348,6 +1445,7 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("[intraday_breakout_continuation]", rendered)
         self.assertIn("[intraday_vwap_reversion]", rendered)
         self.assertIn("[intraday_volatility_expansion]", rendered)
+        self.assertIn("promotion_gate", rendered)
 
     def test_cli_trend_alpha_entry_flags_build_config(self):
         parser = cli.build_parser()

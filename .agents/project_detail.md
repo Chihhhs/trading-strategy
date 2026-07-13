@@ -41,7 +41,7 @@
 - `python apps/runners/paper_runner.py`
 - `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
 - `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-adaptive-atr-trail --trend-evaluation-report --fee-bps 4.5 --slippage-bps 2`
-- `python backtest/backtest_runner.py --short-cycle-alpha-report --coins BTC,ETH,SOL,BNB --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640 --fee-bps 4.5 --slippage-bps 2 --bucket-count 5 --random-baseline-runs 50`
+- `python backtest/backtest_runner.py --short-cycle-alpha-report --coins BTC,ETH,SOL,BNB --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640 --fee-bps 4.5 --slippage-bps 2 --bucket-count 5 --random-baseline-runs 50 --short-cycle-splits rolling_30,train60_test30 --short-cycle-min-events 100 --short-cycle-focus-alpha intraday_vwap_reversion`
 - `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
 - `python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid trend,intraday_momentum`
 
@@ -352,7 +352,8 @@ STRATEGY_OVERRIDES = {
 
 - 新增 `--short-cycle-alpha-report`，預設測試 `intraday_breakout_continuation`、`intraday_vwap_reversion`、`intraday_volatility_expansion`。
 - 預設 forward bars 為 `1,3,6,12,24`，對 15m 代表 15m 到 6h 的 signal-level forward return。
-- 這個 report 不產生交易、不改 live/paper；只輸出 bucket、regime、成本後 forward return 與 randomized baseline。
+- report 支援 `--short-cycle-splits rolling_30,train60_test30`、`--short-cycle-min-events`、`--short-cycle-focus-alpha`，用來輸出 walk-forward split summary 與 promotion gate。
+- promotion gate 只評估 signal 是否值得 deeper research；不產生交易、不改 live/paper。
 - 90d BTC/ETH/SOL/BNB 15m fixture 初跑顯示 breakout 與 volatility expansion 成本後偏弱；VWAP reversion 相對 random baseline 較好，但 net mean 仍略負，尚不能升級為策略。
 
 ## Agent 修改守則

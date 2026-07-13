@@ -332,7 +332,8 @@ Promotion gate：
 
 - 15m 是後續主要研究時間框架；新策略不受既有 trend 或 `intraday_momentum` 限制，但與日線 trend 的訊號、持倉與 live config 完全分離。
 - 現有 `intraday_momentum` 是已被成本與 turnover 否決的負面 baseline，不能以單純調參方式直接 promotion。
-- `--short-cycle-alpha-report` 是短週期研究主入口，先檢查 feature bucket、regime split、成本後 forward return 與 randomized baseline。
+- `--short-cycle-alpha-report` 是短週期研究主入口，先檢查 feature bucket、regime split、成本後 forward return、walk-forward split 與 randomized baseline。
+- 短週期 promotion gate 只判斷 signal 是否值得 deeper research；即使通過也不能直接接 paper/live strategy。
 - 先補齊可重播的 15m OHLCV、funding/OI、交易成本與可觀測 L2 context；資料不足時只輸出 missing-data diagnostics，不以日線 derivatives 代理短週期結果。
 - 依序研究 breakout、mean reversion、volatility expansion、Funding/Basis crowding、OI expansion 與 order-flow/L2 context 的 feature-to-forward-return 關係；先證實成本後 edge，才建立策略規則。
 - 每個候選固定比較 BTC-only、BTC/ETH/BNB 與擴展幣池，採用 walk-forward、randomized baseline、費用與滑價；未通過多數窗口的 net PnL、drawdown 與樣本門檻，不進 paper/live。
