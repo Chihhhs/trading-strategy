@@ -3,7 +3,7 @@ from trading_strategy.shared.trade_history import apply_closed_trade
 from trading_strategy.strategies.base import StrategyContext, signal_value
 
 from .types import BacktestConfig, BacktestStrategy
-from .exit_replay import resolve_hourly_stop_fill
+from .exit_replay import effective_stop, resolve_hourly_stop_fill
 
 
 def _append_equity(equity_curve, state, peak_balance):
@@ -246,7 +246,7 @@ class BacktestEngine:
         self.config = config
         self.strategy = strategy
 
-    def replay_hourly_exits(self, coin, hourly_bars, state):
+    def replay_hourly_exits(self, coin, hourly_bars, state, *, mode="strict"):
         open_positions = state.setdefault("positions", [])
         position = next((item for item in open_positions if item.get("coin") == coin), None)
         if position is None:
@@ -254,9 +254,23 @@ class BacktestEngine:
         diagnostics = state.setdefault("_diagnostics", {})
         for bar in hourly_bars:
             _update_trade_excursions(position, bar)
-            fill = resolve_hourly_stop_fill(position, bar)
+            stop_price = effective_stop(position)
+            fill = resolve_hourly_stop_fill(position, bar, mode=mode)
             if fill is None:
                 continue
+            event = {
+                "coin": coin,
+                "direction": position.get("direction"),
+                "stop_source": fill["reason"],
+                "stop_price": stop_price,
+                "fill_price": fill["price"],
+                "fill_type": fill["fill_type"],
+                "open_time": bar.get("open_time"),
+                "initial_risk": position.get("initial_risk"),
+                "entry": position.get("entry"),
+                "entry_atr": position.get("entry_atr"),
+            }
+            diagnostics.setdefault("exit_replay_events", []).append(event)
             _close_position(
                 state,
                 position,

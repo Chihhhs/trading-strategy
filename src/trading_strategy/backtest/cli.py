@@ -74,6 +74,10 @@ def build_parser():
     parser.add_argument("--trend-evaluation-report", action="store_true")
     parser.add_argument("--trend-exit-replay-report", action="store_true")
     parser.add_argument("--exit-replay-data-path", default="")
+    parser.add_argument("--exit-replay-mode", choices=("strict", "close_confirmed"), default="close_confirmed")
+    parser.add_argument("--stop-sweep-forward-hours", default="6,12,24,72")
+    parser.add_argument("--stop-sweep-reclaim-hours", type=int, default=24)
+    parser.add_argument("--stop-sweep-false-sweep-r", type=float, default=0.5)
     parser.add_argument("--evaluation-windows", default="120,180,240")
     parser.add_argument("--evaluation-min-trades", type=int, default=5)
     parser.add_argument("--microstructure-report", action="store_true")
@@ -244,6 +248,12 @@ def main(argv=None):
             hourly_data_map,
             config=build_config(args),
             derivatives_data_map=derivatives_data_map,
+            forward_hours=tuple(_parse_csv_values(args.stop_sweep_forward_hours, int)),
+            reclaim_hours=args.stop_sweep_reclaim_hours,
+            false_sweep_r=args.stop_sweep_false_sweep_r,
+            windows=tuple(_parse_csv_values(args.evaluation_windows, int)),
+            min_trades=max(int(args.evaluation_min_trades), 1),
+            selected_mode=args.exit_replay_mode,
         )
         for line in format_trend_exit_replay_lines(report):
             print(line)

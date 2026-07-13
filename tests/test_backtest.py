@@ -33,6 +33,8 @@ from trading_strategy.backtest.derivatives import load_derivatives_data, normali
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
 from trading_strategy.backtest.evaluation import _exit_diagnostics, run_trend_evaluation
 from trading_strategy.backtest.exit_replay import effective_stop, resolve_hourly_stop_fill
+from trading_strategy.backtest.exit_replay_report import classify_stop_sweep_event
+from trading_strategy.backtest.exit_replay_report import analyze_stop_sweep_events
 from trading_strategy.backtest.historical_fetch import fetch_binance_hourly_klines
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
@@ -119,6 +121,106 @@ class BacktestModuleTest(unittest.TestCase):
             resolve_hourly_stop_fill(short_position, {"open": 107.0, "high": 108.0, "low": 104.0}),
             {"price": 107.0, "reason": "SL", "fill_type": "gap"},
         )
+
+    def test_close_confirmed_stop_ignores_reclaimed_touch(self):
+        position = {"direction": "long", "sl": 95.0}
+        self.assertIsNone(
+            resolve_hourly_stop_fill(
+                position,
+                {"open": 100.0, "high": 101.0, "low": 94.0, "close": 98.0},
+                mode="close_confirmed",
+            )
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(
+                position,
+                {"open": 100.0, "high": 101.0, "low": 94.0, "close": 93.0},
+                mode="close_confirmed",
+            ),
+            {"price": 93.0, "reason": "SL", "fill_type": "confirmed"},
+        )
+
+    def test_close_confirmed_stop_still_exits_on_gap_open(self):
+        self.assertEqual(
+            resolve_hourly_stop_fill(
+                {"direction": "short", "sl": 105.0},
+                {"open": 107.0, "high": 108.0, "low": 101.0, "close": 103.0},
+                mode="close_confirmed",
+            ),
+            {"price": 107.0, "reason": "SL", "fill_type": "gap"},
+        )
+
+    def test_stop_sweep_classification_boundaries(self):
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": False}),
+            "ineligible",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": True, "max_favorable_r": 0.5}),
+            "false_sweep",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": True, "max_favorable_r": 0.2}),
+            "reclaimed_stop",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": False, "signed_return_r": -0.5}),
+            "valid_stop",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": False, "signed_return_r": -0.2}),
+            "unclear",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "fill_type": "gap", "reclaimed": True, "max_favorable_r": 2.0}),
+            "ineligible",
+        )
+
+    def test_stop_sweep_horizons_are_independently_eligible(self):
+        hour_ms = 60 * 60 * 1000
+        hourly = {
+            "BTC": [
+                {"open_time": index * hour_ms, "open": 100, "high": 101, "low": 99, "close": 100 + index}
+                for index in range(25)
+            ]
+        }
+        report = analyze_stop_sweep_events(
+            [{"coin": "BTC", "direction": "long", "fill_type": "stop", "open_time": 0, "fill_price": 95, "stop_price": 95, "initial_risk": 5}],
+            hourly,
+            forward_hours=(6, 12, 72),
+            reclaim_hours=24,
+        )
+
+        self.assertEqual(report["events_eligible"], 1)
+        self.assertEqual(report["forward_summary"][6]["events"], 1)
+        self.assertEqual(report["forward_summary"][72]["events"], 0)
+
+    def test_strict_exit_replay_fixture_regression(self):
+        data = load_historical_data(os.path.join(ROOT, "data", "historical_prices", "1000d_50coins.json"))
+        hourly = load_historical_data(
+            os.path.join(ROOT, "data", "historical_prices", "binance_1h_240d_BTC_ETH_BNB.json")
+        )
+        derivatives = load_derivatives_data(
+            os.path.join(ROOT, "data", "derivatives", "bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json")
+        )
+        result = PortfolioBacktester(
+            config=BacktestConfig(
+                coins=("BTC", "ETH", "BNB"),
+                max_days=240,
+                atr_trailing_enabled=True,
+                derivatives_crowding_exit_enabled=True,
+                derivatives_crowding_action="reduce",
+                derivatives_crowding_reduce_fraction=0.75,
+                fee_bps=4.5,
+                slippage_bps=2.0,
+            ),
+            derivatives_data_map=derivatives,
+            exit_replay_data_map=hourly,
+            exit_replay_mode="strict",
+        ).run(data)
+
+        self.assertEqual(result.portfolio["total_pnl_pct"], -26.7)
+        self.assertEqual(result.portfolio["max_drawdown"], 26.7)
 
     def test_exit_replay_does_not_fill_without_complete_bar_or_touch(self):
         position = {"direction": "long", "sl": 95.0}

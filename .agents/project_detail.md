@@ -359,6 +359,16 @@ STRATEGY_OVERRIDES = {
 - 差異：net `-22.2pp`，drawdown `+9.2pp`。結果與先前淘汰的 daily intrabar stop-first 一致。
 - 結論：replay 工具保留作研究基礎，但「現有 stop 改成 1h 即時執行」未通過 promotion gate，不接 paper/live。下一輪若繼續出場研究，應測 stop 結構或啟動條件，而不是再次測更快執行。
 
+## 2026-07-13 Stop Sweep / Close-confirmed Exit
+
+- `--trend-exit-replay-report` 現在固定同時比較 daily close baseline、strict 1h stop、single-bar 1h close-confirmed stop，並跑 BTC-only、BTC/ETH/BNB 的 120/180/240d frozen gate。
+- Confirmed 規則：gap open 穿越 stop 立即以 open 成交；其餘必須 1h close 穿越 stop，並以該 close 成交。沒有測 2-bar confirmation 或參數 sweep。
+- BTC/ETH/BNB 240d：daily baseline `net=-4.5% / DD=17.5%`；strict `-26.7% / 26.7%`；confirmed `-24.5% / 24.5%`。
+- Confirmed 相對 daily baseline：net `-20.0pp`、drawdown `+7.0pp`，未通過 required 240d multi gate。
+- Strict stop events 共 10 次且 72h coverage 完整：6 次 reclaimed stop、3 次 false sweep、1 次 unclear；24h 平均方向化結果僅 `+0.093R`。
+- 分組顯示 long 24h 平均 `-0.228R`、short `+0.415R`；恢復不具跨方向穩定性，不能支持共用 close-confirmation 規則。
+- 決策：close-confirmed exit 淘汰，不進 paper/live，也不改 Hyperliquid 硬 SL。後續不得以 2-bar confirmation 繼續調參。
+
 ## Agent 修改守則
 
 - 不要讓本地 state 覆蓋交易所持倉真相

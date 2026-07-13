@@ -51,7 +51,7 @@ def effective_stop_candidates(position):
     ]
 
 
-def resolve_hourly_stop_fill(position, bar):
+def resolve_hourly_stop_fill(position, bar, *, mode="strict"):
     candidates = effective_stop_candidates(position)
     if not candidates:
         return None
@@ -67,11 +67,21 @@ def resolve_hourly_stop_fill(position, bar):
     if str(position.get("direction") or "").lower() == "short":
         if open_price >= stop:
             return {"price": open_price, "reason": reason, "fill_type": "gap"}
+        if mode == "close_confirmed":
+            close = _number(bar.get("close"))
+            if close is not None and close >= stop:
+                return {"price": close, "reason": reason, "fill_type": "confirmed"}
+            return None
         if high >= stop:
             return {"price": stop, "reason": reason, "fill_type": "stop"}
         return None
     if open_price <= stop:
         return {"price": open_price, "reason": reason, "fill_type": "gap"}
+    if mode == "close_confirmed":
+        close = _number(bar.get("close"))
+        if close is not None and close <= stop:
+            return {"price": close, "reason": reason, "fill_type": "confirmed"}
+        return None
     if low <= stop:
         return {"price": stop, "reason": reason, "fill_type": "stop"}
     return None

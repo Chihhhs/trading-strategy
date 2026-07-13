@@ -22,11 +22,15 @@ class PortfolioBacktester:
         strategy=None,
         derivatives_data_map=None,
         exit_replay_data_map=None,
+        exit_replay_mode="strict",
     ):
         self.config = config
         self.strategy = strategy or resolve_strategy(config.strategy)
         self.derivatives_data_map = derivatives_data_map or {}
         self.exit_replay_data_map = normalize_hourly_data(exit_replay_data_map or {})
+        if exit_replay_mode not in ("strict", "close_confirmed"):
+            raise ValueError(f"unsupported exit replay mode: {exit_replay_mode}")
+        self.exit_replay_mode = exit_replay_mode
         self.engine = BacktestEngine(config=config, strategy=self._wrap_strategy())
 
     def _wrap_strategy(self):
@@ -120,6 +124,8 @@ class PortfolioBacktester:
                     "exit_replay_missing_hours": 0,
                     "exit_replay_stop_fills": 0,
                     "exit_replay_gap_fills": 0,
+                    "exit_replay_confirmed_fills": 0,
+                    "exit_replay_events": [],
                 }
             )
 
@@ -161,7 +167,12 @@ class PortfolioBacktester:
                     diagnostics["exit_replay_missing_hours"] += max(expected - len(valid_bars), 0)
                     replay_events.extend((bar["open_time"], coin, bar) for bar in valid_bars)
                 for _open_time, coin, bar in sorted(replay_events, key=lambda item: (item[0], item[1])):
-                    self.engine.replay_hourly_exits(coin, [bar], state)
+                    self.engine.replay_hourly_exits(
+                        coin,
+                        [bar],
+                        state,
+                        mode=self.exit_replay_mode,
+                    )
 
             for coin, _series, window, current_bar, btc_window in daily_contexts:
                 self.engine.step(

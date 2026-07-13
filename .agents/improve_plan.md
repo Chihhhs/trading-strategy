@@ -503,3 +503,29 @@ python -m compileall src tests
 - 不再重測「同一 stop 只改成更快成交」；它與已淘汰的 daily intrabar stop-first 指向相同負面結果。
 - replay engine 與固定資料保留，供下一個單一候選做公平 A/B。
 - 下一個合理候選必須改變 stop 結構或啟動條件，並先定義經濟理由與 frozen parameters；不得同時改入場。
+
+## 9. Close-confirmed Stop Result (2026-07-13)
+
+已完成 strict stop sweep 診斷與單根 1h close-confirmed frozen candidate。規則保留 gap open 即時退出，非 gap 則等 1h close 穿越 stop 並以 close 成交。
+
+主要結果：
+
+- Daily baseline：12 trades，net `-4.5%`，drawdown `17.5%`
+- Strict 1h：13 trades，net `-26.7%`，drawdown `26.7%`
+- Close-confirmed 1h：12 trades，net `-24.5%`，drawdown `24.5%`
+- Confirmed 相對 baseline：net `-20.0pp`，drawdown `+7.0pp`
+- Frozen gate：6 comparisons 中只有 1 組達最低交易樣本，且該組未改善；`required_240d_multi_pass=False`、`passes_majority_gate=False`
+
+Stop sweep 證據：
+
+- 10/10 strict stop events 具完整 72h 後續資料
+- 分類：6 reclaimed、3 false sweep、1 unclear、0 valid stop
+- 平均方向化結果：6h `+0.066R`、12h `-0.012R`、24h `+0.093R`、72h `+0.326R`
+- Long 24h 平均 `-0.228R`，short `+0.415R`；效果集中於特定方向，缺乏共用規則所需的穩定性
+
+決策：
+
+- close-confirmed stop 淘汰，不進 paper observe-only 或 live。
+- 不測 2-bar confirmation，不以同一資料繼續調 threshold。
+- live 保持既有 Trend + funding/basis position control 與交易所硬 SL。
+- 下一個出場研究必須提出不同的結構性假說；不能只是延後相同 stop 的成交。
