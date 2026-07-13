@@ -206,6 +206,20 @@ def _resolve_strategy_exit(position, current_price, config, current_index, windo
     return None
 
 
+def _update_trade_excursions(position, current_bar):
+    entry = float(position.get("entry") or 0.0)
+    if entry <= 0:
+        return
+    high = float(current_bar.get("high", current_bar.get("close", entry)))
+    low = float(current_bar.get("low", current_bar.get("close", entry)))
+    if position.get("direction") == "long":
+        position["max_favorable_price"] = max(float(position.get("max_favorable_price") or entry), high)
+        position["max_adverse_price"] = min(float(position.get("max_adverse_price") or entry), low)
+    else:
+        position["max_favorable_price"] = min(float(position.get("max_favorable_price") or entry), low)
+        position["max_adverse_price"] = max(float(position.get("max_adverse_price") or entry), high)
+
+
 class BacktestEngine:
     def __init__(self, *, config: BacktestConfig, strategy: BacktestStrategy):
         self.config = config
@@ -218,6 +232,7 @@ class BacktestEngine:
         active_position = next((pos for pos in open_positions if pos.get("coin") == coin), None)
 
         if active_position is not None:
+            _update_trade_excursions(active_position, current_bar)
             resolved_exit = _resolve_exit(active_position, current_price, current_bar, self.config)
             if resolved_exit is None:
                 resolved_exit = _resolve_strategy_exit(

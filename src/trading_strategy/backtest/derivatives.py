@@ -187,6 +187,49 @@ def should_block_signal_for_derivatives(signal, window, config, diagnostics=None
     return False
 
 
+def should_block_signal_for_oi_entry_filter(signal, window, config, diagnostics=None):
+    if not bool(getattr(config, "oi_entry_filter_enabled", False)):
+        return False
+    lookback = int(getattr(config, "oi_entry_filter_lookback", 5) or 5)
+    if not window or len(window) <= lookback:
+        _increment(diagnostics, "oi_entry_filter_missing_context_signals")
+        return True
+
+    current = window[-1]
+    previous = window[-lookback - 1]
+    current_oi = _safe_float((current or {}).get("open_interest"))
+    previous_oi = _safe_float((previous or {}).get("open_interest"))
+    current_close = _safe_float((current or {}).get("close"))
+    previous_close = _safe_float((previous or {}).get("close"))
+    if current_oi is None or previous_oi in (None, 0) or current_close is None or previous_close in (None, 0):
+        _increment(diagnostics, "oi_entry_filter_missing_context_signals")
+        return True
+
+    oi_change = (current_oi / previous_oi - 1.0) * 100.0
+    price_return = (current_close / previous_close - 1.0) * 100.0
+    direction = getattr(signal, "direction", None)
+    if isinstance(signal, dict):
+        direction = signal.get("direction")
+    direction = str(direction or "").lower()
+    price_direction = "long" if price_return > 0 else "short" if price_return < 0 else None
+    min_oi_change = float(getattr(config, "oi_entry_filter_min_change_pct", 0.0) or 0.0)
+    min_price_move = float(getattr(config, "oi_entry_filter_min_price_move_pct", 0.1) or 0.0)
+
+    if oi_change < min_oi_change or abs(price_return) < min_price_move or price_direction != direction:
+        _increment(diagnostics, "oi_entry_filter_unconfirmed_signals")
+        return True
+
+    if bool(getattr(config, "oi_entry_filter_block_late_crowded", True)):
+        funding = _safe_float((current or {}).get("funding_rate"))
+        funding_extreme = abs(float(getattr(config, "oi_entry_filter_funding_extreme_abs", 0.0005) or 0.0005))
+        if oi_change >= 10.0 and funding is not None and abs(funding) >= funding_extreme:
+            _increment(diagnostics, "oi_entry_filter_late_crowded_blocks")
+            return True
+
+    _increment(diagnostics, "oi_entry_filter_confirmed_signals")
+    return False
+
+
 def build_derivatives_monitor(data_map, *, coins, oi_lookback=5):
     rows = []
     for coin in coins:

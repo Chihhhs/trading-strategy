@@ -14,7 +14,8 @@ from .engine.protection import cancel_orphan_orders, ensure_position_protection
 from .engine.reporting import print_debug_account, print_report, verify_saved_orders
 from .engine.summary import build_run_summary, build_strategy_snapshot
 from .io import load_state, record_trade_event, save_state
-from .market import get_current_prices, load_coin_list
+from .market import get_current_prices, get_klines, load_coin_list
+from .observations import advance_signal_observations, summarize_signal_observations
 
 
 def ensure_live_perp_balance(state):
@@ -46,10 +47,24 @@ def maybe_log_config_mismatch(state):
         )
 
 
+def advance_paper_signal_observations(state, coins):
+    """Resolve paper observations only after current-cycle signal collection."""
+    if config.MODE != "paper" or not config.STRATEGY.get("signal_observation_enabled", False):
+        return []
+    symbols = {coin["name"]: coin["symbol"] for coin in coins}
+    cache = state.setdefault("_data_cache", {})
+    for observation in state.get("_signal_observations_pending", []):
+        coin = observation.get("coin")
+        if coin in cache or coin not in symbols:
+            continue
+        cache[coin] = get_klines(symbols[coin], 60) or []
+    return advance_signal_observations(state, cache)
+
+
 def run_once():
     state = load_state()
     try:
-        if config.MODE == "live" or config.get_account_address():
+        if config.MODE == "live":
             state = sync_state_with_hl_balance(state)
         ensure_live_perp_balance(state)
         maybe_log_config_mismatch(state)
@@ -141,6 +156,16 @@ def run_once():
         else:
             entry_summary = check_entries(state, coins)
 
+        for outcome in advance_paper_signal_observations(state, coins):
+            record_trade_event("trend_signal_outcome_observed", mode=config.MODE, **outcome)
+        if config.MODE == "paper" and config.STRATEGY.get("signal_observation_enabled", False):
+            entry_summary.update(
+                summarize_signal_observations(
+                    state,
+                    config.STRATEGY.get("signal_observation_min_samples", 30),
+                )
+            )
+
         entry_summary.setdefault("exchange_open_orders_count", state.get("_exchange_open_orders_count", 0))
         entry_summary.setdefault("managed_orders_count", len(state.get("managed_orders") or []))
         entry_summary.update(cancel_summary)
@@ -206,14 +231,14 @@ def main():
             sys.exit(1)
         print("Running in live mode")
     if "--reset" in args:
-        path = get_state_path(config.STATE_DIR)
+        path = get_state_path(config.get_state_dir())
         if os.path.exists(path):
             os.remove(path)
         print("State reset")
         return
     if "--report" in args:
         state = load_state()
-        if config.MODE == "live" or config.get_account_address():
+        if config.MODE == "live":
             state = sync_state_with_hl_balance(state)
         print_report(state)
         return

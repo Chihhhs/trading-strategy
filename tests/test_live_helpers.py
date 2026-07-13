@@ -230,10 +230,10 @@ class LiveHelpersTest(unittest.TestCase):
 
     def test_load_coin_list_rebuilds_cache_when_metadata_mismatch(self):
         old_mode = config.MODE
-        old_state_dir = config.STATE_DIR
+        old_live_state_dir = config.LIVE_STATE_DIR
         old_universe = config.STRATEGY.get("coin_universe")
         tmpdir = tempfile.mkdtemp()
-        config.STATE_DIR = tmpdir
+        config.LIVE_STATE_DIR = tmpdir
         config.STRATEGY["coin_universe"] = None
         config.set_mode("live")
         try:
@@ -245,7 +245,17 @@ class LiveHelpersTest(unittest.TestCase):
             self.assertEqual(coins, [{"name": "BTC", "symbol": "BTCUSDT"}])
         finally:
             config.STRATEGY["coin_universe"] = old_universe
-            config.STATE_DIR = old_state_dir
+            config.LIVE_STATE_DIR = old_live_state_dir
+            config.set_mode(old_mode)
+
+    def test_get_state_dir_separates_paper_and_live(self):
+        old_mode = config.MODE
+        try:
+            config.set_mode("paper")
+            self.assertEqual(config.get_state_dir(), config.PAPER_STATE_DIR)
+            config.set_mode("live")
+            self.assertEqual(config.get_state_dir(), config.LIVE_STATE_DIR)
+        finally:
             config.set_mode(old_mode)
 
     def test_load_coin_list_uses_configured_universe(self):

@@ -521,6 +521,7 @@ class TrendStrategy(BaseStrategy):
         position["initial_risk"] = abs(entry - sl) if entry is not None and sl is not None else None
         if exit_policy.get("name") == "trend_sl_only":
             position["entry_atr"] = raw.get("atr")
+            position["entry_adx"] = raw.get("adx")
             position["sl_stage"] = position.get("sl_stage", 0)
             position["best_price"] = position.get("best_price", entry)
             position["entry_klines_len"] = position.get("entry_klines_len") or len(context.window or [])
@@ -598,7 +599,7 @@ class TrendStrategy(BaseStrategy):
             current_atr=current_atr,
             atr_trailing_enabled=_config_value(context.config, "atr_trailing_enabled", False),
             atr_activation_r=_config_value(context.config, "atr_activation_r", 1.5),
-            atr_trailing_mult=_config_value(context.config, "atr_trailing_mult", 2.0),
+            atr_trailing_mult=self._effective_atr_trailing_mult(position, context.config),
         )
 
     def check_atr_trailing_exit(self, position, window, config):
@@ -614,8 +615,18 @@ class TrendStrategy(BaseStrategy):
             current_atr=current_atr,
             enabled=_config_value(config, "atr_trailing_enabled", False),
             atr_activation_r=_config_value(config, "atr_activation_r", 1.5),
-            atr_trailing_mult=_config_value(config, "atr_trailing_mult", 2.0),
+            atr_trailing_mult=self._effective_atr_trailing_mult(position, config),
         )
+
+    def _effective_atr_trailing_mult(self, position, config):
+        default = float(_config_value(config, "atr_trailing_mult", 2.0) or 2.0)
+        if not bool(_config_value(config, "adaptive_atr_trailing_enabled", False)):
+            return default
+        entry_adx = _safe_float((position or {}).get("entry_adx"), default=None)
+        strong_adx = float(_config_value(config, "adaptive_atr_strong_adx", 35.0) or 35.0)
+        if entry_adx is not None and entry_adx >= strong_adx:
+            return float(_config_value(config, "adaptive_atr_strong_mult", 3.0) or 3.0)
+        return float(_config_value(config, "adaptive_atr_weak_mult", 1.5) or 1.5)
 
     def check_failure_exit(self, position, window, config):
         if not window:

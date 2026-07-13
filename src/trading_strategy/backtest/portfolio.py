@@ -1,7 +1,11 @@
 from trading_strategy.shared.state import build_default_state
 
 from .alpha_overlay import apply_trend_alpha_entry_overlay
-from .derivatives import merge_derivatives_into_price_data, should_block_signal_for_derivatives
+from .derivatives import (
+    merge_derivatives_into_price_data,
+    should_block_signal_for_derivatives,
+    should_block_signal_for_oi_entry_filter,
+)
 from .data import get_coin_series
 from .engine import BacktestEngine, close_position_at_bar
 from .reporting import build_coin_results, build_portfolio_summary
@@ -34,6 +38,8 @@ class PortfolioBacktester:
                         diagnostics["btc_filtered_signals"] = int(diagnostics.get("btc_filtered_signals") or 0) + 1
                     return None
                 if should_block_signal_for_derivatives(signal, context.window, config, context.diagnostics):
+                    return None
+                if should_block_signal_for_oi_entry_filter(signal, context.window, config, context.diagnostics):
                     return None
                 return apply_trend_alpha_entry_overlay(signal, context, config)
 

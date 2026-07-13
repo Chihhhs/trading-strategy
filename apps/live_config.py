@@ -29,6 +29,11 @@ STRATEGY_OVERRIDES = {
     "derivatives_crowding_exit_enabled": True,
     "derivatives_crowding_action": "reduce",
     "derivatives_crowding_reduce_fraction": 0.75,
+    "derivatives_monitor_enabled": True,
+    # Paper-only research: capture full entry context until 30 trend signals accrue.
+    "signal_observation_enabled": True,
+    "signal_observation_min_samples": 30,
+    "signal_observation_horizons": (1, 3, 6),
     "microstructure_guard_enabled": True,
     "microstructure_guard_observe_only": True,
     "microstructure_max_spread_bps": 8.0,
