@@ -32,6 +32,8 @@ from trading_strategy.backtest.carry import (
 from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
 from trading_strategy.backtest.evaluation import _exit_diagnostics, run_trend_evaluation
+from trading_strategy.backtest.exit_replay import effective_stop, resolve_hourly_stop_fill
+from trading_strategy.backtest.historical_fetch import fetch_binance_hourly_klines
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.research import format_research_report_lines, run_research_report
@@ -63,6 +65,112 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_exit_replay_uses_most_protective_known_stop(self):
+        self.assertEqual(
+            effective_stop({"direction": "long", "sl": 95.0, "atr_trailing_stop": 98.0}),
+            98.0,
+        )
+        self.assertEqual(
+            effective_stop({"direction": "short", "sl": 105.0, "atr_trailing_stop": 102.0}),
+            102.0,
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(
+                {"direction": "long", "sl": 95.0, "atr_trailing_stop": 98.0},
+                {"open": 100.0, "high": 101.0, "low": 97.0},
+            )["reason"],
+            "ATR_TRAIL",
+        )
+
+    def test_hourly_fetch_paginates_and_deduplicates(self):
+        hour_ms = 60 * 60 * 1000
+        pages = [
+            [[0, "1", "2", "0.5", "1.5", "10"], [hour_ms, "2", "3", "1", "2.5", "20"]],
+            [[2 * hour_ms, "3", "4", "2", "3.5", "30"]],
+        ]
+
+        bars = fetch_binance_hourly_klines(
+            "BTC",
+            0,
+            3 * hour_ms,
+            request_json=lambda _url: pages.pop(0),
+            limit=2,
+        )
+
+        self.assertEqual([bar["open_time"] for bar in bars], [0, hour_ms, 2 * hour_ms])
+        self.assertEqual(bars[-1]["close"], 3.5)
+
+    def test_exit_replay_fills_stop_touch_and_gap_causally(self):
+        long_position = {"direction": "long", "sl": 95.0}
+        short_position = {"direction": "short", "sl": 105.0}
+        self.assertEqual(
+            resolve_hourly_stop_fill(long_position, {"open": 97.0, "high": 99.0, "low": 94.0}),
+            {"price": 95.0, "reason": "SL", "fill_type": "stop"},
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(long_position, {"open": 93.0, "high": 96.0, "low": 92.0}),
+            {"price": 93.0, "reason": "SL", "fill_type": "gap"},
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(short_position, {"open": 103.0, "high": 106.0, "low": 101.0}),
+            {"price": 105.0, "reason": "SL", "fill_type": "stop"},
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(short_position, {"open": 107.0, "high": 108.0, "low": 104.0}),
+            {"price": 107.0, "reason": "SL", "fill_type": "gap"},
+        )
+
+    def test_exit_replay_does_not_fill_without_complete_bar_or_touch(self):
+        position = {"direction": "long", "sl": 95.0}
+        self.assertIsNone(resolve_hourly_stop_fill(position, {"open": 100.0, "high": 101.0}))
+        self.assertIsNone(
+            resolve_hourly_stop_fill(position, {"open": 100.0, "high": 102.0, "low": 96.0})
+        )
+
+    def test_portfolio_exit_replay_uses_only_hours_after_entry_boundary(self):
+        day_ms = 24 * 60 * 60 * 1000
+        daily = {
+            "BTC": [
+                {**build_bar(100.0, index), "ts": index * day_ms}
+                for index in range(4)
+            ]
+        }
+        hourly = {
+            "BTC": [
+                {
+                    "open_time": 2 * day_ms - 60 * 60 * 1000,
+                    "open": 100.0,
+                    "high": 101.0,
+                    "low": 80.0,
+                    "close": 90.0,
+                },
+                {
+                    "open_time": 2 * day_ms,
+                    "open": 100.0,
+                    "high": 101.0,
+                    "low": 89.0,
+                    "close": 90.0,
+                },
+            ]
+        }
+
+        def signal_factory(context):
+            if context.current_bar["ts"] == day_ms:
+                return StrategySignal(direction="long", sl=95.0, tp=None, score=5, reason="TEST")
+            return None
+
+        result = PortfolioBacktester(
+            config=BacktestConfig(coins=("BTC",), min_bars=1, btc_filter_enabled=False),
+            strategy=FakeStrategy(signal_factory),
+            exit_replay_data_map=hourly,
+        ).run(daily)
+
+        self.assertEqual(result.trades[0]["exit"], 95.0)
+        self.assertEqual(result.trades[0]["exit_reason"], "SL")
+        self.assertEqual(result.portfolio["diagnostics"]["exit_replay_stop_fills"], 1)
+        self.assertEqual(result.portfolio["diagnostics"]["exit_replay_gap_fills"], 0)
+        self.assertGreater(result.portfolio["diagnostics"]["exit_replay_missing_hours"], 0)
+
     def test_closed_trade_records_initial_risk_and_r_excursions(self):
         trade = build_trade_record(
             {

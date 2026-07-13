@@ -3,6 +3,7 @@ from trading_strategy.shared.trade_history import apply_closed_trade
 from trading_strategy.strategies.base import StrategyContext, signal_value
 
 from .types import BacktestConfig, BacktestStrategy
+from .exit_replay import resolve_hourly_stop_fill
 
 
 def _append_equity(equity_curve, state, peak_balance):
@@ -163,7 +164,18 @@ def _resolve_exit(position, current_price, current_bar, config):
     return None
 
 
-def _resolve_strategy_exit(position, current_price, config, current_index, window, strategy, current_bar, state):
+def _resolve_strategy_exit(
+    position,
+    current_price,
+    config,
+    current_index,
+    window,
+    strategy,
+    current_bar,
+    state,
+    *,
+    defer_trailing_exit=False,
+):
     position["current_price"] = current_price
     bars_since_entry = max(int(current_index or 0) - int(position.get("entry_bar_index") or 0), 0)
     position["bars_since_entry"] = bars_since_entry
@@ -187,7 +199,14 @@ def _resolve_strategy_exit(position, current_price, config, current_index, windo
         if trail.get("source") == "dynamic_stage":
             position["sl"] = trail["sl"]
         else:
-            position["atr_trailing_stop"] = trail["sl"]
+            next_stop = float(trail["sl"])
+            previous_stop = position.get("atr_trailing_stop")
+            if defer_trailing_exit and previous_stop is not None:
+                if position.get("direction") == "short":
+                    next_stop = min(float(previous_stop), next_stop)
+                else:
+                    next_stop = max(float(previous_stop), next_stop)
+            position["atr_trailing_stop"] = next_stop
         dynamic_target = trail.get("dynamic_target") or {}
         if dynamic_target.get("stage") is not None:
             position["sl_stage"] = dynamic_target.get("stage")
@@ -201,7 +220,9 @@ def _resolve_strategy_exit(position, current_price, config, current_index, windo
             adjustment,
             exit_time=str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
         )
-    if evaluation.get("exit_reason"):
+    if evaluation.get("exit_reason") and not (
+        defer_trailing_exit and evaluation.get("exit_reason") in ("ATR_TRAIL", "SL")
+    ):
         return current_price, evaluation["exit_reason"]
     return None
 
@@ -225,7 +246,31 @@ class BacktestEngine:
         self.config = config
         self.strategy = strategy
 
-    def step(self, coin, current_bar, window, btc_window, state):
+    def replay_hourly_exits(self, coin, hourly_bars, state):
+        open_positions = state.setdefault("positions", [])
+        position = next((item for item in open_positions if item.get("coin") == coin), None)
+        if position is None:
+            return None
+        diagnostics = state.setdefault("_diagnostics", {})
+        for bar in hourly_bars:
+            _update_trade_excursions(position, bar)
+            fill = resolve_hourly_stop_fill(position, bar)
+            if fill is None:
+                continue
+            _close_position(
+                state,
+                position,
+                fill["price"],
+                fill["reason"],
+                exit_time=str(bar.get("time") or bar.get("open_time") or ""),
+            )
+            open_positions.remove(position)
+            key = f"exit_replay_{fill['fill_type']}_fills"
+            diagnostics[key] = int(diagnostics.get(key) or 0) + 1
+            return fill
+        return None
+
+    def step(self, coin, current_bar, window, btc_window, state, *, defer_stop_exits=False):
         open_positions = state.setdefault("positions", [])
         state["_bar_index"] = len(window) - 1
         current_price = float(current_bar["close"])
@@ -233,7 +278,9 @@ class BacktestEngine:
 
         if active_position is not None:
             _update_trade_excursions(active_position, current_bar)
-            resolved_exit = _resolve_exit(active_position, current_price, current_bar, self.config)
+            resolved_exit = None
+            if not defer_stop_exits:
+                resolved_exit = _resolve_exit(active_position, current_price, current_bar, self.config)
             if resolved_exit is None:
                 resolved_exit = _resolve_strategy_exit(
                     active_position,
@@ -244,6 +291,7 @@ class BacktestEngine:
                     self.strategy,
                     current_bar,
                     state,
+                    defer_trailing_exit=defer_stop_exits,
                 )
             if resolved_exit is not None:
                 exit_price, exit_reason = resolved_exit

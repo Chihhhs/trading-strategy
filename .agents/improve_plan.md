@@ -485,3 +485,21 @@ python -m compileall src tests
 - 改 order 價格正規化時，要同時看 entry order 與 trigger order
 - 改 log schema 時，要同步更新測試與文檔
 - 若觀察到 log 與 state 不一致，先查 `save_state()` 的持久化裁切邏輯
+
+## 8. Trend Exit Replay Result (2026-07-13)
+
+已完成日線訊號、1h 僅重播出場的 240 天研究工具與固定 fixture。BTC/ETH/BNB 的 1h coverage 為 100%，回測保留 `fee=4.5bps`、`slippage=2bps`、position control 與 ATR trail。
+
+結果：
+
+- daily close-fill baseline：12 trades，net `-4.5%`，max drawdown `17.5%`
+- causal 1h replay：13 trades，net `-26.7%`，max drawdown `26.7%`
+- delta：net `-22.2pp`，drawdown `+9.2pp`
+- 1h replay 共 10 次 stop fill、0 次 gap fill，沒有 coverage 缺口
+
+決策：
+
+- 不將 1h stop replay 接入 paper/live。
+- 不再重測「同一 stop 只改成更快成交」；它與已淘汰的 daily intrabar stop-first 指向相同負面結果。
+- replay engine 與固定資料保留，供下一個單一候選做公平 A/B。
+- 下一個合理候選必須改變 stop 結構或啟動條件，並先定義經濟理由與 frozen parameters；不得同時改入場。

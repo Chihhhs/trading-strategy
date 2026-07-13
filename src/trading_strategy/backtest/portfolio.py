@@ -8,16 +8,25 @@ from .derivatives import (
 )
 from .data import get_coin_series
 from .engine import BacktestEngine, close_position_at_bar
+from .exit_replay import DAY_MS, HOUR_MS, is_replayable_hourly_bar, normalize_hourly_data, timestamp_ms
 from .reporting import build_coin_results, build_portfolio_summary
 from .strategies import is_signal_blocked_by_btc_filter, resolve_strategy
 from .types import BacktestConfig, BacktestResult
 
 
 class PortfolioBacktester:
-    def __init__(self, *, config: BacktestConfig, strategy=None, derivatives_data_map=None):
+    def __init__(
+        self,
+        *,
+        config: BacktestConfig,
+        strategy=None,
+        derivatives_data_map=None,
+        exit_replay_data_map=None,
+    ):
         self.config = config
         self.strategy = strategy or resolve_strategy(config.strategy)
         self.derivatives_data_map = derivatives_data_map or {}
+        self.exit_replay_data_map = normalize_hourly_data(exit_replay_data_map or {})
         self.engine = BacktestEngine(config=config, strategy=self._wrap_strategy())
 
     def _wrap_strategy(self):
@@ -103,6 +112,16 @@ class PortfolioBacktester:
         state["_config"] = self.config
         state["_diagnostics"] = {}
         state["_diagnostics"].update(merge_diagnostics)
+        if self.exit_replay_data_map:
+            state["_diagnostics"].update(
+                {
+                    "exit_replay_expected_hours": 0,
+                    "exit_replay_available_hours": 0,
+                    "exit_replay_missing_hours": 0,
+                    "exit_replay_stop_fills": 0,
+                    "exit_replay_gap_fills": 0,
+                }
+            )
 
         max_len = max((len(series) for series in normalized.values()), default=0)
         equity_curve = [self.config.initial_capital]
@@ -110,6 +129,7 @@ class PortfolioBacktester:
         state["_diagnostics"]["missing_data_coins"] = [coin for coin, series in normalized.items() if not series]
 
         for index in range(self.config.min_bars, max_len):
+            daily_contexts = []
             for coin in self.config.coins:
                 series = normalized.get(coin, [])
                 if len(series) <= index:
@@ -117,7 +137,41 @@ class PortfolioBacktester:
                 window = series[: index + 1]
                 current_bar = window[-1]
                 btc_window = btc_series[: index + 1] if len(btc_series) > index else btc_series
-                self.engine.step(coin, current_bar, window, btc_window, state)
+                daily_contexts.append((coin, series, window, current_bar, btc_window))
+
+            if self.exit_replay_data_map:
+                replay_events = []
+                for coin, series, _window, current_bar, _btc_window in daily_contexts:
+                    current_open = timestamp_ms(current_bar)
+                    previous_open = timestamp_ms(series[index - 1]) if index > 0 else None
+                    if current_open is None or previous_open is None:
+                        continue
+                    start = previous_open + DAY_MS
+                    end = current_open + DAY_MS
+                    interval_bars = [
+                        bar
+                        for bar in self.exit_replay_data_map.get(coin, [])
+                        if start <= bar["open_time"] < end
+                    ]
+                    valid_bars = [bar for bar in interval_bars if is_replayable_hourly_bar(bar)]
+                    expected = max(int((end - start) / HOUR_MS), 0)
+                    diagnostics = state["_diagnostics"]
+                    diagnostics["exit_replay_expected_hours"] += expected
+                    diagnostics["exit_replay_available_hours"] += len(valid_bars)
+                    diagnostics["exit_replay_missing_hours"] += max(expected - len(valid_bars), 0)
+                    replay_events.extend((bar["open_time"], coin, bar) for bar in valid_bars)
+                for _open_time, coin, bar in sorted(replay_events, key=lambda item: (item[0], item[1])):
+                    self.engine.replay_hourly_exits(coin, [bar], state)
+
+            for coin, _series, window, current_bar, btc_window in daily_contexts:
+                self.engine.step(
+                    coin,
+                    current_bar,
+                    window,
+                    btc_window,
+                    state,
+                    defer_stop_exits=bool(self.exit_replay_data_map),
+                )
             current_balance = float(state.get("balance") or 0.0)
             equity_curve.append(current_balance)
             peak_balance = max(peak_balance, current_balance)

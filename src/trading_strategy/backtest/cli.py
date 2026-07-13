@@ -23,6 +23,8 @@ from .carry import (
 from .data import DATA_PATH, DEFAULT_COINS, load_historical_data
 from .derivatives import load_derivatives_data
 from .evaluation import format_trend_evaluation_lines, run_trend_evaluation
+from .exit_replay import normalize_hourly_data
+from .exit_replay_report import format_trend_exit_replay_lines, run_trend_exit_replay_report
 from .microstructure import (
     build_microstructure_guard_outcome_report,
     format_microstructure_guard_outcome_lines,
@@ -70,6 +72,8 @@ def build_parser():
     parser.add_argument("--compare-strategies", default="")
     parser.add_argument("--research-report", action="store_true")
     parser.add_argument("--trend-evaluation-report", action="store_true")
+    parser.add_argument("--trend-exit-replay-report", action="store_true")
+    parser.add_argument("--exit-replay-data-path", default="")
     parser.add_argument("--evaluation-windows", default="120,180,240")
     parser.add_argument("--evaluation-min-trades", type=int, default=5)
     parser.add_argument("--microstructure-report", action="store_true")
@@ -228,6 +232,22 @@ def main(argv=None):
             print(line)
         return report
     data_map = load_historical_data(args.data_path)
+    if args.trend_exit_replay_report:
+        if args.strategy not in ("trend", "trend_sl_only"):
+            parser.error("--trend-exit-replay-report supports only trend strategies")
+        if not args.exit_replay_data_path:
+            parser.error("--exit-replay-data-path is required with --trend-exit-replay-report")
+        with open(args.exit_replay_data_path, "r", encoding="utf-8") as handle:
+            hourly_data_map = normalize_hourly_data(json.load(handle))
+        report = run_trend_exit_replay_report(
+            data_map,
+            hourly_data_map,
+            config=build_config(args),
+            derivatives_data_map=derivatives_data_map,
+        )
+        for line in format_trend_exit_replay_lines(report):
+            print(line)
+        return report
     if args.trend_evaluation_report:
         candidate_config = build_config(args)
         baseline_config = replace(candidate_config, adaptive_atr_trailing_enabled=False)

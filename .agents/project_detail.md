@@ -29,6 +29,7 @@
 - live microstructure guard 目前為 observe-only，用於記錄 spread/depth/imbalance，不強制阻擋 entry
 - backtest 支援 `--trend-evaluation-report`：固定比較多個窗口與幣池，輸出成本後績效、幣種貢獻、價格相關性與出場分組
 - closed trade 會保留 `initial_risk`、`mfe_r`、`mae_r`、`best_close_r`，供日線 trend 出場研究區分 intrabar excursion 與收盤可執行的進展
+- backtest 支援 `--trend-exit-replay-report`：日線只產生訊號與更新 stop，1h 僅重播前一個日線收盤已知的停損成交；此能力是研究工具，不改 live/paper
 - adaptive ATR trail 是 backtest/paper 候選變體，依入場 ADX 使用較寬或較緊的 trail；預設關閉，未通過評估 gate 不接 live
 - paper mode 可觀測 funding/basis/Bybit OI 與每個 trend signal 的完整 L2 context，寫入 `trend_signal_observed`；後續 K 線到位後寫入 1/3/6 bar 的 `trend_signal_outcome_observed`，不參與 entry；live mode 不會呼叫這個 OI/L2 研究 monitor
 - paper observation 以 30 個去重 trend signals 為最低樣本門檻；`run_summary` 顯示已累積、pending 與剩餘樣本數，未達門檻不得將 OI/L2 觀測升級為 live guard
@@ -42,6 +43,7 @@
 - `python apps/runners/paper_runner.py`
 - `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
 - `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-adaptive-atr-trail --trend-evaluation-report --fee-bps 4.5 --slippage-bps 2`
+- `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --fee-bps 4.5 --slippage-bps 2 --trend-exit-replay-report --exit-replay-data-path data/historical_prices/binance_1h_240d_BTC_ETH_BNB.json`
 - `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
 - `python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid trend,intraday_momentum`
 
@@ -347,6 +349,15 @@ STRATEGY_OVERRIDES = {
 - 四幣同設定：`trades=2324`, gross `pnl=-59.1%`, `drawdown=77.5%`
 - 費用估算：BTC-only turnover 約 `1866.7x` 起始資金，tier-0 taker fee drag 約 `84.0%`
 - 結論：`intraday_momentum` 目前只能視為接線與研究 baseline，不能上 paper/live。
+
+## 2026-07-13 Trend 1h Exit Replay
+
+- 固定資料：`data/historical_prices/binance_1h_240d_BTC_ETH_BNB.json`，BTC/ETH/BNB 各 5,760 根，對齊日線 2025-11-03 到 2026-06-30，coverage 100%。
+- 因果規則：日線收盤更新訊號與 stop；下一個日線區間只使用前一收盤已知 stop。跳空穿越 stop 以 1h open 成交，否則觸及時以 stop 成交。
+- baseline：12 trades，net `-4.5%`，drawdown `17.5%`。
+- 1h replay：13 trades，net `-26.7%`，drawdown `26.7%`，10 次 stop fill、0 次 gap fill。
+- 差異：net `-22.2pp`，drawdown `+9.2pp`。結果與先前淘汰的 daily intrabar stop-first 一致。
+- 結論：replay 工具保留作研究基礎，但「現有 stop 改成 1h 即時執行」未通過 promotion gate，不接 paper/live。下一輪若繼續出場研究，應測 stop 結構或啟動條件，而不是再次測更快執行。
 
 ## Agent 修改守則
 
