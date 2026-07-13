@@ -32,9 +32,10 @@ from trading_strategy.backtest.carry import (
 from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
 from trading_strategy.backtest.evaluation import _exit_diagnostics, run_trend_evaluation
-from trading_strategy.backtest.exit_replay import effective_stop, resolve_hourly_stop_fill
+from trading_strategy.backtest.exit_replay import effective_stop, resolve_hourly_stop_fill, timestamp_iso
 from trading_strategy.backtest.exit_replay_report import classify_stop_sweep_event
 from trading_strategy.backtest.exit_replay_report import analyze_stop_sweep_events
+from trading_strategy.backtest.live_like import build_mark_to_market_point, classify_stop_kind, drawdown_diagnostics
 from trading_strategy.backtest.historical_fetch import fetch_binance_hourly_klines
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
@@ -67,6 +68,65 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_exit_replay_cli_defaults_to_strict_canonical_mode(self):
+        args = cli.build_parser().parse_args([])
+        self.assertEqual(args.exit_replay_mode, "strict")
+
+    def test_timestamp_iso_normalizes_numeric_and_iso_values(self):
+        self.assertEqual(timestamp_iso({"ts": 0}), "1970-01-01T00:00:00+00:00")
+        self.assertEqual(
+            timestamp_iso({"time": "2026-01-01T00:00:00Z"}),
+            "2026-01-01T00:00:00+00:00",
+        )
+
+    def test_mark_to_market_point_includes_unrealized_pnl_and_liquidation_cost(self):
+        point = build_mark_to_market_point(
+            balance=1000.0,
+            positions=[
+                {"coin": "BTC", "direction": "long", "entry": 100.0, "size": 2.0},
+                {"coin": "ETH", "direction": "short", "entry": 50.0, "size": 1.0},
+            ],
+            prices={"BTC": 110.0, "ETH": 45.0},
+            timestamp_ms=3600000,
+            fee_bps=5.0,
+            slippage_bps=0.0,
+        )
+        self.assertAlmostEqual(point["unrealized_pnl"], 25.0)
+        self.assertAlmostEqual(point["estimated_exit_cost"], 0.2575)
+        self.assertAlmostEqual(point["equity"], 1024.7425)
+        self.assertEqual(point["open_positions"], 2)
+        self.assertEqual(point["gross_exposure"], 265.0)
+
+    def test_mark_to_market_point_rejects_missing_position_price(self):
+        self.assertIsNone(
+            build_mark_to_market_point(
+                balance=1000.0,
+                positions=[{"coin": "BTC", "direction": "long", "entry": 100.0, "size": 1.0}],
+                prices={},
+                timestamp_ms=0,
+            )
+        )
+
+    def test_drawdown_diagnostics_reports_peak_trough_and_duration(self):
+        report = drawdown_diagnostics(
+            [
+                {"timestamp_ms": 0, "equity": 100.0},
+                {"timestamp_ms": 3600000, "equity": 120.0},
+                {"timestamp_ms": 7200000, "equity": 90.0},
+                {"timestamp_ms": 10800000, "equity": 110.0},
+            ]
+        )
+        self.assertEqual(report["max_drawdown_pct"], 25.0)
+        self.assertEqual(report["peak_timestamp_ms"], 3600000)
+        self.assertEqual(report["trough_timestamp_ms"], 7200000)
+        self.assertEqual(report["drawdown_duration_hours"], 2.0)
+
+    def test_stop_kind_distinguishes_initial_dynamic_and_atr(self):
+        self.assertEqual(classify_stop_kind({"sl_stage": 0}, "SL"), "initial")
+        self.assertEqual(classify_stop_kind({"sl_stage": 1}, "SL"), "breakeven")
+        self.assertEqual(classify_stop_kind({"sl_stage": 2}, "SL"), "half_r")
+        self.assertEqual(classify_stop_kind({"sl_stage": 2}, "ATR_TRAIL"), "atr")
+
     def test_exit_replay_uses_most_protective_known_stop(self):
         self.assertEqual(
             effective_stop({"direction": "long", "sl": 95.0, "atr_trailing_stop": 98.0}),
@@ -221,6 +281,16 @@ class BacktestModuleTest(unittest.TestCase):
 
         self.assertEqual(result.portfolio["total_pnl_pct"], -26.7)
         self.assertEqual(result.portfolio["max_drawdown"], 26.7)
+        self.assertEqual(result.portfolio["closed_balance_max_drawdown"], 26.7)
+        self.assertAlmostEqual(result.portfolio["mark_to_market_max_drawdown"], 26.7169)
+        self.assertEqual(result.portfolio["mark_to_market"]["points"], 4560)
+        self.assertEqual(result.portfolio["mark_to_market"]["daily_points"], 190)
+        self.assertEqual(result.portfolio["mark_to_market"]["max_open_positions"], 2)
+        self.assertTrue(all(trade["entry_time"] for trade in result.trades))
+        self.assertTrue(all(trade["exit_time"] for trade in result.trades))
+        events = result.portfolio["diagnostics"]["exit_replay_events"]
+        self.assertEqual({event["stop_kind"] for event in events}, {"initial", "breakeven"})
+        self.assertTrue(all(event["stop_effective_time"] and event["trigger_time"] for event in events))
 
     def test_exit_replay_does_not_fill_without_complete_bar_or_touch(self):
         position = {"direction": "long", "sl": 95.0}
@@ -997,6 +1067,9 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(result.portfolio["diagnostics"]["derivatives_crowding_reduce_long_signals"], 1)
         reduce_trade = next(trade for trade in result.trades if trade["exit_reason"] == "DERIVATIVES_CROWDING_REDUCE")
         final_trade = result.trades[-1]
+        self.assertTrue(reduce_trade["is_partial"])
+        self.assertFalse(final_trade["is_partial"])
+        self.assertEqual(reduce_trade["position_id"], final_trade["position_id"])
         self.assertLess(reduce_trade["size"], reduce_trade["size"] + final_trade["size"])
         self.assertEqual(round(reduce_trade["size"], 6), round(final_trade["size"], 6))
 

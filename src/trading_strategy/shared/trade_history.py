@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def _safe_float(value, default=None):
@@ -12,7 +12,8 @@ def _parse_iso_datetime(value):
     if not value:
         return None
     try:
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
+        return parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed
     except (TypeError, ValueError):
         return None
 
@@ -26,7 +27,7 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
     pnl = (exit_px - entry) * size if direction == "long" else (entry - exit_px) * size
 
     entry_time = (pos or {}).get("entry_time")
-    resolved_exit_time = exit_time or datetime.now().isoformat()
+    resolved_exit_time = exit_time or ""
     entry_dt = _parse_iso_datetime(entry_time)
     exit_dt = _parse_iso_datetime(resolved_exit_time)
     hold_minutes = None
@@ -87,6 +88,8 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         "exit_reason": exit_reason,
         "exit_policy": ((pos or {}).get("exit_policy") or {}).get("name"),
         "position_source": (pos or {}).get("position_source"),
+        "position_id": (pos or {}).get("position_id"),
+        "is_partial": bool(exit_context.get("is_partial")),
         "close_status": exit_context.get("close_status"),
         "close_reason_source": exit_context.get("close_reason_source"),
         "close_submitted_at": (pos or {}).get("close_submitted_at"),

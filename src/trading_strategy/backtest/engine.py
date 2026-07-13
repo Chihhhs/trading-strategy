@@ -3,7 +3,8 @@ from trading_strategy.shared.trade_history import apply_closed_trade
 from trading_strategy.strategies.base import StrategyContext, signal_value
 
 from .types import BacktestConfig, BacktestStrategy
-from .exit_replay import effective_stop, resolve_hourly_stop_fill
+from .exit_replay import effective_stop, resolve_hourly_stop_fill, timestamp_iso
+from .live_like import classify_stop_kind
 
 
 def _append_equity(equity_curve, state, peak_balance):
@@ -29,7 +30,7 @@ def _build_position(coin, signal, current_price, current_bar, state, config, str
         "size": size,
         "tp": signal_value(signal, "tp"),
         "sl": signal_value(signal, "sl"),
-        "entry_time": str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
+        "entry_time": timestamp_iso(current_bar, offset_ms=state.get("_bar_time_offset_ms", 0)),
         "entry_reason": signal_value(signal, "reason", ""),
         "signal_reason": signal_value(signal, "reason", ""),
         "signal_score": signal_value(signal, "score"),
@@ -37,6 +38,7 @@ def _build_position(coin, signal, current_price, current_bar, state, config, str
         "entry_bar_index": int(state.get("_bar_index") or 0),
         "strategy_name": getattr(strategy, "name", config.strategy),
     }
+    position["position_id"] = f"{coin}:{position['direction']}:{position['entry_time']}:{position['entry_bar_index']}"
     position["exit_policy"] = strategy.build_exit_policy(signal=signal, position=position)
     return strategy.initialize_position(
         position,
@@ -68,7 +70,7 @@ def _estimate_transaction_cost(position, exit_price, config):
     return (entry * size + exit_px * size) * rate
 
 
-def _close_position(state, position, exit_price, exit_reason, *, exit_time=None):
+def _close_position(state, position, exit_price, exit_reason, *, exit_time=None, is_partial=False):
     trade = apply_closed_trade(
         state,
         position,
@@ -76,7 +78,7 @@ def _close_position(state, position, exit_price, exit_reason, *, exit_time=None)
         exit_reason,
         exit_time=exit_time,
         update_balance=True,
-        exit_context={"close_status": "simulated"},
+        exit_context={"close_status": "simulated", "is_partial": bool(is_partial)},
         transaction_cost=_estimate_transaction_cost(position, exit_price, state.get("_config")),
     )
     return trade
@@ -100,6 +102,7 @@ def _reduce_position(state, position, current_price, adjustment, *, exit_time=No
         current_price,
         reason,
         exit_time=exit_time,
+        is_partial=True,
     )
     remaining_size = max(current_size - reduce_size, 0.0)
     position["size"] = remaining_size
@@ -116,7 +119,7 @@ def close_position_at_bar(state, position, current_bar, exit_reason="EOD"):
         position,
         float(current_bar["close"]),
         exit_reason,
-        exit_time=str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
+        exit_time=timestamp_iso(current_bar, offset_ms=state.get("_bar_time_offset_ms", 0)),
     )
 
 
@@ -207,6 +210,10 @@ def _resolve_strategy_exit(
                 else:
                     next_stop = max(float(previous_stop), next_stop)
             position["atr_trailing_stop"] = next_stop
+        position["stop_effective_time"] = timestamp_iso(
+            current_bar,
+            offset_ms=state.get("_bar_time_offset_ms", 0),
+        )
         dynamic_target = trail.get("dynamic_target") or {}
         if dynamic_target.get("stage") is not None:
             position["sl_stage"] = dynamic_target.get("stage")
@@ -218,7 +225,7 @@ def _resolve_strategy_exit(
             position,
             current_price,
             adjustment,
-            exit_time=str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
+            exit_time=timestamp_iso(current_bar, offset_ms=state.get("_bar_time_offset_ms", 0)),
         )
     if evaluation.get("exit_reason") and not (
         defer_trailing_exit and evaluation.get("exit_reason") in ("ATR_TRAIL", "SL")
@@ -269,6 +276,11 @@ class BacktestEngine:
                 "initial_risk": position.get("initial_risk"),
                 "entry": position.get("entry"),
                 "entry_atr": position.get("entry_atr"),
+                "sl_stage": int(position.get("sl_stage") or 0),
+                "stop_kind": classify_stop_kind(position, fill["reason"]),
+                "stop_effective_time": position.get("stop_effective_time") or position.get("entry_time"),
+                "trigger_time": timestamp_iso(bar),
+                "position_id": position.get("position_id"),
             }
             diagnostics.setdefault("exit_replay_events", []).append(event)
             _close_position(
@@ -276,7 +288,7 @@ class BacktestEngine:
                 position,
                 fill["price"],
                 fill["reason"],
-                exit_time=str(bar.get("time") or bar.get("open_time") or ""),
+                exit_time=timestamp_iso(bar),
             )
             open_positions.remove(position)
             key = f"exit_replay_{fill['fill_type']}_fills"
@@ -314,7 +326,7 @@ class BacktestEngine:
                     active_position,
                     exit_price,
                     exit_reason,
-                    exit_time=str(current_bar.get("time") or current_bar.get("timestamp") or current_bar.get("date") or ""),
+                    exit_time=timestamp_iso(current_bar, offset_ms=state.get("_bar_time_offset_ms", 0)),
                 )
                 open_positions.remove(active_position)
                 active_position = None

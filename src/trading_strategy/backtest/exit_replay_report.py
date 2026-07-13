@@ -28,27 +28,108 @@ def _avg(trades, key):
     return round(sum(values) / len(values), 3) if values else None
 
 
+def _position_lifecycles(trades):
+    grouped = {}
+    for index, trade in enumerate(trades or []):
+        key = trade.get("position_id") or f"legacy:{index}"
+        row = grouped.setdefault(
+            key,
+            {
+                "position_id": key,
+                "coin": trade.get("coin"),
+                "direction": trade.get("direction"),
+                "pnl": 0.0,
+                "cost": 0.0,
+                "partial_reductions": 0,
+                "exit_reason": None,
+                "mfe_r": None,
+                "mae_r": None,
+                "best_close_r": None,
+                "hold_bars": None,
+            },
+        )
+        row["pnl"] += float(trade.get("pnl") or 0.0)
+        row["cost"] += float(trade.get("cost") or 0.0)
+        if trade.get("is_partial"):
+            row["partial_reductions"] += 1
+        else:
+            row["exit_reason"] = trade.get("exit_reason")
+            for field in ("mfe_r", "mae_r", "best_close_r", "hold_bars"):
+                row[field] = trade.get(field)
+    return list(grouped.values())
+
+
+def _group_lifecycles(rows, key):
+    result = {}
+    for value in sorted({str(row.get(key) or "unknown") for row in rows}):
+        subset = [row for row in rows if str(row.get(key) or "unknown") == value]
+        result[value] = {
+            "positions": len(subset),
+            "net_pnl": round(sum(row["pnl"] for row in subset), 2),
+            "expectancy": round(sum(row["pnl"] for row in subset) / len(subset), 2),
+            "avg_mfe_r": _avg(subset, "mfe_r"),
+            "avg_mae_r": _avg(subset, "mae_r"),
+            "avg_best_close_r": _avg(subset, "best_close_r"),
+            "avg_hold_bars": _avg(subset, "hold_bars"),
+        }
+    return result
+
+
+def _winner_concentration(rows, initial_capital):
+    ordered = sorted((float(row.get("pnl") or 0.0) for row in rows), reverse=True)
+    net = sum(ordered)
+    positive = sum(value for value in ordered if value > 0)
+    largest = ordered[0] if ordered else 0.0
+    return {
+        "largest_winner": round(max(largest, 0.0), 2),
+        "largest_winner_pct_of_positive_pnl": round(max(largest, 0.0) / positive * 100, 1) if positive else None,
+        "largest_trade_pct_of_net_pnl": round(largest / net * 100, 1) if net else None,
+        "net_pnl_without_top_1_pct": round(sum(ordered[1:]) / initial_capital * 100, 1) if initial_capital else None,
+        "net_pnl_without_top_2_pct": round(sum(ordered[2:]) / initial_capital * 100, 1) if initial_capital else None,
+    }
+
+
 def _summary(result):
     portfolio = result.portfolio
     diagnostics = portfolio.get("diagnostics") or {}
-    trades = int(portfolio["trades"] or 0)
+    lifecycles = _position_lifecycles(result.trades)
+    trades = len(lifecycles)
+    wins = sum(1 for row in lifecycles if row["pnl"] > 0)
+    stop_kind_by_position = {
+        event.get("position_id"): event.get("stop_kind")
+        for event in diagnostics.get("exit_replay_events") or []
+        if event.get("position_id")
+    }
+    for row in lifecycles:
+        row["stop_kind"] = stop_kind_by_position.get(row["position_id"], "not_hard_stop")
     return {
         "trades": trades,
-        "win_rate": portfolio["win_rate"],
+        "execution_records": len(result.trades),
+        "partial_reductions": sum(1 for trade in result.trades if trade.get("is_partial")),
+        "win_rate": round(wins / trades * 100, 1) if trades else 0.0,
         "net_pnl_pct": portfolio["total_pnl_pct"],
         "gross_pnl_pct": portfolio["gross_pnl_pct"],
         "cost_pct": portfolio["total_cost_pct"],
-        "max_drawdown": portfolio["max_drawdown"],
+        "max_drawdown": float(portfolio.get("mark_to_market_max_drawdown") or portfolio["max_drawdown"]),
+        "closed_balance_drawdown": portfolio.get("closed_balance_max_drawdown", portfolio["max_drawdown"]),
+        "mark_to_market": portfolio.get("mark_to_market"),
         "score": portfolio["score"],
         "average_trade_pct": round(float(portfolio["total_pnl_pct"]) / trades, 3) if trades else 0.0,
-        "avg_hold_bars": portfolio["avg_hold_bars"],
-        "exit_reasons": portfolio["exit_reason_counts"],
-        "avg_mfe_r": _avg(result.trades, "mfe_r"),
-        "avg_mae_r": _avg(result.trades, "mae_r"),
-        "avg_best_close_r": _avg(result.trades, "best_close_r"),
+        "avg_hold_bars": _avg(lifecycles, "hold_bars") or 0.0,
+        "exit_reasons": dict(Counter(row.get("exit_reason") or "unknown" for row in lifecycles)),
+        "avg_mfe_r": _avg(lifecycles, "mfe_r"),
+        "avg_mae_r": _avg(lifecycles, "mae_r"),
+        "avg_best_close_r": _avg(lifecycles, "best_close_r"),
         "stop_fills": int(diagnostics.get("exit_replay_stop_fills") or 0),
         "gap_fills": int(diagnostics.get("exit_replay_gap_fills") or 0),
         "confirmed_fills": int(diagnostics.get("exit_replay_confirmed_fills") or 0),
+        "breakdown": {
+            "coin": _group_lifecycles(lifecycles, "coin"),
+            "direction": _group_lifecycles(lifecycles, "direction"),
+            "stop_kind": _group_lifecycles(lifecycles, "stop_kind"),
+            "exit_reason": _group_lifecycles(lifecycles, "exit_reason"),
+        },
+        "winner_concentration": _winner_concentration(lifecycles, float(portfolio["starting_balance"])),
     }
 
 
@@ -57,12 +138,14 @@ def _coverage(result):
     expected = int(diagnostics.get("exit_replay_expected_hours") or 0)
     available = int(diagnostics.get("exit_replay_available_hours") or 0)
     missing = int(diagnostics.get("exit_replay_missing_hours") or 0)
+    mark_missing = int(diagnostics.get("mark_to_market_missing_points") or 0)
     return {
         "expected_hours": expected,
         "available_hours": available,
         "missing_hours": missing,
-        "eligible": expected > 0 and missing == 0,
+        "eligible": expected > 0 and missing == 0 and mark_missing == 0,
         "coverage_pct": round(available / expected * 100, 2) if expected else 0.0,
+        "mark_to_market_missing_points": mark_missing,
     }
 
 
@@ -214,7 +297,8 @@ def _comparison(data_map, hourly_data_map, derivatives_data_map, config):
     baseline_summary = _summary(baseline)
     strict_summary = _summary(strict)
     confirmed_summary = _summary(confirmed)
-    coverage = _coverage(confirmed)
+    strict_coverage = _coverage(strict)
+    confirmed_coverage = _coverage(confirmed)
     trade_ratio = confirmed_summary["trades"] / baseline_summary["trades"] if baseline_summary["trades"] else 0.0
     return {
         "coins": config.coins,
@@ -222,7 +306,9 @@ def _comparison(data_map, hourly_data_map, derivatives_data_map, config):
         "daily_close_baseline": baseline_summary,
         "strict_1h_stop": strict_summary,
         "confirmed_1h_stop": confirmed_summary,
-        "coverage": coverage,
+        "coverage": strict_coverage,
+        "strict_coverage": strict_coverage,
+        "confirmed_coverage": confirmed_coverage,
         "candidate_trade_ratio": round(trade_ratio, 4),
         "candidate_vs_baseline": {
             "net_pnl_pct": round(confirmed_summary["net_pnl_pct"] - baseline_summary["net_pnl_pct"], 2),
@@ -248,7 +334,7 @@ def run_trend_exit_replay_report(
     windows=DEFAULT_WINDOWS,
     universes=DEFAULT_UNIVERSES,
     min_trades=5,
-    selected_mode="close_confirmed",
+    selected_mode="strict",
 ):
     primary = _comparison(data_map, hourly_data_map, derivatives_data_map, config)
     strict_events = primary["results"]["strict"].portfolio.get("diagnostics", {}).get("exit_replay_events", [])
@@ -277,16 +363,9 @@ def run_trend_exit_replay_report(
         row
         for row in comparisons
         if row["coverage"]["eligible"]
-        and row["daily_close_baseline"]["trades"] >= min_trades
-        and row["confirmed_1h_stop"]["trades"] >= min_trades
-        and row["candidate_trade_ratio"] >= 0.8
+        and row["strict_1h_stop"]["trades"] >= min_trades
     ]
-    non_worse = [
-        row
-        for row in eligible
-        if row["candidate_vs_baseline"]["net_pnl_pct"] >= 0
-        and row["candidate_vs_baseline"]["max_drawdown"] <= 0
-    ]
+    positive = [row for row in eligible if row["strict_1h_stop"]["net_pnl_pct"] > 0]
     required = next(
         (row for row in comparisons if row["window"] == 240 and row["coins"] == ("BTC", "ETH", "BNB")),
         None,
@@ -294,22 +373,28 @@ def run_trend_exit_replay_report(
     required_pass = bool(
         required
         and required in eligible
-        and required["candidate_vs_baseline"]["net_pnl_pct"] >= 0
-        and required["candidate_vs_baseline"]["max_drawdown"] <= 0
+        and required["strict_1h_stop"]["net_pnl_pct"] > 0
     )
     gate = {
         "comparisons": len(comparisons),
         "eligible_comparisons": len(eligible),
-        "non_worse_comparisons": len(non_worse),
-        "required_240d_multi_pass": required_pass,
-        "passes_majority_gate": len(eligible) >= 3 and len(non_worse) >= (len(eligible) + 1) // 2 and required_pass,
+        "positive_comparisons": len(positive),
+        "required_240d_multi_positive": required_pass,
+        "passes_live_like_baseline_gate": len(eligible) >= 3 and len(positive) >= (len(eligible) + 1) // 2 and required_pass,
     }
+    contribution_config = replace(config, coins=("ETH", "BNB"), max_days=240)
+    contribution = _comparison(data_map, hourly_data_map, derivatives_data_map, contribution_config)
     return {
         **{key: primary[key] for key in ("daily_close_baseline", "strict_1h_stop", "confirmed_1h_stop", "coverage")},
         "primary": primary,
         "stop_sweep": stop_sweep,
         "comparisons": comparisons,
         "gate": gate,
+        "portfolio_contribution": {
+            "BTC": next((row["strict_1h_stop"] for row in comparisons if row["coins"] == ("BTC",) and row["window"] == 240), None),
+            "ETH_BNB": contribution["strict_1h_stop"],
+            "BTC_ETH_BNB": required["strict_1h_stop"] if required else None,
+        },
         "selected_mode": selected_mode,
         "selected_replay": primary["strict_1h_stop" if selected_mode == "strict" else "confirmed_1h_stop"],
     }
@@ -326,9 +411,16 @@ def format_trend_exit_replay_lines(report):
         )
         lines.append(
             f"  fills=stop:{row['stop_fills']} gap:{row['gap_fills']} confirmed:{row['confirmed_fills']} "
+            f"positions={row['trades']} records={row['execution_records']} partials={row['partial_reductions']} "
             f"avg_trade={row['average_trade_pct']:+.3f}% avg_hold={row['avg_hold_bars']:.1f} "
             f"mfe_r={row['avg_mfe_r']} mae_r={row['avg_mae_r']} best_close_r={row['avg_best_close_r']}"
         )
+        if row.get("mark_to_market"):
+            lines.append(
+                f"  drawdown=hourly_mtm:{row['max_drawdown']:.2f}% "
+                f"daily_mtm:{row['mark_to_market']['daily_max_drawdown_pct']:.2f}% "
+                f"closed_balance:{row['closed_balance_drawdown']:.1f}%"
+            )
     sweep = report["stop_sweep"]
     selected = report["selected_replay"]
     lines.append(
@@ -342,14 +434,18 @@ def format_trend_exit_replay_lines(report):
     lines.append(f"  forward={sweep['forward_summary']}")
     lines.append(f"  groups={sweep['groups']}")
     for row in report["comparisons"]:
-        delta = row["candidate_vs_baseline"]
+        strict = row["strict_1h_stop"]
         lines.append(
             f"coins={','.join(row['coins'])} window={row['window']}: "
-            f"confirmed_vs_baseline net={delta['net_pnl_pct']:+.2f}pp "
-            f"dd={delta['max_drawdown']:+.2f}pp trades_ratio={row['candidate_trade_ratio']:.2f} "
+            f"canonical net={strict['net_pnl_pct']:+.1f}% mtm_dd={strict['max_drawdown']:.1f}% "
+            f"closed_dd={strict['closed_balance_drawdown']:.1f}% positions={strict['trades']} "
             f"coverage={row['coverage']['coverage_pct']:.2f}%"
         )
-    lines.append(f"Gate: {report['gate']}")
-    if not report["gate"]["passes_majority_gate"]:
-        lines.append("Decision: REJECT confirmed 1h stop; do not promote to paper/live")
+    lines.append(f"Canonical gate: {report['gate']}")
+    lines.append(f"Portfolio contribution: {report['portfolio_contribution']}")
+    lines.append(f"Canonical breakdown: {report['strict_1h_stop']['breakdown']}")
+    lines.append(f"Winner concentration: {report['strict_1h_stop']['winner_concentration']}")
+    lines.append(f"Daily counterfactual concentration: {report['daily_close_baseline']['winner_concentration']}")
+    if not report["gate"]["passes_live_like_baseline_gate"]:
+        lines.append("Decision: canonical live-like baseline is not robustly positive; stop strategy promotion")
     return lines

@@ -369,6 +369,17 @@ STRATEGY_OVERRIDES = {
 - 分組顯示 long 24h 平均 `-0.228R`、short `+0.415R`；恢復不具跨方向穩定性，不能支持共用 close-confirmation 規則。
 - 決策：close-confirmed exit 淘汰，不進 paper/live，也不改 Hyperliquid 硬 SL。後續不得以 2-bar confirmation 繼續調參。
 
+## 2026-07-13 Canonical Live-like Baseline
+
+- Promotion baseline 已改為日線訊號 + 1h strict hard-SL replay；daily close-fill 僅保留 counterfactual，因為它允許盤中穿越交易所硬 SL 後繼續持倉，不符合 live。
+- Replay 每小時以 close 計算 net-liquidation equity：cash balance + unrealized PnL - 尚未實現部位的預估 round-trip fee/slippage。缺任一持倉價格時不 forward-fill，comparison 直接失去資格。
+- 240d BTC/ETH/BNB canonical：10 個完整 positions、13 個 execution records、3 次 partial reductions；net `-26.7%`，hourly MTM DD `26.72%`，closed-balance DD `26.7%`。
+- BTC-only canonical：2 positions，net `-3.6%`，hourly MTM DD `9.29%`；ETH/BNB：8 positions，net `-23.8%`，hourly MTM DD `23.81%`。
+- Stop-kind 分解：8 個 initial-stop positions 合計約 `-263.8`；2 個 breakeven positions 合計約 `-3.4`。問題主體是入場後直接走向 initial SL，不是 breakeven stage。
+- Daily BTC-only 的正績效由單一 BTC short winner 主導；該交易在 live-like hard SL 下於 breakeven 出場，因此 daily `+30.2%` 不是可用的 live 證據。
+- 六組 120/180/240d canonical gate 只有一組達五筆最低樣本，且沒有正向 comparison；`passes_live_like_baseline_gate=False`。
+- 決策：停止出場參數研究與 promotion。下一條研究主線回到 entry quality、BTC regime 與 live universe；ETH/BNB 不應靠放寬出場補救。
+
 ## Agent 修改守則
 
 - 不要讓本地 state 覆蓋交易所持倉真相

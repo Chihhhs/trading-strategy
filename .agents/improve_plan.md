@@ -529,3 +529,30 @@ Stop sweep 證據：
 - 不測 2-bar confirmation，不以同一資料繼續調 threshold。
 - live 保持既有 Trend + funding/basis position control 與交易所硬 SL。
 - 下一個出場研究必須提出不同的結構性假說；不能只是延後相同 stop 的成交。
+
+## 10. Canonical Live-like Baseline (2026-07-13)
+
+研究基準已校正：
+
+- Canonical baseline 為 daily Trend decisions + causal 1h hard-SL execution。
+- Daily close-fill 降級為 counterfactual，不再用於 promotion。
+- Replay 報告使用 hourly mark-to-market net-liquidation equity 計算 drawdown。
+- Trade reporting 以 position lifecycle 為單位，partial reduction 另列 execution records，不再灌大交易筆數與 win rate。
+- 所有 entry/exit/stop events 使用市場 timestamp，不再退回系統執行時間。
+
+240d 結果：
+
+- BTC/ETH/BNB：10 positions，net `-26.7%`，hourly MTM DD `26.72%`
+- BTC-only：2 positions，net `-3.6%`，hourly MTM DD `9.29%`
+- ETH/BNB：8 positions，net `-23.8%`，hourly MTM DD `23.81%`
+- Initial stop：8 positions，合計約 `-263.8`
+- Breakeven stop：2 positions，合計約 `-3.4`
+- Canonical gate：`eligible=1/6`、`positive=0`、`passes_live_like_baseline_gate=False`
+
+研究決策：
+
+- 現有 Trend 沒有通過 live-like baseline，不得再把 daily BTC winner 當作 live edge。
+- 停止 stop stage、ATR、confirmation 與 failure-exit 調參。
+- 下一主線應改善 entry/regime/universe，且每個 candidate 必須相對 strict hard-SL + MTM baseline 比較。
+- BTC 可保留為核心研究標的，但目前樣本只有兩筆，不足以上 live 證據。
+- ETH/BNB 持續負貢獻，未有新的 entry alpha 證據前不應擴大 live 配置。

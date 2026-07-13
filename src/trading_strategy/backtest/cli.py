@@ -74,7 +74,7 @@ def build_parser():
     parser.add_argument("--trend-evaluation-report", action="store_true")
     parser.add_argument("--trend-exit-replay-report", action="store_true")
     parser.add_argument("--exit-replay-data-path", default="")
-    parser.add_argument("--exit-replay-mode", choices=("strict", "close_confirmed"), default="close_confirmed")
+    parser.add_argument("--exit-replay-mode", choices=("strict", "close_confirmed"), default="strict")
     parser.add_argument("--stop-sweep-forward-hours", default="6,12,24,72")
     parser.add_argument("--stop-sweep-reclaim-hours", type=int, default=24)
     parser.add_argument("--stop-sweep-false-sweep-r", type=float, default=0.5)

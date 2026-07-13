@@ -31,6 +31,13 @@ def timestamp_ms(bar):
     return int(parsed.timestamp() * 1000)
 
 
+def timestamp_iso(bar, *, offset_ms=0):
+    value = timestamp_ms(bar)
+    if value is None:
+        return ""
+    return datetime.fromtimestamp((value + int(offset_ms or 0)) / 1000, tz=timezone.utc).isoformat()
+
+
 def effective_stop(position):
     stops = effective_stop_candidates(position)
     if not stops:
