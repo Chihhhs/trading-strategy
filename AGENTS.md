@@ -25,6 +25,9 @@ Follow this execution order:
 5. Prefer the exchange state and runtime config as truth; do not assume persisted state files are authoritative.
 6. Implement in small increments, keeping TP/SL protection, reconciliation, and event logging intact.
 7. Review the result against the original spec before considering the task done.
+8. When public interfaces or module boundaries change, update `docs/restruct.md`, the relevant user workflow document, and `.agents` state documents in the same change.
+
+For a new strategy, add its implementation, typed `StrategyDefinition`, tests, and baseline experiment manifest together. The strategy must run through experiment adapters without modifying the backtest CLI, optimizer, paper runner, or live engine. Validate all documented canonical commands; passing code tests with stale documentation is not complete.
 
 When a task is ambiguous, spend effort refining the spec before changing code. When a task is high risk, prefer narrower changes, explicit assumptions, and validation checkpoints over speed.
 

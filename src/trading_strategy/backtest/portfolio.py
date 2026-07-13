@@ -14,6 +14,7 @@ from .live_like import build_mark_to_market_point, summarize_mark_to_market
 from .reporting import build_coin_results, build_portfolio_summary, calc_max_drawdown
 from .strategies import is_signal_blocked_by_btc_filter, resolve_strategy
 from .types import BacktestConfig, BacktestResult
+from trading_strategy.strategies import get_strategy_definition
 
 
 class PortfolioBacktester:
@@ -33,6 +34,7 @@ class PortfolioBacktester:
         if exit_replay_mode not in ("strict", "close_confirmed"):
             raise ValueError(f"unsupported exit replay mode: {exit_replay_mode}")
         self.exit_replay_mode = exit_replay_mode
+        self.context_bars = get_strategy_definition(config.strategy).context_bars
         self.engine = BacktestEngine(config=config, strategy=self._wrap_strategy())
 
     def _wrap_strategy(self):
@@ -144,9 +146,11 @@ class PortfolioBacktester:
                 series = normalized.get(coin, [])
                 if len(series) <= index:
                     continue
-                window = series[: index + 1]
+                full_window = series[: index + 1]
+                window = full_window[-self.context_bars :] if self.context_bars else full_window
                 current_bar = window[-1]
-                btc_window = btc_series[: index + 1] if len(btc_series) > index else btc_series
+                full_btc_window = btc_series[: index + 1] if len(btc_series) > index else btc_series
+                btc_window = full_btc_window[-self.context_bars :] if self.context_bars else full_btc_window
                 daily_contexts.append((coin, series, window, current_bar, btc_window))
 
             if self.exit_replay_data_map:
@@ -205,6 +209,7 @@ class PortfolioBacktester:
                     btc_window,
                     state,
                     defer_stop_exits=bool(self.exit_replay_data_map),
+                    bar_index=index,
                 )
             current_balance = float(state.get("balance") or 0.0)
             closed_equity_curve.append(current_balance)

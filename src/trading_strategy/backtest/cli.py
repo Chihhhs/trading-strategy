@@ -1,6 +1,7 @@
 import argparse
 from dataclasses import replace
 import json
+import sys
 
 from trading_strategy.strategies import available_strategy_names
 
@@ -196,6 +197,12 @@ def build_config(args):
 
 
 def main(argv=None):
+    argv = list(argv) if argv is not None else None
+    command_argv = argv if argv is not None else sys.argv[1:]
+    if command_argv and command_argv[0] in ("run", "compare", "promote"):
+        from trading_strategy.experiments.cli import run_command
+
+        return run_command(command_argv)
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.microstructure_report:

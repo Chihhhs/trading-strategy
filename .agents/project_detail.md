@@ -16,6 +16,7 @@
 - `src/trading_strategy/positions/`：position lifecycle / snapshot / trend stop helper
 - `src/trading_strategy/shared/`：risk / state / trade history 共用 helper
 - `src/trading_strategy/core/`：相容層，舊 import 仍可用，但新實作不應再放進這裡
+- `src/trading_strategy/experiments/`：typed manifest、結果、promotion gate 與 backtest/paper adapters
 
 最近的變更重心集中在 live 安全性與策略架構：
 
@@ -42,6 +43,10 @@
 - `python apps/runners/live_runner.py --live --loop`
 - `python apps/runners/paper_runner.py`
 - `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
+- `python backtest/backtest_runner.py run --experiment experiments/trend_baseline.json`
+- `python backtest/backtest_runner.py compare --experiments experiments/trend_baseline.json experiments/intraday_momentum_rejected.json`
+- `python backtest/backtest_runner.py promote --experiment experiments/trend_paper_candidate.json`
+- `python apps/runners/paper_runner.py --experiment experiments/trend_paper_candidate.json --approval-result /tmp/trend_promotion.json`
 - `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-adaptive-atr-trail --trend-evaluation-report --fee-bps 4.5 --slippage-bps 2`
 - `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --fee-bps 4.5 --slippage-bps 2 --trend-exit-replay-report --exit-replay-data-path data/historical_prices/binance_1h_240d_BTC_ETH_BNB.json`
 - `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
@@ -184,6 +189,19 @@ STRATEGY_OVERRIDES = {
 - 不要從 `live_state.json.params` 反推當前 `entry_order_type`
 - 不要讓本地 state 覆蓋交易所持倉真相
 - 不要把 paper mode 的觀測結果與 live adopted positions 混在一起解讀
+- 不要讓 paper state snapshot 覆蓋 validated `ExperimentSpec`
+- 不要讓 live 直接讀 research manifest 或自動採用 promotion 結果
+
+## Experiment contracts
+
+- `StrategyDefinition` 宣告策略 factory、typed parameters、capabilities、預設 timeframe 與 `min_bars`。
+- `ExperimentSpec` 是 research/paper 的設定真相；未知欄位與未知策略參數會直接失敗。
+- Experiment paper state 使用 `experiment-<safe-name>-<fingerprint-prefix>`，禁止與 legacy state 共用；manifest 變更後會進入新的隔離 state。
+- Experiment paper 的完整平倉與 partial reduction 會套用 manifest fee/slippage，並持久化 reduction key 防止同一 crowding 狀態重複減倉。
+- `ExperimentResult` 記錄 fingerprint、dataset、窗口、幣池、成本後 PnL、drawdown、turnover 與幣種貢獻。
+- `PromotionDecision.status` 只有 `approved_for_paper` 可啟動 experiment paper runner，且 `candidate_fingerprint` 必須與 manifest 相同；低樣本、fingerprint 不符與未過多數 gate 都必須拒絕。
+- `intraday_momentum` 的 strategy context 限制為最近 90 bars，保留全域 bar index；這是研究效能邊界，不改 trend 數值語義。
+- 完整操作與失敗語義見 `docs/experiment_workflow.md`。
 
 ## Live state 與 log 形狀
 

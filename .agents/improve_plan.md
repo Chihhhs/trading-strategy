@@ -33,6 +33,9 @@
 - `python apps/runners/live_runner.py --live --loop`
 - `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
 - `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
+- `python backtest/backtest_runner.py run --experiment experiments/trend_baseline.json`
+- `python backtest/backtest_runner.py promote --experiment experiments/trend_paper_candidate.json`
+- `python apps/runners/paper_runner.py --experiment experiments/trend_paper_candidate.json --approval-result /tmp/trend_promotion.json`
 
 目前主要資料檔：
 
@@ -221,6 +224,26 @@ Promotion gate：
 
 - candidate 必須在至少三個具備足夠交易樣本的固定比較中，以每組至少五筆 trades 為下限，並在多數比較同時不劣於 baseline 的 net PnL 與 max drawdown。
 - 只有通過 gate 的單一候選，才允許進 paper；不直接接 live。
+
+### 2.10 Experiment spec 與 promotion workflow
+
+已完成：
+
+- strategy registry 增加 typed `StrategyDefinition`、capabilities、default timeframe 與 minimum bars。
+- JSON manifest 嚴格轉成 `ExperimentSpec`，以 fingerprint 確保可重現。
+- backtest adapter 輸出成本後 `ExperimentResult`，包含 turnover 與幣種貢獻。
+- promotion gate 只比較樣本足夠的相同窗口/幣池，net PnL 與 drawdown 同時不劣於 baseline 才算通過。
+- experiment paper runner 必須取得 `approved_for_paper` decision，並使用相同 strategy hooks 與 typed parameters。
+- live 保持隔離，不消費研究 manifest。
+- intraday experiment 使用 90-bar rolling strategy context，避免長窗口回測重複計算完整歷史。
+- manifest loader 嚴格拒絕錯誤容器/boolean、非有限成本與非正窗口；paper state 以 fingerprint 隔離，避免 stale spec 或 legacy state 碰撞。
+
+實測：
+
+- trend paper candidate 六組比較中僅一組達到每組五筆交易，低於三組門檻，promotion 正確回傳 `rejected`。
+- intraday rejected baseline 在 2,880–8,640 bars、BTC/四幣比較中，成本後 PnL 約 `-52.7%` 至 `-99.8%`，turnover 約 `807.8x` 至 `1968.9x`，仍不可進 paper/live。
+
+Promotion 邊界固定為 `research -> cost-adjusted backtest -> majority gate -> paper observation -> explicit live review`。目前尚未處理 live config 與 experiment spec 的統一，這是刻意保留的安全邊界，不應在沒有獨立設計與驗證時自動擴張。
 
 ## 3. Current Observations
 
