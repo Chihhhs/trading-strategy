@@ -320,18 +320,19 @@ Promotion gate：
 
 - live baseline 維持 `trend + funding/basis position control`；不因研究候選改動 live 預設。
 - 240d 成本後出場診斷以 `SL` 為主，ATR trail 只在少數長趨勢捕捉到收益。
-- `breakout_failure` 在 5 bars 的 frozen candidate 於 BTC/ETH/BNB 240d 為 `net +1.8%`、8 幣池為 `net +10.1%`，回撤不惡化；但僅 2 個比較達最低交易數，尚未通過 promotion gate。
+- `breakout_failure` / `--failure-exit-bars` 調參線已淘汰；不得再用單一窗口的局部改善重新推進。
 
 下一步：
 
-- 用 `--enable-failure-exit --failure-exit-bars 5` 固定測試 breakout failure candidate；每次只比較單一出場變體。
+- 從最新的 exit-reason、MFE、MAE 與持有期資料重新定位單一候選；每次只比較一種出場變體。
 - 固定成本、`120/180/240d`、BTC-only、BTC/ETH/BNB、擴展幣池；需至少 3 個合格比較，且多數比較同時不劣於 baseline 的 net PnL 與 max drawdown，才可進 paper。
-- 不再重新測試已失敗的 adaptive ATR trail；在 failure exit 未通過前，不新增第二個出場變體。
+- 不重新測試已淘汰的 adaptive ATR trail 或 `breakout_failure`；在新的資料診斷提出可驗證假說前，不新增出場規則。
 
 ### 主要研究線：短週期 alpha research（15m）
 
 - 15m 是後續主要研究時間框架；新策略不受既有 trend 或 `intraday_momentum` 限制，但與日線 trend 的訊號、持倉與 live config 完全分離。
 - 現有 `intraday_momentum` 是已被成本與 turnover 否決的負面 baseline，不能以單純調參方式直接 promotion。
+- `--short-cycle-alpha-report` 是短週期研究主入口，先檢查 feature bucket、regime split、成本後 forward return 與 randomized baseline。
 - 先補齊可重播的 15m OHLCV、funding/OI、交易成本與可觀測 L2 context；資料不足時只輸出 missing-data diagnostics，不以日線 derivatives 代理短週期結果。
 - 依序研究 breakout、mean reversion、volatility expansion、Funding/Basis crowding、OI expansion 與 order-flow/L2 context 的 feature-to-forward-return 關係；先證實成本後 edge，才建立策略規則。
 - 每個候選固定比較 BTC-only、BTC/ETH/BNB 與擴展幣池，採用 walk-forward、randomized baseline、費用與滑價；未通過多數窗口的 net PnL、drawdown 與樣本門檻，不進 paper/live。

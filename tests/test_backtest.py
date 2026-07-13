@@ -1170,6 +1170,52 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("[btc_regime_trend]", rendered)
         self.assertIn("random_delta=", rendered)
 
+    def test_short_cycle_alpha_report_runs_on_synthetic_15m_ohlcv(self):
+        prices = []
+        price = 100.0
+        for index in range(160):
+            if index in (45, 90, 125):
+                price += 4.0
+            elif index in (70, 110, 145):
+                price -= 4.5
+            else:
+                price += 0.15 if index % 6 < 3 else -0.08
+            prices.append(price)
+        data_map = {
+            "BTC": [
+                {
+                    **build_bar(price, index),
+                    "time": f"2026-01-01T{index // 4:02d}:{(index % 4) * 15:02d}:00",
+                    "volume": 1000 + (600 if index in (45, 70, 90, 110, 125, 145) else index),
+                }
+                for index, price in enumerate(prices)
+            ]
+        }
+        report = run_alpha_report(
+            data_map,
+            coins=("BTC",),
+            max_days=160,
+            alpha_set=(
+                "intraday_breakout_continuation",
+                "intraday_vwap_reversion",
+                "intraday_volatility_expansion",
+            ),
+            forward_bars=(1, 3, 6, 12, 24),
+            bucket_count=4,
+            random_baseline_runs=5,
+            report_type="short_cycle_15m",
+            fee_bps=4.5,
+            slippage_bps=2.0,
+        )
+        self.assertEqual(report["report_type"], "short_cycle_15m")
+        events_by_name = {alpha["name"]: alpha["events"] for alpha in report["alphas"]}
+        self.assertGreater(events_by_name["intraday_breakout_continuation"], 0)
+        self.assertGreater(events_by_name["intraday_vwap_reversion"], 0)
+        self.assertGreater(events_by_name["intraday_volatility_expansion"], 0)
+        rendered = "\n".join(format_alpha_report_lines(report))
+        self.assertIn("Alpha signal report (short_cycle_15m)", rendered)
+        self.assertIn("[intraday_breakout_continuation]", rendered)
+
     def test_alpha_report_missing_derivatives_emits_diagnostics(self):
         prices = [100.0 + index * 0.2 for index in range(80)]
         data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
@@ -1264,6 +1310,45 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertIn("[btc_regime_trend]", rendered)
         self.assertIn("buckets", rendered)
 
+    def test_cli_short_cycle_alpha_report_prints_15m_sections(self):
+        price = 100.0
+        bars = []
+        for index in range(160):
+            price += 3.5 if index in (50, 95, 130) else (-3.0 if index in (75, 115, 145) else 0.1)
+            bar = build_bar(price, index)
+            bar["time"] = f"2026-01-01T{index // 4:02d}:{(index % 4) * 15:02d}:00"
+            bar["volume"] = 1000 + (500 if index in (50, 75, 95, 115, 130, 145) else index)
+            bars.append(bar)
+        payload = {"BTC": bars}
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--max-days",
+                        "160",
+                        "--data-path",
+                        path,
+                        "--short-cycle-alpha-report",
+                        "--bucket-count",
+                        "4",
+                        "--random-baseline-runs",
+                        "5",
+                    ]
+                )
+        finally:
+            os.remove(path)
+        rendered = output.getvalue()
+        self.assertIn("Alpha signal report (short_cycle_15m)", rendered)
+        self.assertIn("[intraday_breakout_continuation]", rendered)
+        self.assertIn("[intraday_vwap_reversion]", rendered)
+        self.assertIn("[intraday_volatility_expansion]", rendered)
+
     def test_cli_trend_alpha_entry_flags_build_config(self):
         parser = cli.build_parser()
         args = parser.parse_args(
@@ -1306,21 +1391,6 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(config.adaptive_atr_strong_adx, 40.0)
         self.assertEqual(config.adaptive_atr_strong_mult, 3.5)
         self.assertEqual(config.adaptive_atr_weak_mult, 1.25)
-
-    def test_cli_failure_exit_bars_build_config(self):
-        parser = cli.build_parser()
-        args = parser.parse_args(
-            [
-                "--coins",
-                "BTC",
-                "--enable-failure-exit",
-                "--failure-exit-bars",
-                "5",
-            ]
-        )
-        config = cli.build_config(args)
-        self.assertTrue(config.failure_exit_enabled)
-        self.assertEqual(config.failure_exit_bars, 5)
 
     def test_cli_trend_evaluation_report_prints_gate(self):
         payload = {

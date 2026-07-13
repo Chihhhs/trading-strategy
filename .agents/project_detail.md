@@ -41,7 +41,7 @@
 - `python apps/runners/paper_runner.py`
 - `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
 - `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-adaptive-atr-trail --trend-evaluation-report --fee-bps 4.5 --slippage-bps 2`
-- `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-failure-exit --failure-exit-bars 5 --fee-bps 4.5 --slippage-bps 2`
+- `python backtest/backtest_runner.py --short-cycle-alpha-report --coins BTC,ETH,SOL,BNB --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640 --fee-bps 4.5 --slippage-bps 2 --bucket-count 5 --random-baseline-runs 50`
 - `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
 - `python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid trend,intraday_momentum`
 
@@ -347,6 +347,13 @@ STRATEGY_OVERRIDES = {
 - 四幣同設定：`trades=2324`, gross `pnl=-59.1%`, `drawdown=77.5%`
 - 費用估算：BTC-only turnover 約 `1866.7x` 起始資金，tier-0 taker fee drag 約 `84.0%`
 - 結論：`intraday_momentum` 目前只能視為接線與研究 baseline，不能上 paper/live。
+
+## 2026-07-13 Short-Cycle Alpha Report
+
+- 新增 `--short-cycle-alpha-report`，預設測試 `intraday_breakout_continuation`、`intraday_vwap_reversion`、`intraday_volatility_expansion`。
+- 預設 forward bars 為 `1,3,6,12,24`，對 15m 代表 15m 到 6h 的 signal-level forward return。
+- 這個 report 不產生交易、不改 live/paper；只輸出 bucket、regime、成本後 forward return 與 randomized baseline。
+- 90d BTC/ETH/SOL/BNB 15m fixture 初跑顯示 breakout 與 volatility expansion 成本後偏弱；VWAP reversion 相對 random baseline 較好，但 net mean 仍略負，尚不能升級為策略。
 
 ## Agent 修改守則
 

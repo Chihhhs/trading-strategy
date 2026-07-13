@@ -12,7 +12,13 @@ DEFAULT_ALPHA_SET = (
     "funding_extreme_reversion",
     "oi_expansion_confirmation",
 )
+SHORT_CYCLE_ALPHA_SET = (
+    "intraday_breakout_continuation",
+    "intraday_vwap_reversion",
+    "intraday_volatility_expansion",
+)
 DEFAULT_FORWARD_BARS = (1, 3, 6, 12, 24, 72)
+SHORT_CYCLE_FORWARD_BARS = (1, 3, 6, 12, 24)
 DEFAULT_RANDOM_SEED = 42
 
 
@@ -49,6 +55,10 @@ def _low(bar):
 
 def _field(bar, name):
     return _safe_float((bar or {}).get(name))
+
+
+def _volume(bar):
+    return _safe_float((bar or {}).get("volume")) or 0.0
 
 
 def _pct_change(current, previous):
@@ -245,6 +255,160 @@ def _build_oi_events(coin, series, max_forward):
     return events, diagnostics
 
 
+def _rolling_vwap(series, start, end):
+    numerator = 0.0
+    denominator = 0.0
+    for bar in series[start:end]:
+        close = _close(bar)
+        volume = _volume(bar)
+        if close is None or volume <= 0:
+            continue
+        numerator += close * volume
+        denominator += volume
+    return numerator / denominator if denominator else None
+
+
+def _range_pct(bar):
+    close = _close(bar)
+    high = _high(bar)
+    low = _low(bar)
+    if close in (None, 0) or high is None or low is None:
+        return None
+    return (high - low) / close * 100.0
+
+
+def _atr_regime_label(atr_pcts, index, lookback=80):
+    value = atr_pcts[index] if index < len(atr_pcts) else None
+    rank = _percentile_rank(atr_pcts[max(0, index - lookback) : index], value)
+    if rank is None:
+        return "atr_unknown"
+    return "high_atr" if rank >= 0.7 else "low_atr"
+
+
+def _build_intraday_breakout_events(coin, series, max_forward):
+    lookback = 20
+    if len(series) <= lookback + max_forward:
+        return [], {"insufficient_bars": 1}
+    closes = [_close(bar) for bar in series]
+    highs = [_high(bar) for bar in series]
+    lows = [_low(bar) for bar in series]
+    volumes = [_volume(bar) for bar in series]
+    atr_values = atr(highs, lows, closes, 14)
+    atr_pcts = [
+        (value / close * 100.0) if value is not None and close not in (None, 0) else None
+        for value, close in zip(atr_values, closes)
+    ]
+    events = []
+    for index in range(lookback, len(series) - max_forward):
+        close = closes[index]
+        previous_high = max(value for value in highs[index - lookback : index] if value is not None)
+        previous_low = min(value for value in lows[index - lookback : index] if value is not None)
+        average_volume = _mean(volumes[index - lookback : index])
+        volume_ratio = (volumes[index] / average_volume) if average_volume else 1.0
+        if close is None or close <= 0:
+            continue
+        direction = None
+        breakout_pct = None
+        if close > previous_high:
+            direction = "long"
+            breakout_pct = _pct_change(close, previous_high)
+        elif close < previous_low:
+            direction = "short"
+            breakout_pct = _pct_change(previous_low, close)
+        if direction is None or breakout_pct is None:
+            continue
+        volume_label = "high_volume" if volume_ratio >= 1.2 else "normal_volume"
+        events.append(
+            {
+                "alpha": "intraday_breakout_continuation",
+                "coin": coin,
+                "index": index,
+                "direction": direction,
+                "feature_value": breakout_pct * max(volume_ratio, 0.1),
+                "regime": f"{_atr_regime_label(atr_pcts, index)}_{volume_label}",
+            }
+        )
+    return events, {}
+
+
+def _build_intraday_vwap_reversion_events(coin, series, max_forward):
+    lookback = 32
+    if len(series) <= lookback + max_forward:
+        return [], {"insufficient_bars": 1}
+    deviations = []
+    for index in range(len(series)):
+        vwap = _rolling_vwap(series, max(0, index - lookback), index)
+        close = _close(series[index])
+        deviations.append(_pct_change(close, vwap) if vwap not in (None, 0) else None)
+    events = []
+    for index in range(lookback, len(series) - max_forward):
+        deviation = deviations[index]
+        deviation_std = _std(deviations[index - lookback : index])
+        if deviation is None or not deviation_std:
+            continue
+        z_score = deviation / deviation_std
+        if abs(z_score) < 1.0:
+            continue
+        direction = "short" if z_score > 0 else "long"
+        trend_return = _pct_change(_close(series[index]), _close(series[index - 8]))
+        trend_label = "with_trend" if (
+            trend_return is not None
+            and ((trend_return > 0 and direction == "short") or (trend_return < 0 and direction == "long"))
+        ) else "stalled_or_countertrend"
+        events.append(
+            {
+                "alpha": "intraday_vwap_reversion",
+                "coin": coin,
+                "index": index,
+                "direction": direction,
+                "feature_value": abs(z_score),
+                "regime": f"{'above_vwap' if z_score > 0 else 'below_vwap'}_{trend_label}",
+            }
+        )
+    return events, {}
+
+
+def _build_intraday_volatility_events(coin, series, max_forward):
+    lookback = 40
+    if len(series) <= lookback + max_forward:
+        return [], {"insufficient_bars": 1}
+    ranges = [_range_pct(bar) for bar in series]
+    closes = [_close(bar) for bar in series]
+    close_to_close = [
+        abs(_pct_change(closes[index], closes[index - 1]) or 0.0) if index > 0 else None
+        for index in range(len(series))
+    ]
+    expansion_pcts = [
+        max(item for item in (range_pct, close_move) if item is not None)
+        if range_pct is not None or close_move is not None
+        else None
+        for range_pct, close_move in zip(ranges, close_to_close)
+    ]
+    events = []
+    for index in range(lookback, len(series) - max_forward):
+        current_range = expansion_pcts[index]
+        range_rank = _percentile_rank(expansion_pcts[index - lookback : index], current_range)
+        bar_return = _pct_change(closes[index], closes[index - 1])
+        volume_average = _mean(_volume(bar) for bar in series[index - lookback : index])
+        volume_ratio = (_volume(series[index]) / volume_average) if volume_average else 1.0
+        if range_rank is None or current_range is None or bar_return is None:
+            continue
+        if range_rank < 0.7 or abs(bar_return) < 0.15:
+            continue
+        direction = "long" if bar_return > 0 else "short"
+        events.append(
+            {
+                "alpha": "intraday_volatility_expansion",
+                "coin": coin,
+                "index": index,
+                "direction": direction,
+                "feature_value": range_rank * abs(bar_return) * max(volume_ratio, 0.1),
+                "regime": "high_volume_expansion" if volume_ratio >= 1.2 else "normal_volume_expansion",
+            }
+        )
+    return events, {}
+
+
 def _summarize_returns(values):
     values = [value for value in values if value is not None]
     if not values:
@@ -352,6 +516,7 @@ def run_alpha_report(
     fee_bps=0.0,
     slippage_bps=0.0,
     random_seed=DEFAULT_RANDOM_SEED,
+    report_type="default",
 ):
     alpha_set = tuple(alpha_set or DEFAULT_ALPHA_SET)
     forward_bars = tuple(int(value) for value in (forward_bars or DEFAULT_FORWARD_BARS) if int(value) > 0)
@@ -387,6 +552,21 @@ def run_alpha_report(
             alpha_events["oi_expansion_confirmation"].extend(events)
             for key, value in diag.items():
                 diagnostics[f"oi_expansion_confirmation_{coin}_{key}"] = value
+        if "intraday_breakout_continuation" in alpha_events:
+            events, diag = _build_intraday_breakout_events(coin, series, max_forward)
+            alpha_events["intraday_breakout_continuation"].extend(events)
+            for key, value in diag.items():
+                diagnostics[f"intraday_breakout_continuation_{coin}_{key}"] = value
+        if "intraday_vwap_reversion" in alpha_events:
+            events, diag = _build_intraday_vwap_reversion_events(coin, series, max_forward)
+            alpha_events["intraday_vwap_reversion"].extend(events)
+            for key, value in diag.items():
+                diagnostics[f"intraday_vwap_reversion_{coin}_{key}"] = value
+        if "intraday_volatility_expansion" in alpha_events:
+            events, diag = _build_intraday_volatility_events(coin, series, max_forward)
+            alpha_events["intraday_volatility_expansion"].extend(events)
+            for key, value in diag.items():
+                diagnostics[f"intraday_volatility_expansion_{coin}_{key}"] = value
 
     reports = [
         _summarize_alpha(
@@ -402,6 +582,7 @@ def run_alpha_report(
         for name in alpha_set
     ]
     return {
+        "report_type": report_type,
         "alpha_set": alpha_set,
         "coins": coins,
         "forward_bars": forward_bars,
@@ -414,7 +595,9 @@ def run_alpha_report(
 
 
 def format_alpha_report_lines(report):
-    lines = ["Alpha signal report"]
+    report_type = str(report.get("report_type") or "default")
+    title = "Alpha signal report" if report_type == "default" else f"Alpha signal report ({report_type})"
+    lines = [title]
     lines.append(
         "coins={coins}, forward_bars={forward_bars}, bucket_count={bucket_count}, "
         "random_baseline_runs={random_baseline_runs}, cost_pct={cost_pct:.4f}".format(

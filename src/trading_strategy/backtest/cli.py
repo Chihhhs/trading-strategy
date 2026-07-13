@@ -10,6 +10,8 @@ from .alpha import (
     format_alpha_report_lines,
     parse_csv_tuple,
     run_alpha_report,
+    SHORT_CYCLE_ALPHA_SET,
+    SHORT_CYCLE_FORWARD_BARS,
 )
 from .carry import (
     DEFAULT_CARRY_SET,
@@ -79,6 +81,7 @@ def build_parser():
     parser.add_argument("--microstructure-min-top-depth-usd", type=float, default=1000.0)
     parser.add_argument("--microstructure-max-opposing-imbalance", type=float, default=0.65)
     parser.add_argument("--alpha-report", action="store_true")
+    parser.add_argument("--short-cycle-alpha-report", action="store_true")
     parser.add_argument("--alpha-set", default=",".join(DEFAULT_ALPHA_SET))
     parser.add_argument("--forward-bars", default=",".join(str(value) for value in DEFAULT_FORWARD_BARS))
     parser.add_argument("--bucket-count", type=int, default=10)
@@ -104,7 +107,6 @@ def build_parser():
     parser.add_argument("--adaptive-atr-strong-mult", type=float, default=3.0)
     parser.add_argument("--adaptive-atr-weak-mult", type=float, default=1.5)
     parser.add_argument("--enable-failure-exit", action="store_true")
-    parser.add_argument("--failure-exit-bars", type=int, default=3)
     parser.add_argument("--enable-intrabar-exit", action="store_true")
     parser.add_argument("--intrabar-fill-policy", choices=("stop_first", "target_first"), default="stop_first")
     parser.add_argument("--max-hold-bars", type=int, default=None)
@@ -159,7 +161,6 @@ def build_config(args):
         adaptive_atr_strong_mult=args.adaptive_atr_strong_mult,
         adaptive_atr_weak_mult=args.adaptive_atr_weak_mult,
         failure_exit_enabled=args.enable_failure_exit,
-        failure_exit_bars=args.failure_exit_bars,
         max_hold_bars=args.max_hold_bars,
         intrabar_exit_enabled=intrabar_exit_enabled,
         intrabar_fill_policy=args.intrabar_fill_policy,
@@ -268,18 +269,28 @@ def main(argv=None):
         for line in format_funding_trend_report_lines(report):
             print(line)
         return report
-    if args.alpha_report:
+    if args.alpha_report or args.short_cycle_alpha_report:
+        alpha_set = parse_csv_tuple(args.alpha_set, str)
+        forward_bars = parse_csv_tuple(args.forward_bars, int)
+        report_type = "default"
+        if args.short_cycle_alpha_report:
+            report_type = "short_cycle_15m"
+            if args.alpha_set == ",".join(DEFAULT_ALPHA_SET):
+                alpha_set = SHORT_CYCLE_ALPHA_SET
+            if args.forward_bars == ",".join(str(value) for value in DEFAULT_FORWARD_BARS):
+                forward_bars = SHORT_CYCLE_FORWARD_BARS
         report = run_alpha_report(
             data_map,
             derivatives_data_map=derivatives_data_map,
             coins=coins,
             max_days=args.max_days,
-            alpha_set=parse_csv_tuple(args.alpha_set, str),
-            forward_bars=parse_csv_tuple(args.forward_bars, int),
+            alpha_set=alpha_set,
+            forward_bars=forward_bars,
             bucket_count=args.bucket_count,
             random_baseline_runs=args.random_baseline_runs,
             fee_bps=args.fee_bps,
             slippage_bps=args.slippage_bps,
+            report_type=report_type,
         )
         for line in format_alpha_report_lines(report):
             print(line)
