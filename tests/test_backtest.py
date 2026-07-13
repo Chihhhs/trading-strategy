@@ -1307,21 +1307,6 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(config.adaptive_atr_strong_mult, 3.5)
         self.assertEqual(config.adaptive_atr_weak_mult, 1.25)
 
-    def test_cli_failure_exit_bars_build_config(self):
-        parser = cli.build_parser()
-        args = parser.parse_args(
-            [
-                "--coins",
-                "BTC",
-                "--enable-failure-exit",
-                "--failure-exit-bars",
-                "5",
-            ]
-        )
-        config = cli.build_config(args)
-        self.assertTrue(config.failure_exit_enabled)
-        self.assertEqual(config.failure_exit_bars, 5)
-
     def test_cli_trend_evaluation_report_prints_gate(self):
         payload = {
             "BTC": [build_bar(100.0 + index, index) for index in range(70)],

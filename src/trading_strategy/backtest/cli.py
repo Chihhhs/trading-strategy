@@ -104,7 +104,6 @@ def build_parser():
     parser.add_argument("--adaptive-atr-strong-mult", type=float, default=3.0)
     parser.add_argument("--adaptive-atr-weak-mult", type=float, default=1.5)
     parser.add_argument("--enable-failure-exit", action="store_true")
-    parser.add_argument("--failure-exit-bars", type=int, default=3)
     parser.add_argument("--enable-intrabar-exit", action="store_true")
     parser.add_argument("--intrabar-fill-policy", choices=("stop_first", "target_first"), default="stop_first")
     parser.add_argument("--max-hold-bars", type=int, default=None)
@@ -159,7 +158,6 @@ def build_config(args):
         adaptive_atr_strong_mult=args.adaptive_atr_strong_mult,
         adaptive_atr_weak_mult=args.adaptive_atr_weak_mult,
         failure_exit_enabled=args.enable_failure_exit,
-        failure_exit_bars=args.failure_exit_bars,
         max_hold_bars=args.max_hold_bars,
         intrabar_exit_enabled=intrabar_exit_enabled,
         intrabar_fill_policy=args.intrabar_fill_policy,

@@ -41,7 +41,6 @@
 - `python apps/runners/paper_runner.py`
 - `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
 - `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-adaptive-atr-trail --trend-evaluation-report --fee-bps 4.5 --slippage-bps 2`
-- `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-failure-exit --failure-exit-bars 5 --fee-bps 4.5 --slippage-bps 2`
 - `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
 - `python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid trend,intraday_momentum`
 

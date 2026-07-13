@@ -320,13 +320,13 @@ Promotion gate：
 
 - live baseline 維持 `trend + funding/basis position control`；不因研究候選改動 live 預設。
 - 240d 成本後出場診斷以 `SL` 為主，ATR trail 只在少數長趨勢捕捉到收益。
-- `breakout_failure` 在 5 bars 的 frozen candidate 於 BTC/ETH/BNB 240d 為 `net +1.8%`、8 幣池為 `net +10.1%`，回撤不惡化；但僅 2 個比較達最低交易數，尚未通過 promotion gate。
+- `breakout_failure` 的既有測試已被淘汰；不得以單一窗口的局部改善重新推進，且不新增專用 CLI 或 live/paper 設定。
 
 下一步：
 
-- 用 `--enable-failure-exit --failure-exit-bars 5` 固定測試 breakout failure candidate；每次只比較單一出場變體。
+- 從最新的 exit-reason、MFE、MAE 與持有期資料重新定位單一候選；每次只比較一種出場變體。
 - 固定成本、`120/180/240d`、BTC-only、BTC/ETH/BNB、擴展幣池；需至少 3 個合格比較，且多數比較同時不劣於 baseline 的 net PnL 與 max drawdown，才可進 paper。
-- 不再重新測試已失敗的 adaptive ATR trail；在 failure exit 未通過前，不新增第二個出場變體。
+- 不重新測試已淘汰的 adaptive ATR trail 或 `breakout_failure`；在新的資料診斷提出可驗證假說前，不新增出場規則。
 
 ### 主要研究線：短週期 alpha research（15m）
 
