@@ -10,11 +10,14 @@ if load_dotenv is not None:
     load_dotenv()
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live")
+LIVE_STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live")
+PAPER_STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live_paper")
+STATE_DIR = LIVE_STATE_DIR
 HL_API_LOG_DIR = os.path.join(PROJECT_ROOT, "data", "hl_api")
 TRADE_HISTORY_DIR = os.path.join(PROJECT_ROOT, "data", "trade_history")
 BINANCE_API = "https://api.binance.com"
 BINANCE_FUTURES_API = "https://fapi.binance.com"
+BYBIT_API = "https://api.bybit.com"
 
 MODE = "paper"
 
@@ -33,6 +36,10 @@ STRATEGY = {
     "atr_trailing_enabled": False,
     "atr_activation_r": 1.5,
     "atr_trailing_mult": 2.0,
+    "adaptive_atr_trailing_enabled": False,
+    "adaptive_atr_strong_adx": 35.0,
+    "adaptive_atr_strong_mult": 3.0,
+    "adaptive_atr_weak_mult": 1.5,
     "failure_exit_enabled": False,
     "failure_exit_bars": 3,
     "failure_exit_mode": "breakout_failure",
@@ -53,6 +60,10 @@ STRATEGY = {
     "derivatives_crowding_funding_z_lookback": 30,
     "derivatives_crowding_funding_z_threshold": 0.75,
     "derivatives_crowding_basis_abs_threshold_pct": 0.03,
+    "derivatives_monitor_enabled": False,
+    "signal_observation_enabled": False,
+    "signal_observation_min_samples": 30,
+    "signal_observation_horizons": (1, 3, 6),
     "microstructure_guard_enabled": False,
     "microstructure_guard_observe_only": False,
     "microstructure_max_spread_bps": 8.0,
@@ -72,7 +83,8 @@ CIRCUIT = {
     "cooldown_hours": 24,
 }
 
-os.makedirs(STATE_DIR, exist_ok=True)
+os.makedirs(LIVE_STATE_DIR, exist_ok=True)
+os.makedirs(PAPER_STATE_DIR, exist_ok=True)
 os.makedirs(HL_API_LOG_DIR, exist_ok=True)
 os.makedirs(TRADE_HISTORY_DIR, exist_ok=True)
 
@@ -114,6 +126,10 @@ def get_market_data_source():
 
 def is_debug_api():
     return get_env("DEBUG_API", "").lower() in ("1", "true", "yes", "on")
+
+
+def get_state_dir():
+    return LIVE_STATE_DIR if MODE == "live" else PAPER_STATE_DIR
 
 
 def set_mode(mode):

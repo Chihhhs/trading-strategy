@@ -42,6 +42,15 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
     else:
         outcome = "breakeven"
 
+    favorable = _safe_float((pos or {}).get("max_favorable_price"), default=entry)
+    adverse = _safe_float((pos or {}).get("max_adverse_price"), default=entry)
+    if direction == "long":
+        mfe_pct = ((favorable - entry) / entry * 100) if entry else 0.0
+        mae_pct = ((adverse - entry) / entry * 100) if entry else 0.0
+    else:
+        mfe_pct = ((entry - favorable) / entry * 100) if entry else 0.0
+        mae_pct = ((entry - adverse) / entry * 100) if entry else 0.0
+
     return {
         "coin": (pos or {}).get("coin"),
         "direction": direction,
@@ -67,6 +76,8 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         "close_status": exit_context.get("close_status"),
         "close_reason_source": exit_context.get("close_reason_source"),
         "close_submitted_at": (pos or {}).get("close_submitted_at"),
+        "mfe_pct": round(mfe_pct, 4),
+        "mae_pct": round(mae_pct, 4),
     }
 
 

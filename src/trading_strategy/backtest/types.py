@@ -22,6 +22,10 @@ class BacktestConfig:
     atr_trailing_enabled: bool = False
     atr_activation_r: float = 1.5
     atr_trailing_mult: float = 2.0
+    adaptive_atr_trailing_enabled: bool = False
+    adaptive_atr_strong_adx: float = 35.0
+    adaptive_atr_strong_mult: float = 3.0
+    adaptive_atr_weak_mult: float = 1.5
     failure_exit_enabled: bool = False
     failure_exit_bars: int = 3
     failure_exit_mode: str = "breakout_failure"
@@ -54,6 +58,12 @@ class BacktestConfig:
     derivatives_oi_lookback: int = 5
     derivatives_min_oi_change_long: float = -10.0
     derivatives_max_oi_change_short: float = 10.0
+    oi_entry_filter_enabled: bool = False
+    oi_entry_filter_lookback: int = 5
+    oi_entry_filter_min_change_pct: float = 0.0
+    oi_entry_filter_min_price_move_pct: float = 0.1
+    oi_entry_filter_block_late_crowded: bool = True
+    oi_entry_filter_funding_extreme_abs: float = 0.0005
     derivatives_crowding_exit_enabled: bool = False
     derivatives_crowding_action: str = "exit"
     derivatives_crowding_reduce_fraction: float = 0.75

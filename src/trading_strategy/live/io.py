@@ -70,8 +70,8 @@ def record_trade_event(event, **fields):
 
 
 def load_state():
-    return load_state_file(config.STATE_DIR, config.STRATEGY)
+    return load_state_file(config.get_state_dir(), config.STRATEGY)
 
 
 def save_state(state):
-    save_state_file(config.STATE_DIR, state, _IO_LOCK)
+    save_state_file(config.get_state_dir(), state, _IO_LOCK)

@@ -149,6 +149,7 @@ def compute_atr_trailing_result(
         return result
 
     result["target_sl"] = target_sl
+    result["effective_atr_trailing_mult"] = float(atr_trailing_mult)
     result["should_update"] = bool(is_more_protective)
     result["triggered"] = bool(is_crossed)
     return result

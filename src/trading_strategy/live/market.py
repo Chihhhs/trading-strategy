@@ -54,6 +54,7 @@ def get_klines(symbol, limit=60, interval=None):
         if data and isinstance(data, list):
             return [
                 {
+                    "time": d.get("t") or d.get("T"),
                     "open": float(d["o"]),
                     "high": float(d["h"]),
                     "low": float(d["l"]),
@@ -68,6 +69,7 @@ def get_klines(symbol, limit=60, interval=None):
     if data and isinstance(data, list):
         return [
             {
+                "time": d[0],
                 "open": float(d[1]),
                 "high": float(d[2]),
                 "low": float(d[3]),
@@ -115,10 +117,20 @@ def _normalize_funding_history(payload):
     return history
 
 
-def get_derivatives_context(symbol, lookback=31):
+def _latest_bybit_open_interest(symbol):
+    payload = api_get(
+        f"{config.BYBIT_API}/v5/market/open-interest?category=linear&symbol={symbol}&intervalTime=5min&limit=1"
+    )
+    rows = ((payload or {}).get("result") or {}).get("list") or []
+    if not rows:
+        return None
+    return _safe_float((rows[0] or {}).get("openInterest"))
+
+
+def get_derivatives_context(symbol, lookback=31, include_open_interest=False):
     symbol = symbol if str(symbol).endswith("USDT") else f"{symbol}USDT"
     lookback = max(int(lookback or 31), 2)
-    cache_key = (symbol, lookback)
+    cache_key = (symbol, lookback, bool(include_open_interest))
     now_bucket = int(time.time() // 300)
     cached = _DERIVATIVES_CONTEXT_CACHE.get(cache_key)
     if cached and cached.get("bucket") == now_bucket:
@@ -137,7 +149,8 @@ def get_derivatives_context(symbol, lookback=31):
         "basis_pct": premium.get("basis_pct"),
         "mark_price": premium.get("mark_price"),
         "index_price": premium.get("index_price"),
-        "source": "binance_futures",
+        "open_interest": _latest_bybit_open_interest(symbol) if include_open_interest else None,
+        "source": "binance_futures+bybit_oi" if include_open_interest else "binance_futures",
     }
     _DERIVATIVES_CONTEXT_CACHE[cache_key] = {"bucket": now_bucket, "context": context}
     if not funding_history or context.get("basis_pct") is None:
@@ -252,7 +265,7 @@ def load_coin_list():
         names = [str(name).upper() for name in configured_universe]
         return [{"name": name, "symbol": f"{name}USDT"} for name in names]
 
-    cache = os.path.join(config.STATE_DIR, "coin_list.json")
+    cache = os.path.join(config.get_state_dir(), "coin_list.json")
     if os.path.exists(cache):
         with open(cache, "r", encoding="utf-8") as handle:
             payload = json.load(handle)

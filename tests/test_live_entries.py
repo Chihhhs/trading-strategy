@@ -2,6 +2,41 @@ from tests.live_test_support import check_entries, live, patch, unittest
 
 
 class LiveEntriesTest(unittest.TestCase):
+    @patch("trading_strategy.live.engine.entries.record_signal_observation")
+    @patch("trading_strategy.live.engine.entries.evaluate_microstructure_guard")
+    @patch("trading_strategy.live.engine.entries.get_derivatives_context")
+    @patch("trading_strategy.live.engine.entries.get_current_prices")
+    @patch("trading_strategy.live.engine.entries.get_btc_direction")
+    @patch("trading_strategy.live.engine.entries.get_klines")
+    def test_check_entries_paper_records_full_signal_observation(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_get_derivatives_context,
+        mock_evaluate_microstructure_guard,
+        mock_record_signal_observation,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY.get("signal_observation_enabled")
+        live.config.set_mode("paper")
+        live.config.STRATEGY["signal_observation_enabled"] = True
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"time": 1, "open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            mock_get_derivatives_context.return_value = {"open_interest": 123.0}
+            mock_evaluate_microstructure_guard.return_value = {"allowed": True, "reason": "microstructure_ok"}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.entries.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.entries.calc_position_size", return_value=0.0
+            ):
+                check_entries({"balance": 100.0, "positions": [], "history": []}, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            mock_record_signal_observation.assert_called_once()
+            self.assertEqual(mock_record_signal_observation.call_args.kwargs["microstructure_context"]["reason"], "microstructure_ok")
+        finally:
+            live.config.STRATEGY["signal_observation_enabled"] = old_enabled
+            live.config.set_mode(old_mode)
     @patch("trading_strategy.live.engine.summary.record_trade_event")
     @patch("trading_strategy.live.engine.entries.get_current_prices")
     @patch("trading_strategy.live.engine.entries.get_btc_direction")
@@ -314,6 +349,81 @@ class LiveEntriesTest(unittest.TestCase):
         finally:
             live.config.STRATEGY["microstructure_guard_enabled"] = old_enabled
             live.config.STRATEGY["microstructure_guard_observe_only"] = old_observe_only
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.entries.record_trade_event")
+    @patch("trading_strategy.live.engine.entries.get_derivatives_context")
+    @patch("trading_strategy.live.engine.entries.get_current_prices")
+    @patch("trading_strategy.live.engine.entries.get_btc_direction")
+    @patch("trading_strategy.live.engine.entries.get_klines")
+    def test_check_entries_paper_records_oi_context_without_using_it_for_entry(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_get_derivatives_context,
+        mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY.get("derivatives_monitor_enabled")
+        live.config.set_mode("paper")
+        live.config.STRATEGY["derivatives_monitor_enabled"] = True
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            mock_get_derivatives_context.return_value = {
+                "funding_rate": 0.0001,
+                "basis_pct": 0.02,
+                "open_interest": 1234.0,
+                "source": "binance_futures+bybit_oi",
+            }
+            state = {"balance": 100.0, "positions": [], "history": [], "managed_orders": []}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.entries.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.entries.calc_position_size", return_value=0.0
+            ):
+                summary = check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertEqual(summary["derivatives_context_observed"], 1)
+            self.assertTrue(
+                any(
+                    call.args[0] == "derivatives_context_observed"
+                    and call.kwargs.get("open_interest") == 1234.0
+                    for call in mock_record_trade_event.call_args_list
+                )
+            )
+        finally:
+            live.config.STRATEGY["derivatives_monitor_enabled"] = old_enabled
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.engine.entries.get_derivatives_context")
+    @patch("trading_strategy.live.engine.entries.get_current_prices")
+    @patch("trading_strategy.live.engine.entries.get_btc_direction")
+    @patch("trading_strategy.live.engine.entries.get_klines")
+    def test_check_entries_live_never_requests_paper_derivatives_monitor(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_get_derivatives_context,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY.get("derivatives_monitor_enabled")
+        live.config.set_mode("live")
+        live.config.STRATEGY["derivatives_monitor_enabled"] = True
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [{"open": 1, "high": 2, "low": 1, "close": 1.5}] * 60
+            state = {"balance": 100.0, "positions": [], "history": [], "managed_orders": []}
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.entries.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.entries.calc_position_size", return_value=0.0
+            ):
+                check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            mock_get_derivatives_context.assert_not_called()
+        finally:
+            live.config.STRATEGY["derivatives_monitor_enabled"] = old_enabled
             live.config.set_mode(old_mode)
 
     @patch("trading_strategy.live.engine.summary.record_trade_event")

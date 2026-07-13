@@ -16,6 +16,7 @@ __pycache__/
 # 執行期資料與狀態
 data/paper_strategies/
 data/paper_strategies_live/
+data/paper_strategies_live_paper/
 data/paper_strategies_v2/
 data/signal_log.json
 data/signal_log_history.json

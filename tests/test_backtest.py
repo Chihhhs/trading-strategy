@@ -31,9 +31,11 @@ from trading_strategy.backtest.carry import (
 )
 from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
+from trading_strategy.backtest.evaluation import run_trend_evaluation
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.research import format_research_report_lines, run_research_report
+from trading_strategy.strategies.trend import TrendStrategy
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
 from trading_strategy.core.trend_trade import compute_atr_trailing_result
 
@@ -60,6 +62,77 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_adaptive_atr_trail_uses_entry_adx_to_select_multiplier(self):
+        position = {
+            "direction": "long",
+            "entry": 100.0,
+            "sl": 90.0,
+            "current_price": 112.0,
+            "initial_risk": 10.0,
+            "best_price": 120.0,
+            "entry_adx": 40.0,
+            "exit_policy": {"name": "trend_sl_only"},
+        }
+        config = BacktestConfig(
+            coins=("BTC",),
+            atr_trailing_enabled=True,
+            adaptive_atr_trailing_enabled=True,
+            adaptive_atr_strong_adx=35.0,
+            adaptive_atr_strong_mult=3.0,
+            adaptive_atr_weak_mult=1.5,
+        )
+        window = [{"high": 114.0, "low": 110.0, "close": 112.0}] * 15
+        result = TrendStrategy().check_atr_trailing_exit(position, window, config)
+        self.assertEqual(result["effective_atr_trailing_mult"], 3.0)
+        self.assertEqual(result["target_sl"], 108.0)
+
+    def test_trend_evaluation_compares_baseline_and_candidate_by_window_and_universe(self):
+        data_map = {
+            "BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 110, 111, 112))],
+            "ETH": [build_bar(price, index) for index, price in enumerate((50, 51, 60, 61, 62))],
+        }
+
+        def build_signal(context):
+            if context.current_bar["close"] not in (101, 51):
+                return None
+            return StrategySignal("long", tp=context.current_bar["close"] + 5, sl=context.current_bar["close"] - 4, score=5, reason="TEST_BUY")
+
+        base = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1, btc_filter_enabled=False)
+        candidate = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1, btc_filter_enabled=False)
+        report = run_trend_evaluation(
+            data_map,
+            baseline_config=base,
+            candidate_config=candidate,
+            baseline_strategy=FakeStrategy(build_signal),
+            candidate_strategy=FakeStrategy(build_signal),
+            windows=(3,),
+            universes=(("BTC",), ("BTC", "ETH")),
+        )
+        self.assertEqual(len(report["comparisons"]), 2)
+        self.assertEqual(report["comparisons"][1]["coins"], ("BTC", "ETH"))
+        self.assertIn("exit_diagnostics", report["comparisons"][0])
+        self.assertFalse(report["summary"]["passes_majority_gate"])
+
+    def test_microstructure_outcome_report_measures_would_block_forward_move(self):
+        from trading_strategy.backtest.microstructure import build_microstructure_guard_outcome_report
+
+        snapshots = normalize_l2_snapshots(
+            {
+                "BTC": [
+                    {"timestamp": 1, "bids": [["99", "1"]], "asks": [["101", "5"]], "signal_direction": "long"},
+                    {"timestamp": 2, "bids": [["89", "1"]], "asks": [["91", "5"]], "signal_direction": "long"},
+                ]
+            }
+        )
+        report = build_microstructure_guard_outcome_report(
+            snapshots,
+            max_spread_bps=50.0,
+            min_top_depth_usd=0.0,
+            max_opposing_imbalance=0.5,
+            forward_steps=(1,),
+        )
+        self.assertEqual(report[0]["would_block_events"], 1)
+        self.assertLess(report[0]["would_block_forward_return_pct"], 0.0)
     def test_compute_atr_trailing_result_triggers_for_long_after_activation(self):
         position = {
             "direction": "long",
@@ -277,6 +350,18 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(result.trades[0]["exit_reason"], "SL")
         self.assertLess(result.trades[0]["pnl"], 0)
 
+    def test_closed_trade_records_mae_on_stop_bar(self):
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 95))]}
+
+        def build_signal(context):
+            if context.current_bar["close"] != 101:
+                return None
+            return StrategySignal("long", tp=110, sl=96, score=5, reason="TREND_BUY")
+
+        config = BacktestConfig(coins=("BTC",), max_days=None, min_bars=1)
+        result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
+        self.assertLess(result.trades[0]["mae_pct"], 0.0)
+
     def test_engine_closes_long_on_atr_trail_exit(self):
         prices = [100] * 20 + [101, 120, 108, 107]
         data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
@@ -388,6 +473,66 @@ class BacktestModuleTest(unittest.TestCase):
         result = PortfolioBacktester(config=config, strategy=FakeStrategy(build_signal)).run(data_map)
         self.assertEqual(result.portfolio["trades"], 1)
         self.assertEqual(result.portfolio["diagnostics"]["derivatives_missing_context_signals"], 1)
+
+    def test_oi_entry_filter_allows_same_direction_oi_expansion(self):
+        prices = (100, 101, 102, 103, 104, 106, 110, 112)
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {"time": bar["time"], "open_interest": 100 + index * 5, "funding_rate": 0.0}
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+
+        def build_signal(context):
+            if context.current_bar["close"] != 106:
+                return None
+            return StrategySignal("long", tp=111, sl=99, score=5, reason="TEST_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            oi_entry_filter_enabled=True,
+        )
+        result = PortfolioBacktester(
+            config=config,
+            strategy=FakeStrategy(build_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        self.assertGreaterEqual(result.portfolio["trades"], 1)
+        self.assertEqual(result.portfolio["diagnostics"]["oi_entry_filter_confirmed_signals"], 1)
+
+    def test_oi_entry_filter_blocks_unconfirmed_signal(self):
+        prices = (100, 99, 98, 97, 96, 95, 94, 93)
+        data_map = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        derivatives = {
+            "BTC": [
+                {"time": bar["time"], "open_interest": 100 + index * 5, "funding_rate": 0.0}
+                for index, bar in enumerate(data_map["BTC"])
+            ]
+        }
+
+        def build_signal(context):
+            if context.current_bar["close"] != 95:
+                return None
+            return StrategySignal("long", tp=105, sl=90, score=5, reason="TEST_BUY")
+
+        config = BacktestConfig(
+            coins=("BTC",),
+            max_days=None,
+            min_bars=1,
+            btc_filter_enabled=False,
+            oi_entry_filter_enabled=True,
+        )
+        result = PortfolioBacktester(
+            config=config,
+            strategy=FakeStrategy(build_signal),
+            derivatives_data_map=derivatives,
+        ).run(data_map)
+        self.assertEqual(result.portfolio["trades"], 0)
+        self.assertEqual(result.portfolio["diagnostics"]["oi_entry_filter_unconfirmed_signals"], 1)
 
     def test_trend_alpha_entry_disabled_leaves_signal_unchanged(self):
         data_map = {"BTC": [build_bar(price, index) for index, price in enumerate((100, 101, 112))]}
@@ -1139,6 +1284,128 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(config.trend_alpha_score_boost, 2)
         self.assertTrue(config.trend_alpha_require_confirmation)
         self.assertTrue(config.trend_alpha_block_crowded_entry)
+
+    def test_cli_adaptive_atr_flags_build_config(self):
+        parser = cli.build_parser()
+        args = parser.parse_args(
+            [
+                "--coins",
+                "BTC",
+                "--enable-atr-trailing",
+                "--enable-adaptive-atr-trail",
+                "--adaptive-atr-strong-adx",
+                "40",
+                "--adaptive-atr-strong-mult",
+                "3.5",
+                "--adaptive-atr-weak-mult",
+                "1.25",
+            ]
+        )
+        config = cli.build_config(args)
+        self.assertTrue(config.adaptive_atr_trailing_enabled)
+        self.assertEqual(config.adaptive_atr_strong_adx, 40.0)
+        self.assertEqual(config.adaptive_atr_strong_mult, 3.5)
+        self.assertEqual(config.adaptive_atr_weak_mult, 1.25)
+
+    def test_cli_failure_exit_bars_build_config(self):
+        parser = cli.build_parser()
+        args = parser.parse_args(
+            [
+                "--coins",
+                "BTC",
+                "--enable-failure-exit",
+                "--failure-exit-bars",
+                "5",
+            ]
+        )
+        config = cli.build_config(args)
+        self.assertTrue(config.failure_exit_enabled)
+        self.assertEqual(config.failure_exit_bars, 5)
+
+    def test_cli_trend_evaluation_report_prints_gate(self):
+        payload = {
+            "BTC": [build_bar(100.0 + index, index) for index in range(70)],
+            "ETH": [build_bar(50.0 + index, index) for index in range(70)],
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                cli.main(
+                    [
+                        "--coins",
+                        "BTC",
+                        "--data-path",
+                        path,
+                        "--max-days",
+                        "60",
+                        "--trend-evaluation-report",
+                        "--evaluation-windows",
+                        "60",
+                        "--enable-adaptive-atr-trail",
+                    ]
+                )
+        finally:
+            os.remove(path)
+        self.assertIn("Trend robustness evaluation", output.getvalue())
+        self.assertIn("Gate:", output.getvalue())
+        self.assertNotIn("coins=BTC,ETH", output.getvalue())
+
+    def test_cli_microstructure_report_prints_would_block_outcomes(self):
+        payload = {
+            "BTC": [
+                {"timestamp": 1, "bids": [["99", "1"]], "asks": [["101", "5"]], "signal_direction": "long"},
+                {"timestamp": 2, "bids": [["89", "1"]], "asks": [["91", "5"]], "signal_direction": "long"},
+            ]
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as handle:
+            json.dump(payload, handle)
+            path = handle.name
+        try:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                cli.main(
+                    [
+                        "--microstructure-report",
+                        "--microstructure-data-path",
+                        path,
+                        "--microstructure-forward-steps",
+                        "1",
+                        "--microstructure-max-spread-bps",
+                        "50",
+                        "--microstructure-min-top-depth-usd",
+                        "0",
+                    ]
+                )
+        finally:
+            os.remove(path)
+        self.assertIn("Microstructure guard outcome report", output.getvalue())
+        self.assertIn("would_block=1", output.getvalue())
+
+    def test_cli_oi_entry_filter_flags_build_config(self):
+        parser = cli.build_parser()
+        args = parser.parse_args(
+            [
+                "--coins",
+                "BTC,ETH",
+                "--enable-oi-entry-filter",
+                "--oi-entry-lookback",
+                "7",
+                "--oi-entry-min-change-pct",
+                "1.5",
+                "--oi-entry-min-price-move-pct",
+                "0.3",
+                "--disable-oi-entry-block-late-crowded",
+            ]
+        )
+        config = cli.build_config(args)
+        self.assertTrue(config.oi_entry_filter_enabled)
+        self.assertEqual(config.oi_entry_filter_lookback, 7)
+        self.assertEqual(config.oi_entry_filter_min_change_pct, 1.5)
+        self.assertEqual(config.oi_entry_filter_min_price_move_pct, 0.3)
+        self.assertFalse(config.oi_entry_filter_block_late_crowded)
 
     def test_carry_report_runs_funding_and_basis_backtests(self):
         derivatives_data_map = {

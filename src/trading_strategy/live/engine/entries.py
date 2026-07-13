@@ -6,7 +6,8 @@ from trading_strategy.strategies.base import signal_value
 
 from .. import config
 from ..io import record_trade_event, save_state
-from ..market import get_btc_direction, get_current_prices, get_klines
+from ..market import get_btc_direction, get_current_prices, get_derivatives_context, get_klines
+from ..observations import record_signal_observation
 from ..orders import (
     classify_order_rejection,
     normalize_hl_order_params,
@@ -125,6 +126,68 @@ def check_entries(state, coins):
             log_entry_skipped(state, name, btc_dir, "no_signal")
             continue
         summary["signals_found"] += 1
+        paper_observation_enabled = (
+            config.MODE == "paper" and config.STRATEGY.get("signal_observation_enabled", False)
+        )
+        derivatives_context = {}
+        if config.MODE == "paper" and (
+            config.STRATEGY.get("derivatives_monitor_enabled", False) or paper_observation_enabled
+        ):
+            derivatives_context = get_derivatives_context(coin["symbol"], include_open_interest=True)
+            summary["derivatives_context_observed"] += 1
+            if derivatives_context.get("open_interest") is None:
+                summary["derivatives_context_missing"] += 1
+            if config.STRATEGY.get("derivatives_monitor_enabled", False):
+                record_trade_event(
+                    "derivatives_context_observed",
+                    **build_entry_context(
+                        state,
+                        name,
+                        btc_dir,
+                        config.STRATEGY["entry_order_type"],
+                        signal_direction=signal_value(sig, "direction"),
+                        funding_rate=derivatives_context.get("funding_rate"),
+                        basis_pct=derivatives_context.get("basis_pct"),
+                        open_interest=derivatives_context.get("open_interest"),
+                        derivatives_source=derivatives_context.get("source"),
+                    ),
+                )
+        if paper_observation_enabled:
+            guard = evaluate_microstructure_guard(name, sig)
+            observation = record_signal_observation(
+                state,
+                coin=name,
+                signal=sig,
+                window=klines,
+                derivatives_context=derivatives_context,
+                microstructure_context=guard,
+                horizons=config.STRATEGY.get("signal_observation_horizons", (1, 3, 6)),
+            )
+            if observation:
+                record_trade_event(
+                    "trend_signal_observed",
+                    **build_entry_context(
+                        state,
+                        name,
+                        btc_dir,
+                        config.STRATEGY["entry_order_type"],
+                        signal_direction=signal_value(sig, "direction"),
+                        signal_score=signal_value(sig, "score"),
+                        funding_rate=observation.get("funding_rate"),
+                        basis_pct=observation.get("basis_pct"),
+                        open_interest=observation.get("open_interest"),
+                        derivatives_source=observation.get("derivatives_source"),
+                        observation_id=observation.get("observation_id"),
+                        entry_bar_time=observation.get("entry_bar_time"),
+                        would_block=observation.get("would_block"),
+                        would_block_reason=observation.get("would_block_reason"),
+                        best_bid=observation.get("best_bid"),
+                        best_ask=observation.get("best_ask"),
+                        spread_bps=observation.get("spread_bps"),
+                        top_depth_usd=observation.get("top_depth_usd"),
+                        book_imbalance=observation.get("book_imbalance"),
+                    ),
+                )
         exit_policy = strategy.build_exit_policy(signal=sig)
         target_tp = signal_value(sig, "tp") if exit_policy.get("requires_tp") else None
 

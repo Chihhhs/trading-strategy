@@ -17,11 +17,14 @@
 - 啟動時檢查缺失的 reduce-only TP/SL
 - 若 TP/SL 缺失，會自動補掛
 - 若仍有未受保護持倉，會阻止新開倉
+- live engine 的 paper mode 使用獨立 state dir，不再同步 Hyperliquid account
 - 每輪執行會寫出 `run_started`、`account_snapshot`、`run_summary`
 - entry / TP/SL / skip / reject 都有事件型 JSONL log
 - 策略架構已重構為 `trading_strategy.strategies`
 - backtest/live 已透過 strategy hook 對齊出場語義
 - live K 線週期可由 `config.STRATEGY["timeframe"]` 控制
+- microstructure guard 已接 live entry 前，但目前以 observe-only 為預設
+- backtest 已支援 OI entry filter-only，用來測試 OI 是否能改善 trend entry 品質
 - 第一版短週期策略 `intraday_momentum` 已接線，但資料驗證顯示不能部署
 
 目前 canonical 入口：
@@ -34,6 +37,7 @@
 目前主要資料檔：
 
 - `data/paper_strategies_live/live_state.json`
+- `data/paper_strategies_live_paper/live_state.json`
 - `data/paper_strategies_live/live_trading_records.jsonl`
 - `data/paper_strategies_live/live_api_debug.log`
 - `data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json`
@@ -159,6 +163,65 @@
 - 不應上 paper/live。
 - 下一步應先做 cost/slippage model、turnover 限制、regime filter。
 
+### 2.8 Position control、OI filter、microstructure guard
+
+已完成：
+
+- `derivatives_crowding_exit_enabled=True` 可用於 trend position control，live 設定採 `action=reduce`、`reduce_fraction=0.75`
+- live `run_summary.strategy_snapshot` 會記錄 position control 與 microstructure guard 設定
+- microstructure guard 使用 Hyperliquid L2 top book 計算 spread、top depth、book imbalance
+- microstructure guard 預設 `observe-only`，只記錄 would-block，不強制阻擋 live entry
+- live-engine paper mode 與 live mode state dir 分離，paper 不再同步 Hyperliquid account
+- Binance OI history 覆蓋不足，改用 Bybit OI + Binance funding/basis fixture：
+  - `data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json`
+- OI entry filter-only 已接 backtest CLI：`--enable-oi-entry-filter`
+
+驗證結果：
+
+- live safety report 顯示目前 4 個 adopted positions 皆有 TP/SL 保護
+- 隔離後 paper single-cycle 顯示 `balance=$1000`、`positions=0`、`balance_source=local_state`
+- BTC/ETH/BNB 240d live-like trend baseline: `net_pnl=-23.9%`, `drawdown=46.0%`
+- trend + position control: `net_pnl=-6.7%`, `drawdown=33.8%`
+- trend + position control + OI entry filter-only: `net_pnl=+31.6%`, `drawdown=10.7%`, 但只有 5 trades，仍需更大樣本驗證
+
+後續擴樣驗證：
+
+- BTC/ETH/BNB 240d OI lookback 3/5 穩定為正；lookback 10 轉弱但仍為正
+- BTC/ETH/BNB 提高 OI min change 到 `0.5%` / `1.0%` 後，240d 表現更好，但交易數降到 4
+- BTC/ETH/BNB 近 120d / 180d 不穩：寬鬆 OI filter 只觸發 1 筆且虧損，嚴格門檻則沒有交易
+- 擴展到 BTC/ETH/BNB/XRP/DOGE/ADA/LINK/LTC 後，position control 單獨為 `net_pnl=+11.5%`、`drawdown=24.7%`
+- 同一 8 幣 universe 加 OI filter-only 後，`min_change=0.5%` 為 `net_pnl=-4.8%`、`drawdown=41.9%`
+- `min_change=1.0%` 小幅轉正但 score 仍負；`min_change=2.0%` 明顯轉差
+
+結論：
+
+- OI entry filter-only 尚未達 live promotion 標準。
+- 目前可 live 的 alpha-derived component 仍只有 funding/basis position control。
+- OI filter 可進 paper-only / research monitor，等待更多樣本與更長 OOS 驗證。
+
+### 2.9 Robustness gate 與 adaptive trail 候選
+
+已完成：
+
+- 新增 `--trend-evaluation-report`，用固定窗口 `120/180/240` 與多組 universe 比較 frozen baseline 和單一 candidate。
+- 評估報告輸出成本後 net PnL、drawdown、score 差異、幣種貢獻、價格相關性，以及依 `ATR_TRAIL` / `FAILURE` / `SL` 等 exit reason 分組的 PnL、持有 bar、MFE、MAE。
+- 新增可選 adaptive ATR trail：入場 ADX 高於門檻時使用較寬 trail，否則使用較緊 trail。預設關閉，不改既有 live 行為。
+- paper mode 可在訊號出現時記錄 Binance funding/basis + Bybit current OI；live mode 硬性跳過這個 monitor。
+- microstructure snapshot report 可比較 would-block 與 allowed 事件的後續方向報酬；沒有 L2 replay 資料時不得宣稱 guard 有 alpha。
+
+首次實測：
+
+- 以 BTC/ETH/BNB/XRP/DOGE/ADA/LINK/LTC、240d Bybit OI + Binance funding/basis、`fee=4.5bps`、`slippage=2bps` 測試 adaptive ATR trail。
+- 九組固定比較中只有兩組達到每組五筆 trades 的最低樣本；雖然兩組皆不劣於 baseline，仍未達至少三組合格樣本的 gate，結果為 `passes_majority_gate=False`。
+- 因此 adaptive ATR trail 保留為 research-only，不進 paper/live。
+- paper live-engine 單輪已確認 `derivatives_monitor_enabled=True`、`priced_ratio=1.0`，但當下沒有訊號，故 `derivatives_context_observed=0`；OI event 欄位與 live hard gate 由 unit tests 驗證。
+- paper 研究現在會在每個 trend signal 記錄 funding/basis/Bybit OI 與 Hyperliquid L2（包含 allowed 與 would-block），並持久化等待 1/3/6 根後的方向化 forward return。觀測佇列只在 paper mode 啟用，預設 30 個去重訊號為最小樣本；尚未達門檻前不得改為 entry filter 或 live 強制 guard。
+
+Promotion gate：
+
+- candidate 必須在至少三個具備足夠交易樣本的固定比較中，以每組至少五筆 trades 為下限，並在多數比較同時不劣於 baseline 的 net PnL 與 max drawdown。
+- 只有通過 gate 的單一候選，才允許進 paper；不直接接 live。
+
 ## 3. Current Observations
 
 從目前 log 可讀到幾個重要現象：
@@ -250,6 +313,34 @@
 原因：
 
 - 第一版策略證明 wiring 可用，但不是有效 alpha
+
+### P1. 日線 trend 出場快速迭代
+
+現況：
+
+- live baseline 維持 `trend + funding/basis position control`；不因研究候選改動 live 預設。
+- 240d 成本後出場診斷以 `SL` 為主，ATR trail 只在少數長趨勢捕捉到收益。
+- `breakout_failure` 在 5 bars 的 frozen candidate 於 BTC/ETH/BNB 240d 為 `net +1.8%`、8 幣池為 `net +10.1%`，回撤不惡化；但僅 2 個比較達最低交易數，尚未通過 promotion gate。
+
+下一步：
+
+- 用 `--enable-failure-exit --failure-exit-bars 5` 固定測試 breakout failure candidate；每次只比較單一出場變體。
+- 固定成本、`120/180/240d`、BTC-only、BTC/ETH/BNB、擴展幣池；需至少 3 個合格比較，且多數比較同時不劣於 baseline 的 net PnL 與 max drawdown，才可進 paper。
+- 不再重新測試已失敗的 adaptive ATR trail；在 failure exit 未通過前，不新增第二個出場變體。
+
+### 主要研究線：短週期 alpha research（15m）
+
+- 15m 是後續主要研究時間框架；新策略不受既有 trend 或 `intraday_momentum` 限制，但與日線 trend 的訊號、持倉與 live config 完全分離。
+- 現有 `intraday_momentum` 是已被成本與 turnover 否決的負面 baseline，不能以單純調參方式直接 promotion。
+- 先補齊可重播的 15m OHLCV、funding/OI、交易成本與可觀測 L2 context；資料不足時只輸出 missing-data diagnostics，不以日線 derivatives 代理短週期結果。
+- 依序研究 breakout、mean reversion、volatility expansion、Funding/Basis crowding、OI expansion 與 order-flow/L2 context 的 feature-to-forward-return 關係；先證實成本後 edge，才建立策略規則。
+- 每個候選固定比較 BTC-only、BTC/ETH/BNB 與擴展幣池，採用 walk-forward、randomized baseline、費用與滑價；未通過多數窗口的 net PnL、drawdown 與樣本門檻，不進 paper/live。
+- 短週期 research 成果只可先進 bounded paper observation；累積足夠真實成交、滑價與 L2 adverse-selection 資料後，才可提案加入 live，預設關閉。
+
+### P2. Trend entry 與多幣 portfolio
+
+- entry：Funding/Basis/OI 僅作研究、paper monitor 或 filter 候選，不單獨產生 entry；等待足夠 OOS 樣本。
+- portfolio：固定 BTC-only 為核心對照，只有跨窗口正貢獻且不顯著提高回撤的幣種才可加入最多兩倉 universe。
 
 ### P1. 強化 `run_summary` 的持倉上下文
 

@@ -1,6 +1,8 @@
 from .cli import build_config, build_parser, main
 from .data import DATA_PATH, DEFAULT_COINS, get_coin_series, load_historical_data
 from .derivatives import load_derivatives_data, normalize_derivatives_data_map
+from .evaluation import format_trend_evaluation_lines, run_trend_evaluation
+from .microstructure import build_microstructure_guard_outcome_report, format_microstructure_guard_outcome_lines
 from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
 from .research import format_research_report_lines, run_research_report
@@ -31,6 +33,8 @@ __all__ = [
     "build_config",
     "build_parser",
     "format_optimization_lines",
+    "format_trend_evaluation_lines",
+    "format_microstructure_guard_outcome_lines",
     "format_research_report_lines",
     "format_result_lines",
     "get_coin_series",
@@ -40,6 +44,8 @@ __all__ = [
     "normalize_derivatives_data_map",
     "resolve_strategy",
     "run_parameter_sweep",
+    "run_trend_evaluation",
+    "build_microstructure_guard_outcome_report",
     "run_backtest_for_coin",
     "run_research_report",
 ]

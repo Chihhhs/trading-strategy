@@ -2,6 +2,55 @@ from tests.live_test_support import cli, live, patch, unittest
 
 
 class LiveCliTest(unittest.TestCase):
+    @patch("trading_strategy.live.cli.print_report")
+    @patch("trading_strategy.live.cli.save_state")
+    @patch("trading_strategy.live.cli.load_state")
+    @patch("trading_strategy.live.cli.load_coin_list")
+    @patch("trading_strategy.live.cli.get_current_prices")
+    @patch("trading_strategy.live.cli.update_positions")
+    @patch("trading_strategy.live.cli.check_entries")
+    @patch("trading_strategy.live.cli.advance_paper_signal_observations")
+    @patch("trading_strategy.live.cli.summarize_signal_observations")
+    @patch("trading_strategy.live.cli.record_trade_event")
+    def test_run_once_paper_includes_signal_observation_progress(
+        self,
+        mock_record_trade_event,
+        mock_summarize,
+        _mock_advance,
+        mock_check_entries,
+        _mock_update_positions,
+        mock_get_current_prices,
+        mock_load_coin_list,
+        mock_load_state,
+        _mock_save_state,
+        _mock_print_report,
+    ):
+        old_mode = live.config.MODE
+        old_enabled = live.config.STRATEGY["signal_observation_enabled"]
+        live.config.set_mode("paper")
+        live.config.STRATEGY["signal_observation_enabled"] = True
+        try:
+            mock_load_state.return_value = {"balance": 100.0, "positions": [], "history": []}
+            mock_load_coin_list.return_value = [{"name": "BTC", "symbol": "BTCUSDT"}]
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_check_entries.return_value = {"top_blockers": []}
+            mock_summarize.return_value = {
+                "signals_observed": 4,
+                "outcomes_observed": 2,
+                "pending_observations": 4,
+                "minimum_signals": 30,
+                "remaining_signals": 26,
+            }
+            cli.run_once()
+            run_summary_call = next(
+                call for call in mock_record_trade_event.call_args_list if call.args[0] == "run_summary"
+            )
+            self.assertEqual(run_summary_call.kwargs["signals_observed"], 4)
+            self.assertEqual(run_summary_call.kwargs["remaining_signals"], 26)
+        finally:
+            live.config.STRATEGY["signal_observation_enabled"] = old_enabled
+            live.config.set_mode(old_mode)
+
     @patch("trading_strategy.live.cli.time.sleep")
     @patch("trading_strategy.live.cli.record_trade_event")
     @patch("trading_strategy.live.cli.run_once")
@@ -63,6 +112,46 @@ class LiveCliTest(unittest.TestCase):
             run_summary_calls = [call for call in mock_record_trade_event.call_args_list if call.args[0] == "run_summary"]
             self.assertEqual(len(run_summary_calls), 1)
             self.assertEqual(run_summary_calls[0].kwargs["unprotected_positions_count"], 1)
+        finally:
+            live.config.set_mode(old_mode)
+
+    @patch("trading_strategy.live.cli.print_report")
+    @patch("trading_strategy.live.cli.save_state")
+    @patch("trading_strategy.live.cli.load_state")
+    @patch("trading_strategy.live.cli.load_coin_list")
+    @patch("trading_strategy.live.cli.get_current_prices")
+    @patch("trading_strategy.live.cli.update_positions")
+    @patch("trading_strategy.live.cli.check_entries")
+    @patch("trading_strategy.live.cli.record_trade_event")
+    def test_run_once_paper_does_not_sync_exchange_even_with_account_address(
+        self,
+        _mock_record_trade_event,
+        mock_check_entries,
+        _mock_update_positions,
+        mock_get_current_prices,
+        mock_load_coin_list,
+        mock_load_state,
+        _mock_save_state,
+        _mock_print_report,
+    ):
+        old_mode = live.config.MODE
+        live.config.set_mode("paper")
+        try:
+            mock_load_state.return_value = {
+                "balance": 100.0,
+                "positions": [],
+                "history": [],
+                "_balance_source": "local_state",
+                "params": dict(live.config.STRATEGY),
+            }
+            mock_load_coin_list.return_value = [{"name": "BTC", "symbol": "BTCUSDT"}]
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_check_entries.return_value = {"top_blockers": []}
+            with patch("trading_strategy.live.cli.config.get_account_address", return_value="0xabc"), patch(
+                "trading_strategy.live.cli.sync_state_with_hl_balance"
+            ) as mock_sync:
+                cli.run_once()
+            mock_sync.assert_not_called()
         finally:
             live.config.set_mode(old_mode)
 
