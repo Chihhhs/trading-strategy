@@ -32,10 +32,16 @@ from trading_strategy.backtest.carry import (
 )
 from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
-from trading_strategy.backtest.evaluation import run_trend_evaluation
+from trading_strategy.backtest.evaluation import _exit_diagnostics, run_trend_evaluation
+from trading_strategy.backtest.exit_replay import effective_stop, resolve_hourly_stop_fill, timestamp_iso
+from trading_strategy.backtest.exit_replay_report import classify_stop_sweep_event
+from trading_strategy.backtest.exit_replay_report import analyze_stop_sweep_events
+from trading_strategy.backtest.live_like import build_mark_to_market_point, classify_stop_kind, drawdown_diagnostics
+from trading_strategy.backtest.historical_fetch import fetch_binance_hourly_klines
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.research import format_research_report_lines, run_research_report
+from trading_strategy.shared.trade_history import build_trade_record
 from trading_strategy.strategies.trend import TrendStrategy
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
 from trading_strategy.core.trend_trade import compute_atr_trailing_result
@@ -63,6 +69,312 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_exit_replay_cli_defaults_to_strict_canonical_mode(self):
+        args = cli.build_parser().parse_args([])
+        self.assertEqual(args.exit_replay_mode, "strict")
+
+    def test_timestamp_iso_normalizes_numeric_and_iso_values(self):
+        self.assertEqual(timestamp_iso({"ts": 0}), "1970-01-01T00:00:00+00:00")
+        self.assertEqual(
+            timestamp_iso({"time": "2026-01-01T00:00:00Z"}),
+            "2026-01-01T00:00:00+00:00",
+        )
+
+    def test_mark_to_market_point_includes_unrealized_pnl_and_liquidation_cost(self):
+        point = build_mark_to_market_point(
+            balance=1000.0,
+            positions=[
+                {"coin": "BTC", "direction": "long", "entry": 100.0, "size": 2.0},
+                {"coin": "ETH", "direction": "short", "entry": 50.0, "size": 1.0},
+            ],
+            prices={"BTC": 110.0, "ETH": 45.0},
+            timestamp_ms=3600000,
+            fee_bps=5.0,
+            slippage_bps=0.0,
+        )
+        self.assertAlmostEqual(point["unrealized_pnl"], 25.0)
+        self.assertAlmostEqual(point["estimated_exit_cost"], 0.2575)
+        self.assertAlmostEqual(point["equity"], 1024.7425)
+        self.assertEqual(point["open_positions"], 2)
+        self.assertEqual(point["gross_exposure"], 265.0)
+
+    def test_mark_to_market_point_rejects_missing_position_price(self):
+        self.assertIsNone(
+            build_mark_to_market_point(
+                balance=1000.0,
+                positions=[{"coin": "BTC", "direction": "long", "entry": 100.0, "size": 1.0}],
+                prices={},
+                timestamp_ms=0,
+            )
+        )
+
+    def test_drawdown_diagnostics_reports_peak_trough_and_duration(self):
+        report = drawdown_diagnostics(
+            [
+                {"timestamp_ms": 0, "equity": 100.0},
+                {"timestamp_ms": 3600000, "equity": 120.0},
+                {"timestamp_ms": 7200000, "equity": 90.0},
+                {"timestamp_ms": 10800000, "equity": 110.0},
+            ]
+        )
+        self.assertEqual(report["max_drawdown_pct"], 25.0)
+        self.assertEqual(report["peak_timestamp_ms"], 3600000)
+        self.assertEqual(report["trough_timestamp_ms"], 7200000)
+        self.assertEqual(report["drawdown_duration_hours"], 2.0)
+
+    def test_stop_kind_distinguishes_initial_dynamic_and_atr(self):
+        self.assertEqual(classify_stop_kind({"sl_stage": 0}, "SL"), "initial")
+        self.assertEqual(classify_stop_kind({"sl_stage": 1}, "SL"), "breakeven")
+        self.assertEqual(classify_stop_kind({"sl_stage": 2}, "SL"), "half_r")
+        self.assertEqual(classify_stop_kind({"sl_stage": 2}, "ATR_TRAIL"), "atr")
+
+    def test_exit_replay_uses_most_protective_known_stop(self):
+        self.assertEqual(
+            effective_stop({"direction": "long", "sl": 95.0, "atr_trailing_stop": 98.0}),
+            98.0,
+        )
+        self.assertEqual(
+            effective_stop({"direction": "short", "sl": 105.0, "atr_trailing_stop": 102.0}),
+            102.0,
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(
+                {"direction": "long", "sl": 95.0, "atr_trailing_stop": 98.0},
+                {"open": 100.0, "high": 101.0, "low": 97.0},
+            )["reason"],
+            "ATR_TRAIL",
+        )
+
+    def test_hourly_fetch_paginates_and_deduplicates(self):
+        hour_ms = 60 * 60 * 1000
+        pages = [
+            [[0, "1", "2", "0.5", "1.5", "10"], [hour_ms, "2", "3", "1", "2.5", "20"]],
+            [[2 * hour_ms, "3", "4", "2", "3.5", "30"]],
+        ]
+
+        bars = fetch_binance_hourly_klines(
+            "BTC",
+            0,
+            3 * hour_ms,
+            request_json=lambda _url: pages.pop(0),
+            limit=2,
+        )
+
+        self.assertEqual([bar["open_time"] for bar in bars], [0, hour_ms, 2 * hour_ms])
+        self.assertEqual(bars[-1]["close"], 3.5)
+
+    def test_exit_replay_fills_stop_touch_and_gap_causally(self):
+        long_position = {"direction": "long", "sl": 95.0}
+        short_position = {"direction": "short", "sl": 105.0}
+        self.assertEqual(
+            resolve_hourly_stop_fill(long_position, {"open": 97.0, "high": 99.0, "low": 94.0}),
+            {"price": 95.0, "reason": "SL", "fill_type": "stop"},
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(long_position, {"open": 93.0, "high": 96.0, "low": 92.0}),
+            {"price": 93.0, "reason": "SL", "fill_type": "gap"},
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(short_position, {"open": 103.0, "high": 106.0, "low": 101.0}),
+            {"price": 105.0, "reason": "SL", "fill_type": "stop"},
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(short_position, {"open": 107.0, "high": 108.0, "low": 104.0}),
+            {"price": 107.0, "reason": "SL", "fill_type": "gap"},
+        )
+
+    def test_close_confirmed_stop_ignores_reclaimed_touch(self):
+        position = {"direction": "long", "sl": 95.0}
+        self.assertIsNone(
+            resolve_hourly_stop_fill(
+                position,
+                {"open": 100.0, "high": 101.0, "low": 94.0, "close": 98.0},
+                mode="close_confirmed",
+            )
+        )
+        self.assertEqual(
+            resolve_hourly_stop_fill(
+                position,
+                {"open": 100.0, "high": 101.0, "low": 94.0, "close": 93.0},
+                mode="close_confirmed",
+            ),
+            {"price": 93.0, "reason": "SL", "fill_type": "confirmed"},
+        )
+
+    def test_close_confirmed_stop_still_exits_on_gap_open(self):
+        self.assertEqual(
+            resolve_hourly_stop_fill(
+                {"direction": "short", "sl": 105.0},
+                {"open": 107.0, "high": 108.0, "low": 101.0, "close": 103.0},
+                mode="close_confirmed",
+            ),
+            {"price": 107.0, "reason": "SL", "fill_type": "gap"},
+        )
+
+    def test_stop_sweep_classification_boundaries(self):
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": False}),
+            "ineligible",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": True, "max_favorable_r": 0.5}),
+            "false_sweep",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": True, "max_favorable_r": 0.2}),
+            "reclaimed_stop",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": False, "signed_return_r": -0.5}),
+            "valid_stop",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "reclaimed": False, "signed_return_r": -0.2}),
+            "unclear",
+        )
+        self.assertEqual(
+            classify_stop_sweep_event({"eligible": True, "fill_type": "gap", "reclaimed": True, "max_favorable_r": 2.0}),
+            "ineligible",
+        )
+
+    def test_stop_sweep_horizons_are_independently_eligible(self):
+        hour_ms = 60 * 60 * 1000
+        hourly = {
+            "BTC": [
+                {"open_time": index * hour_ms, "open": 100, "high": 101, "low": 99, "close": 100 + index}
+                for index in range(25)
+            ]
+        }
+        report = analyze_stop_sweep_events(
+            [{"coin": "BTC", "direction": "long", "fill_type": "stop", "open_time": 0, "fill_price": 95, "stop_price": 95, "initial_risk": 5}],
+            hourly,
+            forward_hours=(6, 12, 72),
+            reclaim_hours=24,
+        )
+
+        self.assertEqual(report["events_eligible"], 1)
+        self.assertEqual(report["forward_summary"][6]["events"], 1)
+        self.assertEqual(report["forward_summary"][72]["events"], 0)
+
+    def test_strict_exit_replay_fixture_regression(self):
+        data = load_historical_data(os.path.join(ROOT, "data", "historical_prices", "1000d_50coins.json"))
+        hourly = load_historical_data(
+            os.path.join(ROOT, "data", "historical_prices", "binance_1h_240d_BTC_ETH_BNB.json")
+        )
+        derivatives = load_derivatives_data(
+            os.path.join(ROOT, "data", "derivatives", "bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json")
+        )
+        result = PortfolioBacktester(
+            config=BacktestConfig(
+                coins=("BTC", "ETH", "BNB"),
+                max_days=240,
+                atr_trailing_enabled=True,
+                derivatives_crowding_exit_enabled=True,
+                derivatives_crowding_action="reduce",
+                derivatives_crowding_reduce_fraction=0.75,
+                fee_bps=4.5,
+                slippage_bps=2.0,
+            ),
+            derivatives_data_map=derivatives,
+            exit_replay_data_map=hourly,
+            exit_replay_mode="strict",
+        ).run(data)
+
+        self.assertEqual(result.portfolio["total_pnl_pct"], -26.7)
+        self.assertEqual(result.portfolio["max_drawdown"], 26.7)
+        self.assertEqual(result.portfolio["closed_balance_max_drawdown"], 26.7)
+        self.assertAlmostEqual(result.portfolio["mark_to_market_max_drawdown"], 26.7169)
+        self.assertEqual(result.portfolio["mark_to_market"]["points"], 4560)
+        self.assertEqual(result.portfolio["mark_to_market"]["daily_points"], 190)
+        self.assertEqual(result.portfolio["mark_to_market"]["max_open_positions"], 2)
+        self.assertTrue(all(trade["entry_time"] for trade in result.trades))
+        self.assertTrue(all(trade["exit_time"] for trade in result.trades))
+        events = result.portfolio["diagnostics"]["exit_replay_events"]
+        self.assertEqual({event["stop_kind"] for event in events}, {"initial", "breakeven"})
+        self.assertTrue(all(event["stop_effective_time"] and event["trigger_time"] for event in events))
+
+    def test_exit_replay_does_not_fill_without_complete_bar_or_touch(self):
+        position = {"direction": "long", "sl": 95.0}
+        self.assertIsNone(resolve_hourly_stop_fill(position, {"open": 100.0, "high": 101.0}))
+        self.assertIsNone(
+            resolve_hourly_stop_fill(position, {"open": 100.0, "high": 102.0, "low": 96.0})
+        )
+
+    def test_portfolio_exit_replay_uses_only_hours_after_entry_boundary(self):
+        day_ms = 24 * 60 * 60 * 1000
+        daily = {
+            "BTC": [
+                {**build_bar(100.0, index), "ts": index * day_ms}
+                for index in range(4)
+            ]
+        }
+        hourly = {
+            "BTC": [
+                {
+                    "open_time": 2 * day_ms - 60 * 60 * 1000,
+                    "open": 100.0,
+                    "high": 101.0,
+                    "low": 80.0,
+                    "close": 90.0,
+                },
+                {
+                    "open_time": 2 * day_ms,
+                    "open": 100.0,
+                    "high": 101.0,
+                    "low": 89.0,
+                    "close": 90.0,
+                },
+            ]
+        }
+
+        def signal_factory(context):
+            if context.current_bar["ts"] == day_ms:
+                return StrategySignal(direction="long", sl=95.0, tp=None, score=5, reason="TEST")
+            return None
+
+        result = PortfolioBacktester(
+            config=BacktestConfig(coins=("BTC",), min_bars=1, btc_filter_enabled=False),
+            strategy=FakeStrategy(signal_factory),
+            exit_replay_data_map=hourly,
+        ).run(daily)
+
+        self.assertEqual(result.trades[0]["exit"], 95.0)
+        self.assertEqual(result.trades[0]["exit_reason"], "SL")
+        self.assertEqual(result.portfolio["diagnostics"]["exit_replay_stop_fills"], 1)
+        self.assertEqual(result.portfolio["diagnostics"]["exit_replay_gap_fills"], 0)
+        self.assertGreater(result.portfolio["diagnostics"]["exit_replay_missing_hours"], 0)
+
+    def test_closed_trade_records_initial_risk_and_r_excursions(self):
+        trade = build_trade_record(
+            {
+                "coin": "BTC",
+                "direction": "long",
+                "entry": 100.0,
+                "size": 1.0,
+                "initial_risk": 10.0,
+                "best_price": 115.0,
+                "max_favorable_price": 120.0,
+                "max_adverse_price": 90.0,
+            },
+            110.0,
+            "EOD",
+        )
+        self.assertEqual(trade["initial_risk"], 10.0)
+        self.assertEqual(trade["initial_risk_pct"], 10.0)
+        self.assertEqual(trade["mfe_r"], 2.0)
+        self.assertEqual(trade["mae_r"], -1.0)
+        self.assertEqual(trade["best_close_r"], 1.5)
+
+    def test_exit_diagnostics_aggregates_r_excursions(self):
+        diagnostics = _exit_diagnostics(
+            [
+                {"exit_reason": "SL", "pnl_pct": -3.0, "hold_bars": 2, "mfe_pct": 5.0, "mae_pct": -6.0, "mfe_r": 1.0, "mae_r": -1.2},
+                {"exit_reason": "SL", "pnl_pct": -4.0, "hold_bars": 4, "mfe_pct": 10.0, "mae_pct": -8.0, "mfe_r": 2.0, "mae_r": -1.6},
+            ]
+        )
+        self.assertEqual(diagnostics["SL"]["avg_mfe_r"], 1.5)
+        self.assertEqual(diagnostics["SL"]["avg_mae_r"], -1.4)
+
     def test_adaptive_atr_trail_uses_entry_adx_to_select_multiplier(self):
         position = {
             "direction": "long",
@@ -756,6 +1068,9 @@ class BacktestModuleTest(unittest.TestCase):
         self.assertEqual(result.portfolio["diagnostics"]["derivatives_crowding_reduce_long_signals"], 1)
         reduce_trade = next(trade for trade in result.trades if trade["exit_reason"] == "DERIVATIVES_CROWDING_REDUCE")
         final_trade = result.trades[-1]
+        self.assertTrue(reduce_trade["is_partial"])
+        self.assertFalse(final_trade["is_partial"])
+        self.assertEqual(reduce_trade["position_id"], final_trade["position_id"])
         self.assertLess(reduce_trade["size"], reduce_trade["size"] + final_trade["size"])
         self.assertEqual(round(reduce_trade["size"], 6), round(final_trade["size"], 6))
 

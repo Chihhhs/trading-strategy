@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def _safe_float(value, default=None):
@@ -12,7 +12,8 @@ def _parse_iso_datetime(value):
     if not value:
         return None
     try:
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
+        return parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed
     except (TypeError, ValueError):
         return None
 
@@ -26,7 +27,7 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
     pnl = (exit_px - entry) * size if direction == "long" else (entry - exit_px) * size
 
     entry_time = (pos or {}).get("entry_time")
-    resolved_exit_time = exit_time or datetime.now().isoformat()
+    resolved_exit_time = exit_time or ""
     entry_dt = _parse_iso_datetime(entry_time)
     exit_dt = _parse_iso_datetime(resolved_exit_time)
     hold_minutes = None
@@ -51,6 +52,20 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         mfe_pct = ((entry - favorable) / entry * 100) if entry else 0.0
         mae_pct = ((entry - adverse) / entry * 100) if entry else 0.0
 
+    initial_risk = _safe_float((pos or {}).get("initial_risk"), default=None)
+    initial_risk_pct = (initial_risk / entry * 100) if initial_risk is not None and entry else None
+    mfe_r = (mfe_pct / initial_risk_pct) if initial_risk_pct not in (None, 0) else None
+    mae_r = (mae_pct / initial_risk_pct) if initial_risk_pct not in (None, 0) else None
+    best_close = _safe_float((pos or {}).get("best_price"), default=None)
+    if initial_risk in (None, 0) or best_close is None:
+        best_close_r = None
+    elif direction == "long":
+        best_close_r = (best_close - entry) / initial_risk
+    elif direction == "short":
+        best_close_r = (entry - best_close) / initial_risk
+    else:
+        best_close_r = None
+
     return {
         "coin": (pos or {}).get("coin"),
         "direction": direction,
@@ -73,11 +88,18 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         "exit_reason": exit_reason,
         "exit_policy": ((pos or {}).get("exit_policy") or {}).get("name"),
         "position_source": (pos or {}).get("position_source"),
+        "position_id": (pos or {}).get("position_id"),
+        "is_partial": bool(exit_context.get("is_partial")),
         "close_status": exit_context.get("close_status"),
         "close_reason_source": exit_context.get("close_reason_source"),
         "close_submitted_at": (pos or {}).get("close_submitted_at"),
         "mfe_pct": round(mfe_pct, 4),
         "mae_pct": round(mae_pct, 4),
+        "initial_risk": round(initial_risk, 8) if initial_risk is not None else None,
+        "initial_risk_pct": round(initial_risk_pct, 4) if initial_risk_pct is not None else None,
+        "mfe_r": round(mfe_r, 4) if mfe_r is not None else None,
+        "mae_r": round(mae_r, 4) if mae_r is not None else None,
+        "best_close_r": round(best_close_r, 4) if best_close_r is not None else None,
     }
 
 

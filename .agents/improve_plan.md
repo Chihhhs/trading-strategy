@@ -320,13 +320,16 @@ Promotion gate：
 
 - live baseline 維持 `trend + funding/basis position control`；不因研究候選改動 live 預設。
 - 240d 成本後出場診斷以 `SL` 為主，ATR trail 只在少數長趨勢捕捉到收益。
-- `breakout_failure` / `--failure-exit-bars` 調參線已淘汰；不得再用單一窗口的局部改善重新推進。
+- `breakout_failure` 的既有測試已被淘汰；不得以單一窗口的局部改善重新推進，且不新增專用 CLI 或 live/paper 設定。
+- closed trade 現在會記錄 `initial_risk`、`mfe_r`、`mae_r` 與僅依已收盤 K 線計算的 `best_close_r`；robustness report 依 exit reason 聚合 R-multiple，作為下一輪出場假說的必要證據。
+- dynamic stop 在收盤達 `1R` 時確實會移至 breakeven；日線 backtest 以 close fill 模擬 stop 後的跳空，不能把 bar high/low 的 MFE 直接視為可成交保本。
+- `intrabar_exit=stop_first` 與關閉 ATR trail 都未通過 frozen robustness gate：前者在 BTC/ETH/BNB 240d `net -22.2%`、drawdown `+9.2%`；後者只在 PnL 局部改善但回撤惡化。兩者均淘汰。
 
 下一步：
 
-- 從最新的 exit-reason、MFE、MAE 與持有期資料重新定位單一候選；每次只比較一種出場變體。
+- 以 `best_close_r` 而不是 intrabar MFE，從更長歷史與更細粒度資料重新定位單一候選；每次只比較一種出場變體。
 - 固定成本、`120/180/240d`、BTC-only、BTC/ETH/BNB、擴展幣池；需至少 3 個合格比較，且多數比較同時不劣於 baseline 的 net PnL 與 max drawdown，才可進 paper。
-- 不重新測試已淘汰的 adaptive ATR trail 或 `breakout_failure`；在新的資料診斷提出可驗證假說前，不新增出場規則。
+- 不重新測試已淘汰的 adaptive ATR trail、`breakout_failure`、`intrabar_exit=stop_first` 或 ATR trail disabled；在新的資料診斷提出可驗證假說前，不新增出場規則。
 
 ### 主要研究線：短週期 alpha research（15m）
 
@@ -484,3 +487,74 @@ python -m compileall src tests
 - 改 order 價格正規化時，要同時看 entry order 與 trigger order
 - 改 log schema 時，要同步更新測試與文檔
 - 若觀察到 log 與 state 不一致，先查 `save_state()` 的持久化裁切邏輯
+
+## 8. Trend Exit Replay Result (2026-07-13)
+
+已完成日線訊號、1h 僅重播出場的 240 天研究工具與固定 fixture。BTC/ETH/BNB 的 1h coverage 為 100%，回測保留 `fee=4.5bps`、`slippage=2bps`、position control 與 ATR trail。
+
+結果：
+
+- daily close-fill baseline：12 trades，net `-4.5%`，max drawdown `17.5%`
+- causal 1h replay：13 trades，net `-26.7%`，max drawdown `26.7%`
+- delta：net `-22.2pp`，drawdown `+9.2pp`
+- 1h replay 共 10 次 stop fill、0 次 gap fill，沒有 coverage 缺口
+
+決策：
+
+- 不將 1h stop replay 接入 paper/live。
+- 不再重測「同一 stop 只改成更快成交」；它與已淘汰的 daily intrabar stop-first 指向相同負面結果。
+- replay engine 與固定資料保留，供下一個單一候選做公平 A/B。
+- 下一個合理候選必須改變 stop 結構或啟動條件，並先定義經濟理由與 frozen parameters；不得同時改入場。
+
+## 9. Close-confirmed Stop Result (2026-07-13)
+
+已完成 strict stop sweep 診斷與單根 1h close-confirmed frozen candidate。規則保留 gap open 即時退出，非 gap 則等 1h close 穿越 stop 並以 close 成交。
+
+主要結果：
+
+- Daily baseline：12 trades，net `-4.5%`，drawdown `17.5%`
+- Strict 1h：13 trades，net `-26.7%`，drawdown `26.7%`
+- Close-confirmed 1h：12 trades，net `-24.5%`，drawdown `24.5%`
+- Confirmed 相對 baseline：net `-20.0pp`，drawdown `+7.0pp`
+- Frozen gate：6 comparisons 中只有 1 組達最低交易樣本，且該組未改善；`required_240d_multi_pass=False`、`passes_majority_gate=False`
+
+Stop sweep 證據：
+
+- 10/10 strict stop events 具完整 72h 後續資料
+- 分類：6 reclaimed、3 false sweep、1 unclear、0 valid stop
+- 平均方向化結果：6h `+0.066R`、12h `-0.012R`、24h `+0.093R`、72h `+0.326R`
+- Long 24h 平均 `-0.228R`，short `+0.415R`；效果集中於特定方向，缺乏共用規則所需的穩定性
+
+決策：
+
+- close-confirmed stop 淘汰，不進 paper observe-only 或 live。
+- 不測 2-bar confirmation，不以同一資料繼續調 threshold。
+- live 保持既有 Trend + funding/basis position control 與交易所硬 SL。
+- 下一個出場研究必須提出不同的結構性假說；不能只是延後相同 stop 的成交。
+
+## 10. Canonical Live-like Baseline (2026-07-13)
+
+研究基準已校正：
+
+- Canonical baseline 為 daily Trend decisions + causal 1h hard-SL execution。
+- Daily close-fill 降級為 counterfactual，不再用於 promotion。
+- Replay 報告使用 hourly mark-to-market net-liquidation equity 計算 drawdown。
+- Trade reporting 以 position lifecycle 為單位，partial reduction 另列 execution records，不再灌大交易筆數與 win rate。
+- 所有 entry/exit/stop events 使用市場 timestamp，不再退回系統執行時間。
+
+240d 結果：
+
+- BTC/ETH/BNB：10 positions，net `-26.7%`，hourly MTM DD `26.72%`
+- BTC-only：2 positions，net `-3.6%`，hourly MTM DD `9.29%`
+- ETH/BNB：8 positions，net `-23.8%`，hourly MTM DD `23.81%`
+- Initial stop：8 positions，合計約 `-263.8`
+- Breakeven stop：2 positions，合計約 `-3.4`
+- Canonical gate：`eligible=1/6`、`positive=0`、`passes_live_like_baseline_gate=False`
+
+研究決策：
+
+- 現有 Trend 沒有通過 live-like baseline，不得再把 daily BTC winner 當作 live edge。
+- 停止 stop stage、ATR、confirmation 與 failure-exit 調參。
+- 下一主線應改善 entry/regime/universe，且每個 candidate 必須相對 strict hard-SL + MTM baseline 比較。
+- BTC 可保留為核心研究標的，但目前樣本只有兩筆，不足以上 live 證據。
+- ETH/BNB 持續負貢獻，未有新的 entry alpha 證據前不應擴大 live 配置。

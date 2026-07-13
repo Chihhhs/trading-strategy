@@ -28,6 +28,8 @@
 - backtest 支援 OI entry filter-only，僅過濾既有 trend 訊號，不加分、不單獨開倉
 - live microstructure guard 目前為 observe-only，用於記錄 spread/depth/imbalance，不強制阻擋 entry
 - backtest 支援 `--trend-evaluation-report`：固定比較多個窗口與幣池，輸出成本後績效、幣種貢獻、價格相關性與出場分組
+- closed trade 會保留 `initial_risk`、`mfe_r`、`mae_r`、`best_close_r`，供日線 trend 出場研究區分 intrabar excursion 與收盤可執行的進展
+- backtest 支援 `--trend-exit-replay-report`：日線只產生訊號與更新 stop，1h 僅重播前一個日線收盤已知的停損成交；此能力是研究工具，不改 live/paper
 - adaptive ATR trail 是 backtest/paper 候選變體，依入場 ADX 使用較寬或較緊的 trail；預設關閉，未通過評估 gate 不接 live
 - paper mode 可觀測 funding/basis/Bybit OI 與每個 trend signal 的完整 L2 context，寫入 `trend_signal_observed`；後續 K 線到位後寫入 1/3/6 bar 的 `trend_signal_outcome_observed`，不參與 entry；live mode 不會呼叫這個 OI/L2 研究 monitor
 - paper observation 以 30 個去重 trend signals 為最低樣本門檻；`run_summary` 顯示已累積、pending 與剩餘樣本數，未達門檻不得將 OI/L2 觀測升級為 live guard
@@ -42,6 +44,7 @@
 - `python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240`
 - `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --enable-adaptive-atr-trail --trend-evaluation-report --fee-bps 4.5 --slippage-bps 2`
 - `python backtest/backtest_runner.py --short-cycle-alpha-report --coins BTC,ETH,SOL,BNB --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640 --fee-bps 4.5 --slippage-bps 2 --bucket-count 5 --random-baseline-runs 50 --short-cycle-splits rolling_30,train60_test30 --short-cycle-min-events 100 --short-cycle-focus-alpha intraday_vwap_reversion`
+- `python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --fee-bps 4.5 --slippage-bps 2 --trend-exit-replay-report --exit-replay-data-path data/historical_prices/binance_1h_240d_BTC_ETH_BNB.json`
 - `python backtest/backtest_runner.py --coins BTC --strategy intraday_momentum --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640`
 - `python backtest/backtest_runner.py --coins BTC,ETH --optimize --strategy-grid trend,intraday_momentum`
 
@@ -355,6 +358,36 @@ STRATEGY_OVERRIDES = {
 - report 支援 `--short-cycle-splits rolling_30,train60_test30`、`--short-cycle-min-events`、`--short-cycle-focus-alpha`，用來輸出 walk-forward split summary 與 promotion gate。
 - promotion gate 只評估 signal 是否值得 deeper research；不產生交易、不改 live/paper。
 - 90d BTC/ETH/SOL/BNB 15m fixture 初跑顯示 breakout 與 volatility expansion 成本後偏弱；VWAP reversion 相對 random baseline 較好，但 net mean 仍略負，尚不能升級為策略。
+
+## 2026-07-13 Trend 1h Exit Replay
+
+- 固定資料：`data/historical_prices/binance_1h_240d_BTC_ETH_BNB.json`，BTC/ETH/BNB 各 5,760 根，對齊日線 2025-11-03 到 2026-06-30，coverage 100%。
+- 因果規則：日線收盤更新訊號與 stop；下一個日線區間只使用前一收盤已知 stop。跳空穿越 stop 以 1h open 成交，否則觸及時以 stop 成交。
+- baseline：12 trades，net `-4.5%`，drawdown `17.5%`。
+- 1h replay：13 trades，net `-26.7%`，drawdown `26.7%`，10 次 stop fill、0 次 gap fill。
+- 差異：net `-22.2pp`，drawdown `+9.2pp`。結果與先前淘汰的 daily intrabar stop-first 一致。
+- 結論：replay 工具保留作研究基礎，但「現有 stop 改成 1h 即時執行」未通過 promotion gate，不接 paper/live。下一輪若繼續出場研究，應測 stop 結構或啟動條件，而不是再次測更快執行。
+
+## 2026-07-13 Stop Sweep / Close-confirmed Exit
+
+- `--trend-exit-replay-report` 現在固定同時比較 daily close baseline、strict 1h stop、single-bar 1h close-confirmed stop，並跑 BTC-only、BTC/ETH/BNB 的 120/180/240d frozen gate。
+- Confirmed 規則：gap open 穿越 stop 立即以 open 成交；其餘必須 1h close 穿越 stop，並以該 close 成交。沒有測 2-bar confirmation 或參數 sweep。
+- BTC/ETH/BNB 240d：daily baseline `net=-4.5% / DD=17.5%`；strict `-26.7% / 26.7%`；confirmed `-24.5% / 24.5%`。
+- Confirmed 相對 daily baseline：net `-20.0pp`、drawdown `+7.0pp`，未通過 required 240d multi gate。
+- Strict stop events 共 10 次且 72h coverage 完整：6 次 reclaimed stop、3 次 false sweep、1 次 unclear；24h 平均方向化結果僅 `+0.093R`。
+- 分組顯示 long 24h 平均 `-0.228R`、short `+0.415R`；恢復不具跨方向穩定性，不能支持共用 close-confirmation 規則。
+- 決策：close-confirmed exit 淘汰，不進 paper/live，也不改 Hyperliquid 硬 SL。後續不得以 2-bar confirmation 繼續調參。
+
+## 2026-07-13 Canonical Live-like Baseline
+
+- Promotion baseline 已改為日線訊號 + 1h strict hard-SL replay；daily close-fill 僅保留 counterfactual，因為它允許盤中穿越交易所硬 SL 後繼續持倉，不符合 live。
+- Replay 每小時以 close 計算 net-liquidation equity：cash balance + unrealized PnL - 尚未實現部位的預估 round-trip fee/slippage。缺任一持倉價格時不 forward-fill，comparison 直接失去資格。
+- 240d BTC/ETH/BNB canonical：10 個完整 positions、13 個 execution records、3 次 partial reductions；net `-26.7%`，hourly MTM DD `26.72%`，closed-balance DD `26.7%`。
+- BTC-only canonical：2 positions，net `-3.6%`，hourly MTM DD `9.29%`；ETH/BNB：8 positions，net `-23.8%`，hourly MTM DD `23.81%`。
+- Stop-kind 分解：8 個 initial-stop positions 合計約 `-263.8`；2 個 breakeven positions 合計約 `-3.4`。問題主體是入場後直接走向 initial SL，不是 breakeven stage。
+- Daily BTC-only 的正績效由單一 BTC short winner 主導；該交易在 live-like hard SL 下於 breakeven 出場，因此 daily `+30.2%` 不是可用的 live 證據。
+- 六組 120/180/240d canonical gate 只有一組達五筆最低樣本，且沒有正向 comparison；`passes_live_like_baseline_gate=False`。
+- 決策：停止出場參數研究與 promotion。下一條研究主線回到 entry quality、BTC regime 與 live universe；ETH/BNB 不應靠放寬出場補救。
 
 ## Agent 修改守則
 

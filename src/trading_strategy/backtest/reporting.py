@@ -12,6 +12,10 @@ def _calc_max_drawdown(equity_curve):
     return round(max_drawdown, 1)
 
 
+def calc_max_drawdown(equity_curve):
+    return _calc_max_drawdown(equity_curve)
+
+
 def calc_score(summary, *, drawdown_weight=0.5):
     return round(float(summary["total_pnl_pct"]) - float(summary["max_drawdown"]) * drawdown_weight, 2)
 
