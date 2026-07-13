@@ -51,6 +51,20 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         mfe_pct = ((entry - favorable) / entry * 100) if entry else 0.0
         mae_pct = ((entry - adverse) / entry * 100) if entry else 0.0
 
+    initial_risk = _safe_float((pos or {}).get("initial_risk"), default=None)
+    initial_risk_pct = (initial_risk / entry * 100) if initial_risk is not None and entry else None
+    mfe_r = (mfe_pct / initial_risk_pct) if initial_risk_pct not in (None, 0) else None
+    mae_r = (mae_pct / initial_risk_pct) if initial_risk_pct not in (None, 0) else None
+    best_close = _safe_float((pos or {}).get("best_price"), default=None)
+    if initial_risk in (None, 0) or best_close is None:
+        best_close_r = None
+    elif direction == "long":
+        best_close_r = (best_close - entry) / initial_risk
+    elif direction == "short":
+        best_close_r = (entry - best_close) / initial_risk
+    else:
+        best_close_r = None
+
     return {
         "coin": (pos or {}).get("coin"),
         "direction": direction,
@@ -78,6 +92,11 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         "close_submitted_at": (pos or {}).get("close_submitted_at"),
         "mfe_pct": round(mfe_pct, 4),
         "mae_pct": round(mae_pct, 4),
+        "initial_risk": round(initial_risk, 8) if initial_risk is not None else None,
+        "initial_risk_pct": round(initial_risk_pct, 4) if initial_risk_pct is not None else None,
+        "mfe_r": round(mfe_r, 4) if mfe_r is not None else None,
+        "mae_r": round(mae_r, 4) if mae_r is not None else None,
+        "best_close_r": round(best_close_r, 4) if best_close_r is not None else None,
     }
 
 

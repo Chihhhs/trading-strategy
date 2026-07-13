@@ -321,12 +321,15 @@ Promotion gate：
 - live baseline 維持 `trend + funding/basis position control`；不因研究候選改動 live 預設。
 - 240d 成本後出場診斷以 `SL` 為主，ATR trail 只在少數長趨勢捕捉到收益。
 - `breakout_failure` 的既有測試已被淘汰；不得以單一窗口的局部改善重新推進，且不新增專用 CLI 或 live/paper 設定。
+- closed trade 現在會記錄 `initial_risk`、`mfe_r`、`mae_r` 與僅依已收盤 K 線計算的 `best_close_r`；robustness report 依 exit reason 聚合 R-multiple，作為下一輪出場假說的必要證據。
+- dynamic stop 在收盤達 `1R` 時確實會移至 breakeven；日線 backtest 以 close fill 模擬 stop 後的跳空，不能把 bar high/low 的 MFE 直接視為可成交保本。
+- `intrabar_exit=stop_first` 與關閉 ATR trail 都未通過 frozen robustness gate：前者在 BTC/ETH/BNB 240d `net -22.2%`、drawdown `+9.2%`；後者只在 PnL 局部改善但回撤惡化。兩者均淘汰。
 
 下一步：
 
-- 從最新的 exit-reason、MFE、MAE 與持有期資料重新定位單一候選；每次只比較一種出場變體。
+- 以 `best_close_r` 而不是 intrabar MFE，從更長歷史與更細粒度資料重新定位單一候選；每次只比較一種出場變體。
 - 固定成本、`120/180/240d`、BTC-only、BTC/ETH/BNB、擴展幣池；需至少 3 個合格比較，且多數比較同時不劣於 baseline 的 net PnL 與 max drawdown，才可進 paper。
-- 不重新測試已淘汰的 adaptive ATR trail 或 `breakout_failure`；在新的資料診斷提出可驗證假說前，不新增出場規則。
+- 不重新測試已淘汰的 adaptive ATR trail、`breakout_failure`、`intrabar_exit=stop_first` 或 ATR trail disabled；在新的資料診斷提出可驗證假說前，不新增出場規則。
 
 ### 主要研究線：短週期 alpha research（15m）
 

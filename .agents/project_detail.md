@@ -28,6 +28,7 @@
 - backtest 支援 OI entry filter-only，僅過濾既有 trend 訊號，不加分、不單獨開倉
 - live microstructure guard 目前為 observe-only，用於記錄 spread/depth/imbalance，不強制阻擋 entry
 - backtest 支援 `--trend-evaluation-report`：固定比較多個窗口與幣池，輸出成本後績效、幣種貢獻、價格相關性與出場分組
+- closed trade 會保留 `initial_risk`、`mfe_r`、`mae_r`、`best_close_r`，供日線 trend 出場研究區分 intrabar excursion 與收盤可執行的進展
 - adaptive ATR trail 是 backtest/paper 候選變體，依入場 ADX 使用較寬或較緊的 trail；預設關閉，未通過評估 gate 不接 live
 - paper mode 可觀測 funding/basis/Bybit OI 與每個 trend signal 的完整 L2 context，寫入 `trend_signal_observed`；後續 K 線到位後寫入 1/3/6 bar 的 `trend_signal_outcome_observed`，不參與 entry；live mode 不會呼叫這個 OI/L2 研究 monitor
 - paper observation 以 30 個去重 trend signals 為最低樣本門檻；`run_summary` 顯示已累積、pending 與剩餘樣本數，未達門檻不得將 OI/L2 觀測升級為 live guard

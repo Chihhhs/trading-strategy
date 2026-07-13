@@ -9,12 +9,16 @@ def _exit_diagnostics(trades):
     rows = {}
     for reason in sorted({trade.get("exit_reason") for trade in trades if trade.get("exit_reason")}):
         subset = [trade for trade in trades if trade.get("exit_reason") == reason]
+        mfe_r_values = [float(item["mfe_r"]) for item in subset if item.get("mfe_r") is not None]
+        mae_r_values = [float(item["mae_r"]) for item in subset if item.get("mae_r") is not None]
         rows[reason] = {
             "trades": len(subset),
             "avg_pnl_pct": round(sum(float(item.get("pnl_pct") or 0.0) for item in subset) / len(subset), 3),
             "avg_hold_bars": round(sum(float(item.get("hold_bars") or 0.0) for item in subset) / len(subset), 2),
             "avg_mfe_pct": round(sum(float(item.get("mfe_pct") or 0.0) for item in subset) / len(subset), 3),
             "avg_mae_pct": round(sum(float(item.get("mae_pct") or 0.0) for item in subset) / len(subset), 3),
+            "avg_mfe_r": round(sum(mfe_r_values) / len(mfe_r_values), 3) if mfe_r_values else None,
+            "avg_mae_r": round(sum(mae_r_values) / len(mae_r_values), 3) if mae_r_values else None,
         }
     return rows
 

@@ -31,10 +31,11 @@ from trading_strategy.backtest.carry import (
 )
 from trading_strategy.backtest.derivatives import load_derivatives_data, normalize_derivatives_data_map
 from trading_strategy.backtest.microstructure import build_microstructure_diagnostic_report, normalize_l2_snapshots
-from trading_strategy.backtest.evaluation import run_trend_evaluation
+from trading_strategy.backtest.evaluation import _exit_diagnostics, run_trend_evaluation
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.research import format_research_report_lines, run_research_report
+from trading_strategy.shared.trade_history import build_trade_record
 from trading_strategy.strategies.trend import TrendStrategy
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
 from trading_strategy.core.trend_trade import compute_atr_trailing_result
@@ -62,6 +63,37 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_closed_trade_records_initial_risk_and_r_excursions(self):
+        trade = build_trade_record(
+            {
+                "coin": "BTC",
+                "direction": "long",
+                "entry": 100.0,
+                "size": 1.0,
+                "initial_risk": 10.0,
+                "best_price": 115.0,
+                "max_favorable_price": 120.0,
+                "max_adverse_price": 90.0,
+            },
+            110.0,
+            "EOD",
+        )
+        self.assertEqual(trade["initial_risk"], 10.0)
+        self.assertEqual(trade["initial_risk_pct"], 10.0)
+        self.assertEqual(trade["mfe_r"], 2.0)
+        self.assertEqual(trade["mae_r"], -1.0)
+        self.assertEqual(trade["best_close_r"], 1.5)
+
+    def test_exit_diagnostics_aggregates_r_excursions(self):
+        diagnostics = _exit_diagnostics(
+            [
+                {"exit_reason": "SL", "pnl_pct": -3.0, "hold_bars": 2, "mfe_pct": 5.0, "mae_pct": -6.0, "mfe_r": 1.0, "mae_r": -1.2},
+                {"exit_reason": "SL", "pnl_pct": -4.0, "hold_bars": 4, "mfe_pct": 10.0, "mae_pct": -8.0, "mfe_r": 2.0, "mae_r": -1.6},
+            ]
+        )
+        self.assertEqual(diagnostics["SL"]["avg_mfe_r"], 1.5)
+        self.assertEqual(diagnostics["SL"]["avg_mae_r"], -1.4)
+
     def test_adaptive_atr_trail_uses_entry_adx_to_select_multiplier(self):
         position = {
             "direction": "long",
