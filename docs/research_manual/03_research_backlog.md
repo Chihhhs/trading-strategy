@@ -3,7 +3,7 @@
 - Date: 2026-07-05
 - Data range: Current repo behavior, cited research, and existing 50-coin research notes
 - Applicable markets: Current crypto majors and future liquid-coin expansions
-- Last updated: 2026-07-10
+- Last updated: 2026-07-14
 
 ## Priority 1: Crypto Trend Mainline
 
@@ -88,27 +88,27 @@
 
 ## Priority 3: Intraday Automation Candidates
 
-### 6. Intraday Momentum / Volatility Breakout
+### 6. Short-Cycle Measurement And Ablation
 
-- Claim: Short-horizon momentum and volatility breakout are the most natural non-daily extension of the current trend mainline.
+- Claim: 現有 `intraday_momentum` 的問題不是單純 turnover，而是成本前 edge 偏弱、八根 bar 內再入場負期望、short side 與 volume confirmation 失準，以及回測/live 執行語義不一致。
 - Evidence level: B
-- Market applicability: Liquid crypto majors, especially BTC and top-liquidity perps.
-- Time horizon: 5m to 15m entries, intraday to multi-hour holds.
-- Known failure modes: Choppy markets, false breakouts, crowded momentum unwind.
-- Cost sensitivity: High.
-- Implementation implication: Add timeframe-aware intraday data, conservative cost assumptions, and BTC-only validation before live use.
-- Decision for this repo: First non-daily candidate after cost/slippage tooling.
-
-### 7. Intraday Mean Reversion
-
-- Claim: Short-horizon mean reversion may help in range-bound regimes, but it is more cost-fragile than intraday momentum.
-- Evidence level: B/C
-- Market applicability: High-liquidity coins during non-trending regimes.
-- Time horizon: 1m to 15m entries, short holds.
-- Known failure modes: Strong trends, liquidation cascades, repeated small losses, overfit thresholds.
+- Market applicability: BTC, ETH, SOL, BNB 15m fixture；尚未證明可外推。
+- Time horizon: 15m entries, intraday to multi-hour holds.
+- Known failure modes: Relative-only promotion gate、MFE/MAE R 缺失、no-op candidate、同一窗口挑選 cooldown。
 - Cost sensitivity: Very high.
-- Implementation implication: Test only after intraday momentum has a reliable BTC-only baseline and cost model.
-- Decision for this repo: Secondary intraday candidate.
+- Implementation implication: 先補量測與 absolute gate，再做 refractory period、direction、score component、session 的單因素消融。
+- Decision for this repo: Highest-priority short-cycle workstream; research-only. See [08_short_cycle_strategy_diagnosis_2026-07-14.md](08_short_cycle_strategy_diagnosis_2026-07-14.md).
+
+### 7. Regime-Conditioned VWAP Reversion
+
+- Claim: VWAP reversion 在最近 rolling/train-test window 的 12/24-bar forward return 與 random delta 轉正，但全樣本與較早窗口仍為負。
+- Evidence level: B/C
+- Market applicability: High-liquidity crypto majors；需 session、liquidity 與 event-time conditioning。
+- Time horizon: 15m signal, 3-24 bars forward horizon.
+- Known failure modes: Window dependence, strong trends, liquidation cascades, cost drag, session concentration.
+- Cost sensitivity: Very high.
+- Implementation implication: 在 frozen OOS、random baseline 與 live-like cost model 下獨立研究；不可直接取代目前策略或接 paper/live。
+- Decision for this repo: Primary alternative-alpha candidate after measurement integrity is fixed.
 
 ## Priority 4: Experimental Branches
 

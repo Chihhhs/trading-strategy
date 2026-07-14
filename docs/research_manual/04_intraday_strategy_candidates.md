@@ -3,7 +3,7 @@
 - Date: 2026-07-10
 - Data range: Current repo behavior, local research notes, Hyperliquid execution constraints, and cited market microstructure research through 2026-07-10
 - Applicable markets: Liquid crypto perps, especially BTC and top-liquidity majors
-- Last updated: 2026-07-10
+- Last updated: 2026-07-14
 
 ## Scope
 
@@ -13,6 +13,17 @@
 - `True HFT`: 秒級到毫秒級 order book / trade-level 策略，例如 market making、order flow imbalance、跨市場套利。這需要不同的資料管線與執行架構，不能直接用目前 candle-based live loop 承接。
 
 目前 live loop 預設以分鐘級輪詢執行，回測策略入口也仍是 `trend`。因此短期策略研究應先落在 short-horizon automation，而不是直接重寫成真正 HFT 系統。
+
+## 2026-07-14 Evidence Update
+
+下方 ranking 保留為 2026-07-10 的候選設計背景，不再代表目前 promotion 順序。新的 90-day、跨幣、成本敏感度、時間切分、intrabar execution 與 random-baseline 診斷顯示：
+
+- 現有 `intraday_momentum` 在成本前已接近零或為負 edge，成本後不可交易。
+- breakout continuation 與 high-volume expansion 未優於 random baseline。
+- 八根 bar 內重複進場、short side 與 volume confirmation 是主要負貢獻來源。
+- VWAP reversion 只在最近部分窗口的 12/24-bar horizon 顯示正向線索，仍未通過 promotion gate。
+
+目前順序改為：量測完整性 → 單因素消融 → regime-conditioned VWAP reversion → bounded paper gate。完整數據、決策與實驗方案見 [08_short_cycle_strategy_diagnosis_2026-07-14.md](08_short_cycle_strategy_diagnosis_2026-07-14.md)。
 
 ## Recommended Ranking
 

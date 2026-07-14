@@ -3,7 +3,7 @@
 - Date: 2026-07-05
 - Data range: Research synthesis plus current repo observations through 2026-07-05
 - Applicable markets: Multi-asset quant research mapped into crypto trading decisions
-- Last updated: 2026-07-10
+- Last updated: 2026-07-14
 
 ## Three Strategic Directions To Track
 
@@ -59,7 +59,7 @@
 - `Short-horizon automation`: 1m / 5m / 15m candle-based 訊號、自動掃描、自動下單、自動風控。這是目前架構可以優先延伸的方向。
 - `True HFT`: order book / trade-level / 秒級或毫秒級策略，例如 market making、order flow imbalance、跨市場套利。這需要 event-driven data capture、order book replay、撤單節奏、latency 與 queue-position 模型。
 
-Decision for this repo: 下一個非 trend 研究方向應先從 `intraday_momentum` 開始，而不是直接做 market making。詳細候選排序見 [04_intraday_strategy_candidates.md](04_intraday_strategy_candidates.md)。
+Decision for this repo: `intraday_momentum` 已被成本、OOS 穩定性與 turnover 證據否決，只保留為 wiring baseline。下一個非 trend 研究方向應先修短週期量測與 promotion gate，再比較 refractory period、非對稱多空規則與 regime-conditioned VWAP reversion；不得直接進 paper/live。詳細診斷見 [08_short_cycle_strategy_diagnosis_2026-07-14.md](08_short_cycle_strategy_diagnosis_2026-07-14.md)，歷史候選背景見 [04_intraday_strategy_candidates.md](04_intraday_strategy_candidates.md)。
 
 ## Supporting Research Areas
 
