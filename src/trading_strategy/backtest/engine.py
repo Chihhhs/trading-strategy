@@ -81,6 +81,7 @@ def _close_position(state, position, exit_price, exit_reason, *, exit_time=None,
         exit_context={"close_status": "simulated", "is_partial": bool(is_partial)},
         transaction_cost=_estimate_transaction_cost(position, exit_price, state.get("_config")),
     )
+    state.setdefault("_last_exit_bar_by_coin", {})[position.get("coin")] = int(state.get("_bar_index") or 0)
     return trade
 
 
@@ -336,6 +337,14 @@ class BacktestEngine:
             return None
         max_positions = getattr(self.config, "max_positions", None)
         if max_positions is not None and len(open_positions) >= int(max_positions):
+            return None
+        cooldown_bars = max(int(getattr(self.config, "intraday_cooldown_bars", 0) or 0), 0)
+        last_exit = (state.get("_last_exit_bar_by_coin") or {}).get(coin)
+        if cooldown_bars and last_exit is not None and current_index - int(last_exit) <= cooldown_bars:
+            diagnostics = state.setdefault("_diagnostics", {})
+            diagnostics["intraday_cooldown_filtered_signals"] = int(
+                diagnostics.get("intraday_cooldown_filtered_signals") or 0
+            ) + 1
             return None
 
         context = StrategyContext(

@@ -7,7 +7,7 @@ from .. import config
 from ..io import record_trade_event
 from ..orders import cancel_hl_order, place_hl_sl_order, place_hl_tpsl_orders
 from .helpers import _safe_float, compute_trend_stop_target, ensure_position_targets
-from .reconcile import extract_open_order_map, match_existing_protection_order
+from .reconcile import extract_open_order_map, match_existing_protection_order_with_meta
 
 
 def submit_position_protection(pos, tp, sl):
@@ -205,6 +205,17 @@ def build_protection_event_context(repaired):
     }
 
 
+def build_protection_match_context(tp_match, sl_match):
+    return {
+        "tp_match_source": (tp_match or {}).get("match_source"),
+        "sl_match_source": (sl_match or {}).get("match_source"),
+        "tp_match_confidence": (tp_match or {}).get("match_confidence"),
+        "sl_match_confidence": (sl_match or {}).get("match_confidence"),
+        "tp_verify_status": ((tp_match or {}).get("order") or {}).get("status"),
+        "sl_verify_status": ((sl_match or {}).get("order") or {}).get("status"),
+    }
+
+
 def ensure_position_protection(state):
     open_orders = extract_open_order_map(state.get("_frontend_open_orders") or [])
     summary = {
@@ -217,19 +228,71 @@ def ensure_position_protection(state):
         "tpsl_repaired_count": 0,
         "sl_replaced_count": 0,
         "unprotected_positions_count": 0,
+        "protection_checked_count": 0,
+        "ambiguous_protection_count": 0,
+        "verification_unknown_count": 0,
+        "protection_repair_failed_count": 0,
+        "protection_update_failed_count": 0,
     }
     for pos in state.get("positions", []):
+        summary["protection_checked_count"] += 1
         exit_policy = build_exit_policy(position=pos)
         prefix = exit_policy.get("protection_event_prefix", "tpsl")
-        tp_open = match_existing_protection_order(pos, open_orders, "tp")
-        sl_open = match_existing_protection_order(pos, open_orders, "sl")
+        tp_match = match_existing_protection_order_with_meta(pos, open_orders, "tp") or {}
+        sl_match = match_existing_protection_order_with_meta(pos, open_orders, "sl") or {}
+        tp_open = tp_match.get("order")
+        sl_open = sl_match.get("order")
         pos["tp_order"] = tp_open if tp_open else pos.get("tp_order")
         pos["sl_order"] = sl_open if sl_open else pos.get("sl_order")
+        pos["protection_match_source"] = {
+            "tp": tp_match.get("match_source"),
+            "sl": sl_match.get("match_source"),
+        }
+        pos["protection_match_confidence"] = {
+            "tp": tp_match.get("match_confidence"),
+            "sl": sl_match.get("match_confidence"),
+        }
         tp, sl = ensure_position_targets(pos, state.setdefault("_data_cache", {}))
         stop_target = compute_trend_stop_target(pos, state.setdefault("_data_cache", {}).get(pos.get("coin")))
         dynamic_target = stop_target.get("dynamic_target") if isinstance(stop_target, dict) else None
         if stop_target and stop_target.get("sl") is not None:
             sl = stop_target.get("sl")
+        ambiguous = bool(tp_match.get("ambiguous") or sl_match.get("ambiguous"))
+        if ambiguous:
+            pos["protection_status"] = "ambiguous_protection"
+            pos["protection_failure_reason"] = "multiple_matching_orders"
+            summary["ambiguous_protection_count"] += 1
+            summary["unprotected_positions_count"] += 1
+            record_trade_event(
+                f"{prefix}_ambiguous_detected",
+                coin=pos.get("coin"),
+                tp_candidates=tp_match.get("candidate_count", 0),
+                sl_candidates=sl_match.get("candidate_count", 0),
+                position_source=pos.get("position_source"),
+            )
+            continue
+
+        required_orders = [("sl", sl_open, exit_policy.get("requires_sl"))]
+        if exit_policy.get("requires_tp"):
+            required_orders.append(("tp", tp_open, True))
+        unknown = any(
+            required and order is not None and str(order.get("status") or order.get("verify_status") or "").lower()
+            in {"unknown", "error", "verification_unknown"}
+            for _, order, required in required_orders
+        )
+        if unknown:
+            pos["protection_status"] = "verification_unknown"
+            pos["protection_failure_reason"] = "order_status_unknown"
+            summary["verification_unknown_count"] += 1
+            summary["unprotected_positions_count"] += 1
+            record_trade_event(
+                f"{prefix}_verification_unknown",
+                coin=pos.get("coin"),
+                tp_present=bool(tp_open),
+                sl_present=bool(sl_open),
+                position_source=pos.get("position_source"),
+            )
+            continue
         if exit_policy.get("name") == "trend_sl_only" and sl_open:
             replacement_decision = evaluate_sl_replacement(pos, sl_open, sl, stop_target)
             if replacement_decision.get("should_replace"):
@@ -240,7 +303,9 @@ def ensure_position_protection(state):
                     pos["protection_status"] = "protected"
                     continue
                 pos["protection_status"] = "update_failed"
+                pos["protection_failure_reason"] = "sl_replace_failed"
                 summary["unprotected_positions_count"] += 1
+                summary["protection_update_failed_count"] += 1
                 continue
             if replacement_decision.get("reason") and replacement_decision.get("source") in ("dynamic_stage", "atr_trail"):
                 record_trade_event(
@@ -262,6 +327,7 @@ def ensure_position_protection(state):
         summary["protection_missing_count"] += 1
         summary["tpsl_missing_count"] += 1
         pos["protection_status"] = missing_status
+        pos["protection_failure_reason"] = None
         record_trade_event(
             f"{prefix}_missing_detected",
             coin=pos.get("coin"),
@@ -270,6 +336,7 @@ def ensure_position_protection(state):
             tp=tp,
             sl=sl,
             position_source=pos.get("position_source"),
+            **build_protection_match_context(tp_match, sl_match),
         )
         repaired = submit_position_protection(pos, tp, sl)
         protection_context = build_protection_event_context(repaired)
@@ -281,8 +348,13 @@ def ensure_position_protection(state):
             tp=tp,
             sl=sl,
             **protection_context,
+            **build_protection_match_context(tp_match, sl_match),
         )
-        if repaired.get("ok"):
+        repaired_orders_identified = bool(
+            (repaired.get("sl_order") or {}).get("oid")
+            and (not exit_policy.get("requires_tp") or (repaired.get("tp_order") or {}).get("oid"))
+        )
+        if repaired.get("ok") and repaired_orders_identified:
             pos["sl"] = sl
             if dynamic_target:
                 pos["sl_stage"] = dynamic_target.get("stage")
@@ -297,12 +369,17 @@ def ensure_position_protection(state):
                 tp_order=repaired.get("tp_order"),
                 sl_order=repaired.get("sl_order"),
                 **protection_context,
+                **build_protection_match_context(tp_match, sl_match),
             )
         else:
             pos["tp_order"] = repaired.get("tp_order")
             pos["sl_order"] = repaired.get("sl_order")
             pos["protection_status"] = "repair_failed"
+            pos["protection_failure_reason"] = (
+                repaired.get("message") or "protection_order_identity_unconfirmed"
+            )
             summary["unprotected_positions_count"] += 1
+            summary["protection_repair_failed_count"] += 1
             record_trade_event(
                 f"{prefix}_repair_failed",
                 coin=pos.get("coin"),
@@ -310,5 +387,6 @@ def ensure_position_protection(state):
                 sl_order=repaired.get("sl_order"),
                 message=repaired.get("message"),
                 **protection_context,
+                **build_protection_match_context(tp_match, sl_match),
             )
     return summary

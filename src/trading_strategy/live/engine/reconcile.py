@@ -174,10 +174,20 @@ def _is_pending_entry_order(pos, open_orders):
 
 
 def match_existing_protection_order(pos, open_orders, tpsl_kind):
+    return (match_existing_protection_order_with_meta(pos, open_orders, tpsl_kind) or {}).get("order")
+
+
+def match_existing_protection_order_with_meta(pos, open_orders, tpsl_kind):
     local_order = pos.get(f"{tpsl_kind}_order") or {}
     oid = local_order.get("oid")
     if oid is not None and open_orders.get(int(oid)):
-        return open_orders[int(oid)]
+        return {
+            "order": open_orders[int(oid)],
+            "match_source": "oid",
+            "match_confidence": "exact",
+            "ambiguous": False,
+        }
+    candidates = []
     for order in open_orders.values():
         if not isinstance(order, dict):
             continue
@@ -187,11 +197,22 @@ def match_existing_protection_order(pos, open_orders, tpsl_kind):
             continue
         order_tpsl = str(order.get("tpsl") or "").lower()
         if order_tpsl == tpsl_kind:
-            return order
+            candidates.append((order, "tpsl", "exact"))
+            continue
         fallback_target = pos.get(tpsl_kind)
         if _order_trigger_matches(order, local_order, fallback_target):
-            return order
-    return None
+            candidates.append((order, "trigger_price", "fallback"))
+    if not candidates:
+        return None
+    exact = [candidate for candidate in candidates if candidate[2] == "exact"]
+    selected = exact[0] if exact else candidates[0]
+    return {
+        "order": selected[0],
+        "match_source": selected[1],
+        "match_confidence": selected[2],
+        "ambiguous": len(candidates) > 1,
+        "candidate_count": len(candidates),
+    }
 
 
 def reconcile_exchange_state(state, perp_state=None, frontend_open_orders=None):

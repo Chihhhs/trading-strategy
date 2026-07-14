@@ -1,7 +1,30 @@
 from tests.live_test_support import live, patch, sync_state_with_exchange_positions, unittest
+from trading_strategy.live.engine.reconcile import match_existing_protection_order_with_meta
 
 
 class LiveReconcileTest(unittest.TestCase):
+    def test_protection_match_reports_ambiguous_candidates(self):
+        result = match_existing_protection_order_with_meta(
+            {"coin": "ETH", "direction": "long", "sl": 100.0},
+            {
+                1: {"oid": 1, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": 100.0},
+                2: {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": 99.9},
+            },
+            "sl",
+        )
+        self.assertTrue(result["ambiguous"])
+        self.assertEqual(result["candidate_count"], 2)
+        self.assertEqual(result["match_confidence"], "exact")
+
+    def test_protection_match_reports_trigger_fallback(self):
+        result = match_existing_protection_order_with_meta(
+            {"coin": "ETH", "direction": "long", "sl": 100.0},
+            {7: {"oid": 7, "coin": "ETH", "reduceOnly": True, "triggerPx": 100.0}},
+            "sl",
+        )
+        self.assertEqual(result["match_source"], "trigger_price")
+        self.assertEqual(result["match_confidence"], "fallback")
+
     @patch("trading_strategy.live.engine.reconcile.record_trade_event")
     def test_sync_state_with_exchange_positions_adopts_exchange_position(self, mock_record_trade_event):
         old_mode = live.config.MODE

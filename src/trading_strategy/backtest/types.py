@@ -31,6 +31,8 @@ class BacktestConfig:
     failure_exit_bars: int = 3
     failure_exit_mode: str = "breakout_failure"
     max_hold_bars: int | None = None
+    intraday_cooldown_bars: int = 0
+    intraday_max_range_pct: float | None = None
     intrabar_exit_enabled: bool = False
     intrabar_fill_policy: str = "stop_first"
     price_position_filter_enabled: bool = False

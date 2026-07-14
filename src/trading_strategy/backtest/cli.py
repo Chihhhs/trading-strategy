@@ -37,6 +37,7 @@ from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
 from .research import format_research_report_lines, run_research_report
 from .reporting import format_comparison_lines, format_optimization_lines, format_result_lines
+from .turnover import format_intraday_turnover_report, run_intraday_turnover_report
 from .types import BacktestConfig
 
 
@@ -98,6 +99,8 @@ def build_parser():
     parser.add_argument("--short-cycle-splits", default="")
     parser.add_argument("--short-cycle-min-events", type=int, default=100)
     parser.add_argument("--short-cycle-focus-alpha", default="intraday_vwap_reversion")
+    parser.add_argument("--intraday-turnover-report", action="store_true")
+    parser.add_argument("--intraday-turnover-min-trades", type=int, default=100)
     parser.add_argument("--carry-report", action="store_true")
     parser.add_argument("--carry-set", default=",".join(DEFAULT_CARRY_SET))
     parser.add_argument("--funding-entry-abs", type=float, default=0.00008)
@@ -249,6 +252,16 @@ def main(argv=None):
             print(line)
         return report
     data_map = load_historical_data(args.data_path)
+    if args.intraday_turnover_report:
+        config = build_config(args)
+        report = run_intraday_turnover_report(
+            data_map,
+            config=config,
+            min_trades=args.intraday_turnover_min_trades,
+        )
+        for line in format_intraday_turnover_report(report):
+            print(line)
+        return report
     if args.trend_exit_replay_report:
         if args.strategy not in ("trend", "trend_sl_only"):
             parser.error("--trend-exit-replay-report supports only trend strategies")

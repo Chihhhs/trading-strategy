@@ -93,6 +93,11 @@ def run_once():
             "protection_repaired_count": 0,
             "tpsl_repaired_count": 0,
             "unprotected_positions_count": 0,
+            "protection_checked_count": 0,
+            "ambiguous_protection_count": 0,
+            "verification_unknown_count": 0,
+            "protection_repair_failed_count": 0,
+            "protection_update_failed_count": 0,
         }
 
         strategy_snapshot = build_strategy_snapshot()

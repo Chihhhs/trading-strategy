@@ -52,6 +52,14 @@ class IntradayMomentumStrategy(BaseStrategy):
         slow_ema = get_ema_value(closes, slow_period, current)
         momentum_pct = ((current / previous_close) - 1.0) * 100 if previous_close else 0.0
         range_pct = (atr_value / current) * 100 if current else 0.0
+        max_range_pct = _config_value(context.config, "intraday_max_range_pct", None)
+        if max_range_pct is not None and range_pct > float(max_range_pct):
+            diagnostics = context.diagnostics
+            if diagnostics is not None:
+                diagnostics["intraday_atr_filtered_signals"] = int(
+                    diagnostics.get("intraday_atr_filtered_signals") or 0
+                ) + 1
+            return None
         recent_volume = _mean(volumes[-5:])
         base_volume = _mean(volumes[-lookback - 1 : -1])
         volume_ratio = recent_volume / base_volume if base_volume > 0 else 1.0
