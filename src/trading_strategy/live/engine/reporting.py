@@ -22,11 +22,12 @@ def print_report(state):
         print(f"   position states: {counts_text}")
     for snapshot in position_snapshots:
         pnl_text = "n/a" if snapshot["pnl"] is None else f'{snapshot["pnl"]:+.2f}'
+        pnl_pct_text = "n/a" if snapshot["pnl_pct"] is None else f'{snapshot["pnl_pct"]:+.2f}%'
         entry_text = "n/a" if snapshot["entry"] is None else f'{snapshot["entry"]:.4f}'
         price_text = "n/a" if snapshot["current_price"] is None else f'{snapshot["current_price"]:.4f}'
         print(
             f'   - {snapshot["coin"]} {snapshot["direction"]} '
-            f'entry={entry_text} current={price_text} pnl={pnl_text} '
+            f'entry={entry_text} current={price_text} pnl={pnl_text} ({pnl_pct_text}) '
             f'status={snapshot["lifecycle_status"]} protection={snapshot["protection_status"] or "n/a"}'
         )
         detail_parts = []

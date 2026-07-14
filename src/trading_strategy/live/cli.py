@@ -156,6 +156,13 @@ def run_once():
         else:
             entry_summary = check_entries(state, coins)
 
+        # Keep snapshots and the human-readable report aligned with the prices
+        # used by update_positions(). This also covers mocked update_positions
+        # calls in diagnostics/tests.
+        for pos in state["positions"]:
+            if pos["coin"] in prices:
+                pos["current_price"] = prices[pos["coin"]]
+
         for outcome in advance_paper_signal_observations(state, coins):
             record_trade_event("trend_signal_outcome_observed", mode=config.MODE, **outcome)
         if config.MODE == "paper" and config.STRATEGY.get("signal_observation_enabled", False):
@@ -178,10 +185,6 @@ def run_once():
             state.get("positions", []),
             mode=config.MODE,
         )
-
-        for pos in state["positions"]:
-            if pos["coin"] in prices:
-                pos["current_price"] = prices[pos["coin"]]
 
         record_trade_event("run_summary", strategy_snapshot=strategy_snapshot, **entry_summary)
         print_report(state)
