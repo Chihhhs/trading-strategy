@@ -29,8 +29,14 @@ def build_position_snapshot(position, *, mode="paper"):
     direction = pos.get("direction")
 
     pnl = None
+    pnl_source = "calculated"
+    exchange_pnl = _safe_float(pos.get("exchange_unrealized_pnl"), default=None)
+    if exchange_pnl is not None:
+        pnl = exchange_pnl
+        pnl_source = "exchange"
     if entry is not None and current_price is not None and size is not None:
-        pnl = (current_price - entry) * size if direction == "long" else (entry - current_price) * size
+        if exchange_pnl is None:
+            pnl = (current_price - entry) * size if direction == "long" else (entry - current_price) * size
 
     pnl_pct = None
     notional = abs(entry * size) if entry is not None and size is not None else None
@@ -45,6 +51,7 @@ def build_position_snapshot(position, *, mode="paper"):
         "current_price": current_price,
         "pnl": round(pnl, 4) if pnl is not None else None,
         "pnl_pct": pnl_pct,
+        "pnl_source": pnl_source if pnl is not None else None,
         "lifecycle_status": resolve_position_lifecycle_status(pos, mode=mode),
         "pending_exit_reason": pos.get("pending_exit_reason"),
         "protection_status": pos.get("protection_status"),

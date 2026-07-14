@@ -47,6 +47,7 @@ def build_position_from_exchange(coin, position_state, existing=None):
         "size": size,
         "current_price": existing.get("current_price", entry),
         "pnl_pnl": existing.get("pnl_pnl", 0),
+        "exchange_unrealized_pnl": _safe_float(position_state.get("unrealizedPnl")),
         "entry_time": existing.get("entry_time") or adopted_at,
         "entry_time_source": existing.get("entry_time_source") or ("local_state" if existing else "exchange_adopted"),
         "position_source": existing.get("position_source") or ("local_state" if existing else "exchange_adopted"),
@@ -61,6 +62,8 @@ def build_position_from_exchange(coin, position_state, existing=None):
             "coin": coin,
             "entryPx": position_state.get("entryPx"),
             "szi": position_state.get("szi"),
+            "unrealizedPnl": position_state.get("unrealizedPnl"),
+            "positionValue": position_state.get("positionValue"),
         },
     }
     if existing.get("reduce_pending") and previous_size is not None and size < previous_size:

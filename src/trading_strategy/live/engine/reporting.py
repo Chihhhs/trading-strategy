@@ -23,8 +23,8 @@ def print_report(state):
     for snapshot in position_snapshots:
         pnl_text = "n/a" if snapshot["pnl"] is None else f'{snapshot["pnl"]:+.2f}'
         pnl_pct_text = "n/a" if snapshot["pnl_pct"] is None else f'{snapshot["pnl_pct"]:+.2f}%'
-        entry_text = "n/a" if snapshot["entry"] is None else f'{snapshot["entry"]:.4f}'
-        price_text = "n/a" if snapshot["current_price"] is None else f'{snapshot["current_price"]:.4f}'
+        entry_text = "n/a" if snapshot["entry"] is None else f'{snapshot["entry"]:.8f}'
+        price_text = "n/a" if snapshot["current_price"] is None else f'{snapshot["current_price"]:.8f}'
         print(
             f'   - {snapshot["coin"]} {snapshot["direction"]} '
             f'entry={entry_text} current={price_text} pnl={pnl_text} ({pnl_pct_text}) '
@@ -41,6 +41,8 @@ def print_report(state):
             detail_parts.append(f'score={snapshot["signal_score"]}')
         if snapshot.get("position_source"):
             detail_parts.append(f'source={snapshot["position_source"]}')
+        if snapshot.get("pnl_source"):
+            detail_parts.append(f'pnl_source={snapshot["pnl_source"]}')
         if snapshot.get("bars_since_entry") is not None:
             detail_parts.append(f'bars={snapshot["bars_since_entry"]}')
         if snapshot.get("sl_stage") is not None:
