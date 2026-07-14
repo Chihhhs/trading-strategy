@@ -77,6 +77,8 @@ def run_once():
             "orphan_orders_detected_count": 0,
             "orphan_orders_canceled_count": 0,
             "orphan_order_cancel_failures": 0,
+            "stale_positions_count": 0,
+            "unknown_orders_count": 0,
         }
         protection_summary = ensure_position_protection(state) if config.MODE == "live" else {
             "adopted_positions_count": 0,
@@ -136,6 +138,7 @@ def run_once():
         if today_pnl < -state["balance"] * 0.05:
             print(f"  daily loss limit hit: {today_pnl:.2f}")
             entry_summary = build_run_summary()
+            entry_summary["daily_loss_limit_hit"] = True
             entry_summary["coins_scanned"] = len(coins)
             entry_summary["priced_coins"] = len(prices)
             if entry_summary["coins_scanned"]:
@@ -175,14 +178,28 @@ def run_once():
 
         entry_summary.setdefault("exchange_open_orders_count", state.get("_exchange_open_orders_count", 0))
         entry_summary.setdefault("managed_orders_count", len(state.get("managed_orders") or []))
+        entry_summary.setdefault("daily_loss_limit_hit", False)
         entry_summary.update(cancel_summary)
         entry_summary.update(protection_summary)
+        entry_summary["stale_positions_count"] = len(state.get("_stale_positions") or [])
+        entry_summary["unknown_orders_count"] = sum(
+            1
+            for order in (state.get("managed_orders") or [])
+            if order.get("order_role") in {"orphan_unknown", "orphan"}
+        )
+        positions = state.get("positions", [])
+        entry_summary["positions_count"] = len(positions)
+        entry_summary["protected_positions_count"] = sum(
+            1 for position in positions if position.get("protection_status") == "protected"
+        )
+        entry_summary["has_unprotected_positions"] = bool(entry_summary.get("unprotected_positions_count", 0))
+        entry_summary["max_positions"] = config.STRATEGY.get("max_positions")
         entry_summary["position_status_counts"] = build_position_status_counts(
-            state.get("positions", []),
+            positions,
             mode=config.MODE,
         )
         entry_summary["position_snapshots"] = build_position_snapshots(
-            state.get("positions", []),
+            positions,
             mode=config.MODE,
         )
 

@@ -210,5 +210,11 @@ class LiveCliTest(unittest.TestCase):
             run_summary_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "run_summary")
             self.assertEqual(run_summary_call.kwargs["position_status_counts"], {})
             self.assertEqual(run_summary_call.kwargs["position_snapshots"], [])
+            self.assertEqual(run_summary_call.kwargs["positions_count"], 0)
+            self.assertEqual(run_summary_call.kwargs["protected_positions_count"], 0)
+            self.assertFalse(run_summary_call.kwargs["has_unprotected_positions"])
+            self.assertFalse(run_summary_call.kwargs["daily_loss_limit_hit"])
+            self.assertEqual(run_summary_call.kwargs["stale_positions_count"], 0)
+            self.assertEqual(run_summary_call.kwargs["unknown_orders_count"], 0)
         finally:
             live.config.set_mode(old_mode)
