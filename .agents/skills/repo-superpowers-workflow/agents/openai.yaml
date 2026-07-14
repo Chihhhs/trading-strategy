@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Superpowers Workflow"
+  short_description: "Spec-first, safety-first workflow for this trading strategy repo."
+  default_prompt: "Use $repo-superpowers-workflow to plan and execute a safe change in this trading strategy repo."

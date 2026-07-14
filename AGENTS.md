@@ -51,6 +51,7 @@ Validation expectations:
 ## Superpower Skills
 This repo includes custom skills under `.agents/skills/`. Treat them as force multipliers and proactively use them when the task matches. The goal is not only better answers, but a repeatable development method: spec first, plan second, targeted skill use during execution, and review before completion.
 
+- `repo-superpowers-workflow`: Use first when a request needs the repo-specific spec -> plan -> execute -> verify loop, especially for ambiguous, high-risk, or cross-module work.
 - `crypto-strategy-backtest`: Use for strategy research, parameter tuning, cross-coin comparison, backtest interpretation, and performance tradeoff analysis.
 - `hyperliquid-trading`: Use for Hyperliquid perp workflow, TP/SL logic, market structure questions, live position handling, and exchange-specific constraints.
 - `trend-framework-dev`: Use for end-to-end trend framework development, strategy wiring, market regime rules, coin selection, and backtest-to-live SOP decisions.
@@ -64,10 +65,11 @@ Skill selection rules:
 
 Suggested activation flow:
 
-1. Use `trend-framework-dev` to shape the spec when the task changes strategy behavior or repo workflow.
-2. Use `crypto-strategy-backtest` to validate assumptions with historical evidence before promoting an idea.
-3. Use `hyperliquid-trading` to pressure-test live execution details, protection orders, exchange semantics, and operational risk.
-4. Finish by checking that the final code and verification still match the approved spec and do not weaken live safety controls.
+1. Use `repo-superpowers-workflow` to classify the task, restate the spec, identify the entrypoint, and write the smallest safe plan.
+2. Use `trend-framework-dev` to shape the spec when the task changes strategy behavior or repo workflow.
+3. Use `crypto-strategy-backtest` to validate assumptions with historical evidence before promoting an idea.
+4. Use `hyperliquid-trading` to pressure-test live execution details, protection orders, exchange semantics, and operational risk.
+5. Finish by checking that the final code and verification still match the approved spec and do not weaken live safety controls.
 
 ## Coding Style & Naming Conventions
 Follow existing Python style: 4-space indentation, `snake_case` for functions and variables, `UPPER_SNAKE_CASE` for module constants, and short, focused helper functions. Keep modules narrow in responsibility; live-trading exchange calls belong in `live/`, not `core/`. Match the repository preference for plain standard-library testing and minimal abstraction. There is no dedicated formatter config in the repo, so keep edits consistent with surrounding code.
