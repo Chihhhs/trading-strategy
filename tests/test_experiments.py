@@ -15,6 +15,21 @@ if SRC not in sys.path:
 
 
 class ExperimentSpecTest(unittest.TestCase):
+    def test_live_trend_baseline_matches_50_coin_runtime_contract(self):
+        from trading_strategy.experiments import load_experiment
+
+        spec = load_experiment(Path(ROOT) / "experiments" / "live_trend_baseline.json")
+        self.assertEqual(spec.strategy.name, "trend")
+        self.assertEqual(len(spec.coins), 50)
+        self.assertEqual(spec.evaluation.universes, (spec.coins,))
+        self.assertEqual(spec.portfolio.leverage, 5.0)
+        self.assertEqual(spec.portfolio.risk_pct, 0.08)
+        self.assertEqual(spec.portfolio.max_positions, 2)
+        self.assertEqual(spec.strategy.parameters.min_score, 3)
+        self.assertTrue(spec.strategy.parameters.derivatives_crowding_exit_enabled)
+        self.assertEqual(spec.strategy.parameters.derivatives_crowding_action, "reduce")
+        self.assertEqual(spec.strategy.parameters.derivatives_crowding_reduce_fraction, 0.75)
+
     def _payload(self):
         return {
             "version": 1,
