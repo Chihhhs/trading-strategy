@@ -29,6 +29,173 @@ class LiveProtectionTest(unittest.TestCase):
     @patch("trading_strategy.live.engine.protection.record_trade_event")
     @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
     @patch("trading_strategy.live.engine.protection.cancel_hl_order")
+    def test_ensure_position_protection_marks_ambiguous_as_unprotected_without_cancel_or_replace(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 100.0,
+                    "size": 1.0,
+                    "sl": 90.0,
+                    "position_source": "exchange_adopted",
+                    "sig": "TREND_BUY",
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "90.0"},
+                {"oid": 3, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "89.9"},
+            ],
+            "managed_orders": [],
+        }
+        summary = ensure_position_protection(state)
+        self.assertEqual(state["positions"][0]["protection_status"], "ambiguous_protection")
+        self.assertEqual(summary["ambiguous_protection_count"], 1)
+        self.assertEqual(summary["unprotected_positions_count"], 1)
+        mock_cancel_hl_order.assert_not_called()
+        mock_place_hl_sl_order.assert_not_called()
+        event_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "sl_ambiguous_detected")
+        self.assertEqual(event_call.kwargs["coin"], "ETH")
+        self.assertEqual(event_call.kwargs["failure_reason"], "multiple_matching_orders")
+        self.assertEqual(event_call.kwargs["sl_candidates"], 2)
+        self.assertEqual(event_call.kwargs["sl_match_source"], "tpsl")
+        self.assertEqual(event_call.kwargs["sl_match_confidence"], "exact")
+        self.assertEqual(event_call.kwargs["position_source"], "exchange_adopted")
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.protection.cancel_hl_order")
+    def test_ensure_position_protection_marks_unknown_verify_as_unprotected_without_repair(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 100.0,
+                    "size": 1.0,
+                    "sl": 90.0,
+                    "position_source": "exchange_adopted",
+                    "sig": "TREND_BUY",
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "90.0", "verify_status": "unknown"}
+            ],
+            "managed_orders": [],
+        }
+        summary = ensure_position_protection(state)
+        self.assertEqual(state["positions"][0]["protection_status"], "verification_unknown")
+        self.assertEqual(state["positions"][0]["protection_failure_reason"], "order_status_unknown")
+        self.assertEqual(summary["verification_unknown_count"], 1)
+        self.assertEqual(summary["unprotected_positions_count"], 1)
+        mock_cancel_hl_order.assert_not_called()
+        mock_place_hl_sl_order.assert_not_called()
+        event_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "sl_verification_unknown")
+        self.assertEqual(event_call.kwargs["failure_reason"], "order_status_unknown")
+        self.assertTrue(event_call.kwargs["sl_present"])
+        self.assertEqual(event_call.kwargs["sl_verify_status"], "unknown")
+        self.assertEqual(event_call.kwargs["sl_match_source"], "tpsl")
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_tpsl_orders")
+    def test_ensure_position_protection_records_repair_failure_context(
+        self,
+        mock_place_hl_tpsl_orders,
+        mock_record_trade_event,
+    ):
+        mock_place_hl_tpsl_orders.return_value = {
+            "ok": False,
+            "message": "Order has invalid price.",
+            "tp_order": {"rejection_reason": "invalid_price", "requested_trigger_px": 120.0},
+            "sl_order": {"rejection_reason": "invalid_price", "requested_trigger_px": 90.0},
+            "order_side": "sell",
+            "price_source": "l2_book",
+        }
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 100.0,
+                    "size": 1.0,
+                    "tp": 120.0,
+                    "sl": 90.0,
+                    "position_source": "exchange_adopted",
+                }
+            ],
+            "_frontend_open_orders": [],
+        }
+        summary = ensure_position_protection(state)
+        self.assertEqual(state["positions"][0]["protection_status"], "repair_failed")
+        self.assertEqual(state["positions"][0]["protection_failure_reason"], "Order has invalid price.")
+        self.assertEqual(summary["protection_repair_failed_count"], 1)
+        self.assertEqual(summary["unprotected_positions_count"], 1)
+        failed_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "tpsl_repair_failed")
+        self.assertEqual(failed_call.kwargs["message"], "Order has invalid price.")
+        self.assertEqual(failed_call.kwargs["order_side"], "sell")
+        self.assertEqual(failed_call.kwargs["price_source"], "l2_book")
+        self.assertEqual(failed_call.kwargs["tp_rejection_reason"], "invalid_price")
+        self.assertEqual(failed_call.kwargs["sl_rejection_reason"], "invalid_price")
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.protection.cancel_hl_order")
+    def test_ensure_position_protection_records_update_failure_context(
+        self,
+        mock_cancel_hl_order,
+        mock_place_hl_sl_order,
+        mock_record_trade_event,
+    ):
+        mock_cancel_hl_order.return_value = {"status": "ok", "message": "canceled", "oid": 2, "coin": "ETH"}
+        mock_place_hl_sl_order.return_value = {"ok": False, "message": "replacement rejected"}
+        state = {
+            "positions": [
+                {
+                    "coin": "ETH",
+                    "direction": "long",
+                    "entry": 100.0,
+                    "size": 1.0,
+                    "sl": 90.0,
+                    "current_price": 110.0,
+                    "sig": "TREND_BUY",
+                    "initial_risk": 10.0,
+                    "sl_stage": 0,
+                    "best_price": 100.0,
+                    "exit_policy": {"name": "trend_sl_only", "requires_tp": False, "requires_sl": True, "protection_event_prefix": "sl"},
+                }
+            ],
+            "_frontend_open_orders": [
+                {"oid": 2, "coin": "ETH", "reduceOnly": True, "tpsl": "sl", "triggerPx": "90.0"}
+            ],
+            "managed_orders": [],
+        }
+        summary = ensure_position_protection(state)
+        self.assertEqual(state["positions"][0]["protection_status"], "update_failed")
+        self.assertEqual(state["positions"][0]["protection_failure_reason"], "sl_replace_failed")
+        self.assertEqual(summary["protection_update_failed_count"], 1)
+        self.assertEqual(summary["unprotected_positions_count"], 1)
+        failed_call = next(call for call in mock_record_trade_event.call_args_list if call.args[0] == "sl_replace_failed")
+        self.assertEqual(failed_call.kwargs["oid"], 2)
+        self.assertEqual(failed_call.kwargs["previous_trigger_px"], 90.0)
+        self.assertEqual(failed_call.kwargs["desired_trigger_px"], 100.0)
+        self.assertEqual(failed_call.kwargs["message"], "replacement rejected")
+        self.assertNotEqual(state["positions"][0]["protection_status"], "protected")
+
+    @patch("trading_strategy.live.engine.protection.record_trade_event")
+    @patch("trading_strategy.live.engine.protection.place_hl_sl_order")
+    @patch("trading_strategy.live.engine.protection.cancel_hl_order")
     def test_ensure_position_protection_replaces_trend_sl_when_more_protective(
         self,
         mock_cancel_hl_order,

@@ -147,11 +147,13 @@ def replace_sl_order(pos, desired_sl):
     current_order = pos.get("sl_order") or {}
     oid = current_order.get("oid")
     coin = pos.get("coin")
+    previous_trigger_px = _extract_order_trigger_px(current_order)
     record_trade_event(
         "sl_replace_attempted",
         coin=coin,
         oid=oid,
-        previous_trigger_px=_extract_order_trigger_px(current_order),
+        previous_trigger_px=previous_trigger_px,
+        desired_trigger_px=desired_sl,
         new_trigger_px=desired_sl,
     )
     cancel_result = cancel_hl_order(coin, oid)
@@ -160,6 +162,8 @@ def replace_sl_order(pos, desired_sl):
             "sl_replace_failed",
             coin=coin,
             oid=oid,
+            previous_trigger_px=previous_trigger_px,
+            desired_trigger_px=desired_sl,
             message=cancel_result.get("message"),
         )
         return {"ok": False, "message": cancel_result.get("message"), "cancel_result": cancel_result}
@@ -179,6 +183,8 @@ def replace_sl_order(pos, desired_sl):
         "sl_replace_failed",
         coin=coin,
         oid=oid,
+        previous_trigger_px=previous_trigger_px,
+        desired_trigger_px=desired_sl,
         message=replacement.get("message"),
     )
     return {"ok": False, "message": replacement.get("message"), "replacement": replacement}
@@ -211,8 +217,16 @@ def build_protection_match_context(tp_match, sl_match):
         "sl_match_source": (sl_match or {}).get("match_source"),
         "tp_match_confidence": (tp_match or {}).get("match_confidence"),
         "sl_match_confidence": (sl_match or {}).get("match_confidence"),
-        "tp_verify_status": ((tp_match or {}).get("order") or {}).get("status"),
-        "sl_verify_status": ((sl_match or {}).get("order") or {}).get("status"),
+        "tp_candidates": (tp_match or {}).get("candidate_count", 0),
+        "sl_candidates": (sl_match or {}).get("candidate_count", 0),
+        "tp_verify_status": (
+            ((tp_match or {}).get("order") or {}).get("status")
+            or ((tp_match or {}).get("order") or {}).get("verify_status")
+        ),
+        "sl_verify_status": (
+            ((sl_match or {}).get("order") or {}).get("status")
+            or ((sl_match or {}).get("order") or {}).get("verify_status")
+        ),
     }
 
 
@@ -266,9 +280,9 @@ def ensure_position_protection(state):
             record_trade_event(
                 f"{prefix}_ambiguous_detected",
                 coin=pos.get("coin"),
-                tp_candidates=tp_match.get("candidate_count", 0),
-                sl_candidates=sl_match.get("candidate_count", 0),
+                failure_reason=pos["protection_failure_reason"],
                 position_source=pos.get("position_source"),
+                **build_protection_match_context(tp_match, sl_match),
             )
             continue
 
@@ -288,9 +302,11 @@ def ensure_position_protection(state):
             record_trade_event(
                 f"{prefix}_verification_unknown",
                 coin=pos.get("coin"),
+                failure_reason=pos["protection_failure_reason"],
                 tp_present=bool(tp_open),
                 sl_present=bool(sl_open),
                 position_source=pos.get("position_source"),
+                **build_protection_match_context(tp_match, sl_match),
             )
             continue
         if exit_policy.get("name") == "trend_sl_only" and sl_open:

@@ -61,6 +61,29 @@ def advance_paper_signal_observations(state, coins):
     return advance_signal_observations(state, cache)
 
 
+def build_protection_blockers(protection_summary):
+    blocker_fields = (
+        ("ambiguous_protection", "ambiguous_protection_count"),
+        ("verification_unknown", "verification_unknown_count"),
+        ("protection_repair_failed", "protection_repair_failed_count"),
+        ("protection_update_failed", "protection_update_failed_count"),
+        ("missing_protection", "protection_missing_count"),
+    )
+    blockers = [
+        {"reason": reason, "count": protection_summary.get(field, 0)}
+        for reason, field in blocker_fields
+        if protection_summary.get(field, 0)
+    ]
+    if blockers:
+        return blockers
+    return [
+        {
+            "reason": "unprotected_positions",
+            "count": protection_summary.get("unprotected_positions_count", 0),
+        }
+    ]
+
+
 def run_once():
     state = load_state()
     try:
@@ -160,7 +183,7 @@ def run_once():
                 entry_summary["priced_ratio"] = round(
                     entry_summary["priced_coins"] / entry_summary["coins_scanned"], 4
                 )
-            entry_summary["top_blockers"] = [{"reason": "unprotected_positions", "count": protection_summary["unprotected_positions_count"]}]
+            entry_summary["top_blockers"] = build_protection_blockers(protection_summary)
         else:
             entry_summary = check_entries(state, coins)
 
