@@ -1,162 +1,109 @@
 ---
 name: crypto-strategy-backtest
-description: "加密貨幣交易策略回測框架 — 建立、測試、優化量化交易策略。支援多幣種回測、參數優化、績效分析、純趨勢/均值回歸策略對比。"
+description: Crypto strategy backtest workflow for this repository. Use for strategy research, cost-aware comparison, candidate diagnostics, optimization, and promotion-gate interpretation.
 ---
 
-# 加密貨幣交易策略回測框架
+# Crypto Strategy Backtest
 
-> 適用場景：開發回測交易策略、比較不同策略績效、優化入場/出場參數、驗證策略泛化能力
-> 語言：zh-tw
-> 風格：數據驅動、直接誠實、偏好表格對比
+Use this skill when the task involves backtest results, strategy comparison, optimization, short-cycle diagnostics, or promotion decisions.
 
----
+Before using evidence, read:
 
-## 核心概念
+- `.agents/current_decisions.md`
+- `.agents/project_detail.md`
+- `.agents/improve_plan.md`
+- `docs/research_manual/00_decision_framework.md`
 
-### 回測 vs 實盤的差距
-| 回測假設 | 實盤現實 |
-|---------|---------|
-| 零手續費 | Hyperliquid 合約 0.035% maker / 0.08% taker |
-| 零滑點 | 大單滑點 0.1-0.5% |
-| 即時成交 | 延遲 + 部分成交 |
-| 吃到 TP/SL | 極端行情跳空 |
+## Current Stance
 
-**教訓**：回測結果要打 6-7 折才是實盤預期。
+- Backtest evidence must include fees, slippage, turnover, drawdown, and sample size before it can affect promotion.
+- Zero-cost results are diagnostics only.
+- Relative improvement is not enough when the baseline is deeply negative.
+- A candidate that reduces turnover but remains negative after costs stays research-only.
+- `intraday_momentum` is rejected for paper/live and should be treated as a negative control.
+- Current trend logic has not passed the canonical live-like baseline gate.
+- Funding/basis/carry is research and monitoring only; current standalone execution is not approved.
 
-### 策略適用性
-- **趨勢策略**（追蹤 EMA/動量/突破）→ 適合趨勢型幣種（ZEC, DOGE, WLD, SHIB）
-- **均值回歸**（FVG/RSI 反轉）→ 適合震盪型幣種（LINK, UNI, FIL）
-- **純趨勢策略**（只做大波段）→ 交易次數少但 SL 容易被掃
-- **混合策略**（趨勢 + 短線 FVG）→ 更好，因為 FVG 提供回調入場點
+## Standard Cost Assumption
 
-### 關鍵發現
-- 純趨勢策略 **不如** 統一框架+短線 FVG 組合（2026-06-25 驗證）
-- 純趨勢交易太頻繁、SL 被掃率高（每幣 26-37 筆 SL 出場）
-- 統一框架+短線 FVG 在回調時入場，避免追高
-- 震盪型幣種（LINK/UNI/FIL/AAVE）不適合趨勢追蹤，要嘛剔除要嘛用均值回歸
+Use these defaults unless the user asks for a different scenario:
 
----
+- `fee_bps=4.5`
+- `slippage_bps=2`
+- Round trip for one directional trade is approximately 13 bps.
 
-## 回測引擎結構
+When comparing candidates, keep constant:
 
-### 檔案位置
-```
-~/.hermes/scripts/trading_lib/
-├── unified_framework.py    # 統一框架（趨勢+短線）
-├── pure_trend.py           # 純趨勢策略（對比用）
-├── coin_scanner.py         # 每日掃描器（用統一框架）
-├── indicators_v3.py        # 技術指標（EMA, RSI, ATR）
-├── backtester_v3.py        # 數據取得（Binance API）
-└── test_coins.py           # 多幣種測試腳本
-```
+- fixture
+- universe
+- fee and slippage
+- timeframe
+- train/test split
+- random baseline settings
+- minimum event count
+- execution profile
 
-### 統一框架參數
-```python
-SHORT_TERM = {
-    'max_hold_days': 14,
-    'tp_rr': 1.5,
-    'trail_trigger': 3,
-    'trail_mult': 2.0,
-    'tight_mult': 1.5,
-    'min_score': 5,
-}
+## Canonical Commands
 
-LONG_TERM = {
-    'max_hold_days': 90,
-    'tp_rr': 3.0,
-    'trail_trigger': 5,
-    'trail_mult': 3.0,
-    'tight_mult': 2.0,
-    'tight_trigger': 15,
-    'min_score': 4,
-}
-```
+Trend representative baseline:
 
-### 出場邏輯（4 階段升級）
-```
-入場 → SL保護 → (+5%)保本 → (+10%)利潤鎖 → (+15%)追蹤止損 → 趨勢結束出場
-```
-
----
-
-## 操作流程
-
-### 1. 新增策略變體
-1. 複製現有框架（如 `pure_trend.py`）
-2. 修改判斷邏輯/參數
-3. 跑回測：`python3 pure_trend.py`
-4. 對比基準（統一框架）
-
-### 2. 新增幣種測試
-1. 寫測試腳本跑單一幣種
-2. 看 PnL、WR、交易次數、SL 出場次數
-3. 決定是否加入 `coin_scanner.py`
-
-### 3. 參數優化
-1. 修改參數
-2. 跑回測
-3. 對比平均 PnL 和 WR
-4. 注意過擬合（參數越少越好）
-
-### 4. 部署到每日掃描
-1. 更新 `coin_scanner.py` 的 `analyze_coin()` 方法
-2. 更新 cron job `daily-coin-scanner` 的描述
-3. 測試：`python3 coin_scanner.py`
-
----
-
-## 效能基準（2026-06-25）
-
-### 統一框架（1000天回測）
-| 幣種 | PnL | WR | 狀態 |
-|------|-----|-----|------|
-| ZEC | +2594% | 40% | 🏆 |
-| DOGE | +650% | 43% | 🔥 |
-| WLD | +348% | 67% | 🔥 |
-| BTC | +207% | 38% | ✅ |
-| SOL | +129% | 31% | ✅ |
-| ETH | +26% | 27% | ⚠️ |
-| AVAX | +7% | 33% | ⚠️ |
-| LINK | -239% | 20% | ❌ 剔除 |
-
-### 純趨勢策略（1000天回測）
-| 幣種 | PnL | WR | 狀態 |
-|------|-----|-----|------|
-| ZEC | +2474% | 38% | 🏆 |
-| DOGE | +809% | 53% | 🔥 |
-| SHIB | +495% | 40% | 🔥 |
-| BCH | +283% | 51% | 🔥 |
-| ETH | +224% | 45% | ✅ |
-| BTC | +61% | 31% | ⚠️ |
-| AVAX | -55% | 45% | ❌ |
-| LINK | -176% | 40% | ❌ |
-
-**結論**：統一框架 > 純趨勢（平均 +465% vs +268%，且 SL 出場更少）
-
----
-
-## 常見陷阱
-
-1. **過擬合**：只在特定幣種上優化 → 用更多幣種測試泛化能力
-2. **不回測就上線**：回測好不代表實盤好，至少跑 2000 天
-3. **忽略交易成本**：回測 +50% 實盤可能只有 +30%
-4. **SL 太緊**：5% SL 在波動大的幣上一定被掃 → 用 ATR 自適應
-5. **追高**：60天漲 150% 後做多 → 大概率被回調洗掉
-6. **同時開太多倉**：相關性高的幣種同時開多 = 加碼同一方向
-
----
-
-## 驗證方式
 ```bash
-# 跑統一框架
-cd ~/.hermes/scripts/trading_lib && python3 unified_framework.py
-
-# 跑純趨勢對比
-python3 pure_trend.py
-
-# 跑每日掃描器
-python3 coin_scanner.py
+python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240
 ```
 
-## 支援檔案
-- `references/performance-baseline.md` — 最新回測數據
+Trend live-like replay:
+
+```bash
+python backtest/backtest_runner.py --coins BTC,ETH,BNB --strategy trend --max-days 240 --derivatives-data-path data/derivatives/bybit_oi_binance_funding_basis_240d_BTC_ETH_BNB.json --enable-trend-position-control --enable-atr-trailing --fee-bps 4.5 --slippage-bps 2 --trend-exit-replay-report --exit-replay-data-path data/historical_prices/binance_1h_240d_BTC_ETH_BNB.json
+```
+
+Short-cycle alpha report:
+
+```bash
+python backtest/backtest_runner.py --short-cycle-alpha-report --coins BTC,ETH,SOL,BNB --data-path data/historical_prices/binance_15m_90d_BTC_ETH_SOL_BNB.json --max-days 8640 --fee-bps 4.5 --slippage-bps 2 --bucket-count 5 --random-baseline-runs 50 --short-cycle-splits rolling_30,train60_test30 --short-cycle-min-events 100 --short-cycle-focus-alpha intraday_vwap_reversion
+```
+
+Experiment workflow:
+
+```bash
+python backtest/backtest_runner.py run --experiment experiments/trend_baseline.json
+python backtest/backtest_runner.py compare --experiments experiments/trend_baseline.json experiments/intraday_momentum_rejected.json
+python backtest/backtest_runner.py promote --experiment experiments/trend_paper_candidate.json
+```
+
+## How To Interpret Results
+
+Always separate:
+
+- gross PnL from net PnL
+- zero-cost signal quality from cost-adjusted tradability
+- close-fill backtests from live-like trigger execution
+- in-sample improvements from OOS evidence
+- paper approval from live approval
+
+For intraday and short-cycle work, inspect:
+
+- per-trade gross return
+- fee drag
+- turnover
+- hold bars
+- exit reason distribution
+- re-entry gap
+- direction split
+- UTC session split
+- MFE/MAE and initial risk
+- no-op filters
+- random baseline delta
+
+## Promotion Rules
+
+Research candidate can move to bounded paper observation only when:
+
+- OOS net PnL after costs is acceptable under the documented gate.
+- Drawdown does not worsen beyond threshold.
+- Turnover and fee drag materially improve.
+- Event count is sufficient.
+- Candidate is not a no-op.
+- Positive result is not concentrated in one coin, one session, or one split.
+
+Live promotion requires a separate explicit review of live execution, protection, fill quality, and operational risk.

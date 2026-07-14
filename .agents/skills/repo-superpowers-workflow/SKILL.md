@@ -22,7 +22,7 @@ Use this skill to adapt the Superpowers method to this repository.
 
 ## Repo rules
 
-- Read `AGENTS.md`, `.agents/project_detail.md`, and `.agents/improve_plan.md` before editing.
+- Read `AGENTS.md`, `.agents/current_decisions.md`, `.agents/project_detail.md`, and `.agents/improve_plan.md` before editing.
 - Treat exchange state and runtime config as the source of truth. Do not assume persisted state files are authoritative.
 - For strategy behavior changes, inspect `src/trading_strategy/strategies/` and the relevant runner or live module before proposing changes.
 - For live-trading changes, inspect:

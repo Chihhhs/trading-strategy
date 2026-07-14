@@ -1,56 +1,47 @@
-# 回測效能基準
+# Archived Performance Baseline
 
-_最後更新：2026-06-25_
+Last updated: 2026-07-14
 
-## 統一框架 v1.0（1000天回測，8幣）
+This reference replaces the older 2026-06-25 performance table. Do not use older high-PnL historical tables or unified-framework claims as current evidence for this repository.
 
-| 幣種 | PnL | WR | 交易次數 | 狀態 |
-|------|-----|-----|---------|------|
-| ZEC | +2594% | 40% | 10 | 🏆 |
-| DOGE | +650% | 43% | 7 | 🔥 |
-| WLD | +348% | 67% | 6 | 🔥 |
-| BTC | +207% | 38% | 13 | ✅ |
-| SOL | +129% | 31% | 13 | ✅ |
-| ETH | +26% | 27% | 11 | ⚠️ |
-| AVAX | +7% | 33% | 6 | ⚠️ |
-| LINK | -239% | 20% | 10 | ❌ 剔除 |
+Current authority:
 
-**平均 PnL: +465%** | 賺錢幣種: 7/8
+- `.agents/current_decisions.md`
+- `.agents/project_detail.md`
+- `.agents/improve_plan.md`
+- `docs/research_manual/01_quant_research_map.md`
+- `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md`
 
-## 純趨勢策略 v1.0（1000天回測，14幣）
+## Current Decisions
 
-| 幣種 | PnL | WR | 交易次數 | 狀態 |
-|------|-----|-----|---------|------|
-| ZEC | +2474% | 38% | 26 | 🏆 |
-| DOGE | +809% | 53% | 32 | 🔥 |
-| SHIB | +495% | 40% | 35 | 🔥 |
-| BCH | +283% | 51% | 41 | 🔥 |
-| ETH | +224% | 45% | 38 | ✅ |
-| BTC | +61% | 31% | 35 | ⚠️ |
-| WLD | +10% | 50% | 12 | ⚠️ |
-| NEAR | +4% | 32% | 34 | ⚠️ |
-| AVAX | -55% | 45% | 44 | ❌ |
-| LINK | -176% | 40% | 48 | ❌ |
-| AAVE | -131% | 49% | 37 | ❌ |
-| FIL | -263% | 40% | 35 | ❌ |
-| UNI | -3% | 47% | 32 | ❌ |
-| INJ | -61% | 38% | 8 | ❌ |
+- Trend is executable but has not passed the canonical live-like baseline gate.
+- Intraday momentum is rejected for paper/live and remains only a wiring baseline.
+- Short-cycle turnover reduction is research-only unless absolute OOS net performance survives realistic costs.
+- VWAP reversion is a research candidate only.
+- Funding/basis/carry is monitor and research context only.
 
-**平均 PnL: +268%** | 賺錢幣種: 9/14
+## Standard Comparison Requirements
 
-## 測試中但未加入的幣種
+Use the same:
 
-| 幣種 | PnL | WR | 結論 |
-|------|-----|-----|------|
-| LDO | -67% | 22% | ❌ |
-| TIA | -156% | 25% | ❌ |
-| OP | -14% | 31% | ❌ |
-| ICP | -250% | 17% | ❌ |
-| RENDER | -96% | 22% | ❌ |
-| PEPE | +54% | 25% | ⚠️ 樣本太少 |
+- fixture
+- universe
+- timeframe
+- fee and slippage
+- execution profile
+- train/test split
+- random baseline settings
+- minimum event count
 
-## 結論
-- 統一框架優於純趨勢策略（+465% vs +268%）
-- 趨勢型幣種（ZEC/DOGE/WLD/SHIB）表現最好
-- 震盪型幣種（LINK/UNI/FIL/AAVE）不適合趨勢追蹤
-- SL 出場次數：統一框架明顯少於純趨勢（FVG 提供更好入場點）
+Default costs:
+
+- `fee_bps=4.5`
+- `slippage_bps=2`
+
+## Canonical Evidence Pointers
+
+- Short-cycle diagnosis: `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md`
+- Carry/funding/basis status: `docs/research_manual/07_carry_funding_basis_backtest.md`
+- Current research map: `docs/research_manual/01_quant_research_map.md`
+
+Older high-PnL historical tables are archived hypotheses, not promotion evidence.
