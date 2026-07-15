@@ -19,6 +19,7 @@
 - `strategy.name/parameters/required_capabilities`：registry 策略、該策略允許的 typed parameters，以及 experiment 必須具備的能力。
 - `portfolio`：初始資金、槓桿、單筆風險與最大持倉。
 - `costs`：fee 與 slippage，promotion 不使用 gross PnL。
+- `execution`：optional replay profile. `exit_replay_path` loads causal hourly bars, `exit_replay_mode` is `strict` or `close_confirmed`, and `drawdown_source=mark_to_market` makes promotion compare MTM drawdown. Existing manifests default to close-balance drawdown.
 - `evaluation`：baseline 路徑、窗口、幣池、每組最低交易數、最低合格比較組數與多數 gate。
 - `target_environment`：只允許 `research` 或 `paper`。
 

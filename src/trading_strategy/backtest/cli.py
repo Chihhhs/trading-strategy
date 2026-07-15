@@ -38,6 +38,7 @@ from .portfolio import PortfolioBacktester
 from .research import format_research_report_lines, run_research_report
 from .reporting import format_comparison_lines, format_optimization_lines, format_result_lines
 from .turnover import format_intraday_turnover_report, run_intraday_turnover_report
+from .trend_attribution import format_trend_entry_attribution_lines, run_trend_entry_attribution_report
 from .types import BacktestConfig
 
 
@@ -76,6 +77,8 @@ def build_parser():
     parser.add_argument("--compare-strategies", default="")
     parser.add_argument("--research-report", action="store_true")
     parser.add_argument("--trend-evaluation-report", action="store_true")
+    parser.add_argument("--trend-entry-attribution-report", action="store_true")
+    parser.add_argument("--trend-entry-attribution-experiment", default="experiments/live_trend_baseline.json")
     parser.add_argument("--trend-exit-replay-report", action="store_true")
     parser.add_argument("--exit-replay-data-path", default="")
     parser.add_argument("--exit-replay-mode", choices=("strict", "close_confirmed"), default="strict")
@@ -266,6 +269,16 @@ def main(argv=None):
             print(line)
         return report
     data_map = load_historical_data(args.data_path)
+    if args.trend_entry_attribution_report:
+        from trading_strategy.experiments import BacktestExperimentAdapter, load_experiment
+
+        spec = load_experiment(args.trend_entry_attribution_experiment)
+        config = BacktestExperimentAdapter().build_config(spec, max_days=240)
+        report_data = load_historical_data(spec.dataset.path)
+        report = run_trend_entry_attribution_report(report_data, config=config, max_bars=240)
+        for line in format_trend_entry_attribution_lines(report):
+            print(line)
+        return report
     if args.intraday_turnover_report:
         config = build_config(args)
         report = run_intraday_turnover_report(

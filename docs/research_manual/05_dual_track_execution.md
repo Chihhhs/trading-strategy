@@ -16,9 +16,9 @@ Protection, execution, reconciliation, and logging are shared live-safety requir
 
 ## `optimize_existing_trend` Baseline
 
-The promotion baseline is not `experiments/live_trend_baseline.json`: that file is a historical research manifest and does not itself represent the active runtime. The required `live_like_trend_baseline` must freeze the effective settings from `src/trading_strategy/live/config.py` and `apps/live_config.py`, including BTC/ETH/BNB, leverage, risk, position limit, derivatives override, daily decision cadence, 4.5 bps fees, 2 bps slippage, causal 1h hard-SL replay, and MTM drawdown.
+The declared current live universe is the 50-coin `experiments/live_trend_baseline.json` reference. The checked-in `apps/live_config.py` still narrows the launcher to BTC/ETH/BNB, while historical live cache data shows broad-universe scanning. This is configuration drift: do not silently choose either source or change live config during research work.
 
-Until that manifest and replay adapter exist, existing daily close-fill and generic trend comparisons are diagnostics only. They cannot promote Market Context, Momentum-Decay, or another Trend candidate.
+The local repository contains only a BTC/ETH/BNB 1h fixture. Therefore 50-coin Market Context and Momentum-Decay comparisons are diagnostic only until a matching 50-coin causal 1h replay fixture exists. The former BTC/ETH/BNB replay result is invalidated because it used the wrong universe.
 
 Promotion path:
 

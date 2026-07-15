@@ -7,6 +7,12 @@ from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
 from .research import format_research_report_lines, run_research_report
 from .reporting import format_optimization_lines, format_result_lines
+from .trend_attribution import (
+    TrendAttributionReport,
+    TrendSignalObservation,
+    format_trend_entry_attribution_lines,
+    run_trend_entry_attribution_report,
+)
 from .strategies import resolve_strategy
 from .types import BacktestConfig, BacktestResult, CoinResult, StrategyContext, StrategySignal
 
@@ -30,6 +36,8 @@ __all__ = [
     "PortfolioBacktester",
     "StrategyContext",
     "StrategySignal",
+    "TrendAttributionReport",
+    "TrendSignalObservation",
     "build_config",
     "build_parser",
     "format_optimization_lines",
@@ -37,6 +45,7 @@ __all__ = [
     "format_microstructure_guard_outcome_lines",
     "format_research_report_lines",
     "format_result_lines",
+    "format_trend_entry_attribution_lines",
     "get_coin_series",
     "load_historical_data",
     "load_derivatives_data",
@@ -48,4 +57,5 @@ __all__ = [
     "build_microstructure_guard_outcome_report",
     "run_backtest_for_coin",
     "run_research_report",
+    "run_trend_entry_attribution_report",
 ]

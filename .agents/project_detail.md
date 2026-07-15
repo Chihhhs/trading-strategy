@@ -90,7 +90,7 @@ Trend:
 
 - Capability exists in backtest, paper, and live wiring.
 - Current canonical live-like baseline is not good enough for live alpha promotion.
-- `experiments/live_trend_baseline.json` is historical research configuration, not the live runtime or promotion authority. The pending frozen live-like baseline must derive from runtime config plus app overrides and use causal 1h replay with MTM drawdown.
+- The declared live universe is the 50-coin `experiments/live_trend_baseline.json` reference. The checked-in launcher override currently specifies BTC/ETH/BNB, which conflicts with that declaration and broad-universe live cache evidence; do not treat either as promotion authority until a live-safety review reconciles them.
 - Next research should target entry quality, BTC regime, and universe selection.
 - Stop-stage, ATR trail, close-confirmed stop, and failure-exit tuning are not the priority unless new evidence changes the baseline.
 

@@ -270,6 +270,89 @@ def generate_trend_signal(
     min_roc_60_short=-120,
     diagnostics=None,
 ):
+    candidate = generate_raw_trend_candidate(
+        klines,
+        min_score=min_score,
+        tp_mult=tp_mult,
+        sl_mult=sl_mult,
+        adx_threshold=adx_threshold,
+        price_position_lookback=price_position_lookback,
+    )
+    if candidate is None:
+        return None
+    if entry_filter_enabled:
+        eligibility = evaluate_trend_entry_eligibility(
+            candidate["direction"],
+            candidate,
+            rsi_min_long=rsi_min_long,
+            rsi_max_long=rsi_max_long,
+            rsi_min_short=rsi_min_short,
+            rsi_max_short=rsi_max_short,
+            max_atr_pct=max_atr_pct,
+            long_max_price_position=long_max_price_position,
+            short_min_price_position=short_min_price_position,
+            max_roc_60_long=max_roc_60_long,
+            min_roc_60_short=min_roc_60_short,
+        )
+        if not eligibility["allowed"]:
+            _increment_counter(diagnostics, eligibility["reasons"][0])
+            return None
+    return candidate
+
+
+def evaluate_trend_entry_eligibility(
+    direction,
+    features,
+    *,
+    rsi_min_long=45,
+    rsi_max_long=70,
+    rsi_min_short=30,
+    rsi_max_short=55,
+    max_atr_pct=8,
+    long_max_price_position=0.75,
+    short_min_price_position=0.25,
+    max_roc_60_long=120,
+    min_roc_60_short=-120,
+):
+    """Evaluate Trend entry filters without mutating diagnostics or strategy state."""
+    rsi_value = float(features.get("rsi", 50.0))
+    atr_pct = float(features.get("atr_pct", 0.0))
+    price_position = float(features.get("price_position_60", 0.5))
+    roc_60 = float(features.get("roc60", 0.0))
+    reasons = []
+    if direction == "long":
+        if not float(rsi_min_long) <= rsi_value <= float(rsi_max_long):
+            reasons.append("trend_rsi_filtered_signals")
+        if atr_pct > float(max_atr_pct):
+            reasons.append("trend_atr_filtered_signals")
+        if price_position > float(long_max_price_position):
+            reasons.append("trend_price_position_filtered_signals")
+        if roc_60 > float(max_roc_60_long):
+            reasons.append("trend_overextension_filtered_signals")
+    elif direction == "short":
+        if not float(rsi_min_short) <= rsi_value <= float(rsi_max_short):
+            reasons.append("trend_rsi_filtered_signals")
+        if atr_pct > float(max_atr_pct):
+            reasons.append("trend_atr_filtered_signals")
+        if price_position < float(short_min_price_position):
+            reasons.append("trend_price_position_filtered_signals")
+        if roc_60 < float(min_roc_60_short):
+            reasons.append("trend_overextension_filtered_signals")
+    else:
+        reasons.append("trend_unknown_direction_filtered_signals")
+    return {"allowed": not reasons, "reasons": tuple(reasons)}
+
+
+def generate_raw_trend_candidate(
+    klines,
+    *,
+    min_score=4,
+    tp_mult=1.5,
+    sl_mult=1.0,
+    adx_threshold=25,
+    price_position_lookback=60,
+):
+    """Return a structurally valid Trend candidate before entry eligibility filters."""
     if not klines or len(klines) < 50:
         return None
 
@@ -302,6 +385,7 @@ def generate_trend_signal(
         return None
 
     score = 0
+    volume_ratio = None
     if index >= 20:
         roc_5 = (closes[index] - closes[index - 5]) / closes[index - 5] * 100
         roc_20 = (closes[index] - closes[index - 20]) / closes[index - 20] * 100
@@ -356,22 +440,11 @@ def generate_trend_signal(
         "low_60_prev": low_60_prev,
         "price_position_60": position_60,
         "roc60": roc_60,
+        "ema_slope": ((ema20 - calc_ema(closes[:-5], 20)) / current * 100.0) if index >= 24 and current else 0.0,
+        "volume_ratio": volume_ratio,
     }
 
     if score >= min_score:
-        if entry_filter_enabled:
-            if not (float(rsi_min_long) <= rsi_val <= float(rsi_max_long)):
-                _increment_counter(diagnostics, "trend_rsi_filtered_signals")
-                return None
-            if atr_pct > float(max_atr_pct):
-                _increment_counter(diagnostics, "trend_atr_filtered_signals")
-                return None
-            if position_60 > float(long_max_price_position):
-                _increment_counter(diagnostics, "trend_price_position_filtered_signals")
-                return None
-            if roc_60 > float(max_roc_60_long):
-                _increment_counter(diagnostics, "trend_overextension_filtered_signals")
-                return None
         return {
             "direction": "long",
             "score": score,
@@ -382,19 +455,6 @@ def generate_trend_signal(
             "breakout_level": structure["high_20_prev"],
         }
     if score <= -min_score:
-        if entry_filter_enabled:
-            if not (float(rsi_min_short) <= rsi_val <= float(rsi_max_short)):
-                _increment_counter(diagnostics, "trend_rsi_filtered_signals")
-                return None
-            if atr_pct > float(max_atr_pct):
-                _increment_counter(diagnostics, "trend_atr_filtered_signals")
-                return None
-            if position_60 < float(short_min_price_position):
-                _increment_counter(diagnostics, "trend_price_position_filtered_signals")
-                return None
-            if roc_60 < float(min_roc_60_short):
-                _increment_counter(diagnostics, "trend_overextension_filtered_signals")
-                return None
         return {
             "direction": "short",
             "score": score,

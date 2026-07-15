@@ -43,6 +43,13 @@ class DatasetSpec:
 
 
 @dataclass(frozen=True)
+class ExecutionSpec:
+    exit_replay_path: str = ""
+    exit_replay_mode: str = "strict"
+    drawdown_source: str = "closed_balance"
+
+
+@dataclass(frozen=True)
 class PortfolioSpec:
     initial_capital: float = 1000.0
     leverage: float = 3.0
@@ -83,6 +90,7 @@ class ExperimentSpec:
     portfolio: PortfolioSpec
     costs: CostSpec
     evaluation: EvaluationGate
+    execution: ExecutionSpec = ExecutionSpec()
     target_environment: str = "research"
 
     @classmethod
@@ -90,7 +98,7 @@ class ExperimentSpec:
         payload = _checked_mapping(
             payload,
             name="experiment",
-            allowed={"version", "name", "dataset", "coins", "strategy", "portfolio", "costs", "evaluation", "target_environment"},
+            allowed={"version", "name", "dataset", "coins", "strategy", "portfolio", "costs", "evaluation", "execution", "target_environment"},
             required={"version", "name", "dataset", "coins", "strategy"},
         )
         if payload["version"] != 1:
@@ -102,6 +110,11 @@ class ExperimentSpec:
         portfolio = _checked_mapping(payload.get("portfolio", {}), name="portfolio", allowed={"initial_capital", "leverage", "risk_pct", "max_positions"})
         costs = _checked_mapping(payload.get("costs", {}), name="costs", allowed={"fee_bps", "slippage_bps"})
         evaluation = _checked_mapping(payload.get("evaluation", {}), name="evaluation", allowed={"baseline", "windows", "universes", "min_trades", "min_eligible_comparisons", "require_majority"})
+        execution = _checked_mapping(
+            payload.get("execution", {}),
+            name="execution",
+            allowed={"exit_replay_path", "exit_replay_mode", "drawdown_source"},
+        )
         if not all(isinstance(dataset.get(key, ""), str) for key in ("id", "path", "derivatives_path")):
             raise ValueError("dataset fields must be strings")
         if not dataset["id"] or not dataset["path"]:
@@ -144,6 +157,14 @@ class ExperimentSpec:
             raise ValueError("costs must be finite")
         if cost_spec.fee_bps < 0 or cost_spec.slippage_bps < 0:
             raise ValueError("costs must not be negative")
+        if not isinstance(execution.get("exit_replay_path", ""), str):
+            raise ValueError("execution.exit_replay_path must be a string")
+        if execution.get("exit_replay_mode", "strict") not in ("strict", "close_confirmed"):
+            raise ValueError("execution.exit_replay_mode must be strict or close_confirmed")
+        if execution.get("drawdown_source", "closed_balance") not in ("closed_balance", "mark_to_market"):
+            raise ValueError("execution.drawdown_source must be closed_balance or mark_to_market")
+        if execution.get("drawdown_source") == "mark_to_market" and not execution.get("exit_replay_path"):
+            raise ValueError("execution.mark_to_market requires execution.exit_replay_path")
         windows = evaluation.get("windows", [120, 180, 240])
         universes = evaluation.get("universes", [])
         if not isinstance(windows, list) or not windows or not all(
@@ -187,6 +208,7 @@ class ExperimentSpec:
             portfolio=portfolio_spec,
             costs=cost_spec,
             evaluation=gate,
+            execution=ExecutionSpec(**execution),
             target_environment=target,
         )
 

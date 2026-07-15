@@ -12,6 +12,8 @@ from .legacy_unified import LegacyUnifiedStrategy
 from .trend import (
     TrendStrategy,
     build_exit_policy,
+    evaluate_trend_entry_eligibility,
+    generate_raw_trend_candidate,
     generate_trend_signal,
     get_btc_direction_from_klines,
     get_trend_structure_context,
@@ -90,6 +92,8 @@ __all__ = [
     "TrendStrategy",
     "available_strategy_names",
     "build_exit_policy",
+    "evaluate_trend_entry_eligibility",
+    "generate_raw_trend_candidate",
     "generate_trend_signal",
     "get_btc_direction_from_klines",
     "get_strategy",

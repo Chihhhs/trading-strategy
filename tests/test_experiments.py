@@ -194,6 +194,53 @@ class ExperimentSpecTest(unittest.TestCase):
         self.assertEqual(config.atr_trailing_enabled, False)
         self.assertEqual(config.strategy_parameters["min_score"], 4)
 
+    def test_execution_requires_replay_for_mark_to_market_drawdown(self):
+        from trading_strategy.experiments import ExperimentSpec
+
+        payload = self._payload()
+        payload["execution"] = {"drawdown_source": "mark_to_market"}
+        with self.assertRaisesRegex(ValueError, "requires execution.exit_replay_path"):
+            ExperimentSpec.from_mapping(payload)
+
+    def test_backtest_adapter_uses_mtm_drawdown_for_replay_profile(self):
+        from trading_strategy.experiments import BacktestExperimentAdapter, ExperimentSpec
+
+        payload = self._payload()
+        payload["evaluation"] = {
+            "windows": [120],
+            "universes": [["BTC"]],
+            "min_trades": 1,
+            "min_eligible_comparisons": 1,
+            "require_majority": False,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            replay_path = Path(directory) / "hourly.json"
+            replay_path.write_text(json.dumps({"BTC": [{"open_time": 3600000, "open": 1, "high": 1, "low": 1, "close": 1}]}), encoding="utf-8")
+            payload["execution"] = {
+                "exit_replay_path": str(replay_path),
+                "exit_replay_mode": "strict",
+                "drawdown_source": "mark_to_market",
+            }
+            spec = ExperimentSpec.from_mapping(payload)
+            result = MagicMock()
+            result.portfolio = {
+                "trades": 1,
+                "total_pnl_pct": 2.0,
+                "max_drawdown": 9.0,
+                "mark_to_market_max_drawdown": 3.0,
+            }
+            result.trades = []
+            result.coin_results = []
+            runner = MagicMock()
+            runner.run.return_value = result
+            with patch("trading_strategy.experiments.backtest_adapter.load_historical_data", return_value={"BTC": []}), patch(
+                "trading_strategy.experiments.backtest_adapter.load_derivatives_data", return_value={}
+            ), patch("trading_strategy.experiments.backtest_adapter.PortfolioBacktester", return_value=runner) as backtester:
+                rows = BacktestExperimentAdapter().run(spec)
+
+        self.assertEqual(rows[0].max_drawdown_pct, 3.0)
+        self.assertIn("BTC", backtester.call_args.kwargs["exit_replay_data_map"])
+
     def test_experiment_result_is_serializable_and_includes_turnover(self):
         from trading_strategy.experiments import ExperimentResult
 

@@ -1,13 +1,20 @@
 {
   "version": 1,
-  "name": "trend-momentum-decay-time-limit",
-  "dataset": {"id": "binance-1000d-50coins", "path": "data/historical_prices/1000d_50coins.json"},
-  "coins": ["BTC", "ETH", "BNB"],
+  "name": "trend-momentum-decay-time-limit-50coin-diagnostic",
+  "dataset": {"id": "binance-240d-live-50coins", "path": "data/historical_prices/1000d_50coins.json", "derivatives_path": "data/derivatives/bybit_oi_binance_funding_basis_240d_live_50coins.json"},
+  "coins": ["BTC", "ETH", "BNB", "NEO", "LTC", "QTUM", "ADA", "XRP", "TUSD", "IOTA", "XLM", "ONT", "TRX", "ETC", "ICX", "VET", "USDC", "LINK", "ONG", "HOT", "ZIL", "ZRX", "FET", "BAT", "ZEC", "IOST", "CELR", "DASH", "THETA", "ENJ", "ATOM", "TFUEL", "ONE", "ALGO", "DOGE", "DUSK", "ANKR", "WIN", "MTL", "CVC", "CHZ", "BAND", "XTZ", "RVN", "HBAR", "STX", "KAVA", "ARPA", "IOTX", "RLC"],
   "strategy": {
     "name": "trend",
     "parameters": {
       "timeframe": "1d",
-      "min_score": 4,
+      "min_score": 3,
+      "trend_entry_filter_enabled": true,
+      "derivatives_crowding_exit_enabled": true,
+      "derivatives_crowding_action": "reduce",
+      "derivatives_crowding_reduce_fraction": 0.75,
+      "derivatives_crowding_funding_z_lookback": 30,
+      "derivatives_crowding_funding_z_threshold": 0.75,
+      "derivatives_crowding_basis_abs_threshold_pct": 0.03,
       "market_context_enabled": false,
       "momentum_decay_time_limit_enabled": true,
       "momentum_decay_bars": 3,
@@ -15,14 +22,14 @@
       "momentum_decay_grace_bars": 3
     }
   },
-  "portfolio": {"initial_capital": 1000.0, "leverage": 3.0, "risk_pct": 0.05, "max_positions": 2},
+  "portfolio": {"initial_capital": 1000.0, "leverage": 5.0, "risk_pct": 0.08, "max_positions": 2},
   "costs": {"fee_bps": 4.5, "slippage_bps": 2.0},
   "evaluation": {
-    "baseline": "experiments/trend_market_context_baseline.json",
+    "baseline": "experiments/live_trend_baseline.json",
     "windows": [120, 180, 240],
-    "universes": [["BTC"], ["BTC", "ETH"], ["BTC", "ETH", "BNB"]],
+    "universes": [["BTC", "ETH", "BNB", "NEO", "LTC", "QTUM", "ADA", "XRP", "TUSD", "IOTA", "XLM", "ONT", "TRX", "ETC", "ICX", "VET", "USDC", "LINK", "ONG", "HOT", "ZIL", "ZRX", "FET", "BAT", "ZEC", "IOST", "CELR", "DASH", "THETA", "ENJ", "ATOM", "TFUEL", "ONE", "ALGO", "DOGE", "DUSK", "ANKR", "WIN", "MTL", "CVC", "CHZ", "BAND", "XTZ", "RVN", "HBAR", "STX", "KAVA", "ARPA", "IOTX", "RLC"]],
     "min_trades": 5,
-    "min_eligible_comparisons": 3,
+    "min_eligible_comparisons": 4,
     "require_majority": true
   },
   "target_environment": "research"

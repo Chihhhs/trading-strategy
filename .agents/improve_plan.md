@@ -91,7 +91,7 @@ Current decision:
 
 - Current trend wiring is executable but not validated live alpha.
 - Canonical baseline is daily trend decisions plus causal 1h hard-SL execution and MTM drawdown.
-- The frozen baseline must snapshot `src/trading_strategy/live/config.py` plus `apps/live_config.py` overrides; short-cycle or generic daily baselines are diagnostic only.
+- The declared live universe is 50 coins (`experiments/live_trend_baseline.json`). The checked-in `apps/live_config.py` narrows launcher behavior to three coins; treat this as unresolved config drift, not a reason to use a three-coin promotion baseline.
 - Stop-stage, ATR trail, close-confirmed stop, and failure-exit tuning should not be the next priority without new evidence.
 
 Allowed research:
@@ -100,6 +100,8 @@ Allowed research:
 - BTC regime gating.
 - Universe selection and coin exclusion.
 - Funding/basis/OI as blocker or confidence modifier, not as standalone alpha.
+
+Entry-quality sequence: raw 50-coin Trend attribution -> fixed walk-forward consistency -> one pre-defined filter hypothesis -> 50-coin causal 1h replay -> shadow. Attribution may observe Market Context, but Market Context and Momentum-Decay remain diagnostic-only until this sequence produces evidence.
 
 Required gate:
 
@@ -111,8 +113,8 @@ Current research candidate:
 
 - `market_context_enabled` filters only new trend entries; it does not change signal generation, sizing, or protection.
 - `momentum_decay_time_limit_enabled` may set one earlier exit deadline when trend direction remains intact but momentum and ADX decay; it must not modify staged SL or ATR trailing.
-- Rebase entry-only, time-limit-only, and combined manifests on the frozen live-like baseline before comparing them.
-- A passing backtest enters no-trade shadow mode first; it records candidate versus baseline decisions before any bounded paper review.
+- Entry-only, time-limit-only, and combined manifests now compare with the 50-coin baseline as diagnostics only.
+- The former three-coin replay result is invalidated. Do not enter shadow mode until full 50-coin 1h replay data enables causal hard-SL and MTM comparison.
 
 ## P1: `new_alpha_research` — Short-Cycle Measurement And Turnover
 

@@ -41,8 +41,14 @@ from trading_strategy.backtest.historical_fetch import fetch_binance_hourly_klin
 from trading_strategy.backtest.optimizer import run_parameter_sweep
 from trading_strategy.backtest.portfolio import PortfolioBacktester
 from trading_strategy.backtest.research import format_research_report_lines, run_research_report
+from trading_strategy.backtest.trend_attribution import (
+    TrendSignalObservation,
+    _net_return,
+    run_trend_entry_attribution_report,
+)
 from trading_strategy.shared.trade_history import build_trade_record
 from trading_strategy.strategies.trend import TrendStrategy
+from trading_strategy.strategies.trend import evaluate_trend_entry_eligibility, generate_raw_trend_candidate
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
 from trading_strategy.core.trend_trade import compute_atr_trailing_result
 
@@ -69,6 +75,36 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_trend_entry_eligibility_is_pure_and_raw_candidate_survives_block(self):
+        bars = [build_bar(100.0, index) for index in range(40)]
+        bars.extend(build_bar(92.0 + index * 0.25, 40 + index) for index in range(20))
+        bars.append(build_bar(106.0, 60))
+        candidate = generate_raw_trend_candidate(bars, min_score=4)
+        self.assertIsNotNone(candidate)
+        eligibility = evaluate_trend_entry_eligibility(candidate["direction"], candidate, rsi_max_long=100, long_max_price_position=0.75)
+        self.assertFalse(eligibility["allowed"])
+        self.assertIn("trend_price_position_filtered_signals", eligibility["reasons"])
+
+    def test_trend_attribution_forward_labels_apply_direction_and_cost(self):
+        self.assertAlmostEqual(_net_return(100.0, 101.0, "long", 13.0), 0.87)
+        self.assertAlmostEqual(_net_return(100.0, 99.0, "short", 13.0), 0.87)
+        observations = [
+            TrendSignalObservation("BTC", "t", 60, "long", 4, False, ("trend_rsi_filtered_signals",), "bull", "strong_trend", {}, {1: 0.87, 3: None, 5: None, 10: None})
+        ]
+        self.assertEqual(observations[0].blocked_reasons, ("trend_rsi_filtered_signals",))
+
+    def test_trend_attribution_uses_completed_future_bars_only(self):
+        prices = [100.0 + index * 0.1 for index in range(80)]
+        prices.extend([110.0, 111.0, 112.0, 113.0, 114.0, 115.0, 116.0, 117.0, 118.0, 119.0, 120.0])
+        data = {"BTC": [build_bar(price, index) for index, price in enumerate(prices)]}
+        report = run_trend_entry_attribution_report(
+            data,
+            config=BacktestConfig(coins=("BTC",), strategy_parameters={"min_score": 3}, trend_entry_filter_enabled=True),
+            max_bars=len(prices),
+        )
+        for observation in report.observations:
+            if observation.bar_index + 10 >= len(prices):
+                self.assertIsNone(observation.forward_net_returns[10])
     def test_market_context_disabled_preserves_fake_strategy_trade(self):
         def build_signal(context):
             if len(context.window) == 2:

@@ -18,9 +18,11 @@ Allowed changes:
 - Market Context entry filtering and Momentum-Decay Time Limit.
 - Research-only position-control changes supported by a separate decision and evidence.
 
-Required baseline: a frozen `live_like_trend_baseline` snapshot built from `src/trading_strategy/live/config.py` plus `apps/live_config.py` overrides. It must use daily decisions, BTC/ETH/BNB, the active leverage, risk, max-position, and derivatives settings, 4.5 bps fee, 2 bps slippage, causal 1h hard-SL replay, and mark-to-market drawdown.
+Required evidence order for a new Trend entry filter: raw 50-coin attribution -> fixed walk-forward consistency -> one pre-defined hypothesis -> 50-coin causal 1h replay -> shadow. Attribution labels completed 1/3/5/10-day forward returns after 13 bps round-trip cost, is diagnostic-only, and never changes runtime eligibility.
 
-`experiments/live_trend_baseline.json` is an historical research manifest. It is not the live runtime, and it is not the promotion authority until the frozen live-like baseline and replay adapter exist.
+Declared live universe: 50 coins, represented by `experiments/live_trend_baseline.json`. It uses daily decisions, the active leverage, risk, max-position, and derivatives settings, 4.5 bps fee, and 2 bps slippage.
+
+The checked-in `apps/live_config.py` currently narrows the launcher to BTC/ETH/BNB, while the declared live universe and existing live cache show broad-universe operation. This is a configuration-drift finding, not permission to change live config. Runtime intent must be reconciled in a dedicated live-safety task.
 
 Promotion path:
 
@@ -72,6 +74,8 @@ A candidate cannot progress merely because it loses less than a negative baselin
 | 15m momentum / VWAP | `new_alpha_research` | Matching short-cycle frozen baseline and random controls |
 | Funding, basis, order flow, L2 | `new_alpha_research` | Candidate-specific replay or observation baseline |
 
-## Next Infrastructure Work
+## Current Trend Candidate Status
 
-The next implementation task is to create `live_like_trend_baseline` and an experiment adapter that applies causal 1h replay and MTM drawdown. Only then may the Market Context baseline and its entry-only, time-limit-only, and combined candidates be re-run for promotion evidence.
+The Market Context entry-only, Momentum-Decay time-limit-only, and combined manifests now compare with the declared 50-coin baseline as diagnostics. Their promotion gates are intentionally impossible to satisfy until a full 50-coin causal 1h replay fixture exists.
+
+The former BTC/ETH/BNB replay result is invalidated because it used the wrong universe. It must not be used to reject or promote the candidate.

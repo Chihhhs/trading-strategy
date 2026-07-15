@@ -1,6 +1,7 @@
 from .spec import (
     CostSpec,
     DatasetSpec,
+    ExecutionSpec,
     EvaluationGate,
     ExperimentSpec,
     PortfolioSpec,
@@ -15,6 +16,7 @@ __all__ = [
     "CostSpec",
     "BacktestExperimentAdapter",
     "DatasetSpec",
+    "ExecutionSpec",
     "EvaluationGate",
     "ExperimentSpec",
     "ExperimentResult",
