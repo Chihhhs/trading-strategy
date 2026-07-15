@@ -11,13 +11,18 @@ from .io import api_get, debug_api_log, hl_info_post
 _DERIVATIVES_CONTEXT_CACHE = {}
 
 
+def _market_data_cache_source(source=None):
+    source = source or config.get_market_data_source()
+    return "binance_usdm" if source == "binance" and config.MODE == "paper" else source
+
+
 def _market_data_cache_path(symbol, interval):
     safe_symbol = "".join(char for char in str(symbol).upper() if char.isalnum() or char in ("-", "_"))
     safe_interval = "".join(char for char in str(interval).lower() if char.isalnum() or char in ("-", "_"))
     return os.path.join(config.get_state_dir(), "market_data", f"{safe_symbol}_{safe_interval}.json")
 
 
-def _load_cached_klines(symbol, interval):
+def _load_cached_klines(symbol, interval, source=None):
     """Return paper-only cached bars from the same configured market-data source."""
     if config.MODE != "paper":
         return None
@@ -28,20 +33,26 @@ def _load_cached_klines(symbol, interval):
     except (OSError, ValueError):
         return None
     metadata = payload.get("metadata") or {}
-    if metadata.get("interval") != interval or metadata.get("market_data_source") != config.get_market_data_source():
+    cached_source = metadata.get("market_data_source")
+    if metadata.get("interval") != interval:
+        return None
+    if source and cached_source != _market_data_cache_source(source):
+        return None
+    if cached_source not in ("hyperliquid", "binance_usdm"):
         return None
     bars = payload.get("klines")
     return bars if isinstance(bars, list) else None
 
 
-def _save_cached_klines(symbol, interval, klines):
+def _save_cached_klines(symbol, interval, klines, source):
     """Merge completed paper bars by timestamp; never write a live-data fallback."""
     if config.MODE != "paper" or not klines:
         return
     timestamped = [bar for bar in klines if isinstance(bar, dict) and bar.get("time") is not None]
     if not timestamped:
         return
-    existing = _load_cached_klines(symbol, interval) or []
+    cache_source = _market_data_cache_source(source)
+    existing = _load_cached_klines(symbol, interval, source=source) or []
     merged = {
         bar["time"]: dict(bar)
         for bar in [*existing, *timestamped]
@@ -51,7 +62,7 @@ def _save_cached_klines(symbol, interval, klines):
     payload = {
         "metadata": {
             "interval": interval,
-            "market_data_source": config.get_market_data_source(),
+            "market_data_source": cache_source,
         },
         "klines": [merged[key] for key in sorted(merged)],
     }
@@ -94,6 +105,7 @@ def get_market_interval():
 def get_klines(symbol, limit=60, interval=None):
     interval = interval or get_market_interval()
     data = None
+    source = config.get_market_data_source()
     if config.get_market_data_source() == "hyperliquid":
         coin = symbol.replace("USDT", "")
         end_time = int(time.time() * 1000)
@@ -121,8 +133,26 @@ def get_klines(symbol, limit=60, interval=None):
                 }
                 for d in data[-limit:]
             ]
+        if not data and config.MODE == "paper":
+            source = "binance"
+            url = f"{config.BINANCE_FUTURES_API}/fapi/v1/klines?symbol={symbol}&interval={interval}&limit={limit}"
+            data = api_get(url)
+            if data and isinstance(data, list):
+                data = [
+                    {
+                        "time": d[0],
+                        "open": float(d[1]),
+                        "high": float(d[2]),
+                        "low": float(d[3]),
+                        "close": float(d[4]),
+                        "volume": float(d[5]),
+                    }
+                    for d in data
+                ]
     else:
-        url = f"{config.BINANCE_API}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+        api_base = config.BINANCE_FUTURES_API if config.MODE == "paper" else config.BINANCE_API
+        endpoint = "/fapi/v1/klines" if config.MODE == "paper" else "/api/v3/klines"
+        url = f"{api_base}{endpoint}?symbol={symbol}&interval={interval}&limit={limit}"
         data = api_get(url)
         if data and isinstance(data, list):
             data = [
@@ -137,7 +167,7 @@ def get_klines(symbol, limit=60, interval=None):
                 for d in data
             ]
     if data:
-        _save_cached_klines(symbol, interval, data)
+        _save_cached_klines(symbol, interval, data, source)
         return data
     cached = _load_cached_klines(symbol, interval)
     return cached[-limit:] if cached else None
@@ -258,8 +288,19 @@ def get_ticker(symbol):
                 "change_pct": 0.0,
                 "volume": (get_klines(symbol, 1) or [{"volume": 0}])[-1]["volume"],
             }
-        return None
-    data = api_get(f"{config.BINANCE_API}/api/v3/ticker/24hr?symbol={symbol}")
+        if config.MODE != "paper":
+            return None
+        data = api_get(f"{config.BINANCE_FUTURES_API}/fapi/v1/ticker/24hr?symbol={symbol}")
+        if not data:
+            return None
+        return {
+            "price": float(data.get("lastPrice", 0)),
+            "change_pct": float(data.get("priceChangePercent", 0)),
+            "volume": float(data.get("quoteVolume", 0)),
+        }
+    api_base = config.BINANCE_FUTURES_API if config.MODE == "paper" else config.BINANCE_API
+    endpoint = "/fapi/v1/ticker/24hr" if config.MODE == "paper" else "/api/v3/ticker/24hr"
+    data = api_get(f"{api_base}{endpoint}?symbol={symbol}")
     if data:
         return {
             "price": float(data.get("lastPrice", 0)),

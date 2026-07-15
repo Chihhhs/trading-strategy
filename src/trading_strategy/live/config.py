@@ -20,6 +20,7 @@ BINANCE_FUTURES_API = "https://fapi.binance.com"
 BYBIT_API = "https://api.bybit.com"
 
 MODE = "paper"
+MODE_STRATEGY_OVERRIDES = {}
 
 STRATEGY = {
     "name": "trend",
@@ -121,7 +122,7 @@ def get_market_data_source():
     source = get_env("MARKET_DATA_SOURCE", "auto").lower()
     if source in ("binance", "hyperliquid"):
         return source
-    return "hyperliquid" if MODE == "live" else "binance"
+    return "hyperliquid"
 
 
 def is_debug_api():
@@ -135,3 +136,4 @@ def get_state_dir():
 def set_mode(mode):
     global MODE
     MODE = mode
+    STRATEGY.update(MODE_STRATEGY_OVERRIDES.get(MODE, {}))

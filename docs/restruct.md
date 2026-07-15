@@ -28,6 +28,9 @@ python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 2
 - `apps/fvg_paper_trader.py` is a compatibility wrapper around `trading_strategy.paper.main`.
 - `apps/hyperliquid_api.py` is a compatibility wrapper around `trading_strategy.hyperliquid`.
 - `apps/live_config.py` remains an app-side override file and mutates `trading_strategy.live.config`.
+  Its `LIVE_UNIVERSE` is the fixed 38-coin runtime entry contract (frozen
+  2026-07-16); it is not a daily market-cap refresh and must be changed only
+  through an explicit live-universe review.
 
 In other words: `apps/` still imports from `src/trading_strategy/`, but it should stay thin and not become the home for reusable business logic.
 
@@ -58,6 +61,9 @@ Current reusable module layout:
   - paper-mode K-line cache: online fetches merge timestamped bars locally;
     an offline paper run may replay only those cached bars to resolve pending
     observations. Live never falls back to cached market data.
+  - paper market reads prefer Hyperliquid. If a coin lacks Hyperliquid price
+    or K-lines, paper alone may use the Binance USDⓈ-M Futures fallback and
+    tags that coin's cache with the actual source; live never does this.
 - `src/trading_strategy/live/decision.py`
   - pure, reason-coded entry-decision records and Market Context annotations
   - observe-only: it must not gate orders, sizing, TP/SL, or protection

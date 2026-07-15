@@ -4,18 +4,50 @@ from tests.live_test_support import (
     cli,
     config,
     helpers,
+    io,
     live,
     market,
     orders,
     os,
     patch,
     tempfile,
+    TEST_TRADE_HISTORY_DIR,
     unittest,
 )
 from trading_strategy.core.exit_policy import build_exit_policy
+from apps.live_config import LIVE_UNIVERSE, apply_overrides
 
 
 class LiveHelpersTest(unittest.TestCase):
+    def test_live_universe_is_the_fixed_38_coin_contract(self):
+        self.assertEqual(len(LIVE_UNIVERSE), 38)
+        self.assertEqual(len(set(LIVE_UNIVERSE)), 38)
+        self.assertEqual(LIVE_UNIVERSE[:3], ("BTC", "ETH", "BNB"))
+        self.assertTrue({"HYPE", "SOL", "XMR", "WLD"}.issubset(LIVE_UNIVERSE))
+
+    def test_app_overrides_keep_paper_and_live_position_limits_separate(self):
+        old_mode = config.MODE
+        old_strategy = dict(config.STRATEGY)
+        old_mode_overrides = dict(config.MODE_STRATEGY_OVERRIDES)
+        try:
+            apply_overrides(config)
+            config.set_mode("paper")
+            self.assertEqual(config.STRATEGY["max_positions"], 10)
+            config.set_mode("live")
+            self.assertEqual(config.STRATEGY["max_positions"], 2)
+        finally:
+            config.STRATEGY.clear()
+            config.STRATEGY.update(old_strategy)
+            config.MODE_STRATEGY_OVERRIDES.clear()
+            config.MODE_STRATEGY_OVERRIDES.update(old_mode_overrides)
+            config.set_mode(old_mode)
+
+    def test_test_events_write_to_the_temp_history_directory(self):
+        path = config.get_trade_log_path()
+        self.assertTrue(path.startswith(TEST_TRADE_HISTORY_DIR))
+        io.record_trade_event("test_event_isolation")
+        self.assertTrue(os.path.exists(path))
+
     def test_check_atr_trailing_exit_triggers_after_activation(self):
         old_mode = config.MODE
         config.set_mode("live")
@@ -280,13 +312,72 @@ class LiveHelpersTest(unittest.TestCase):
             {"time": 2, "open": 10.5, "high": 12.0, "low": 10.0, "close": 11.5, "volume": 120.0},
         ]
         try:
-            with patch("trading_strategy.live.market.api_get", return_value=[
-                [bar["time"], str(bar["open"]), str(bar["high"]), str(bar["low"]), str(bar["close"]), str(bar["volume"])]
+            with patch("trading_strategy.live.market.hl_info_post", return_value=[
+                {"t": bar["time"], "o": str(bar["open"]), "h": str(bar["high"]), "l": str(bar["low"]), "c": str(bar["close"]), "v": str(bar["volume"])}
                 for bar in online_bars
             ]):
                 self.assertEqual(market.get_klines("BTCUSDT", 2), online_bars)
-            with patch("trading_strategy.live.market.api_get", return_value=None):
+            with patch("trading_strategy.live.market.hl_info_post", return_value=None), patch(
+                "trading_strategy.live.market.api_get", return_value=None
+            ):
                 self.assertEqual(market.get_klines("BTCUSDT", 2), online_bars)
+        finally:
+            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.set_mode(old_mode)
+
+    def test_paper_market_data_prefers_hyperliquid(self):
+        old_mode = config.MODE
+        old_paper_state_dir = config.PAPER_STATE_DIR
+        config.PAPER_STATE_DIR = tempfile.mkdtemp()
+        config.set_mode("paper")
+        try:
+            with patch("trading_strategy.live.market.hl_info_post", return_value=[{"t": 1, "o": "1", "h": "2", "l": "0.5", "c": "1.5", "v": "10"}]) as hl_info_post:
+                market.get_klines("HYPEUSDT", 1)
+            self.assertEqual(hl_info_post.call_args.args[0]["type"], "candleSnapshot")
+            with patch(
+                "trading_strategy.live.market.hl_info_post",
+                side_effect=[{"CC": "1"}, [{"t": 1, "o": "1", "h": "1", "l": "1", "c": "1", "v": "10"}]],
+            ) as hl_info_post:
+                market.get_ticker("CCUSDT")
+            self.assertEqual(hl_info_post.call_args_list[0].args[0], {"type": "allMids"})
+        finally:
+            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.set_mode(old_mode)
+
+    def test_paper_market_data_falls_back_to_binance_for_missing_hyperliquid_coin(self):
+        old_mode = config.MODE
+        old_paper_state_dir = config.PAPER_STATE_DIR
+        config.PAPER_STATE_DIR = tempfile.mkdtemp()
+        config.set_mode("paper")
+        try:
+            with patch("trading_strategy.live.market.hl_info_post", return_value=None), patch(
+                "trading_strategy.live.market.api_get", return_value=[[1, "1", "2", "0.5", "1.5", "10"]]
+            ) as api_get:
+                bars = market.get_klines("CCUSDT", 1)
+            self.assertEqual(len(bars), 1)
+            self.assertIn("fapi.binance.com/fapi/v1/klines", api_get.call_args.args[0])
+            with patch("trading_strategy.live.market.hl_info_post", return_value={}), patch(
+                "trading_strategy.live.market.api_get", return_value={"lastPrice": "1", "priceChangePercent": "2", "quoteVolume": "3"}
+            ) as api_get:
+                ticker = market.get_ticker("CCUSDT")
+            self.assertEqual(ticker["price"], 1.0)
+            self.assertIn("fapi.binance.com/fapi/v1/ticker/24hr", api_get.call_args.args[0])
+        finally:
+            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.set_mode(old_mode)
+
+    def test_paper_cache_rejects_legacy_binance_spot_metadata(self):
+        old_mode = config.MODE
+        old_paper_state_dir = config.PAPER_STATE_DIR
+        tmpdir = tempfile.mkdtemp()
+        config.PAPER_STATE_DIR = tmpdir
+        config.set_mode("paper")
+        try:
+            path = os.path.join(tmpdir, "market_data", "BTCUSDT_1d.json")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as handle:
+                handle.write('{"metadata":{"interval":"1d","market_data_source":"binance"},"klines":[]}')
+            self.assertIsNone(market._load_cached_klines("BTCUSDT", "1d"))
         finally:
             config.PAPER_STATE_DIR = old_paper_state_dir
             config.set_mode(old_mode)

@@ -12,12 +12,16 @@ if SRC not in sys.path:
 
 from trading_strategy import live
 from trading_strategy.hyperliquid import choose_limit_price
-from trading_strategy.live import account, cli, config, market, orders
+from trading_strategy.live import account, cli, config, io, market, orders
 from trading_strategy.live.engine import helpers
 from trading_strategy.live.engine.entries import check_entries
 from trading_strategy.live.engine.positions import update_positions
 from trading_strategy.live.engine.protection import cancel_orphan_orders, ensure_position_protection
 from trading_strategy.live.engine.reconcile import sync_state_with_exchange_positions
+
+
+TEST_TRADE_HISTORY_DIR = tempfile.mkdtemp(prefix="trading_strategy_test_events_")
+config.TRADE_HISTORY_DIR = TEST_TRADE_HISTORY_DIR
 
 __all__ = [
     "account",
@@ -28,12 +32,14 @@ __all__ = [
     "config",
     "ensure_position_protection",
     "helpers",
+    "io",
     "live",
     "market",
     "orders",
     "os",
     "patch",
     "sync_state_with_exchange_positions",
+    "TEST_TRADE_HISTORY_DIR",
     "tempfile",
     "unittest",
     "update_positions",

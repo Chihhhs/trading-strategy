@@ -14,13 +14,21 @@ ENV_OVERRIDES = {
 }
 
 # Strategy overrides merged into trading_strategy.live.config.STRATEGY
+LIVE_UNIVERSE = (
+    # Historical Hyperliquid-active members retained from the former 50-coin reference.
+    "BTC", "ETH", "BNB", "NEO", "LTC", "ADA", "XRP", "IOTA", "XLM", "TRX",
+    "ETC", "LINK", "FET", "ZEC", "DASH", "ATOM", "ALGO", "DOGE", "HBAR", "STX",
+    # Fixed 2026-07-16 market-cap leaders that are active Hyperliquid perps.
+    "SOL", "HYPE", "XMR", "CC", "BCH", "SUI", "AVAX", "NEAR", "UNI", "TAO",
+    "PAXG", "WLFI", "ASTER", "ONDO", "AAVE", "SKY", "DOT", "WLD"
+)
+
 STRATEGY_OVERRIDES = {
     # "name": "intraday_momentum",
-    "coin_universe": ["BTC", "ETH", "BNB"],
+    "coin_universe": list(LIVE_UNIVERSE),
     # "timeframe": "15m",
     # "leverage": 5,
     # "risk_per_trade": 0.08,
-    "max_positions": 2,
     # "max_hold_days": 30,
     # "min_score": 3,
     # "tp_mult": 1.5,
@@ -43,6 +51,11 @@ STRATEGY_OVERRIDES = {
     # "intraday_max_hold_bars": 24,
 }
 
+MODE_STRATEGY_OVERRIDES = {
+    "paper": {"max_positions": 10},
+    "live": {"max_positions": 2},
+}
+
 # Circuit-breaker overrides merged into trading_strategy.live.config.CIRCUIT
 CIRCUIT_OVERRIDES = {
     # "max_daily_loss_pct": 15.0,
@@ -62,6 +75,8 @@ def apply_overrides(live_config_module):
     live_config_module.STRATEGY.update(
         {key: value for key, value in STRATEGY_OVERRIDES.items() if value is not None}
     )
+    live_config_module.MODE_STRATEGY_OVERRIDES.update(MODE_STRATEGY_OVERRIDES)
+    live_config_module.set_mode(live_config_module.MODE)
     live_config_module.CIRCUIT.update(
         {key: value for key, value in CIRCUIT_OVERRIDES.items() if value is not None}
     )

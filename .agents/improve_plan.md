@@ -1,6 +1,6 @@
 # Improve Plan For Agents
 
-Last updated: 2026-07-15
+Last updated: 2026-07-16
 
 This is the active execution queue. Historical results and detailed research backlogs belong in `docs/research_manual/` and `.agents/current_decisions.md`.
 
@@ -58,6 +58,19 @@ Paper market data may be cached while online and replayed only when an online
 fetch fails. This permits pending observation horizons to resolve from already
 captured bars during offline operation; it cannot create a new bar, use a
 cached price for an entry, or affect live mode.
+
+Universe contract (2026-07-16): `apps/live_config.py` fixes entry scanning to
+38 coins: the 20 still-active members of the historical reference plus 18
+currently active Hyperliquid perps selected from the market-cap ranking. This
+is static until an explicit future review; it does not refresh daily. Binance
+Paper and live prefer Hyperliquid K-lines and prices across this same 38-coin
+contract. Binance USDⓈ-M Futures is an explicit per-coin fallback only when
+Hyperliquid market data is unavailable; its cache is source-tagged. Data coverage does not make a coin executable on Hyperliquid;
+the exchange eligibility gate remains required before any order attempt.
+Live unit tests write any unmocked event records only to an OS temporary
+directory, never to `data/trade_history`.
+Paper permits 10 concurrent simulated positions to maintain observation
+coverage; the live cap remains 2.
 
 ## Later: Module Cleanup
 
