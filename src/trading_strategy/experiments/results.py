@@ -16,6 +16,16 @@ class ExperimentResult:
     max_drawdown_pct: float
     turnover: float
     coin_contributions: dict[str, float]
+    gross_pnl_pct: float = 0.0
+    total_cost_pct: float = 0.0
+    fee_bps: float = 0.0
+    slippage_bps: float = 0.0
+    average_hold_bars: float = 0.0
+    exit_reason_counts: dict[str, int] = field(default_factory=dict)
+    direction_summary: dict[str, dict] = field(default_factory=dict)
+    missing_data_coins: tuple[str, ...] = ()
+    dataset_fingerprint: str = ""
+    data_source: str = ""
     config_diff: dict = field(default_factory=dict)
     version: int = 1
 

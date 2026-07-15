@@ -3,6 +3,7 @@ from .data import DATA_PATH, DEFAULT_COINS, get_coin_series, load_historical_dat
 from .derivatives import load_derivatives_data, normalize_derivatives_data_map
 from .evaluation import format_trend_evaluation_lines, run_trend_evaluation
 from .microstructure import build_microstructure_guard_outcome_report, format_microstructure_guard_outcome_lines
+from .fixture_metadata import build_fixture_metadata, require_complete_fixture
 from .optimizer import run_parameter_sweep
 from .portfolio import PortfolioBacktester
 from .research import format_research_report_lines, run_research_report
@@ -55,6 +56,8 @@ __all__ = [
     "run_parameter_sweep",
     "run_trend_evaluation",
     "build_microstructure_guard_outcome_report",
+    "build_fixture_metadata",
+    "require_complete_fixture",
     "run_backtest_for_coin",
     "run_research_report",
     "run_trend_entry_attribution_report",

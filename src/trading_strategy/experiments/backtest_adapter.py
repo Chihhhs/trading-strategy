@@ -1,5 +1,7 @@
 from dataclasses import asdict, fields
+from hashlib import sha256
 import json
+from pathlib import Path
 
 from trading_strategy.backtest import PortfolioBacktester, load_derivatives_data, load_historical_data
 from trading_strategy.backtest.exit_replay import normalize_hourly_data
@@ -10,6 +12,16 @@ from .results import ExperimentResult
 
 
 class BacktestExperimentAdapter:
+    @staticmethod
+    def _file_fingerprint(path):
+        if not path or not Path(path).is_file():
+            return ""
+        digest = sha256()
+        with Path(path).open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
     def build_config(self, spec, *, max_days=None, coins=None):
         strategy_values = asdict(spec.strategy.parameters)
         allowed = {field.name for field in fields(BacktestConfig)}
@@ -37,6 +49,7 @@ class BacktestExperimentAdapter:
         windows = spec.evaluation.windows
         universes = spec.evaluation.universes or (spec.coins,)
         rows = []
+        dataset_fingerprint = self._file_fingerprint(spec.dataset.path)
         for window in windows:
             for universe in universes:
                 coins = tuple(coin for coin in universe if coin in spec.coins)
@@ -73,6 +86,17 @@ class BacktestExperimentAdapter:
                         max_drawdown_pct=float(max_drawdown),
                         turnover=round(turnover_notional / initial, 6),
                         coin_contributions={row.coin: row.total_pnl for row in result.coin_results},
+                        gross_pnl_pct=float(result.portfolio.get("gross_pnl_pct") or 0.0),
+                        total_cost_pct=float(result.portfolio.get("total_cost_pct") or 0.0),
+                        fee_bps=float(config.fee_bps),
+                        slippage_bps=float(config.slippage_bps),
+                        average_hold_bars=float(result.portfolio.get("avg_hold_bars") or 0.0),
+                        exit_reason_counts=dict(result.portfolio.get("exit_reason_counts") or {}),
+                        direction_summary=dict(result.portfolio.get("direction_summary") or {}),
+                        missing_data_coins=tuple(result.portfolio.get("missing_data_coins") or ()),
+                        dataset_fingerprint=dataset_fingerprint,
+                        data_source=spec.dataset.id,
+                        version=2,
                     )
                 )
         return rows
