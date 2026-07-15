@@ -11,6 +11,63 @@ from .io import api_get, debug_api_log, hl_info_post
 _DERIVATIVES_CONTEXT_CACHE = {}
 
 
+def _market_data_cache_path(symbol, interval):
+    safe_symbol = "".join(char for char in str(symbol).upper() if char.isalnum() or char in ("-", "_"))
+    safe_interval = "".join(char for char in str(interval).lower() if char.isalnum() or char in ("-", "_"))
+    return os.path.join(config.get_state_dir(), "market_data", f"{safe_symbol}_{safe_interval}.json")
+
+
+def _load_cached_klines(symbol, interval):
+    """Return paper-only cached bars from the same configured market-data source."""
+    if config.MODE != "paper":
+        return None
+    path = _market_data_cache_path(symbol, interval)
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, ValueError):
+        return None
+    metadata = payload.get("metadata") or {}
+    if metadata.get("interval") != interval or metadata.get("market_data_source") != config.get_market_data_source():
+        return None
+    bars = payload.get("klines")
+    return bars if isinstance(bars, list) else None
+
+
+def _save_cached_klines(symbol, interval, klines):
+    """Merge completed paper bars by timestamp; never write a live-data fallback."""
+    if config.MODE != "paper" or not klines:
+        return
+    timestamped = [bar for bar in klines if isinstance(bar, dict) and bar.get("time") is not None]
+    if not timestamped:
+        return
+    existing = _load_cached_klines(symbol, interval) or []
+    merged = {
+        bar["time"]: dict(bar)
+        for bar in [*existing, *timestamped]
+        if isinstance(bar, dict) and bar.get("time") is not None
+    }
+    path = _market_data_cache_path(symbol, interval)
+    payload = {
+        "metadata": {
+            "interval": interval,
+            "market_data_source": config.get_market_data_source(),
+        },
+        "klines": [merged[key] for key in sorted(merged)],
+    }
+    tmp_path = path + ".tmp"
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(tmp_path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False)
+        os.replace(tmp_path, path)
+    except OSError:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+
+
 def _interval_to_millis(interval):
     raw = str(interval or "1d").strip()
     if not raw:
@@ -36,6 +93,7 @@ def get_market_interval():
 
 def get_klines(symbol, limit=60, interval=None):
     interval = interval or get_market_interval()
+    data = None
     if config.get_market_data_source() == "hyperliquid":
         coin = symbol.replace("USDT", "")
         end_time = int(time.time() * 1000)
@@ -52,7 +110,7 @@ def get_klines(symbol, limit=60, interval=None):
             }
         )
         if data and isinstance(data, list):
-            return [
+            data = [
                 {
                     "time": d.get("t") or d.get("T"),
                     "open": float(d["o"]),
@@ -63,22 +121,26 @@ def get_klines(symbol, limit=60, interval=None):
                 }
                 for d in data[-limit:]
             ]
-        return None
-    url = f"{config.BINANCE_API}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
-    data = api_get(url)
-    if data and isinstance(data, list):
-        return [
-            {
-                "time": d[0],
-                "open": float(d[1]),
-                "high": float(d[2]),
-                "low": float(d[3]),
-                "close": float(d[4]),
-                "volume": float(d[5]),
-            }
-            for d in data
-        ]
-    return None
+    else:
+        url = f"{config.BINANCE_API}/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+        data = api_get(url)
+        if data and isinstance(data, list):
+            data = [
+                {
+                    "time": d[0],
+                    "open": float(d[1]),
+                    "high": float(d[2]),
+                    "low": float(d[3]),
+                    "close": float(d[4]),
+                    "volume": float(d[5]),
+                }
+                for d in data
+            ]
+    if data:
+        _save_cached_klines(symbol, interval, data)
+        return data
+    cached = _load_cached_klines(symbol, interval)
+    return cached[-limit:] if cached else None
 
 
 def _safe_float(value, default=None):

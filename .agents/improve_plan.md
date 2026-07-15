@@ -54,6 +54,11 @@ Normal paper/live runs now collect evidence for future research hypotheses.
 Activation remains subject to the canonical live-like trend gate and a separate
 live-safety review.
 
+Paper market data may be cached while online and replayed only when an online
+fetch fails. This permits pending observation horizons to resolve from already
+captured bars during offline operation; it cannot create a new bar, use a
+cached price for an entry, or affect live mode.
+
 ## Later: Module Cleanup
 
 Do this only when there is no active safety incident, operational review, or

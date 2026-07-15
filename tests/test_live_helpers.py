@@ -268,3 +268,38 @@ class LiveHelpersTest(unittest.TestCase):
             )
         finally:
             config.STRATEGY["coin_universe"] = old_universe
+
+    def test_paper_klines_fall_back_to_persisted_cache_after_network_failure(self):
+        old_mode = config.MODE
+        old_paper_state_dir = config.PAPER_STATE_DIR
+        tmpdir = tempfile.mkdtemp()
+        config.PAPER_STATE_DIR = tmpdir
+        config.set_mode("paper")
+        online_bars = [
+            {"time": 1, "open": 10.0, "high": 11.0, "low": 9.0, "close": 10.5, "volume": 100.0},
+            {"time": 2, "open": 10.5, "high": 12.0, "low": 10.0, "close": 11.5, "volume": 120.0},
+        ]
+        try:
+            with patch("trading_strategy.live.market.api_get", return_value=[
+                [bar["time"], str(bar["open"]), str(bar["high"]), str(bar["low"]), str(bar["close"]), str(bar["volume"])]
+                for bar in online_bars
+            ]):
+                self.assertEqual(market.get_klines("BTCUSDT", 2), online_bars)
+            with patch("trading_strategy.live.market.api_get", return_value=None):
+                self.assertEqual(market.get_klines("BTCUSDT", 2), online_bars)
+        finally:
+            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.set_mode(old_mode)
+
+    def test_live_klines_never_fall_back_to_paper_cache(self):
+        old_mode = config.MODE
+        old_live_state_dir = config.LIVE_STATE_DIR
+        tmpdir = tempfile.mkdtemp()
+        config.LIVE_STATE_DIR = tmpdir
+        config.set_mode("live")
+        try:
+            with patch("trading_strategy.live.market.hl_info_post", return_value=None):
+                self.assertIsNone(market.get_klines("BTCUSDT", 2))
+        finally:
+            config.LIVE_STATE_DIR = old_live_state_dir
+            config.set_mode(old_mode)

@@ -55,6 +55,9 @@ Current reusable module layout:
 - `src/trading_strategy/live/`
   - live runtime package
   - append-only Hyperliquid L2 observations; these remain observe-only research evidence
+  - paper-mode K-line cache: online fetches merge timestamped bars locally;
+    an offline paper run may replay only those cached bars to resolve pending
+    observations. Live never falls back to cached market data.
 - `src/trading_strategy/live/decision.py`
   - pure, reason-coded entry-decision records and Market Context annotations
   - observe-only: it must not gate orders, sizing, TP/SL, or protection

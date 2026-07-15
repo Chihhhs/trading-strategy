@@ -23,6 +23,9 @@ Current stance:
 - Local state files under `data/` are generated cache and audit context.
 - Research reports are evidence, not state.
 - Paper state and live state must stay separated.
+- Paper K-line cache is research evidence only: it can replay previously fetched
+  bars to resolve pending observations offline, but must never be used as a
+  live price, live market-data fallback, or exchange-truth substitute.
 
 Do not:
 
