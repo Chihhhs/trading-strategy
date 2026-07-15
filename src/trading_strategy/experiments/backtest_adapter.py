@@ -5,6 +5,7 @@ from pathlib import Path
 
 from trading_strategy.backtest import PortfolioBacktester, load_derivatives_data, load_historical_data
 from trading_strategy.backtest.exit_replay import normalize_hourly_data
+from trading_strategy.backtest.fixture_metadata import require_complete_fixture
 from trading_strategy.backtest.types import BacktestConfig
 from trading_strategy.strategies import get_strategy_definition
 
@@ -45,7 +46,11 @@ class BacktestExperimentAdapter:
     def run(self, spec):
         data_map = load_historical_data(spec.dataset.path)
         derivatives = load_derivatives_data(spec.dataset.derivatives_path)
-        exit_replay_data = self._load_exit_replay_data(spec.execution.exit_replay_path)
+        exit_replay_data = self._load_exit_replay_data(
+            spec.execution.exit_replay_path,
+            spec.execution.replay_metadata_path,
+            required_coins=spec.coins if spec.execution.drawdown_source == "mark_to_market" else (),
+        )
         windows = spec.evaluation.windows
         universes = spec.evaluation.universes or (spec.coins,)
         rows = []
@@ -102,8 +107,21 @@ class BacktestExperimentAdapter:
         return rows
 
     @staticmethod
-    def _load_exit_replay_data(path):
+    def _load_exit_replay_data(path, metadata_path="", *, required_coins=()):
         if not path:
             return {}
         with open(path, "r", encoding="utf-8") as handle:
-            return normalize_hourly_data(json.load(handle))
+            raw_data = json.load(handle)
+        if metadata_path:
+            with open(metadata_path, "r", encoding="utf-8") as handle:
+                metadata = require_complete_fixture(json.load(handle))
+            canonical = json.dumps(raw_data, sort_keys=True, separators=(",", ":"))
+            checksum = sha256(canonical.encode("utf-8")).hexdigest()
+            if metadata.get("checksum_sha256") != checksum:
+                raise ValueError("replay fixture checksum does not match its metadata")
+            missing = sorted(set(required_coins) - set(metadata.get("coverage_bars") or {}))
+            if missing:
+                raise ValueError(f"replay fixture is missing required coins: {', '.join(missing)}")
+        elif required_coins:
+            raise ValueError("mark-to-market replay requires fixture metadata")
+        return normalize_hourly_data(raw_data)

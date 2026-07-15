@@ -45,6 +45,7 @@ class DatasetSpec:
 @dataclass(frozen=True)
 class ExecutionSpec:
     exit_replay_path: str = ""
+    replay_metadata_path: str = ""
     exit_replay_mode: str = "strict"
     drawdown_source: str = "closed_balance"
 
@@ -114,7 +115,7 @@ class ExperimentSpec:
         execution = _checked_mapping(
             payload.get("execution", {}),
             name="execution",
-            allowed={"exit_replay_path", "exit_replay_mode", "drawdown_source"},
+            allowed={"exit_replay_path", "replay_metadata_path", "exit_replay_mode", "drawdown_source"},
         )
         if not all(isinstance(dataset.get(key, ""), str) for key in ("id", "path", "derivatives_path")):
             raise ValueError("dataset fields must be strings")
@@ -160,12 +161,16 @@ class ExperimentSpec:
             raise ValueError("costs must not be negative")
         if not isinstance(execution.get("exit_replay_path", ""), str):
             raise ValueError("execution.exit_replay_path must be a string")
+        if not isinstance(execution.get("replay_metadata_path", ""), str):
+            raise ValueError("execution.replay_metadata_path must be a string")
         if execution.get("exit_replay_mode", "strict") not in ("strict", "close_confirmed"):
             raise ValueError("execution.exit_replay_mode must be strict or close_confirmed")
         if execution.get("drawdown_source", "closed_balance") not in ("closed_balance", "mark_to_market"):
             raise ValueError("execution.drawdown_source must be closed_balance or mark_to_market")
         if execution.get("drawdown_source") == "mark_to_market" and not execution.get("exit_replay_path"):
             raise ValueError("execution.mark_to_market requires execution.exit_replay_path")
+        if execution.get("drawdown_source") == "mark_to_market" and not execution.get("replay_metadata_path"):
+            raise ValueError("execution.mark_to_market requires execution.replay_metadata_path")
         windows = evaluation.get("windows", [120, 180, 240])
         universes = evaluation.get("universes", [])
         if not isinstance(windows, list) or not windows or not all(

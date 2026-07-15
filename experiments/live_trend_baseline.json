@@ -34,6 +34,12 @@
     "fee_bps": 4.5,
     "slippage_bps": 2.0
   },
+  "execution": {
+    "exit_replay_path": "data/historical_prices/binance_1h_240d_live_50coins.json",
+    "replay_metadata_path": "data/historical_prices/binance_1h_240d_live_50coins.json.metadata.json",
+    "exit_replay_mode": "strict",
+    "drawdown_source": "mark_to_market"
+  },
   "evaluation": {
     "baseline": null,
     "windows": [120, 180, 240],

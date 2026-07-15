@@ -55,6 +55,9 @@ Current reusable module layout:
 - `src/trading_strategy/live/`
   - live runtime package
   - append-only Hyperliquid L2 observations; these remain observe-only research evidence
+- `src/trading_strategy/live/decision.py`
+  - pure, reason-coded entry-decision records and Market Context annotations
+  - observe-only: it must not gate orders, sizing, TP/SL, or protection
 - `src/trading_strategy/market_data.py`
 - `src/trading_strategy/market_context.py`
 - `src/trading_strategy/hyperliquid.py`

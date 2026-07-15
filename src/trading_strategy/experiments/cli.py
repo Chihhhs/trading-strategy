@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 from dataclasses import replace
 
 from .backtest_adapter import BacktestExperimentAdapter
@@ -54,3 +55,7 @@ def run_command(argv):
     decision = replace(decision, config_diff=build_config_diff(baseline_spec, candidate_spec))
     _print_json(decision.to_dict())
     return decision
+
+
+if __name__ == "__main__":
+    run_command(sys.argv[1:])

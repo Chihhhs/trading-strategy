@@ -30,7 +30,7 @@ def build_hourly_fixture(coins, start_ms, end_ms, *, request_json=None):
     return data, build_fixture_metadata(data, venue="hyperliquid", market_type="perpetual", interval="1h", start_ms=start_ms, end_ms=end_ms, request_parameters={"type": "candleSnapshot", "limit_note": "most recent 5000 candles"})
 
 
-def collect_hourly_candles(coin, *, start_ms, end_ms, fetch=None, page_hours=480):
+def collect_hourly_candles(coin, *, start_ms, end_ms, fetch=None, page_hours=4800):
     """Collect a bounded history in pages and remove duplicate timestamps."""
     rows = {}
     cursor = int(start_ms)

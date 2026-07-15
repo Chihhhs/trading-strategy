@@ -202,6 +202,10 @@ class ExperimentSpecTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "requires execution.exit_replay_path"):
             ExperimentSpec.from_mapping(payload)
 
+        payload["execution"] = {"exit_replay_path": "hourly.json", "drawdown_source": "mark_to_market"}
+        with self.assertRaisesRegex(ValueError, "requires execution.replay_metadata_path"):
+            ExperimentSpec.from_mapping(payload)
+
     def test_backtest_adapter_uses_mtm_drawdown_for_replay_profile(self):
         from trading_strategy.experiments import BacktestExperimentAdapter, ExperimentSpec
 
@@ -213,11 +217,27 @@ class ExperimentSpecTest(unittest.TestCase):
             "min_eligible_comparisons": 1,
             "require_majority": False,
         }
+        payload["coins"] = ["BTC"]
         with tempfile.TemporaryDirectory() as directory:
             replay_path = Path(directory) / "hourly.json"
-            replay_path.write_text(json.dumps({"BTC": [{"open_time": 3600000, "open": 1, "high": 1, "low": 1, "close": 1}]}), encoding="utf-8")
+            replay_data = {"BTC": [{"open_time": 3600000, "open": 1, "high": 1, "low": 1, "close": 1}]}
+            replay_path.write_text(json.dumps(replay_data), encoding="utf-8")
+            metadata_path = Path(directory) / "hourly.metadata.json"
+            metadata_path.write_text(
+                json.dumps(
+                    {
+                        "complete": True,
+                        "coverage_bars": {"BTC": 1},
+                        "checksum_sha256": __import__("hashlib").sha256(
+                            json.dumps(replay_data, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                        ).hexdigest(),
+                    }
+                ),
+                encoding="utf-8",
+            )
             payload["execution"] = {
                 "exit_replay_path": str(replay_path),
+                "replay_metadata_path": str(metadata_path),
                 "exit_replay_mode": "strict",
                 "drawdown_source": "mark_to_market",
             }
@@ -240,6 +260,24 @@ class ExperimentSpecTest(unittest.TestCase):
 
         self.assertEqual(rows[0].max_drawdown_pct, 3.0)
         self.assertIn("BTC", backtester.call_args.kwargs["exit_replay_data_map"])
+
+    def test_backtest_adapter_rejects_mismatched_replay_metadata(self):
+        from trading_strategy.experiments import BacktestExperimentAdapter
+
+        with tempfile.TemporaryDirectory() as directory:
+            replay_path = Path(directory) / "hourly.json"
+            replay_path.write_text(json.dumps({"BTC": []}), encoding="utf-8")
+            metadata_path = Path(directory) / "hourly.metadata.json"
+            metadata_path.write_text(
+                json.dumps({"complete": True, "coverage_bars": {"BTC": 1}, "checksum_sha256": "wrong"}),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "checksum"):
+                BacktestExperimentAdapter._load_exit_replay_data(
+                    str(replay_path),
+                    str(metadata_path),
+                    required_coins=("BTC",),
+                )
 
     def test_experiment_result_is_serializable_and_includes_turnover(self):
         from trading_strategy.experiments import ExperimentResult

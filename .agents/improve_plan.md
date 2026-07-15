@@ -2,7 +2,7 @@
 
 Last updated: 2026-07-15
 
-This is the active roadmap. Historical results belong in `docs/research_manual/`; this file should stay short enough that future agents can use it as working guidance.
+This is the active execution queue. Historical results and detailed research backlogs belong in `docs/research_manual/` and `.agents/current_decisions.md`.
 
 ## Current Spec
 
@@ -23,168 +23,55 @@ Non-goals:
 - Do not change TP/SL, signal, or exit policy in this documentation task.
 - Do not promote `intraday_momentum`, funding/basis, or trend variants to paper/live.
 
-## P0: Protection Reliability
+## P0: Complete, Operationally Verified
 
-Objective: make live entry safety depend on verified protection, not optimistic matching.
+Protection reliability and run-summary observability are implemented.
 
-Required behavior:
+- Unknown, ambiguous, missing, or unverified protection blocks new entry.
+- Protection repair/verification outcomes and entry blockers are recoverable from events and position snapshots.
+- Run summaries include strategy fingerprint, universe, costs, protection statuses, blocker counts, turnover, exit reasons, MFE/MAE, and drawdown when available.
 
-- Match protection orders by stronger identity: order id when available, coin, reduce-only, TP/SL type, and trigger price fallback.
-- Represent protection status explicitly: `protected`, `missing_sl`, `missing_tpsl`, `repair_failed`, `update_failed`, `ambiguous_protection`, `verification_unknown`.
-- Treat unknown and ambiguous as not protected.
-- Never auto-cancel or auto-replace ambiguous protection orders.
-- Block new entries when any open position has unverified or missing protection.
-- Emit match source, confidence, verify status, failure reason, repair result, and replace result.
-
-Implementation areas:
-
-- `src/trading_strategy/live/engine/protection.py`
-- `src/trading_strategy/live/orders.py`
-- `src/trading_strategy/live/engine/`
-- `src/trading_strategy/live/cli.py`
-- `tests/test_live.py`
-
-Verification:
+Before any paper or live operation, run the live regression suite and inspect the resulting runtime evidence. Do not open a new P0 implementation task unless a failing test or runtime record identifies a concrete safety gap.
 
 ```bash
 python -m unittest tests.test_live
 python -m compileall src tests
 ```
 
-Acceptance:
+## P1: Complete, Observe-Only Decision Record
 
-- Unknown or ambiguous protection is not deleted.
-- Unverified protection blocks new entry.
-- Repair and replace failures can be reconstructed from event logs.
-- `run_summary` exposes protection counts and statuses.
+- `live.decision.Decision` records allowed/action, ordered reason codes, signal
+  context, BTC regime, Market Context, and safety blockers.
+- `decision_observed` events and schema-v3 run summaries record skips, order
+  attempts, order outcomes, protection failures, and opened positions after a
+  signal exists.
+- Market Context records a hypothetical allow/block result only. It does not
+  gate entries or alter order, TP/SL, protection, sizing, or configuration.
+- Tests cover warmup annotation, combined blockers, summary aggregation, and
+  proof that observe-only recording does not place an order.
 
-## P0: Run Summary Observability
+Normal paper/live runs now collect evidence for future research hypotheses.
+Activation remains subject to the canonical live-like trend gate and a separate
+live-safety review.
 
-Objective: one run summary should explain why live did or did not trade.
+## Later: Module Cleanup
 
-Required summary fields:
+Do this only when there is no active safety incident, operational review, or
+approved research slice.
 
-- strategy and parameter fingerprint
-- timeframe and universe
-- signals observed
-- entries attempted, filled, rejected
-- blocker counts
-- positions count
-- protection status
-- turnover when available
-- fee and slippage assumptions when available
-- exit reason counts
-- MFE/MAE when available
-- drawdown when available
+- Identify narrow, duplicated live/backtest helpers and remove obsolete
+  compatibility paths only after their callers are covered by tests.
+- Keep public runner commands and persisted event/state schemas compatible.
+- Do not mix cleanup with strategy, risk, protection, or live configuration
+  changes.
+- Validate with the relevant targeted tests, full live regression suite, AST
+  parsing, and `git diff --check`.
 
-Acceptance:
+## Deferred Research
 
-- Entry skips and rejections have counted reasons.
-- Protection status is visible without reading raw state.
-- Summary separates live state truth from research report fields.
-
-## P1: `optimize_existing_trend`
-
-Objective: find whether the current live Trend strategy still has a valid live-like edge after realistic execution.
-
-Current decision:
-
-- Current trend wiring is executable but not validated live alpha.
-- Canonical baseline is daily trend decisions plus causal 1h hard-SL execution and MTM drawdown.
-- The declared live universe is 50 coins (`experiments/live_trend_baseline.json`). The checked-in `apps/live_config.py` narrows launcher behavior to three coins; treat this as unresolved config drift, not a reason to use a three-coin promotion baseline.
-- Stop-stage, ATR trail, close-confirmed stop, and failure-exit tuning should not be the next priority without new evidence.
-
-Allowed research:
-
-- Entry quality filters.
-- BTC regime gating.
-- Universe selection and coin exclusion.
-- Funding/basis/OI as blocker or confidence modifier, not as standalone alpha.
-
-Entry-quality sequence: raw 50-coin Trend attribution -> fixed walk-forward consistency -> one pre-defined filter hypothesis -> 50-coin causal 1h replay -> shadow. Attribution may observe Market Context, but Market Context and Momentum-Decay remain diagnostic-only until this sequence produces evidence.
-
-Required gate:
-
-- Same windows, costs, universe, and live-like execution profile.
-- Improve net PnL and drawdown versus canonical baseline.
-- Avoid single-coin or single-window concentration.
-
-Current research candidate:
-
-- `market_context_enabled` filters only new trend entries; it does not change signal generation, sizing, or protection.
-- `momentum_decay_time_limit_enabled` may set one earlier exit deadline when trend direction remains intact but momentum and ADX decay; it must not modify staged SL or ATR trailing.
-- Entry-only, time-limit-only, and combined manifests now compare with the 50-coin baseline as diagnostics only.
-- The former three-coin replay result is invalidated. Do not enter shadow mode until full 50-coin 1h replay data enables causal hard-SL and MTM comparison.
-
-## P1: `new_alpha_research` — Short-Cycle Measurement And Turnover
-
-Objective: diagnose and reduce intraday churn only if an OOS edge survives costs.
-
-Current decision:
-
-- `intraday_momentum` is rejected for paper/live.
-- It remains a negative control and wiring baseline.
-- Its 15m results must never be used to judge an `optimize_existing_trend` candidate.
-- Turnover reduction is research-only until absolute net performance and OOS gates pass.
-
-Phase 0 measurement fixes:
-
-- Store `initial_risk` for intraday positions.
-- Report MFE/MAE R and best-close R.
-- Record entry components, not only aggregate score.
-- Record re-entry gap, direction, UTC session, ATR/range context, volatility context, and BTC regime.
-- Mark no-op candidates when filters do not change the event set.
-- Clarify `max_days=8640` bar semantics or add an explicit `max_bars`.
-
-Phase 1 frozen baselines:
-
-- BTC-only, BTC/ETH/BNB, BTC/ETH/SOL/BNB.
-- first/middle/last 30-day, rolling 30-day, train60/test30.
-- zero-cost and `fee_bps=4.5`, `slippage_bps=2` per side.
-- close-fill and live-like intrabar profiles.
-- same fixture, universe, random baseline, and minimum event count.
-
-Phase 2 one-factor ablation:
-
-- Refractory period `0/4/8/12/16/24` bars.
-- Long-only and short-only.
-- Asymmetric long/short thresholds.
-- Volume confirmation on/off.
-- Breakout, EMA, momentum, and volume component removals.
-- Session buckets with frozen rules before OOS.
-
-Promotion boundary:
-
-- Passing research gates permits bounded paper observation only.
-- Live requires separate fill, slippage, L2 adverse-selection, and safety review.
-
-## P1: `new_alpha_research` — Alternative Short-Cycle Alpha
-
-Current decision:
-
-- Breakout continuation is a rejected/deprioritized control.
-- Volatility expansion is a rejected/deprioritized control.
-- VWAP reversion is the only current short-cycle research candidate, and only because recent 12/24-bar windows improved while older windows failed.
-
-Next research:
-
-- VWAP reversion with regime and session conditioning.
-- L2 spread, depth, order-flow imbalance, and adverse-selection data if replayable.
-- Event-time regime exclusions for FOMC, jumps, and liquidation cascades.
-
-## P2: `new_alpha_research` — Funding, Basis, OI, And L2
-
-Current decision:
-
-- Carry/funding/basis is not viable as standalone execution after realistic two-leg costs.
-- Funding/basis/OI may be useful as trend context, blocker, or exposure reducer.
-- L2 microstructure guard is observe-only.
-
-Next work:
-
-- Improve OI and venue-specific funding/basis coverage.
-- Test context as a blocker/confidence modifier in trend research.
-- Keep live disabled until OOS and paper evidence exist.
+- Trend: the canonical 50-coin causal replay baseline failed its cost-adjusted performance and drawdown gate. No candidate exists until a new pre-defined entry, BTC-regime, or universe hypothesis is supported by attribution.
+- Short-cycle alpha: `intraday_momentum` remains a negative control; VWAP is research-only. Follow the frozen OOS and random-baseline process in `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md`.
+- Funding, basis, OI, and L2 remain context or observe-only inputs. See `.agents/current_decisions.md` for their evidence and constraints.
 
 ## Do Not Revisit Without New Evidence
 

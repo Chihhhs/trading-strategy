@@ -95,6 +95,9 @@ def resolve_hourly_stop_fill(position, bar, *, mode="strict"):
 
 
 def normalize_hourly_data(data_map):
+    # Hyperliquid collectors preserve provenance and coverage beside the bars.
+    if isinstance(data_map, dict) and isinstance(data_map.get("data"), dict):
+        data_map = data_map["data"]
     normalized = {}
     for coin, bars in (data_map or {}).items():
         usable = []

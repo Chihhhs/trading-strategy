@@ -8,7 +8,7 @@ from ..io import record_trade_event
 
 def build_run_summary():
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "coins_scanned": 0,
         "priced_coins": 0,
         "valid_klines": 0,
@@ -57,6 +57,12 @@ def build_run_summary():
         "unprotected_positions_count": 0,
         "position_status_counts": {},
         "position_snapshots": [],
+        "decisions_observed": 0,
+        "decision_action_counts": {},
+        "decision_reason_counts": {},
+        "market_context_observed_count": 0,
+        "market_context_would_block_count": 0,
+        "market_context_regime_counts": {},
     }
 
 
@@ -163,6 +169,23 @@ def bump_summary_blocker(summary, reason, coin_name=None):
         summary["btc_filtered"] += 1
 
 
+def observe_decision_summary(summary, decision):
+    """Add observe-only decision evidence without changing entry eligibility."""
+    summary["decisions_observed"] += 1
+    action_counts = Counter(summary.get("decision_action_counts") or {})
+    action_counts[decision.action] += 1
+    summary["decision_action_counts"] = dict(action_counts)
+    reason_counts = Counter(summary.get("decision_reason_counts") or {})
+    reason_counts.update(decision.reason_codes)
+    summary["decision_reason_counts"] = dict(reason_counts)
+    context = decision.market_context or {}
+    if context:
+        summary["market_context_observed_count"] += 1
+        regime_counts = Counter(summary.get("market_context_regime_counts") or {})
+        regime_counts[context.get("regime", "unknown")] += 1
+        summary["market_context_regime_counts"] = dict(regime_counts)
+        if not context.get("hypothetical_allowed", True):
+            summary["market_context_would_block_count"] += 1
 def finalize_run_summary(summary):
     blockers = summary.pop("_blockers", Counter())
     summary["entry_rejected_reasons"] = dict(summary.get("_rejected_reasons", {}))

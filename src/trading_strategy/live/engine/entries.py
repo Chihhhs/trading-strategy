@@ -5,6 +5,7 @@ from trading_strategy.shared.risk import calc_position_size, check_circuit_break
 from trading_strategy.strategies.base import signal_value
 
 from .. import config
+from ..decision import build_decision, observe_market_context
 from ..io import record_trade_event, save_state
 from ..market import get_btc_direction, get_current_prices, get_derivatives_context, get_klines
 from ..observations import record_signal_observation
@@ -30,6 +31,7 @@ from .summary import (
     bump_summary_blocker,
     finalize_run_summary,
     log_entry_skipped,
+    observe_decision_summary,
 )
 
 
@@ -57,6 +59,29 @@ def _build_order_context(order_meta):
         "best_ask": (order_meta or {}).get("best_ask"),
         "price_source": (order_meta or {}).get("price_source"),
     }
+
+
+def _record_decision(summary, state, coin_name, btc_dir, *, allowed, action, reasons=(), signal=None, market_context=None):
+    decision = build_decision(
+        allowed=allowed,
+        action=action,
+        reason_codes=reasons,
+        signal=signal,
+        btc_regime=btc_dir,
+        market_context=market_context,
+    )
+    observe_decision_summary(summary, decision)
+    record_trade_event(
+        "decision_observed",
+        **build_entry_context(
+            state,
+            coin_name,
+            btc_dir,
+            config.STRATEGY["entry_order_type"],
+            decision=decision.to_dict(),
+        ),
+    )
+    return decision
 
 
 def check_entries(state, coins):
@@ -127,6 +152,7 @@ def check_entries(state, coins):
             log_entry_skipped(state, name, btc_dir, "no_signal")
             continue
         summary["signals_found"] += 1
+        market_context = observe_market_context(name, klines, sig, config.STRATEGY)
         paper_observation_enabled = (
             config.MODE == "paper" and config.STRATEGY.get("signal_observation_enabled", False)
         )
@@ -203,6 +229,10 @@ def check_entries(state, coins):
             btc_dir == "bear" and signal_value(sig, "direction") == "long"
         ):
             bump_summary_blocker(summary, "btc_filter")
+            _record_decision(
+                summary, state, name, btc_dir, allowed=False, action="entry_skipped",
+                reasons=("btc_filter",), signal=sig, market_context=market_context,
+            )
             log_entry_skipped(
                 state,
                 name,
@@ -248,6 +278,10 @@ def check_entries(state, coins):
                     )
                 else:
                     bump_summary_blocker(summary, reason)
+                    _record_decision(
+                        summary, state, name, btc_dir, allowed=False, action="entry_skipped",
+                        reasons=(reason,), signal=sig, market_context=market_context,
+                    )
                     log_entry_skipped(
                         state,
                         name,
@@ -284,6 +318,10 @@ def check_entries(state, coins):
         base_context = _base_entry_context(state, sig, entry, target_tp, risk_pct, available_balance)
         if available_balance <= 0:
             bump_summary_blocker(summary, "reserved_margin_exhausted")
+            _record_decision(
+                summary, state, name, btc_dir, allowed=False, action="entry_skipped",
+                reasons=("reserved_margin_exhausted",), signal=sig, market_context=market_context,
+            )
             log_entry_skipped(state, name, btc_dir, "reserved_margin_exhausted", **base_context)
             continue
         size = calc_position_size(
@@ -299,16 +337,28 @@ def check_entries(state, coins):
 
         if size <= 0:
             bump_summary_blocker(summary, "size_zero")
+            _record_decision(
+                summary, state, name, btc_dir, allowed=False, action="entry_skipped",
+                reasons=("size_zero",), signal=sig, market_context=market_context,
+            )
             log_entry_skipped(state, name, btc_dir, "size_zero", **base_context)
             continue
         if preview["size"] <= 0:
             bump_summary_blocker(summary, "normalized_size_zero")
+            _record_decision(
+                summary, state, name, btc_dir, allowed=False, action="entry_skipped",
+                reasons=("normalized_size_zero",), signal=sig, market_context=market_context,
+            )
             log_entry_skipped(state, name, btc_dir, "normalized_size_zero", **base_context)
             continue
 
         order_meta, protection_meta = None, {"tp_order": None, "sl_order": None}
         if config.MODE == "live":
             summary["orders_attempted"] += 1
+            _record_decision(
+                summary, state, name, btc_dir, allowed=True, action="entry_order_attempted",
+                signal=sig, market_context=market_context,
+            )
             record_trade_event(
                 "entry_order_attempted",
                 **build_entry_context(
@@ -334,6 +384,10 @@ def check_entries(state, coins):
                 rejected = summary.setdefault("_rejected_reasons", Counter())
                 rejected[rejection_reason] += 1
                 bump_summary_blocker(summary, rejection_reason)
+                _record_decision(
+                    summary, state, name, btc_dir, allowed=False, action="entry_order_rejected",
+                    reasons=(rejection_reason,), signal=sig, market_context=market_context,
+                )
                 record_trade_event(
                     "entry_order_rejected",
                     rejection_reason=rejection_reason,
@@ -349,6 +403,10 @@ def check_entries(state, coins):
                 continue
             if order_context["order_status"] != "filled":
                 bump_summary_blocker(summary, "entry_order_not_filled")
+                _record_decision(
+                    summary, state, name, btc_dir, allowed=False, action="entry_order_not_filled",
+                    reasons=("entry_order_not_filled",), signal=sig, market_context=market_context,
+                )
                 record_trade_event(
                     "entry_order_not_filled",
                     **build_entry_context(
@@ -380,6 +438,10 @@ def check_entries(state, coins):
             if not protection_meta.get("ok"):
                 failure_reason = "tpsl_submit_failed" if exit_policy.get("requires_tp") else "sl_submit_failed"
                 bump_summary_blocker(summary, failure_reason)
+                _record_decision(
+                    summary, state, name, btc_dir, allowed=False, action="protection_submit_failed",
+                    reasons=(failure_reason,), signal=sig, market_context=market_context,
+                )
                 protection_context = dict(order_context)
                 protection_context["message"] = protection_meta.get("message")
                 record_trade_event(
@@ -446,6 +508,10 @@ def check_entries(state, coins):
         )
         state["positions"].append(position)
         summary["positions_opened"] += 1
+        _record_decision(
+            summary, state, name, btc_dir, allowed=True, action="position_opened",
+            signal=sig, market_context=market_context,
+        )
         if config.MODE == "live":
             record_trade_event(
                 "position_opened",

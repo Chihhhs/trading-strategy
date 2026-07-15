@@ -2,6 +2,61 @@ from tests.live_test_support import check_entries, live, patch, unittest
 
 
 class LiveEntriesTest(unittest.TestCase):
+    def test_decision_contract_keeps_ordered_blockers_and_context(self):
+        from trading_strategy.live.decision import build_decision
+
+        decision = build_decision(
+            allowed=False,
+            action="entry_skipped",
+            reason_codes=("btc_filter", "reserved_margin_exhausted"),
+            signal={"direction": "short", "score": -4, "reason": "TREND_SELL"},
+            btc_regime="bull",
+            market_context={"regime": "unknown", "hypothetical_allowed": False},
+        )
+
+        self.assertEqual(decision.reason_codes, ("btc_filter", "reserved_margin_exhausted"))
+        self.assertEqual(decision.safety_blockers, decision.reason_codes)
+        self.assertEqual(decision.market_context["regime"], "unknown")
+
+    @patch("trading_strategy.live.engine.entries.place_hl_order")
+    @patch("trading_strategy.live.engine.entries.record_trade_event")
+    @patch("trading_strategy.live.engine.entries.get_current_prices")
+    @patch("trading_strategy.live.engine.entries.get_btc_direction")
+    @patch("trading_strategy.live.engine.entries.get_klines")
+    def test_check_entries_observes_warmup_context_without_ordering(
+        self,
+        mock_get_klines,
+        mock_get_btc_direction,
+        mock_get_current_prices,
+        mock_record_trade_event,
+        mock_place_hl_order,
+    ):
+        old_mode = live.config.MODE
+        live.config.set_mode("paper")
+        try:
+            mock_get_btc_direction.return_value = "neutral"
+            mock_get_current_prices.return_value = {"BTC": 100.0}
+            mock_get_klines.return_value = [
+                {"time": index, "open": 1, "high": 2, "low": 1, "close": 1.5}
+                for index in range(60)
+            ]
+            signal = {"direction": "long", "score": 4, "sl": 95.0, "tp": 110.0, "reason": "TREND_BUY"}
+            with patch("trading_strategy.live.engine.entries.generate_signal", return_value=signal), patch(
+                "trading_strategy.live.engine.entries.calc_position_size", return_value=0.0
+            ):
+                summary = check_entries({"balance": 100.0, "positions": [], "history": []}, [{"name": "BTC", "symbol": "BTCUSDT"}])
+
+            decisions = [call.kwargs["decision"] for call in mock_record_trade_event.call_args_list if call.args[0] == "decision_observed"]
+            self.assertEqual(len(decisions), 1)
+            self.assertEqual(decisions[0]["action"], "entry_skipped")
+            self.assertEqual(decisions[0]["reason_codes"], ("size_zero",))
+            self.assertEqual(decisions[0]["market_context"]["regime"], "unknown")
+            self.assertEqual(summary["market_context_observed_count"], 1)
+            self.assertEqual(summary["decision_reason_counts"], {"size_zero": 1})
+            mock_place_hl_order.assert_not_called()
+        finally:
+            live.config.set_mode(old_mode)
+
     @patch("trading_strategy.live.engine.entries.record_signal_observation")
     @patch("trading_strategy.live.engine.entries.evaluate_microstructure_guard")
     @patch("trading_strategy.live.engine.entries.get_derivatives_context")

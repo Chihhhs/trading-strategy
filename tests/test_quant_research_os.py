@@ -35,7 +35,7 @@ class QuantResearchOsTest(unittest.TestCase):
 
         summary = build_run_summary()
         metrics = build_history_metrics([{"entry": 100.0, "exit": 110.0, "size": 2.0, "exit_reason": "SL", "mfe_r": 1.0, "mae_r": -0.5}])
-        self.assertEqual(summary["schema_version"], 2)
+        self.assertEqual(summary["schema_version"], 3)
         self.assertEqual(metrics["run_turnover_notional"], 420.0)
         self.assertEqual(metrics["run_exit_reason_counts"], {"SL": 1})
         self.assertEqual(strategy_fingerprint({"name": "trend", "timeframe": "1d"}), strategy_fingerprint({"timeframe": "1d", "name": "trend"}))
@@ -79,6 +79,7 @@ class QuantResearchOsTest(unittest.TestCase):
         self.assertEqual(len(records), 1)
 
     def test_hyperliquid_fixture_reports_missing_coins(self):
+        from trading_strategy.backtest.exit_replay import normalize_hourly_data
         from trading_strategy.backtest.hyperliquid_history import collect_fixture
 
         def fetch(payload):
@@ -88,6 +89,7 @@ class QuantResearchOsTest(unittest.TestCase):
         fixture = collect_fixture(("BTC", "MISSING"), days=1, now_ms=1000, fetch=fetch)
         self.assertEqual(fixture["missing_coins"], ["MISSING"])
         self.assertEqual(fixture["data"]["BTC"][0]["close"], 2.0)
+        self.assertEqual(normalize_hourly_data(fixture)["BTC"][0]["close"], 2.0)
 
     def test_l2_jsonl_replay_adapter_uses_observation_shape(self):
         from trading_strategy.backtest.microstructure import load_l2_observation_jsonl

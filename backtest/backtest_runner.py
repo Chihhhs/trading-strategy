@@ -22,4 +22,9 @@ __all__ = [
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] in {"run", "compare", "promote"}:
+        from trading_strategy.experiments.cli import run_command
+
+        run_command(sys.argv[1:])
+    else:
+        main()
