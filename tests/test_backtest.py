@@ -69,6 +69,47 @@ class FakeStrategy:
 
 
 class BacktestModuleTest(unittest.TestCase):
+    def test_market_context_disabled_preserves_fake_strategy_trade(self):
+        def build_signal(context):
+            if len(context.window) == 2:
+                return {"direction": "long", "tp": 200.0, "sl": 90.0, "score": 5, "reason": "TREND_BUY"}
+            return None
+
+        data = {"BTC": [build_bar(100.0 + index, index) for index in range(5)]}
+        baseline = PortfolioBacktester(
+            config=BacktestConfig(coins=("BTC",), min_bars=1, btc_filter_enabled=False),
+            strategy=FakeStrategy(build_signal),
+        ).run(data)
+        disabled = PortfolioBacktester(
+            config=BacktestConfig(coins=("BTC",), min_bars=1, btc_filter_enabled=False, market_context_enabled=False),
+            strategy=FakeStrategy(build_signal),
+        ).run(data)
+        self.assertEqual(baseline.trades, disabled.trades)
+
+    def test_momentum_decay_deadline_exits_without_modifying_stop(self):
+        class ExhaustionDetector:
+            def observe(self, coin, window):
+                from trading_strategy.market_context import MarketContext, MarketRegime
+                return MarketContext(MarketRegime.EXHAUSTION, "long", 1.0, ("test",))
+
+        def build_signal(context):
+            if len(context.window) == 2:
+                return {"direction": "long", "tp": 200.0, "sl": 90.0, "score": 5, "reason": "TREND_BUY"}
+            return None
+
+        # Patch the detector at its construction boundary so the position lifecycle is tested separately from classifier math.
+        data = {"BTC": [build_bar(100.0 + index, index) for index in range(8)]}
+        with patch("trading_strategy.backtest.portfolio.MarketContextDetector", return_value=ExhaustionDetector()):
+            result = PortfolioBacktester(
+                config=BacktestConfig(
+                    coins=("BTC",), min_bars=1, btc_filter_enabled=False,
+                    momentum_decay_time_limit_enabled=True, momentum_decay_grace_bars=2,
+                ),
+                strategy=FakeStrategy(build_signal),
+            ).run(data)
+        self.assertEqual(result.trades[0]["exit_reason"], "MOMENTUM_DECAY_TIME_LIMIT")
+        self.assertEqual(result.trades[0]["initial_risk"], 11.0)
+        self.assertEqual(result.portfolio["diagnostics"]["momentum_decay_deadlines_set"], 1)
     def test_exit_replay_cli_defaults_to_strict_canonical_mode(self):
         args = cli.build_parser().parse_args([])
         self.assertEqual(args.exit_replay_mode, "strict")

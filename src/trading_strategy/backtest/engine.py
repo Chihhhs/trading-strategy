@@ -38,6 +38,9 @@ def _build_position(coin, signal, current_price, current_bar, state, config, str
         "entry_bar_index": int(state.get("_bar_index") or 0),
         "strategy_name": getattr(strategy, "name", config.strategy),
     }
+    market_context = (signal_value(signal, "raw", {}) or {}).get("market_context")
+    if isinstance(market_context, dict):
+        position["market_context_at_entry"] = dict(market_context)
     position["position_id"] = f"{coin}:{position['direction']}:{position['entry_time']}:{position['entry_bar_index']}"
     position["exit_policy"] = strategy.build_exit_policy(signal=signal, position=position)
     return strategy.initialize_position(
@@ -53,6 +56,7 @@ def _build_position(coin, signal, current_price, current_bar, state, config, str
             config=config,
             mode="backtest",
             price=current_price,
+            bar_index=state.get("_bar_index"),
             diagnostics=state.get("_diagnostics"),
         ),
     )
@@ -193,6 +197,7 @@ def _resolve_strategy_exit(
         config=config,
         mode="backtest",
         price=current_price,
+        bar_index=current_index,
         diagnostics=state.get("_diagnostics"),
     )
     trail = strategy.resolve_stop_target(

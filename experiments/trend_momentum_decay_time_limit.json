@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "name": "trend-momentum-decay-time-limit",
+  "dataset": {"id": "binance-1000d-50coins", "path": "data/historical_prices/1000d_50coins.json"},
+  "coins": ["BTC", "ETH", "BNB"],
+  "strategy": {
+    "name": "trend",
+    "parameters": {
+      "timeframe": "1d",
+      "min_score": 4,
+      "market_context_enabled": false,
+      "momentum_decay_time_limit_enabled": true,
+      "momentum_decay_bars": 3,
+      "momentum_decay_adx_lookback": 5,
+      "momentum_decay_grace_bars": 3
+    }
+  },
+  "portfolio": {"initial_capital": 1000.0, "leverage": 3.0, "risk_pct": 0.05, "max_positions": 2},
+  "costs": {"fee_bps": 4.5, "slippage_bps": 2.0},
+  "evaluation": {
+    "baseline": "experiments/trend_market_context_baseline.json",
+    "windows": [120, 180, 240],
+    "universes": [["BTC"], ["BTC", "ETH"], ["BTC", "ETH", "BNB"]],
+    "min_trades": 5,
+    "min_eligible_comparisons": 3,
+    "require_majority": true
+  },
+  "target_environment": "research"
+}

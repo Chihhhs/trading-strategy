@@ -1,7 +1,7 @@
-# Dual-Track Strategy Execution
+# Two Research Modes And Strategy Promotion
 
-- Date: 2026-07-11
-- Purpose: Run existing-strategy optimization and new-strategy research in parallel without mixing unproven ideas into live execution.
+- Last updated: 2026-07-15
+- Purpose: Run current Trend optimization and new-alpha research in parallel without mixing their baselines or unproven ideas into live execution.
 
 ## Operating Model
 
@@ -9,10 +9,26 @@ The repo now treats strategy work as two parallel tracks:
 
 | Track | Goal | Default Action |
 | --- | --- | --- |
-| `optimize_existing` | Improve the current trend baseline with cost-aware risk, exits, and portfolio controls. | Can graduate toward paper/live after walk-forward validation. |
-| `new_strategy` | Explore new alpha such as intraday momentum, funding/basis, and order flow. | Research-only until data, costs, and replay/backtest evidence are strong. |
+| `optimize_existing_trend` | Improve the currently executable daily Trend strategy with entry, regime, universe, and approved context changes. | Compare only with a frozen live-like Trend baseline; shadow, bounded paper, then explicit live review. |
+| `new_alpha_research` | Explore new alpha such as intraday momentum, VWAP reversion, funding/basis, and order flow. | Use an independent frequency-matched research baseline; separate strategy approval is required. |
 
-## Current Report Candidates
+Protection, execution, reconciliation, and logging are shared live-safety requirements, not a third research mode. Detailed mode rules live in [`.agents/research_modes.md`](../../.agents/research_modes.md).
+
+## `optimize_existing_trend` Baseline
+
+The promotion baseline is not `experiments/live_trend_baseline.json`: that file is a historical research manifest and does not itself represent the active runtime. The required `live_like_trend_baseline` must freeze the effective settings from `src/trading_strategy/live/config.py` and `apps/live_config.py`, including BTC/ETH/BNB, leverage, risk, position limit, derivatives override, daily decision cadence, 4.5 bps fees, 2 bps slippage, causal 1h hard-SL replay, and MTM drawdown.
+
+Until that manifest and replay adapter exist, existing daily close-fill and generic trend comparisons are diagnostics only. They cannot promote Market Context, Momentum-Decay, or another Trend candidate.
+
+Promotion path:
+
+```text
+live-like backtest -> frozen gate -> shadow mode (no orders) -> bounded paper -> explicit live review
+```
+
+Shadow mode records baseline and candidate signals, block reasons, intended actions, and their differences. It never submits orders or changes TP/SL protection.
+
+## `new_alpha_research` Candidates
 
 Run:
 
@@ -22,10 +38,6 @@ python backtest/backtest_runner.py --coins BTC,ETH,BNB,SOL --max-days 240 --rese
 
 The report includes:
 
-- `trend_unfiltered_reference`: previous single-coin trend behavior without the new entry filters.
-- `trend_filtered_control`: single-coin trend baseline with RSI, ATR, price-position, and overextension filters.
-- `trend_controlled_portfolio`: lower-risk basket version with max position limits.
-- `trend_derivatives_filtered`: trend baseline with Funding / OI / Basis filters that can only block existing trend signals.
 - `intraday_momentum_probe`: first runnable new-strategy probe; only meaningful on intraday candle data.
 - `funding_basis_monitor`: runnable monitor-only Funding / OI / Basis report.
 - `order_flow_imbalance`: pending L2/order-book infrastructure.
@@ -38,7 +50,7 @@ python backtest/backtest_runner.py --coins BTC,ETH,BNB,SOL --max-days 240 --rese
 
 ## Promotion Rules
 
-- Existing-strategy candidates must beat `trend_unfiltered_reference` on score, drawdown, and net PnL before being considered for paper/live.
-- New-strategy candidates stay research-only until they pass cost-adjusted backtests on appropriate data.
+- Existing Trend candidates must improve cost-adjusted net PnL and drawdown across frozen windows and universes against the live-like Trend baseline before shadow mode; a generic or short-cycle baseline is not valid.
+- New-alpha candidates stay research-only until they pass cost-adjusted, frequency-matched OOS and random-baseline evidence. They cannot be promoted merely because they lose less than a negative baseline.
 - Funding/basis and order-flow tracks should start as reports, not live execution branches.
 - Any intraday result must include realistic fee, slippage, and turnover checks.

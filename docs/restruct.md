@@ -54,6 +54,7 @@ Current reusable module layout:
 - `src/trading_strategy/live/`
   - live runtime package
 - `src/trading_strategy/market_data.py`
+- `src/trading_strategy/market_context.py`
 - `src/trading_strategy/hyperliquid.py`
 - `src/trading_strategy/indicators.py`
 
@@ -64,6 +65,7 @@ Current reusable module layout:
 - New reusable code should go into `shared/`, `strategies/`, or `positions/` instead of `core/`.
 - Experiment orchestration belongs in `experiments/`; strategy-specific parameters belong beside strategy definitions, never in `core/`.
 - `paper.py` still uses some `core/*` imports today, but those modules now re-export from the new locations.
+- `market_context.py` is a research-only, causal classifier used by the backtest trend wrapper; it must not alter live behavior without a separate review.
 
 ## Cleanup Performed
 

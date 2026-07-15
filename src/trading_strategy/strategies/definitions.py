@@ -47,6 +47,32 @@ class TrendParameters:
     trend_alpha_score_boost: float = 1.0
     trend_alpha_require_confirmation: bool = False
     trend_alpha_block_crowded_entry: bool = True
+    market_context_enabled: bool = False
+    market_context_ema_fast: int = 20
+    market_context_ema_slow: int = 50
+    market_context_slope_bars: int = 5
+    market_context_ema_slope_min: float = 0.05
+    market_context_adx_period: int = 14
+    market_context_adx_strong: float = 30.0
+    market_context_adx_weak: float = 20.0
+    market_context_adx_range: float = 18.0
+    market_context_atr_short_period: int = 5
+    market_context_atr_long_period: int = 14
+    market_context_atr_contraction_threshold: float = 0.8
+    market_context_bb_period: int = 20
+    market_context_bb_rank_lookback: int = 40
+    market_context_compression_percentile: float = 0.2
+    market_context_donchian_lookback: int = 20
+    market_context_transition_confirmation_bars: int = 2
+    market_context_breakout_atr_multiple: float = 0.5
+    market_context_breakout_volume_ratio: float = 1.2
+    market_context_breakout_min_confirmations: int = 2
+    market_context_btc_lookback: int = 7
+    market_context_btc_threshold_pct: float = 3.0
+    momentum_decay_time_limit_enabled: bool = False
+    momentum_decay_bars: int = 3
+    momentum_decay_adx_lookback: int = 5
+    momentum_decay_grace_bars: int = 3
 
 
 @dataclass(frozen=True)

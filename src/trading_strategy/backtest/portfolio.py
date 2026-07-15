@@ -1,5 +1,6 @@
 from trading_strategy.shared.state import build_default_state
 from itertools import groupby
+from dataclasses import replace
 
 from .alpha_overlay import apply_trend_alpha_entry_overlay
 from .derivatives import (
@@ -14,6 +15,8 @@ from .live_like import build_mark_to_market_point, summarize_mark_to_market
 from .reporting import build_coin_results, build_portfolio_summary, calc_max_drawdown
 from .strategies import is_signal_blocked_by_btc_filter, resolve_strategy
 from .types import BacktestConfig, BacktestResult
+from trading_strategy.market_context import MarketContextDetector, entry_decision
+from trading_strategy.strategies.base import signal_value
 from trading_strategy.strategies import get_strategy_definition
 
 
@@ -41,11 +44,44 @@ class PortfolioBacktester:
         config = self.config
         strategy = self.strategy
         fallback_strategy = resolve_strategy(config.strategy)
+        market_context_detector = MarketContextDetector(config)
+
+        def _context_enabled():
+            parameters = config.strategy_parameters or {}
+            return bool(parameters.get("market_context_enabled", config.market_context_enabled))
+
+        def _time_limit_enabled():
+            parameters = config.strategy_parameters or {}
+            return bool(parameters.get("momentum_decay_time_limit_enabled", config.momentum_decay_time_limit_enabled))
+
+        def _config_value(key, default):
+            parameters = config.strategy_parameters or {}
+            return parameters.get(key, getattr(config, key, default))
+
+        def _annotate_signal(signal, context, decision):
+            raw = dict(signal_value(signal, "raw", {}) or {})
+            raw["market_context"] = context.to_dict()
+            raw["market_context_decision"] = dict(decision)
+            if isinstance(signal, dict):
+                annotated = dict(signal)
+                annotated["raw"] = raw
+                return annotated
+            return replace(signal, raw=raw)
+
+        def _increment(diagnostics, key):
+            if diagnostics is not None:
+                diagnostics[key] = int(diagnostics.get(key) or 0) + 1
 
         class FilteringStrategy:
             name = getattr(strategy, "name", config.strategy)
 
             def generate_signal(self, context):
+                market_context = None
+                if _context_enabled():
+                    market_context = market_context_detector.observe(context.coin, context.window, context.btc_window)
+                    _increment(context.diagnostics, f"market_context_regime_{market_context.regime.value}")
+                    if market_context.breakout_confirmed:
+                        _increment(context.diagnostics, "market_context_breakout_confirmed")
                 signal = strategy.generate_signal(context)
                 if signal is None:
                     return None
@@ -58,6 +94,13 @@ class PortfolioBacktester:
                     return None
                 if should_block_signal_for_oi_entry_filter(signal, context.window, config, context.diagnostics):
                     return None
+                if market_context is not None:
+                    decision = entry_decision(signal_value(signal, "direction"), market_context)
+                    if not decision["allowed"]:
+                        _increment(context.diagnostics, "market_context_blocked_signals")
+                        _increment(context.diagnostics, f"market_context_blocked_{market_context.regime.value}")
+                        return None
+                    signal = _annotate_signal(signal, market_context, decision)
                 return apply_trend_alpha_entry_overlay(signal, context, config)
 
             def build_exit_policy(self, *, signal=None, position=None):
@@ -83,8 +126,42 @@ class PortfolioBacktester:
 
             def evaluate_open_position(self, position, context):
                 if hasattr(strategy, "evaluate_open_position"):
-                    return strategy.evaluate_open_position(position, context)
-                return fallback_strategy.evaluate_open_position(position, context)
+                    evaluation = strategy.evaluate_open_position(position, context)
+                else:
+                    evaluation = fallback_strategy.evaluate_open_position(position, context)
+                evaluation = dict(evaluation or {})
+                if evaluation.get("exit_reason"):
+                    return evaluation
+                current_bar_index = context.bar_index
+                if current_bar_index is None:
+                    current_bar_index = int(position.get("entry_bar_index") or 0) + int(position.get("bars_since_entry") or 0)
+                general_max_hold = _config_value("max_hold_bars", None)
+                general_deadline = (
+                    int(position.get("entry_bar_index") or 0) + int(general_max_hold)
+                    if general_max_hold is not None and int(general_max_hold) > 0
+                    else None
+                )
+                if _time_limit_enabled():
+                    market_context = market_context_detector.observe(context.coin, context.window)
+                    if (
+                        position.get("momentum_decay_deadline_bar") is None
+                        and market_context.regime.value == "exhaustion"
+                        and market_context.direction == position.get("direction")
+                    ):
+                        deadline = int(current_bar_index) + max(int(_config_value("momentum_decay_grace_bars", 3)), 1)
+                        if general_deadline is not None:
+                            deadline = min(deadline, general_deadline)
+                        position["momentum_decay_deadline_bar"] = deadline
+                        position["momentum_decay_context"] = market_context.to_dict()
+                        _increment(context.diagnostics, "momentum_decay_deadlines_set")
+                    deadline = position.get("momentum_decay_deadline_bar")
+                    if deadline is not None and int(current_bar_index) >= int(deadline):
+                        _increment(context.diagnostics, "momentum_decay_time_limit_exits")
+                        evaluation["exit_reason"] = "MOMENTUM_DECAY_TIME_LIMIT"
+                        return evaluation
+                if general_deadline is not None and int(current_bar_index) >= general_deadline:
+                    evaluation["exit_reason"] = "MAX_HOLD"
+                return evaluation
 
             def resolve_stop_target(self, position, context):
                 if hasattr(strategy, "resolve_stop_target"):

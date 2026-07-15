@@ -1,6 +1,6 @@
 # Improve Plan For Agents
 
-Last updated: 2026-07-14
+Last updated: 2026-07-15
 
 This is the active roadmap. Historical results belong in `docs/research_manual/`; this file should stay short enough that future agents can use it as working guidance.
 
@@ -12,8 +12,10 @@ Goal:
 
 - Keep live runtime safety first.
 - Make current research decisions unambiguous for agents.
-- Separate protection reliability from intraday research.
+- Separate `optimize_existing_trend` from `new_alpha_research`.
 - Prevent stale strategy evidence from being treated as live promotion authority.
+
+Mode authority: `.agents/research_modes.md` defines baseline ownership and promotion paths. Protection reliability, execution, and observability remain shared live-safety work rather than a strategy-research mode.
 
 Non-goals:
 
@@ -81,14 +83,15 @@ Acceptance:
 - Protection status is visible without reading raw state.
 - Summary separates live state truth from research report fields.
 
-## P1: Trend Entry, Regime, And Universe
+## P1: `optimize_existing_trend`
 
-Objective: find whether trend still has a valid live-like edge after realistic execution.
+Objective: find whether the current live Trend strategy still has a valid live-like edge after realistic execution.
 
 Current decision:
 
 - Current trend wiring is executable but not validated live alpha.
 - Canonical baseline is daily trend decisions plus causal 1h hard-SL execution and MTM drawdown.
+- The frozen baseline must snapshot `src/trading_strategy/live/config.py` plus `apps/live_config.py` overrides; short-cycle or generic daily baselines are diagnostic only.
 - Stop-stage, ATR trail, close-confirmed stop, and failure-exit tuning should not be the next priority without new evidence.
 
 Allowed research:
@@ -104,7 +107,14 @@ Required gate:
 - Improve net PnL and drawdown versus canonical baseline.
 - Avoid single-coin or single-window concentration.
 
-## P1: Short-Cycle Measurement And Turnover
+Current research candidate:
+
+- `market_context_enabled` filters only new trend entries; it does not change signal generation, sizing, or protection.
+- `momentum_decay_time_limit_enabled` may set one earlier exit deadline when trend direction remains intact but momentum and ADX decay; it must not modify staged SL or ATR trailing.
+- Rebase entry-only, time-limit-only, and combined manifests on the frozen live-like baseline before comparing them.
+- A passing backtest enters no-trade shadow mode first; it records candidate versus baseline decisions before any bounded paper review.
+
+## P1: `new_alpha_research` — Short-Cycle Measurement And Turnover
 
 Objective: diagnose and reduce intraday churn only if an OOS edge survives costs.
 
@@ -112,6 +122,7 @@ Current decision:
 
 - `intraday_momentum` is rejected for paper/live.
 - It remains a negative control and wiring baseline.
+- Its 15m results must never be used to judge an `optimize_existing_trend` candidate.
 - Turnover reduction is research-only until absolute net performance and OOS gates pass.
 
 Phase 0 measurement fixes:
@@ -145,7 +156,7 @@ Promotion boundary:
 - Passing research gates permits bounded paper observation only.
 - Live requires separate fill, slippage, L2 adverse-selection, and safety review.
 
-## P1: Alternative Short-Cycle Alpha
+## P1: `new_alpha_research` — Alternative Short-Cycle Alpha
 
 Current decision:
 
@@ -159,7 +170,7 @@ Next research:
 - L2 spread, depth, order-flow imbalance, and adverse-selection data if replayable.
 - Event-time regime exclusions for FOMC, jumps, and liquidation cascades.
 
-## P2: Funding, Basis, OI, And L2
+## P2: `new_alpha_research` — Funding, Basis, OI, And L2
 
 Current decision:
 

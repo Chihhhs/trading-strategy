@@ -139,6 +139,13 @@ def build_parser():
     parser.add_argument("--trend-alpha-score-boost", type=float, default=1.0)
     parser.add_argument("--trend-alpha-require-confirmation", action="store_true")
     parser.add_argument("--trend-alpha-block-crowded-entry", action="store_true", default=True)
+    parser.add_argument("--enable-market-context", action="store_true")
+    parser.add_argument("--market-context-transition-bars", type=int, default=2)
+    parser.add_argument("--market-context-breakout-min-confirmations", type=int, default=2)
+    parser.add_argument("--enable-momentum-decay-time-limit", action="store_true")
+    parser.add_argument("--momentum-decay-bars", type=int, default=3)
+    parser.add_argument("--momentum-decay-adx-lookback", type=int, default=5)
+    parser.add_argument("--momentum-decay-grace-bars", type=int, default=3)
     parser.add_argument("--enable-derivatives-crowding-exit", action="store_true")
     parser.add_argument("--derivatives-crowding-action", choices=("exit", "reduce"), default="exit")
     parser.add_argument("--derivatives-crowding-reduce-fraction", type=float, default=0.75)
@@ -202,6 +209,13 @@ def build_config(args):
         trend_alpha_score_boost=args.trend_alpha_score_boost,
         trend_alpha_require_confirmation=args.trend_alpha_require_confirmation,
         trend_alpha_block_crowded_entry=args.trend_alpha_block_crowded_entry,
+        market_context_enabled=args.enable_market_context,
+        market_context_transition_confirmation_bars=args.market_context_transition_bars,
+        market_context_breakout_min_confirmations=args.market_context_breakout_min_confirmations,
+        momentum_decay_time_limit_enabled=args.enable_momentum_decay_time_limit,
+        momentum_decay_bars=args.momentum_decay_bars,
+        momentum_decay_adx_lookback=args.momentum_decay_adx_lookback,
+        momentum_decay_grace_bars=args.momentum_decay_grace_bars,
     )
 
 

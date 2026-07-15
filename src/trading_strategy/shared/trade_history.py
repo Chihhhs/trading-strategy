@@ -100,6 +100,7 @@ def build_trade_record(pos, exit_price, exit_reason, *, exit_time=None, exit_con
         "mfe_r": round(mfe_r, 4) if mfe_r is not None else None,
         "mae_r": round(mae_r, 4) if mae_r is not None else None,
         "best_close_r": round(best_close_r, 4) if best_close_r is not None else None,
+        "market_context_at_entry": (pos or {}).get("market_context_at_entry"),
     }
 
 

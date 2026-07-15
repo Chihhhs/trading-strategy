@@ -1,6 +1,6 @@
 # Project Detail For Agents
 
-Last updated: 2026-07-14
+Last updated: 2026-07-15
 
 This file is the concise current map for agents working in this repository. For current decisions, read `.agents/current_decisions.md` first. For historical evidence, use `docs/research_manual/`.
 
@@ -84,10 +84,13 @@ Primary live files:
 
 ## Current Strategy State
 
+Research modes are defined in `.agents/research_modes.md`. `optimize_existing_trend` is the only mode that may progress toward the current Trend live configuration; `new_alpha_research` has independent baselines and approval.
+
 Trend:
 
 - Capability exists in backtest, paper, and live wiring.
 - Current canonical live-like baseline is not good enough for live alpha promotion.
+- `experiments/live_trend_baseline.json` is historical research configuration, not the live runtime or promotion authority. The pending frozen live-like baseline must derive from runtime config plus app overrides and use causal 1h replay with MTM drawdown.
 - Next research should target entry quality, BTC regime, and universe selection.
 - Stop-stage, ATR trail, close-confirmed stop, and failure-exit tuning are not the priority unless new evidence changes the baseline.
 

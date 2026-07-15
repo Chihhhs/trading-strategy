@@ -39,6 +39,34 @@ def _calc_direction_summary(trades):
     return summary
 
 
+def _calc_market_context_summary(trades):
+    groups = {}
+    for trade in trades:
+        context = trade.get("market_context_at_entry") or {}
+        regime = context.get("regime") if isinstance(context, dict) else None
+        if not regime:
+            regime = "unclassified"
+        groups.setdefault(regime, []).append(trade)
+    summary = {}
+    for regime, subset in sorted(groups.items()):
+        pnl = [float(trade.get("pnl") or 0.0) for trade in subset]
+        running = 0.0
+        peak = 0.0
+        max_drawdown = 0.0
+        for value in pnl:
+            running += value
+            peak = max(peak, running)
+            max_drawdown = max(max_drawdown, peak - running)
+        summary[regime] = {
+            "trades": len(subset),
+            "win_rate": round(sum(value > 0 for value in pnl) / len(subset) * 100, 1) if subset else 0.0,
+            "net_pnl": round(sum(pnl), 2),
+            "avg_hold_bars": _calc_avg_hold_bars(subset),
+            "sequential_drawdown_contribution": round(max_drawdown, 2),
+        }
+    return summary
+
+
 def build_coin_results(state, coins):
     initial_balance = float(state.get("initial_balance") or 0.0)
     results = []
@@ -96,6 +124,7 @@ def build_portfolio_summary(state, equity_curve, peak_balance=None):
             for reason in sorted({trade.get("exit_reason") for trade in state.get("history", []) if trade.get("exit_reason")})
         },
         "direction_summary": _calc_direction_summary(state.get("history", [])),
+        "market_context_entry_summary": _calc_market_context_summary(state.get("history", [])),
     }
     diagnostics = dict(state.get("_diagnostics") or {})
     summary["missing_data_coins"] = list(diagnostics.get("missing_data_coins") or [])
@@ -120,6 +149,9 @@ def format_result_lines(result, *, show_trades=False):
         )
     lines.append(f"Exit reasons: {result.portfolio.get('exit_reason_counts', {})}")
     lines.append(f"Direction summary: {result.portfolio.get('direction_summary', {})}")
+    context_summary = result.portfolio.get("market_context_entry_summary") or {}
+    if context_summary:
+        lines.append(f"Market context entries: {context_summary}")
     missing_data_coins = result.portfolio.get("missing_data_coins") or []
     if missing_data_coins:
         lines.append(f"Missing data coins: {', '.join(missing_data_coins)}")
@@ -155,6 +187,10 @@ def format_result_lines(result, *, show_trades=False):
             "trend_alpha_crowded_blocks",
             "trend_alpha_missing_derivatives_bars",
             "trend_alpha_unconfirmed_blocks",
+            "market_context_blocked_signals",
+            "market_context_breakout_confirmed",
+            "momentum_decay_deadlines_set",
+            "momentum_decay_time_limit_exits",
         )
         if diagnostics.get(key)
     }
@@ -220,6 +256,10 @@ def format_comparison_lines(results_by_strategy):
                 "trend_alpha_crowded_blocks",
                 "trend_alpha_missing_derivatives_bars",
                 "trend_alpha_unconfirmed_blocks",
+                "market_context_blocked_signals",
+                "market_context_breakout_confirmed",
+                "momentum_decay_deadlines_set",
+                "momentum_decay_time_limit_exits",
             )
             if diagnostics.get(key)
         }

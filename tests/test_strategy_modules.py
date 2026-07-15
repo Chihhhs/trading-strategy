@@ -10,6 +10,8 @@ if SRC not in sys.path:
 
 from trading_strategy.core.exit_policy import build_exit_policy
 from trading_strategy.core.legacy_unified import analyze_market_regime, is_dead_cat_bounce, is_price_position_blocked
+from trading_strategy.market_context import MarketContextDetector, MarketRegime, entry_decision
+from trading_strategy.backtest.types import BacktestConfig
 from trading_strategy.positions import build_position_snapshot, build_position_status_counts
 from trading_strategy.strategies import available_strategy_names, generate_trend_signal, resolve_strategy
 from trading_strategy.strategies.base import StrategyContext
@@ -27,6 +29,31 @@ def build_bar(close_price, index, *, volume=1000):
 
 
 class StrategyModulesTest(unittest.TestCase):
+    def test_market_context_warmup_is_unknown(self):
+        detector = MarketContextDetector(BacktestConfig(coins=("BTC",), market_context_enabled=True))
+        bars = [build_bar(100.0 + index, index) for index in range(30)]
+        context = detector.observe("BTC", bars)
+        self.assertEqual(context.regime, MarketRegime.UNKNOWN)
+
+    def test_market_context_compression_blocks_trend_entry(self):
+        detector = MarketContextDetector(BacktestConfig(coins=("BTC",), market_context_enabled=True))
+        prices = [100.0 + index for index in range(60)] + [160.0, 160.6, 161.0, 161.2, 161.3, 161.35, 161.4, 161.45]
+        bars = [build_bar(price, index) for index, price in enumerate(prices)]
+        for index in range(len(bars)):
+            context = detector.observe("BTC", bars[: index + 1])
+        self.assertEqual(context.regime, MarketRegime.COMPRESSION)
+        self.assertFalse(entry_decision("long", context)["allowed"])
+
+    def test_market_context_confirmed_breakout_allows_matching_direction(self):
+        detector = MarketContextDetector(BacktestConfig(coins=("BTC",), market_context_enabled=True))
+        bars = [build_bar(100.0 + index * 0.1, index) for index in range(65)]
+        bars.append(build_bar(110.0, 65, volume=3000))
+        context = detector.observe("BTC", bars)
+        self.assertEqual(context.regime, MarketRegime.BREAKOUT)
+        self.assertTrue(context.breakout_confirmed)
+        self.assertTrue(entry_decision("long", context)["allowed"])
+        self.assertFalse(entry_decision("short", context)["allowed"])
+
     def test_resolve_strategy_returns_trend(self):
         strategy = resolve_strategy("trend")
         self.assertEqual(strategy.name, "trend")

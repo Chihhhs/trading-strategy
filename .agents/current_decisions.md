@@ -1,8 +1,10 @@
 # Current Decisions For Agents
 
-Last updated: 2026-07-14
+Last updated: 2026-07-15
 
 Purpose: this file is the current decision register for repo agents. Prefer it over older narrative sections in `.agents/improve_plan.md` or historical research docs when deciding what is allowed next.
+
+Research modes are defined in `.agents/research_modes.md`: `optimize_existing_trend` is the only path that can improve the current live Trend strategy; `new_alpha_research` has independent baselines and approval.
 
 ## Operating Rules
 
@@ -20,8 +22,9 @@ Purpose: this file is the current decision register for repo agents. Prefer it o
 |---|---|---|---|---|
 | P0 | Protection reliability | Safety-critical. Improve order identity, ambiguous matching, verification status, and run summary observability. | Implement and test matching, repair, verification, and entry-blocking behavior. | `docs/research_manual/05_dual_track_execution.md`, live tests, recent protection work |
 | P0 | Run summary observability | Required for live operations. Summary must expose blockers, positions, protection state, fee/slippage, turnover, and failure reasons. | Extend event and summary schema with tests. | `docs/research_manual/05_dual_track_execution.md` |
-| P1 | Trend strategy | Executable, but not validated as live alpha under canonical live-like baseline. | Research entry quality, BTC regime, and universe selection against strict hard-SL plus MTM baseline. | `docs/research_manual/01_quant_research_map.md`, `.agents/improve_plan.md` |
-| P1 | Intraday momentum | Rejected for paper/live. Keep only as a wiring baseline and negative control. | Measurement integrity, frozen baselines, one-factor ablation, and research reports only. | `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md` |
+| P1 | Trend strategy | `optimize_existing_trend`: executable, but not validated as live alpha under canonical live-like baseline. | Research entry quality, BTC regime, and universe selection against strict hard-SL plus MTM baseline. | `.agents/research_modes.md`, `.agents/improve_plan.md` |
+| P1 | Trend market context | `optimize_existing_trend` research-only candidate: causal regime entry filter plus momentum-decay time limit. | Compare entry-only, time-limit-only, and combined candidates only after the frozen live-like baseline exists. | `.agents/research_modes.md`, `docs/research_manual/09_trend_market_context_candidate.md` |
+| P1 | Intraday momentum | `new_alpha_research`; rejected for paper/live. Keep only as a wiring baseline and negative control. | Measurement integrity, frozen short-cycle baselines, one-factor ablation, and research reports only. | `.agents/research_modes.md`, `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md` |
 | P1 | Intraday turnover | Turnover reduction alone is not enough. Current issue is negative or weak raw edge plus 13 bps round-trip cost. | Collect per-trade diagnostics and compare frozen candidates. Do not promote if net PnL remains negative. | `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md` |
 | P1 | VWAP reversion | Research candidate only. Recent 12/24-bar windows improved, older windows failed. | Test regime/session-conditioned variants with OOS and random baseline. | `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md` |
 | P2 | Funding/basis/OI | Monitor and research context. Not standalone live alpha. | Improve data coverage, test as blocker/confidence modifier, keep live disabled. | `docs/research_manual/07_carry_funding_basis_backtest.md` |
@@ -65,3 +68,4 @@ Trend research gate:
 - Compare against canonical live-like baseline: daily trend decision plus causal 1h hard-SL execution and MTM drawdown.
 - Candidate must improve net PnL and drawdown across frozen windows and universes.
 - Entry/regime/universe changes are in scope. Further stop-stage or ATR tuning is not the priority without new evidence.
+- Passing the gate permits shadow mode only; bounded paper and live require their subsequent, separate approvals.
