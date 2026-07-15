@@ -1,4 +1,6 @@
 from collections import Counter
+from hashlib import sha256
+import json
 
 from .. import config
 from ..io import record_trade_event
@@ -6,6 +8,7 @@ from ..io import record_trade_event
 
 def build_run_summary():
     return {
+        "schema_version": 2,
         "coins_scanned": 0,
         "priced_coins": 0,
         "valid_klines": 0,
@@ -78,6 +81,36 @@ def build_strategy_snapshot():
         "microstructure_max_spread_bps": config.STRATEGY.get("microstructure_max_spread_bps"),
         "microstructure_min_top_depth_usd": config.STRATEGY.get("microstructure_min_top_depth_usd"),
         "microstructure_max_opposing_imbalance": config.STRATEGY.get("microstructure_max_opposing_imbalance"),
+    }
+
+
+def strategy_fingerprint(snapshot):
+    """Return a stable identifier for the runtime configuration being observed."""
+    payload = json.dumps(snapshot or {}, sort_keys=True, separators=(",", ":"))
+    return sha256(payload.encode("utf-8")).hexdigest()
+
+
+def build_history_metrics(history, start_index=0):
+    """Summarize only exits produced during this run without redefining PnL truth."""
+    rows = list(history or [])[max(int(start_index or 0), 0) :]
+    exit_reasons = Counter(str(row.get("exit_reason") or "unknown") for row in rows)
+    turnover = 0.0
+    mfe = []
+    mae = []
+    for row in rows:
+        size = float(row.get("size") or 0.0)
+        turnover += abs(float(row.get("entry") or 0.0) * size)
+        turnover += abs(float(row.get("exit_price", row.get("exit")) or 0.0) * size)
+        if row.get("mfe_r") is not None:
+            mfe.append(float(row["mfe_r"]))
+        if row.get("mae_r") is not None:
+            mae.append(float(row["mae_r"]))
+    return {
+        "run_closed_trades": len(rows),
+        "run_turnover_notional": round(turnover, 8),
+        "run_exit_reason_counts": dict(exit_reasons),
+        "run_avg_mfe_r": round(sum(mfe) / len(mfe), 6) if mfe else None,
+        "run_avg_mae_r": round(sum(mae) / len(mae), 6) if mae else None,
     }
 
 

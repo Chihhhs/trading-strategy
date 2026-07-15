@@ -36,3 +36,21 @@ def write_research_export(path, result, trades):
     payload = build_research_export(result, trades)
     target.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
     return target
+
+
+def write_trend_attribution_artifact(path, report, *, experiment, data_fingerprint=""):
+    """Persist research-only attribution evidence without changing strategy state."""
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "schema_version": 1,
+        "kind": "trend_entry_attribution",
+        "experiment_name": experiment.name,
+        "manifest_fingerprint": experiment.fingerprint,
+        "dataset_id": experiment.dataset.id,
+        "dataset_fingerprint": data_fingerprint,
+        "limitations": ["research_only", "does_not_modify_signal_generation", "does_not_authorize_paper_or_live"],
+        "report": report.to_dict(),
+    }
+    target.write_text(json.dumps(payload, sort_keys=True, indent=2), encoding="utf-8")
+    return target

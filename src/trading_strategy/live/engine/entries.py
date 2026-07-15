@@ -21,6 +21,7 @@ from .helpers import (
     get_available_entry_balance,
 )
 from .execution_guard import evaluate_microstructure_guard
+from ..l2_observations import record_l2_observation
 from .protection import submit_position_protection
 from .summary import (
     build_entry_context,
@@ -154,6 +155,13 @@ def check_entries(state, coins):
                 )
         if paper_observation_enabled:
             guard = evaluate_microstructure_guard(name, sig)
+            if config.STRATEGY.get("microstructure_guard_enabled", False):
+                record_l2_observation(
+                    name,
+                    signal_direction=signal_value(sig, "direction"),
+                    guard=guard,
+                    correlation_id=f"{name}:{klines[-1].get('time')}",
+                )
             observation = record_signal_observation(
                 state,
                 coin=name,
@@ -209,6 +217,15 @@ def check_entries(state, coins):
 
         if config.MODE == "live":
             guard = evaluate_microstructure_guard(name, sig)
+            if config.STRATEGY.get("microstructure_guard_enabled", False):
+                observation = record_l2_observation(
+                    name,
+                    signal_direction=signal_value(sig, "direction"),
+                    guard=guard,
+                    correlation_id=f"{name}:{klines[-1].get('time')}",
+                )
+                if observation and observation.get("capture_status") != "ok":
+                    record_trade_event("l2_observation_missing", coin=name, correlation_id=observation.get("correlation_id"))
             if not guard.get("allowed", True):
                 reason = guard.get("reason") or "microstructure_guard"
                 if config.STRATEGY.get("microstructure_guard_observe_only", False):

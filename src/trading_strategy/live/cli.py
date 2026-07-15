@@ -12,7 +12,7 @@ from .engine.entries import check_entries
 from .engine.positions import update_positions
 from .engine.protection import cancel_orphan_orders, ensure_position_protection
 from .engine.reporting import print_debug_account, print_report, verify_saved_orders
-from .engine.summary import build_run_summary, build_strategy_snapshot
+from .engine.summary import build_history_metrics, build_run_summary, build_strategy_snapshot, strategy_fingerprint
 from .io import load_state, record_trade_event, save_state
 from .market import get_current_prices, get_klines, load_coin_list
 from .observations import advance_signal_observations, summarize_signal_observations
@@ -86,6 +86,7 @@ def build_protection_blockers(protection_summary):
 
 def run_once():
     state = load_state()
+    history_start_index = len(state.get("history") or [])
     try:
         if config.MODE == "live":
             state = sync_state_with_hl_balance(state)
@@ -124,6 +125,7 @@ def run_once():
         }
 
         strategy_snapshot = build_strategy_snapshot()
+        runtime_fingerprint = strategy_fingerprint(strategy_snapshot)
         record_trade_event(
             "run_started",
             mode=config.MODE,
@@ -132,6 +134,7 @@ def run_once():
             balance_source=state.get("_balance_source"),
             positions=len(state.get("positions", [])),
             strategy_snapshot=strategy_snapshot,
+            strategy_fingerprint=runtime_fingerprint,
         )
         record_trade_event(
             "account_snapshot",
@@ -144,6 +147,7 @@ def run_once():
             balance_warning=state.get("_balance_warning"),
             positions=len(state.get("positions", [])),
             strategy_snapshot=strategy_snapshot,
+            strategy_fingerprint=runtime_fingerprint,
         )
 
         print(
@@ -229,6 +233,16 @@ def run_once():
         entry_summary["position_snapshots"] = build_position_snapshots(
             positions,
             mode=config.MODE,
+        )
+        entry_summary.update(build_history_metrics(state.get("history"), history_start_index))
+        entry_summary.update(
+            {
+                "strategy_fingerprint": runtime_fingerprint,
+                "timeframe": strategy_snapshot.get("timeframe"),
+                "coin_universe": strategy_snapshot.get("coin_universe"),
+                "fee_bps_assumption": config.STRATEGY.get("fee_bps", 4.5),
+                "slippage_bps_assumption": config.STRATEGY.get("slippage_bps", 2.0),
+            }
         )
 
         record_trade_event("run_summary", strategy_snapshot=strategy_snapshot, **entry_summary)

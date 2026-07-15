@@ -51,8 +51,10 @@ Current reusable module layout:
 - `src/trading_strategy/experiments/`
   - typed experiment specs, JSON manifest validation, result and promotion contracts
   - adapters translate one validated spec into backtest or approval-gated paper execution
+  - research artifacts, isolated paper candidate sessions, and manual-only live-review bundles
 - `src/trading_strategy/live/`
   - live runtime package
+  - append-only Hyperliquid L2 observations; these remain observe-only research evidence
 - `src/trading_strategy/market_data.py`
 - `src/trading_strategy/market_context.py`
 - `src/trading_strategy/hyperliquid.py`

@@ -92,11 +92,15 @@ def build_config_diff(baseline_spec, candidate_spec):
 def evaluate_candidate(baseline_results, candidate_results, gate: EvaluationGate):
     baseline_by_key = {(row.window, row.universe): row for row in baseline_results}
     eligible = []
+    coverage_failed = False
     for candidate in candidate_results:
         baseline = baseline_by_key.get((candidate.window, candidate.universe))
         if baseline is None:
             continue
         if baseline.trades < gate.min_trades or candidate.trades < gate.min_trades:
+            continue
+        if gate.require_complete_data and (baseline.missing_data_coins or candidate.missing_data_coins):
+            coverage_failed = True
             continue
         eligible.append(
             candidate.net_pnl_pct >= baseline.net_pnl_pct
@@ -108,6 +112,8 @@ def evaluate_candidate(baseline_results, candidate_results, gate: EvaluationGate
     reasons = (
         ()
         if approved
+        else ("incomplete required data coverage",)
+        if coverage_failed
         else ("insufficient eligible comparisons",)
         if len(eligible) < gate.min_eligible_comparisons
         else ("candidate failed promotion gate",)

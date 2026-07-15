@@ -9,9 +9,10 @@ from .spec import (
     load_experiment,
 )
 from .backtest_adapter import BacktestExperimentAdapter
-from .paper_adapter import PaperExperimentAdapter, PaperSession
+from .paper_adapter import PaperExperimentAdapter, PaperSession, update_paper_session_progress
 from .results import ExperimentResult, PromotionDecision, build_config_diff, evaluate_candidate
-from .export import build_research_export, write_research_export
+from .export import build_research_export, write_research_export, write_trend_attribution_artifact
+from .live_review import build_live_review_bundle
 
 __all__ = [
     "CostSpec",
@@ -24,6 +25,7 @@ __all__ = [
     "PortfolioSpec",
     "PaperExperimentAdapter",
     "PaperSession",
+    "update_paper_session_progress",
     "PromotionDecision",
     "build_config_diff",
     "StrategySpec",
@@ -31,4 +33,6 @@ __all__ = [
     "evaluate_candidate",
     "build_research_export",
     "write_research_export",
+    "write_trend_attribution_artifact",
+    "build_live_review_bundle",
 ]

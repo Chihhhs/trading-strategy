@@ -31,6 +31,7 @@ from .exit_replay_report import format_trend_exit_replay_lines, run_trend_exit_r
 from .microstructure import (
     build_microstructure_guard_outcome_report,
     format_microstructure_guard_outcome_lines,
+    load_l2_observation_jsonl,
     normalize_l2_snapshots,
 )
 from .optimizer import run_parameter_sweep
@@ -79,6 +80,7 @@ def build_parser():
     parser.add_argument("--trend-evaluation-report", action="store_true")
     parser.add_argument("--trend-entry-attribution-report", action="store_true")
     parser.add_argument("--trend-entry-attribution-experiment", default="experiments/live_trend_baseline.json")
+    parser.add_argument("--trend-entry-attribution-output", default="")
     parser.add_argument("--trend-exit-replay-report", action="store_true")
     parser.add_argument("--exit-replay-data-path", default="")
     parser.add_argument("--exit-replay-mode", choices=("strict", "close_confirmed"), default="strict")
@@ -89,6 +91,7 @@ def build_parser():
     parser.add_argument("--evaluation-min-trades", type=int, default=5)
     parser.add_argument("--microstructure-report", action="store_true")
     parser.add_argument("--microstructure-data-path", default="")
+    parser.add_argument("--microstructure-observation-path", default="")
     parser.add_argument("--microstructure-forward-steps", default="1,3")
     parser.add_argument("--microstructure-max-spread-bps", type=float, default=8.0)
     parser.add_argument("--microstructure-min-top-depth-usd", type=float, default=1000.0)
@@ -232,10 +235,13 @@ def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.microstructure_report:
-        if not args.microstructure_data_path:
-            parser.error("--microstructure-data-path is required with --microstructure-report")
-        with open(args.microstructure_data_path, "r", encoding="utf-8") as handle:
-            snapshots = normalize_l2_snapshots(json.load(handle))
+        if not args.microstructure_data_path and not args.microstructure_observation_path:
+            parser.error("--microstructure-data-path or --microstructure-observation-path is required with --microstructure-report")
+        if args.microstructure_observation_path:
+            snapshots = load_l2_observation_jsonl(args.microstructure_observation_path)
+        else:
+            with open(args.microstructure_data_path, "r", encoding="utf-8") as handle:
+                snapshots = normalize_l2_snapshots(json.load(handle))
         report = build_microstructure_guard_outcome_report(
             snapshots,
             max_spread_bps=args.microstructure_max_spread_bps,
@@ -270,12 +276,19 @@ def main(argv=None):
         return report
     data_map = load_historical_data(args.data_path)
     if args.trend_entry_attribution_report:
-        from trading_strategy.experiments import BacktestExperimentAdapter, load_experiment
+        from trading_strategy.experiments import BacktestExperimentAdapter, load_experiment, write_trend_attribution_artifact
 
         spec = load_experiment(args.trend_entry_attribution_experiment)
         config = BacktestExperimentAdapter().build_config(spec, max_days=240)
         report_data = load_historical_data(spec.dataset.path)
         report = run_trend_entry_attribution_report(report_data, config=config, max_bars=240)
+        if args.trend_entry_attribution_output:
+            write_trend_attribution_artifact(
+                args.trend_entry_attribution_output,
+                report,
+                experiment=spec,
+                data_fingerprint=BacktestExperimentAdapter._file_fingerprint(spec.dataset.path),
+            )
         for line in format_trend_entry_attribution_lines(report):
             print(line)
         return report

@@ -1,3 +1,6 @@
+import json
+
+
 def _safe_float(value):
     try:
         return float(value)
@@ -55,6 +58,24 @@ def normalize_l2_snapshots(payload):
             )
         normalized[str(coin).upper()] = rows
     return normalized
+
+
+def load_l2_observation_jsonl(path):
+    """Load append-only live observation rows into the existing replay shape."""
+    snapshots = {}
+    with open(path, "r", encoding="utf-8") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except (TypeError, ValueError):
+                continue
+            if not isinstance(item, dict) or item.get("capture_status") != "ok":
+                continue
+            coin = str(item.get("coin") or "").upper()
+            if not coin:
+                continue
+            snapshots.setdefault(coin, []).append(item)
+    return normalize_l2_snapshots(snapshots)
 
 
 def build_microstructure_diagnostic_report(snapshots_by_coin):

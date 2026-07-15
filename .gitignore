@@ -23,3 +23,5 @@ data/signal_log_history.json
 data/historical_prices/prices_*.json
 data/trade_history/*
 data/hl_api/*
+data/l2_observations/
+data/paper_candidates/

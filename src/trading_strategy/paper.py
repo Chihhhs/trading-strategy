@@ -235,7 +235,7 @@ def _experiment_params(session):
 def _load_experiment_state(session):
     params = _experiment_params(session)
     return load_shared_state(
-        MULTI_STATE_DIR,
+        session.state_dir or MULTI_STATE_DIR,
         params,
         name=session.state_id,
         initial_balance=session.initial_capital,
@@ -422,6 +422,8 @@ def _check_experiment_entries(state, session, prices, data_cache, strategy, para
 
 
 def run_experiment_once(session):
+    from trading_strategy.experiments import update_paper_session_progress
+
     params = _experiment_params(session)
     strategy = get_strategy(session.strategy_name)
     market_context_coins = set(session.coins) | {"BTC"}
@@ -440,7 +442,8 @@ def run_experiment_once(session):
     }
     _update_experiment_positions(state, prices, data_cache, strategy, params)
     _check_experiment_entries(state, session, prices, data_cache, strategy, params)
-    save_shared_state(MULTI_STATE_DIR, state, name=session.state_id)
+    save_shared_state(session.state_dir or MULTI_STATE_DIR, state, name=session.state_id)
+    update_paper_session_progress(session, state)
     return state
 
 
@@ -464,7 +467,11 @@ def main(argv=None):
         spec = load_experiment(args.experiment)
         with open(args.approval_result, "r", encoding="utf-8") as handle:
             decision = PromotionDecision.from_mapping(json.load(handle))
-        session = PaperExperimentAdapter().start(spec, decision)
+        session = PaperExperimentAdapter().start(
+            spec,
+            decision,
+            session_root=os.path.join(PROJECT_ROOT, "data", "paper_candidates"),
+        )
         state = run_experiment_once(session)
         print(
             f"{session.experiment_name}: balance=${state['balance']:.2f}, "

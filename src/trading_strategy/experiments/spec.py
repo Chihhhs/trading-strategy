@@ -78,6 +78,7 @@ class EvaluationGate:
     min_trades: int = 5
     min_eligible_comparisons: int = 3
     require_majority: bool = True
+    require_complete_data: bool = True
 
 
 @dataclass(frozen=True)
@@ -109,7 +110,7 @@ class ExperimentSpec:
         strategy = _checked_mapping(payload["strategy"], name="strategy", allowed={"name", "parameters", "required_capabilities"}, required={"name"})
         portfolio = _checked_mapping(payload.get("portfolio", {}), name="portfolio", allowed={"initial_capital", "leverage", "risk_pct", "max_positions"})
         costs = _checked_mapping(payload.get("costs", {}), name="costs", allowed={"fee_bps", "slippage_bps"})
-        evaluation = _checked_mapping(payload.get("evaluation", {}), name="evaluation", allowed={"baseline", "windows", "universes", "min_trades", "min_eligible_comparisons", "require_majority"})
+        evaluation = _checked_mapping(payload.get("evaluation", {}), name="evaluation", allowed={"baseline", "windows", "universes", "min_trades", "min_eligible_comparisons", "require_majority", "require_complete_data"})
         execution = _checked_mapping(
             payload.get("execution", {}),
             name="execution",
@@ -178,6 +179,8 @@ class ExperimentSpec:
             raise ValueError("evaluation universes must be arrays of coin strings")
         if "require_majority" in evaluation and not isinstance(evaluation["require_majority"], bool):
             raise ValueError("evaluation require_majority must be a boolean")
+        if "require_complete_data" in evaluation and not isinstance(evaluation["require_complete_data"], bool):
+            raise ValueError("evaluation require_complete_data must be a boolean")
         _require_positive_int(evaluation.get("min_trades", 5), "evaluation.min_trades")
         _require_positive_int(
             evaluation.get("min_eligible_comparisons", 3),
@@ -192,6 +195,7 @@ class ExperimentSpec:
             min_trades=evaluation.get("min_trades", 5),
             min_eligible_comparisons=evaluation.get("min_eligible_comparisons", 3),
             require_majority=evaluation.get("require_majority", True),
+            require_complete_data=evaluation.get("require_complete_data", True),
         )
         if gate.min_trades <= 0 or gate.min_eligible_comparisons <= 0 or not gate.windows:
             raise ValueError("evaluation gate requires positive min_trades and windows")
