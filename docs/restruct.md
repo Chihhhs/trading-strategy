@@ -24,7 +24,7 @@ python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 2
 ## App Imports
 
 - `apps/runners/live_runner.py` does not implement trading logic itself; it bootstraps `trading_strategy.live.main`.
-- `apps/runners/paper_runner.py` imports `trading_strategy.paper.main`.
+- `apps/runners/paper_runner.py` bootstraps the same `trading_strategy.live.main` in paper mode, preserving the separate paper state directory and current Decision/cache workflow.
 - `apps/fvg_paper_trader.py` is a compatibility wrapper around `trading_strategy.paper.main`.
 - `apps/hyperliquid_api.py` is a compatibility wrapper around `trading_strategy.hyperliquid`.
 - `apps/live_config.py` remains an app-side override file and mutates `trading_strategy.live.config`.

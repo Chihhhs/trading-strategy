@@ -391,6 +391,22 @@ def load_coin_list():
 
 
 def get_current_prices(coins):
+    if config.get_market_data_source() == "hyperliquid":
+        mids = hl_info_post({"type": "allMids"})
+        if isinstance(mids, dict):
+            prices = {
+                coin["name"]: float(mids[coin["name"]])
+                for coin in coins
+                if coin["name"] in mids
+            }
+            if config.MODE == "paper":
+                for coin in coins:
+                    if coin["name"] in prices:
+                        continue
+                    data = api_get(f"{config.BINANCE_FUTURES_API}/fapi/v1/ticker/24hr?symbol={coin['symbol']}")
+                    if data:
+                        prices[coin["name"]] = float(data.get("lastPrice", 0))
+            return prices
     prices = {}
     for coin in coins:
         ticker = get_ticker(coin["symbol"])

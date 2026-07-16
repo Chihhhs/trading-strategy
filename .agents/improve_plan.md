@@ -59,11 +59,11 @@ fetch fails. This permits pending observation horizons to resolve from already
 captured bars during offline operation; it cannot create a new bar, use a
 cached price for an entry, or affect live mode.
 
-Universe contract (2026-07-16): `apps/live_config.py` fixes entry scanning to
-38 coins: the 20 still-active members of the historical reference plus 18
-currently active Hyperliquid perps selected from the market-cap ranking. This
-is static until an explicit future review; it does not refresh daily. Binance
-Paper and live prefer Hyperliquid K-lines and prices across this same 38-coin
+Universe contract (2026-07-16): `apps/live_config.py` fixes live entry
+scanning to 38 coins: the 20 still-active members of the historical reference
+plus 18 currently active Hyperliquid perps selected from the market-cap
+ranking. Paper loads every active Hyperliquid perp from `meta` for broader data collection.
+Paper and live prefer Hyperliquid K-lines and prices.
 contract. Binance USDⓈ-M Futures is an explicit per-coin fallback only when
 Hyperliquid market data is unavailable; its cache is source-tagged. Data coverage does not make a coin executable on Hyperliquid;
 the exchange eligibility gate remains required before any order attempt.

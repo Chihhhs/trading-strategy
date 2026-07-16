@@ -93,7 +93,7 @@ Trend:
 
 - Capability exists in backtest, paper, and live wiring.
 - Current canonical live-like baseline is not good enough for live alpha promotion.
-- The fixed runtime entry universe is the 38-coin `LIVE_UNIVERSE` in `apps/live_config.py`: 20 active members retained from the historical reference plus 18 active Hyperliquid market-cap leaders, frozen on 2026-07-16. The historical 50-coin experiment remains research evidence, not runtime authority.
+- Live uses the fixed 38-coin `LIVE_UNIVERSE` in `apps/live_config.py`: 20 active members retained from the historical reference plus 18 active Hyperliquid market-cap leaders, frozen on 2026-07-16. Paper has no configured universe and collects every active Hyperliquid perp from `meta`. The historical 50-coin experiment remains research evidence, not runtime authority.
 - Next research should target entry quality, BTC regime, and universe selection.
 - Stop-stage, ATR trail, close-confirmed stop, and failure-exit tuning are not the priority unless new evidence changes the baseline.
 

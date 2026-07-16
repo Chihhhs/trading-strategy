@@ -84,10 +84,21 @@ def _record_decision(summary, state, coin_name, btc_dir, *, allowed, action, rea
     return decision
 
 
+def _refresh_paper_market_cache(state, coins):
+    if config.MODE != "paper":
+        return
+    cache = state.setdefault("_data_cache", {})
+    for coin in coins:
+        klines = get_klines(coin["symbol"], 60)
+        if klines:
+            cache[coin["name"]] = klines
+
+
 def check_entries(state, coins):
     strategy = get_active_strategy()
     summary = build_run_summary()
     summary["coins_scanned"] = len(coins)
+    _refresh_paper_market_cache(state, coins)
     if len(state["positions"]) >= config.STRATEGY["max_positions"]:
         bump_summary_blocker(summary, "max_positions_reached")
         record_trade_event(
@@ -138,7 +149,7 @@ def check_entries(state, coins):
             log_entry_skipped(state, name, btc_dir, "missing_price")
             continue
 
-        klines = get_klines(coin["symbol"], 60)
+        klines = state.get("_data_cache", {}).get(name) or get_klines(coin["symbol"], 60)
         if not klines or len(klines) < 50:
             bump_summary_blocker(summary, "insufficient_klines")
             log_entry_skipped(state, name, btc_dir, "insufficient_klines")

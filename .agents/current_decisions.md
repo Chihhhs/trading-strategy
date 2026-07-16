@@ -11,11 +11,12 @@ Research modes are defined in `.agents/research_modes.md`: `optimize_existing_tr
 - Exchange positions and exchange open orders are the live truth. Local state files are cached context, not authority.
 - Runtime config is the active strategy truth. Do not infer live intent from stale `live_state.json.params`.
 - Research reports may summarize evidence, but they must not overwrite live or paper state.
-- The fixed runtime entry universe is the 38-coin `LIVE_UNIVERSE` in
-  `apps/live_config.py`: the 20 still-active historical members plus the
-  2026-07-16 market-cap leaders that have active Hyperliquid perps. It is a
-  deliberate static contract, not a daily ranking. Do not substitute the old
-  3-coin override or the historical 50-coin research fixture for it.
+- Live uses the fixed 38-coin `LIVE_UNIVERSE` in `apps/live_config.py`: the
+  20 still-active historical members plus the 2026-07-16 market-cap leaders
+  that have active Hyperliquid perps. It is a deliberate static contract, not
+  a daily ranking. Paper deliberately has no configured universe and loads all
+  active Hyperliquid perps from `meta` for data collection. Do not substitute
+  the old 3-coin override or the historical 50-coin research fixture for live.
 - Paper and live prefer Hyperliquid market data for the fixed 38-coin universe.
   A coin with missing Hyperliquid price or K-lines may fall back to Binance USDⓈ-M
   Futures, with its paper cache marked per coin by the source actually used.
@@ -26,6 +27,8 @@ Research modes are defined in `.agents/research_modes.md`: `optimize_existing_tr
   not treat them as paper or live observation evidence.
 - Position capacity is mode-specific: paper permits 10 concurrent simulated
   positions for evidence collection; live remains capped at 2.
+- Paper refreshes every active Hyperliquid perp K-line cache before checking
+  its position limit, so a full paper portfolio cannot stop offline-data accumulation.
 - Live entry is blocked when protection status is unknown, ambiguous, or unverified.
 - Unknown or ambiguous protection orders must not be automatically canceled or replaced.
 - Strategy promotion path is always: research -> cost-adjusted backtest -> gate -> bounded paper observation -> explicit live review.
@@ -37,7 +40,7 @@ Research modes are defined in `.agents/research_modes.md`: `optimize_existing_tr
 |---|---|---|---|---|
 | P0 | Protection reliability | Implemented and safety-critical. Unknown, ambiguous, missing, or unverified protection blocks entry. The current state snapshot has three protected positions and six managed protection orders; its last event summary is older, so do not call it fresh operational evidence. | Before paper/live operation, run regression tests and inspect the current run's events. Open new work only for a concrete failing safety case. | `docs/research_manual/05_dual_track_execution.md`, live tests |
 | P0 | Run summary observability | Implemented. Summary exposes blockers, positions, protection state, fee/slippage, turnover, exit reasons, MFE/MAE, and drawdown when available. | Validate each operational run; do not expand schema without a demonstrated observability gap. | `docs/research_manual/05_dual_track_execution.md` |
-| P1 | Live decision architecture | Implemented in observe-only mode. Each signal path emits a reason-coded `Decision` event and summary aggregation without changing entry behavior. The fixed 38-coin runtime contract combines the 20 active historical members with 18 active Hyperliquid market-cap leaders, frozen on 2026-07-16. Paper-mode K-line cache may resolve pending observations while offline; it never supplies a live decision or entry price. | Rebuild paper cache and observation state for the 38-coin contract through Binance market data. Keep Hyperliquid execution eligibility explicit; do not equate Binance data coverage with order eligibility. | `apps/live_config.py`, `src/trading_strategy/live/decision.py`, `src/trading_strategy/live/market.py`, Hyperliquid public `meta` and CoinGecko market-cap audit 2026-07-16 |
+| P1 | Live decision architecture | Implemented in observe-only mode. Each signal path emits a reason-coded `Decision` event and summary aggregation without changing entry behavior. Live uses the frozen 38-coin contract; paper loads every active Hyperliquid perp and source-tags any per-coin fallback cache. Paper-mode K-line cache may resolve pending observations while offline; it never supplies a live decision or entry price. | Continue collecting paper observations through `apps/runners/paper_runner.py`; keep Hyperliquid execution eligibility explicit and do not equate fallback data coverage with order eligibility. | `apps/live_config.py`, `apps/runners/paper_runner.py`, `src/trading_strategy/live/decision.py`, `src/trading_strategy/live/market.py`, Hyperliquid public `meta` |
 | P1 | Live market context | Implemented as a hypothetical annotation in `Decision`; it is not a live gate. | Compare observed hypothetical outcomes only after enough normal-run samples exist. | `src/trading_strategy/live/decision.py`, `docs/research_manual/09_trend_market_context_candidate.md` |
 | Later | Module cleanup | Deferred maintenance only. Reduce duplication and obsolete compatibility paths after current safety and research work is quiet. | Take one narrow module at a time with targeted tests; preserve runner commands and persisted schemas. | `docs/restruct.md`, live/backtest tests |
 | P1 | Trend strategy | `optimize_existing_trend`: canonical 50-coin causal replay is complete, but the baseline fails the performance and drawdown gate. | Do not create a paper candidate. Develop one new pre-defined entry, BTC-regime, or universe hypothesis only after attribution evidence supports it. | `data/research_artifacts/live_trend_baseline_1h_replay_50coin.json`, `docs/research_manual/09_trend_market_context_candidate.md` |

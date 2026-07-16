@@ -33,8 +33,10 @@ class LiveHelpersTest(unittest.TestCase):
             apply_overrides(config)
             config.set_mode("paper")
             self.assertEqual(config.STRATEGY["max_positions"], 10)
+            self.assertIsNone(config.STRATEGY["coin_universe"])
             config.set_mode("live")
             self.assertEqual(config.STRATEGY["max_positions"], 2)
+            self.assertEqual(config.STRATEGY["coin_universe"], list(LIVE_UNIVERSE))
         finally:
             config.STRATEGY.clear()
             config.STRATEGY.update(old_strategy)
@@ -47,6 +49,17 @@ class LiveHelpersTest(unittest.TestCase):
         self.assertTrue(path.startswith(TEST_TRADE_HISTORY_DIR))
         io.record_trade_event("test_event_isolation")
         self.assertTrue(os.path.exists(path))
+
+    def test_hyperliquid_current_prices_uses_one_all_mids_request(self):
+        old_mode = config.MODE
+        config.set_mode("paper")
+        try:
+            coins = [{"name": "BTC", "symbol": "BTCUSDT"}, {"name": "ETH", "symbol": "ETHUSDT"}]
+            with patch("trading_strategy.live.market.hl_info_post", return_value={"BTC": "1", "ETH": "2"}) as mids:
+                self.assertEqual(market.get_current_prices(coins), {"BTC": 1.0, "ETH": 2.0})
+            mids.assert_called_once_with({"type": "allMids"})
+        finally:
+            config.set_mode(old_mode)
 
     def test_check_atr_trailing_exit_triggers_after_activation(self):
         old_mode = config.MODE

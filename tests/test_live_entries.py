@@ -2,6 +2,30 @@ from tests.live_test_support import check_entries, live, patch, unittest
 
 
 class LiveEntriesTest(unittest.TestCase):
+    @patch("trading_strategy.live.engine.entries.record_trade_event")
+    @patch("trading_strategy.live.engine.entries.get_klines")
+    def test_paper_refreshes_every_coin_cache_when_position_limit_is_reached(
+        self,
+        mock_get_klines,
+        _mock_record_trade_event,
+    ):
+        old_mode = live.config.MODE
+        old_max_positions = live.config.STRATEGY["max_positions"]
+        live.config.set_mode("paper")
+        live.config.STRATEGY["max_positions"] = 1
+        coins = [{"name": "BTC", "symbol": "BTCUSDT"}, {"name": "ETH", "symbol": "ETHUSDT"}]
+        bars = [{"time": index, "open": 1, "high": 2, "low": 1, "close": 1.5} for index in range(60)]
+        try:
+            mock_get_klines.return_value = bars
+            state = {"balance": 100.0, "positions": [{"coin": "SOL"}], "history": []}
+            summary = check_entries(state, coins)
+            self.assertEqual(mock_get_klines.call_count, 2)
+            self.assertEqual(set(state["_data_cache"]), {"BTC", "ETH"})
+            self.assertEqual(summary["top_blockers"], [{"reason": "max_positions_reached", "count": 1}])
+        finally:
+            live.config.STRATEGY["max_positions"] = old_max_positions
+            live.config.set_mode(old_mode)
+
     def test_decision_contract_keeps_ordered_blockers_and_context(self):
         from trading_strategy.live.decision import build_decision
 

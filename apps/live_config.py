@@ -52,8 +52,8 @@ STRATEGY_OVERRIDES = {
 }
 
 MODE_STRATEGY_OVERRIDES = {
-    "paper": {"max_positions": 10},
-    "live": {"max_positions": 2},
+    "paper": {"max_positions": 10, "coin_universe": None},
+    "live": {"max_positions": 2, "coin_universe": list(LIVE_UNIVERSE)},
 }
 
 # Circuit-breaker overrides merged into trading_strategy.live.config.CIRCUIT

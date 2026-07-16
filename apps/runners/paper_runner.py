@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
+"""Run the current Hyperliquid-aligned paper workflow."""
+
 import os
 import sys
 
 
 CURRENT_DIR = os.path.dirname(__file__)
-PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))
-SRC_DIR = os.path.join(PROJECT_ROOT, "src")
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
+APPS_DIR = os.path.dirname(CURRENT_DIR)
+if APPS_DIR not in sys.path:
+    sys.path.insert(0, APPS_DIR)
 
-from trading_strategy.paper import main as paper_main
+from _live_bootstrap import load_live_main
+
+
+paper_main = load_live_main()
 
 
 def main():
-    return paper_main(sys.argv[1:])
+    return paper_main()
 
 
 if __name__ == "__main__":
