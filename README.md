@@ -15,7 +15,7 @@
   - `trading_strategy.shared`
   - `trading_strategy.strategies`
   - `trading_strategy.positions`
-- `trading_strategy.core` 現在是相容層；舊 import 仍可用，但不應再把新實作寫進去。
+- 共用 helper 位於 `trading_strategy.shared`、策略邏輯位於 `trading_strategy.strategies`、倉位 helper 位於 `trading_strategy.positions`；`core` 僅保留 legacy strategy 實作。
 
 ## 主要功能
 
@@ -154,7 +154,7 @@ src/
     backtest/              # 回測 package（data / engine / portfolio / reporting / cli）
     paper.py               # paper trading 主邏輯
     hyperliquid.py         # Hyperliquid 市場價格與 tick helper
-    core/                  # 相容層，re-export 到新模組
+    core/                  # retained legacy_unified strategy helper only
     live/
       config.py            # live 模式設定、狀態路徑、策略參數
       cli.py               # live 主流程與 CLI
@@ -175,8 +175,6 @@ tests/
 
 - `apps/runners/live_runner.py` 透過 `apps/_live_bootstrap.py` 啟動 `trading_strategy.live.main`
 - `apps/runners/paper_runner.py` 直接 import `trading_strategy.paper.main`
-- `apps/fvg_paper_trader.py` 是 `trading_strategy.paper.main` 的相容入口
-- `apps/hyperliquid_api.py` 是 `trading_strategy.hyperliquid` 的相容入口
 - `apps/live_config.py` 用來覆寫 `trading_strategy.live.config`
 
 這表示 `apps` import 還在，而且是刻意保留的，但它們只應該當 entrypoint / wrapper，不是新 module 的落點。

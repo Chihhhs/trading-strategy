@@ -72,18 +72,16 @@ directory, never to `data/trade_history`.
 Paper permits 10 concurrent simulated positions to maintain observation
 coverage; the live cap remains 2.
 
-## Later: Module Cleanup
+## Complete: Module Cleanup
 
-Do this only when there is no active safety incident, operational review, or
-approved research slice.
-
-- Identify narrow, duplicated live/backtest helpers and remove obsolete
-  compatibility paths only after their callers are covered by tests.
-- Keep public runner commands and persisted event/state schemas compatible.
-- Do not mix cleanup with strategy, risk, protection, or live configuration
-  changes.
-- Validate with the relevant targeted tests, full live regression suite, AST
-  parsing, and `git diff --check`.
+- Removed obsolete versioned and app compatibility wrappers.
+- Removed `core` re-export modules after moving every internal caller to
+  `shared/`, `strategies/`, or `positions/`.
+- Kept canonical runners, persisted schemas, and the public `legacy_unified`
+  negative-control strategy unchanged; its implementation remains in
+  `core/legacy_unified.py` until that strategy is retired.
+- Validated with the full test suite, syntax checks, a canonical trend
+  backtest, and `git diff --check`.
 
 ## Deferred Research
 

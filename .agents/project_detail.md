@@ -36,8 +36,10 @@ Do not:
 
 ## Repository Map
 
-- `src/trading_strategy/core/`: reusable signal, risk, exit, and state logic.
-- `src/trading_strategy/strategies/`: strategy registry and strategy hooks.
+- `src/trading_strategy/shared/`: reusable risk, state, and trade-history helpers.
+- `src/trading_strategy/positions/`: position snapshots and trend stop helpers.
+- `src/trading_strategy/strategies/`: strategy registry, entry logic, and exit-policy hooks.
+- `src/trading_strategy/core/legacy_unified.py`: retained legacy-strategy implementation only.
 - `src/trading_strategy/live/`: Hyperliquid live runtime, CLI flow, exchange sync, orders, protection, persistence.
 - `src/trading_strategy/experiments/`: typed experiment manifests, adapters, results, and promotion decisions.
 - `apps/runners/live_runner.py`: live runner entrypoint.

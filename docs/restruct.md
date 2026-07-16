@@ -25,8 +25,6 @@ python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 2
 
 - `apps/runners/live_runner.py` does not implement trading logic itself; it bootstraps `trading_strategy.live.main`.
 - `apps/runners/paper_runner.py` bootstraps the same `trading_strategy.live.main` in paper mode, preserving the separate paper state directory and current Decision/cache workflow.
-- `apps/fvg_paper_trader.py` is a compatibility wrapper around `trading_strategy.paper.main`.
-- `apps/hyperliquid_api.py` is a compatibility wrapper around `trading_strategy.hyperliquid`.
 - `apps/live_config.py` remains an app-side override file and mutates `trading_strategy.live.config`.
   Its `LIVE_UNIVERSE` is the fixed 38-coin runtime entry contract (frozen
   2026-07-16); it is not a daily market-cap refresh and must be changed only
@@ -72,13 +70,13 @@ Current reusable module layout:
 - `src/trading_strategy/hyperliquid.py`
 - `src/trading_strategy/indicators.py`
 
-## Compatibility Layer
+## Module Boundaries
 
-- `src/trading_strategy/core/` is now transitional.
-- Existing imports such as `trading_strategy.core.risk` and `trading_strategy.core.signals` still work.
-- New reusable code should go into `shared/`, `strategies/`, or `positions/` instead of `core/`.
-- Experiment orchestration belongs in `experiments/`; strategy-specific parameters belong beside strategy definitions, never in `core/`.
-- `paper.py` still uses some `core/*` imports today, but those modules now re-export from the new locations.
+- Shared state, risk, and trade-history helpers live in `shared/`.
+- Strategy entry and exit policy logic lives in `strategies/`.
+- Position lifecycle helpers live in `positions/`.
+- `core/legacy_unified.py` contains the retained legacy strategy implementation only.
+- Experiment orchestration belongs in `experiments/`; strategy-specific parameters belong beside strategy definitions.
 - `market_context.py` is a research-only, causal classifier used by the backtest trend wrapper; it must not alter live behavior without a separate review.
 
 ## Cleanup Performed
@@ -86,7 +84,7 @@ Current reusable module layout:
 - Removed old research/versioned backtest scripts from `backtest/`.
 - Removed old helper and monitor scripts from the former `strategy/` area.
 - Removed obsolete versioned backtest wrappers.
-- Restricted `sys.path.insert(...)` to runner and compatibility entrypoints.
+- Restricted `sys.path.insert(...)` to runner entrypoints.
 
 ## Validation
 

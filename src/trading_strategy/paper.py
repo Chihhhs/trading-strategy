@@ -4,17 +4,16 @@ import shutil
 import sys
 from datetime import datetime, timedelta
 
-from trading_strategy.core.risk import (
+from trading_strategy.shared.risk import (
     calc_position_size,
     check_circuit_breaker,
     is_cooldown,
 )
-from trading_strategy.core.signals import generate_trend_signal
-from trading_strategy.core.state import load_state as load_shared_state
-from trading_strategy.core.state import save_state as save_shared_state
-from trading_strategy.core.trade_history import apply_closed_trade
+from trading_strategy.shared.state import load_state as load_shared_state
+from trading_strategy.shared.state import save_state as save_shared_state
+from trading_strategy.shared.trade_history import apply_closed_trade
 from trading_strategy.market_data import WATCHLIST, get_binance_klines, get_current_prices
-from trading_strategy.strategies import StrategyContext, get_strategy, get_strategy_definition
+from trading_strategy.strategies import StrategyContext, generate_trend_signal, get_strategy, get_strategy_definition
 from trading_strategy.strategies.base import signal_value
 
 

@@ -14,7 +14,7 @@ from tests.live_test_support import (
     TEST_TRADE_HISTORY_DIR,
     unittest,
 )
-from trading_strategy.core.exit_policy import build_exit_policy
+from trading_strategy.strategies import build_exit_policy
 from apps.live_config import LIVE_UNIVERSE, apply_overrides
 
 

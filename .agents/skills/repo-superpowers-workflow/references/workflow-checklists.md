@@ -32,7 +32,7 @@ Write the spec in four lines:
 
 - `src/trading_strategy/strategies/`
 - relevant runner under `apps/runners/`
-- touched shared logic in `src/trading_strategy/core/`
+- touched shared logic in `src/trading_strategy/shared/`, `strategies/`, or `positions/`
 
 ### Backtest
 

@@ -8,7 +8,7 @@ SRC = os.path.join(ROOT, "src")
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
-from trading_strategy.core.exit_policy import build_exit_policy
+from trading_strategy.strategies import build_exit_policy
 from trading_strategy.core.legacy_unified import analyze_market_regime, is_dead_cat_bounce, is_price_position_blocked
 from trading_strategy.market_context import MarketContextDetector, MarketRegime, entry_decision
 from trading_strategy.backtest.types import BacktestConfig

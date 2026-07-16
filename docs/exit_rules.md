@@ -119,11 +119,11 @@ To reduce the chance of missing exits during sharp short-term swings:
 
 This document matches the current structure in the codebase:
 
-- `src/trading_strategy/core/exit_policy.py`
+- `src/trading_strategy/strategies/trend.py`
   - Selects `trend_sl_only` for `TREND_*` signals and `fixed_tpsl` otherwise.
-- `src/trading_strategy/core/signals.py`
+- `src/trading_strategy/strategies/trend.py`
   - Generates initial `tp` and `sl`, with trend entries currently using ATR-based distances.
-- `src/trading_strategy/live/engine.py`
+- `src/trading_strategy/positions/trend.py` and `src/trading_strategy/live/engine/`
   - Tracks `initial_risk`, `sl_stage`, and `best_price` for trend positions.
   - Moves stop-loss to `break-even` at `+1R`.
   - Moves stop-loss to `+0.5R` at `+1.5R`.

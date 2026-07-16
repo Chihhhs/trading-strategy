@@ -50,7 +50,7 @@ from trading_strategy.shared.trade_history import build_trade_record
 from trading_strategy.strategies.trend import TrendStrategy
 from trading_strategy.strategies.trend import evaluate_trend_entry_eligibility, generate_raw_trend_candidate
 from trading_strategy.backtest.types import BacktestConfig, StrategySignal
-from trading_strategy.core.trend_trade import compute_atr_trailing_result
+from trading_strategy.positions import compute_atr_trailing_result
 
 
 def build_bar(close_price, index):

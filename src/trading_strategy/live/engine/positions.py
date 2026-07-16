@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from trading_strategy.core.trade_history import apply_closed_trade
+from trading_strategy.shared.trade_history import apply_closed_trade
 from trading_strategy.strategies import build_exit_policy
 
 from .. import config

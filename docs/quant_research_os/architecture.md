@@ -10,7 +10,7 @@ Market data -> features -> strategy signal -> decision and risk
             -> order intent -> backtest, paper, or Hyperliquid adapter
 ```
 
-`core/` stays deterministic and exchange-agnostic. `live/` owns Hyperliquid
+`shared/`, `strategies/`, and `positions/` stay deterministic and exchange-agnostic. `live/` owns Hyperliquid
 translation, reconciliation, order verification, and TP/SL protection.
 
 ## Useful External Patterns
@@ -22,7 +22,7 @@ translation, reconciliation, order verification, and TP/SL protection.
 | NautilusTrader | common domain contracts | a second execution engine |
 | Freqtrade / Jesse | focused strategy API | bot state or executor |
 | Qlib | reproducible experiment artifacts | ML before a causal use case |
-| Hummingbot | order tracking and reconciliation ideas | connector model in `core/` |
+| Hummingbot | order tracking and reconciliation ideas | connector model in shared strategy logic |
 
 ## Shared Contract Direction
 

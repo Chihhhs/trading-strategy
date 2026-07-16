@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR
 
-from trading_strategy.core.exit_policy import build_exit_policy
+from trading_strategy.strategies import build_exit_policy
 
 from .. import config
 from ..io import record_trade_event
