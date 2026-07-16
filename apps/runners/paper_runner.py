@@ -13,11 +13,13 @@ if APPS_DIR not in sys.path:
 from _live_bootstrap import load_live_main
 
 
-paper_main = load_live_main()
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if "--experiment" in argv:
+        from trading_strategy.paper import main as experiment_main
 
-
-def main():
-    return paper_main()
+        return experiment_main(argv)
+    return load_live_main()()
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
 from trading_strategy.strategies import build_exit_policy
-from trading_strategy.core.legacy_unified import analyze_market_regime, is_dead_cat_bounce, is_price_position_blocked
+from trading_strategy.strategies.legacy_unified_helpers import analyze_market_regime, is_dead_cat_bounce, is_price_position_blocked
 from trading_strategy.market_context import MarketContextDetector, MarketRegime, entry_decision
 from trading_strategy.backtest.types import BacktestConfig
 from trading_strategy.positions import build_position_snapshot, build_position_status_counts

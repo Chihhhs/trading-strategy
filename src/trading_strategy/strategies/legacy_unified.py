@@ -1,4 +1,4 @@
-from trading_strategy.core.legacy_unified import generate_legacy_signal, get_btc_direction_from_klines
+from .legacy_unified_helpers import generate_legacy_signal, get_btc_direction_from_klines
 from trading_strategy.positions.trend import compute_atr_trailing_result, resolve_trend_stop_target
 
 from .base import BaseStrategy, StrategyContext, StrategySignal, signal_value

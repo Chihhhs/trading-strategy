@@ -78,8 +78,7 @@ coverage; the live cap remains 2.
 - Removed `core` re-export modules after moving every internal caller to
   `shared/`, `strategies/`, or `positions/`.
 - Kept canonical runners, persisted schemas, and the public `legacy_unified`
-  negative-control strategy unchanged; its implementation remains in
-  `core/legacy_unified.py` until that strategy is retired.
+  negative-control strategy unchanged under `strategies/`.
 - Validated with the full test suite, syntax checks, a canonical trend
   backtest, and `git diff --check`.
 

@@ -75,7 +75,7 @@ Current reusable module layout:
 - Shared state, risk, and trade-history helpers live in `shared/`.
 - Strategy entry and exit policy logic lives in `strategies/`.
 - Position lifecycle helpers live in `positions/`.
-- `core/legacy_unified.py` contains the retained legacy strategy implementation only.
+- `strategies/legacy_unified_helpers.py` contains the retained legacy strategy implementation only.
 - Experiment orchestration belongs in `experiments/`; strategy-specific parameters belong beside strategy definitions.
 - `market_context.py` is a research-only, causal classifier used by the backtest trend wrapper; it must not alter live behavior without a separate review.
 

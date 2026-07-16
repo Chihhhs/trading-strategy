@@ -1,5 +1,6 @@
 from trading_strategy.strategies import get_strategy, get_trend_structure_context
 from trading_strategy.strategies.base import StrategyContext
+from trading_strategy.strategies.trend import calc_atr, calc_ema
 
 from .. import config
 from ..market import enrich_klines_with_derivatives_context, get_klines
@@ -39,33 +40,6 @@ def build_strategy_context(coin, klines, *, price=None, balance=0.0, open_positi
         price=price,
         diagnostics=diagnostics,
     )
-
-
-def calc_ema(closes, period):
-    if len(closes) < period:
-        return closes[-1] if closes else 0
-    ema = sum(closes[:period]) / period
-    weight = 2 / (period + 1)
-    for close in closes[period:]:
-        ema = close * weight + ema * (1 - weight)
-    return ema
-
-
-def calc_atr(highs, lows, closes, period=14):
-    trs = [
-        max(
-            highs[i] - lows[i],
-            abs(highs[i] - closes[i - 1]),
-            abs(lows[i] - closes[i - 1]),
-        )
-        for i in range(1, len(highs))
-    ]
-    if len(trs) < period:
-        return sum(trs) / len(trs) if trs else 0
-    atr = sum(trs[:period]) / period
-    for tr in trs[period:]:
-        atr = (atr * (period - 1) + tr) / period
-    return atr
 
 
 def generate_signal(klines, min_score=4):
