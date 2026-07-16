@@ -11,7 +11,7 @@
 - `src/trading_strategy/` remains a package folder because Python's `src` layout needs a package root.
 - The old top-level `strategy/` folder was renamed in role to `apps/` to avoid confusion with the package name.
 - `apps/` now contains only thin runners, bootstrap glue, and compatibility wrappers.
-- `backtest/` now contains only the canonical runner and one legacy wrapper.
+- `backtest/` contains only the canonical runner.
 
 ## Canonical Entry Points
 
@@ -85,7 +85,7 @@ Current reusable module layout:
 
 - Removed old research/versioned backtest scripts from `backtest/`.
 - Removed old helper and monitor scripts from the former `strategy/` area.
-- Reduced remaining legacy files to wrappers only.
+- Removed obsolete versioned backtest wrappers.
 - Restricted `sys.path.insert(...)` to runner and compatibility entrypoints.
 
 ## Validation
