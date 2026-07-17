@@ -139,16 +139,30 @@ def _post(payload):
         return json.load(response)
 
 
-def fetch_current_daily_fixture(path, *, volume_pool=30, min_bars=720, max_assets=12, now_ms=None, interval="1d"):
+def fetch_current_daily_fixture(
+    path,
+    *,
+    volume_pool=30,
+    min_bars=720,
+    max_assets=12,
+    now_ms=None,
+    interval="1d",
+    coins=None,
+):
     meta, contexts = _post({"type": "metaAndAssetCtxs"})
-    ranked = sorted(
-        (
-            (float(context.get("dayNtlVlm") or 0.0), asset["name"])
-            for asset, context in zip(meta["universe"], contexts)
-            if not asset.get("isDelisted", False)
-        ),
-        reverse=True,
-    )[:volume_pool]
+    available = {
+        asset["name"].upper(): (float(context.get("dayNtlVlm") or 0.0), asset["name"])
+        for asset, context in zip(meta["universe"], contexts)
+        if not asset.get("isDelisted", False)
+    }
+    if coins:
+        missing = [coin for coin in coins if coin.upper() not in available]
+        if missing:
+            raise ValueError(f"fixed Hyperliquid universe is unavailable: {', '.join(missing)}")
+        ranked = [available[coin.upper()] for coin in coins]
+        max_assets = len(ranked)
+    else:
+        ranked = sorted(available.values(), reverse=True)[:volume_pool]
     end_ms = int(now_ms or time.time() * 1000)
     start_ms = end_ms - 5 * 366 * 86_400_000
     data = {}
@@ -176,6 +190,9 @@ def fetch_current_daily_fixture(path, *, volume_pool=30, min_bars=720, max_asset
             volume_snapshot[coin] = volume
         if len(data) >= max_assets:
             break
+    if coins and len(data) != len(ranked):
+        missing = [coin for _volume, coin in ranked if coin not in data]
+        raise ValueError(f"fixed Hyperliquid universe lacks required history: {', '.join(missing)}")
     if len(data) < 5:
         raise ValueError("insufficient current Hyperliquid assets with required history")
     payload = {
@@ -184,7 +201,7 @@ def fetch_current_daily_fixture(path, *, volume_pool=30, min_bars=720, max_asset
         "venue": "hyperliquid",
         "interval": interval,
         "selection": {
-            "rule": "top current day notional volume with minimum history",
+            "rule": "fixed manifest universe" if coins else "top current day notional volume with minimum history",
             "volume_pool": volume_pool,
             "min_bars": min_bars,
             "max_assets": max_assets,
@@ -211,6 +228,28 @@ def load_funding_fixture(path):
         coin: json.loads((data_directory / f"{coin}.json").read_text(encoding="utf-8"))
         for coin in manifest["completed_coins"]
     }
+
+
+def fetch_current_perp_meta(path):
+    meta, contexts = _post({"type": "metaAndAssetCtxs"})
+    assets = {
+        asset["name"]: {
+            "sz_decimals": int(asset["szDecimals"]),
+            "is_delisted": bool(asset.get("isDelisted", False)),
+            "mark_price": float(context["markPx"]),
+        }
+        for asset, context in zip(meta["universe"], contexts)
+    }
+    payload = {
+        "schema_version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "venue": "hyperliquid",
+        "assets": assets,
+    }
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+    return payload
 
 
 def fetch_coinbase_daily_fixture(
@@ -296,12 +335,14 @@ def fetch_hyperliquid_funding_fixture(
     coins = sorted(candle_fixture["data"])
     for coin_index, coin in enumerate(coins):
         coin_path = data_dir / f"{coin}.json"
-        if coin in payload["completed_coins"]:
-            cached = json.loads(coin_path.read_text(encoding="utf-8"))
+        bars = candle_fixture["data"][coin]
+        cached = json.loads(coin_path.read_text(encoding="utf-8")) if coin_path.is_file() else []
+        if coin in payload["completed_coins"] and cached and int(cached[-1]["time"]) >= int(bars[-1]["time"]):
             print(f"funding {coin}: cached {len(cached)}", flush=True)
             continue
-        bars = candle_fixture["data"][coin]
-        rows = json.loads(coin_path.read_text(encoding="utf-8")) if coin_path.is_file() else []
+        if coin in payload["completed_coins"]:
+            payload["completed_coins"].remove(coin)
+        rows = cached
         cursor = int(rows[-1]["time"]) + 1 if rows else int(bars[0]["time"])
         end_time = int(bars[-1]["time"])
         page_count = 0

@@ -87,7 +87,7 @@ cap is the same two positions as live. Collector and observer have no position c
 ## Deferred Research
 
 - Clean-room cross-sectional strength: typed experiment support is implemented, but both the raw and breadth-gated versions are rejected. Keep them research-only; do not tune further on the inspected 1000-day fixture.
-- Independent search: the 4h 14-day cross-sectional momentum family passed development, anchor/cost robustness, and a one-time 120-day holdout using actual funding. The typed experiment and isolated no-order shadow runner are implemented. Collect forward target observations next; do not change live config or place candidate orders.
+- Independent search: the 4h 14-day cross-sectional momentum family also passed fixed-contract and exchange-rounded replay. A resumable, fail-closed, fixed-ten-asset paper ledger is implemented with no order API. Collect forward paper observations next; do not change live config or place exchange orders.
 - Trend: fixed 38-coin attribution supports one RSI-ceiling diagnostic. It improved the relative 120/180/240d windows but is not promotable because of a four-trade 120d sample and 240d coin concentration. Next action is one stricter OOS/absolute-performance validation only; no paper/live change.
 - Short-cycle alpha: `intraday_momentum` remains a negative control; VWAP is research-only. Follow the frozen OOS and random-baseline process in `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md`.
 - Funding, basis, OI, and L2 remain context or observe-only inputs. See `.agents/current_decisions.md` for their evidence and constraints.

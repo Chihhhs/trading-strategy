@@ -1,6 +1,10 @@
 import os
 import sys
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
@@ -8,7 +12,14 @@ SRC = os.path.join(ROOT, "src")
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
-from trading_strategy.backtest.independent_lab import Candidate, _aligned_funding, evaluate, search
+from trading_strategy.backtest.independent_lab import (
+    Candidate,
+    _aligned_funding,
+    evaluate,
+    fetch_current_daily_fixture,
+    fetch_hyperliquid_funding_fixture,
+    search,
+)
 
 
 def fixture():
@@ -22,6 +33,51 @@ def fixture():
 
 
 class IndependentLabTest(unittest.TestCase):
+    def test_fixed_fixture_fetch_preserves_manifest_universe(self):
+        coins = ("BTC", "ETH", "SOL", "SUI", "KBONK")
+        universe = [
+            {"name": "kBONK" if coin == "KBONK" else coin, "szDecimals": 2}
+            for coin in coins
+        ]
+        contexts = [{"dayNtlVlm": str(index + 1)} for index in range(len(coins))]
+        candle = [{"t": 1, "o": "1", "h": "1", "l": "1", "c": "1", "v": "1"}]
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "trading_strategy.backtest.independent_lab._post",
+            side_effect=[({"universe": universe}, contexts)] + [candle] * len(coins),
+        ):
+            payload = fetch_current_daily_fixture(
+                Path(directory) / "fixture.json",
+                coins=coins,
+                min_bars=1,
+            )
+        self.assertEqual(payload["selection"]["rule"], "fixed manifest universe")
+        self.assertEqual(tuple(payload["data"]), ("BTC", "ETH", "SOL", "SUI", "kBONK"))
+
+    def test_funding_fetch_resumes_completed_coin_when_candles_advance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            candles = root / "candles.json"
+            candles.write_text(json.dumps({"data": {"BTC": [{"time": 0}, {"time": 100}]}}), encoding="utf-8")
+            manifest = root / "funding.json"
+            data_dir = root / "funding"
+            data_dir.mkdir()
+            (data_dir / "BTC.json").write_text(
+                json.dumps([{"time": 50, "funding_rate": 0.0, "premium": 0.0}]),
+                encoding="utf-8",
+            )
+            manifest.write_text(
+                json.dumps({"completed_coins": ["BTC"], "data_directory": str(data_dir)}),
+                encoding="utf-8",
+            )
+            with patch(
+                "trading_strategy.backtest.independent_lab._post",
+                return_value=[{"time": 75, "fundingRate": "0.001", "premium": "0"}],
+            ) as post:
+                fetch_hyperliquid_funding_fixture(candles, manifest, page_pause_seconds=0)
+            rows = json.loads((data_dir / "BTC.json").read_text(encoding="utf-8"))
+        post.assert_called_once()
+        self.assertEqual(rows[-1]["time"], 75)
+
     def test_rotation_uses_prior_data_and_profits_from_persistent_strength(self):
         candidate = Candidate("rotation", "rotation", lookback=20, rebalance_days=7, top_n=1)
         result = evaluate(candidate, fixture(), start_index=40, end_index=160)

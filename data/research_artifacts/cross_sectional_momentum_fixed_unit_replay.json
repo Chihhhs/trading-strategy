@@ -1,0 +1,136 @@
+{
+  "development_starts": [
+    373,
+    1093,
+    1813,
+    2533,
+    3253
+  ],
+  "exchange_replay": {
+    "fees_paid": 12.035479280499999,
+    "funding_pnl": -1.5575916175099258,
+    "initial_capital": 1000.0,
+    "max_drawdown_pct": 7.43324010357284,
+    "max_positive_contribution_share": 0.3700054511898447,
+    "net_pnl_pct": 16.3215305101992,
+    "price_pnl": 176.80837600000018,
+    "sharpe": 2.3375064130636125,
+    "skipped_small_orders": 415,
+    "stress_drag": 0.0,
+    "submitted_orders": 651,
+    "turnover": 18.516121970000004
+  },
+  "experiment_fingerprint": "3d41849ac859c3fc8b3dff507a536eb5ef60bd01641d4e776acc3da38ca6d198",
+  "fold_passed": true,
+  "fold_summary": {
+    "median_net_pnl_pct": 5.74895720219557,
+    "median_sharpe": 0.8364065480597753,
+    "positive_scenarios": 4,
+    "required_positive_scenarios": 4,
+    "scenarios": 5,
+    "worst_drawdown_pct": 19.989184496687248,
+    "worst_positive_contribution_share": 0.5727598534801617
+  },
+  "folds": [
+    {
+      "fees_paid": 12.86217214243602,
+      "funding_pnl": -5.7372806053561005,
+      "max_drawdown_pct": 8.541878397774468,
+      "max_positive_contribution_share": 0.42183796105582305,
+      "net_pnl_pct": 8.077399837519895,
+      "price_pnl": 99.3734511229897,
+      "sharpe": 1.0665581955085213,
+      "skipped_small_orders": 0,
+      "stress_drag": 0.0,
+      "submitted_orders": 0,
+      "turnover": 19.78795714220926
+    },
+    {
+      "fees_paid": 13.649878218237566,
+      "funding_pnl": -9.123285213024916,
+      "max_drawdown_pct": 19.989184496687248,
+      "max_positive_contribution_share": 0.5476062328400518,
+      "net_pnl_pct": 5.117720767700407,
+      "price_pnl": 73.95037110826794,
+      "sharpe": 0.6203237419311284,
+      "skipped_small_orders": 0,
+      "stress_drag": 0.0,
+      "submitted_orders": 0,
+      "turnover": 20.999812643442407
+    },
+    {
+      "fees_paid": 12.95987929681989,
+      "funding_pnl": 1.4433221876576512,
+      "max_drawdown_pct": 13.294715291336473,
+      "max_positive_contribution_share": 0.5727598534801617,
+      "net_pnl_pct": 5.74895720219557,
+      "price_pnl": 69.00612913111772,
+      "sharpe": 0.8364065480597753,
+      "skipped_small_orders": 0,
+      "stress_drag": 0.0,
+      "submitted_orders": 0,
+      "turnover": 19.93827584126135
+    },
+    {
+      "fees_paid": 12.898748453007562,
+      "funding_pnl": -5.406132993168035,
+      "max_drawdown_pct": 6.825664076484217,
+      "max_positive_contribution_share": 0.2867903759424145,
+      "net_pnl_pct": 17.470485685690807,
+      "price_pnl": 193.009738303087,
+      "sharpe": 2.4936394284066186,
+      "skipped_small_orders": 0,
+      "stress_drag": 0.0,
+      "submitted_orders": 0,
+      "turnover": 19.84422838924239
+    },
+    {
+      "fees_paid": 11.905138132551086,
+      "funding_pnl": -4.623179340993006,
+      "max_drawdown_pct": 16.13010649506333,
+      "max_positive_contribution_share": 0.5357324980627692,
+      "net_pnl_pct": -8.500410244234136,
+      "price_pnl": -68.47578496879686,
+      "sharpe": -1.1649689044208693,
+      "skipped_small_orders": 0,
+      "stress_drag": 0.0,
+      "submitted_orders": 0,
+      "turnover": 18.31559712700166
+    }
+  ],
+  "holdout": {
+    "fees_paid": 12.739794377822056,
+    "funding_pnl": -1.5057965730256622,
+    "max_drawdown_pct": 7.4703854001168635,
+    "max_positive_contribution_share": 0.3781635212883732,
+    "net_pnl_pct": 16.097001123903844,
+    "price_pnl": 175.2156021898876,
+    "sharpe": 2.306733996649139,
+    "skipped_small_orders": 0,
+    "stress_drag": 0.0,
+    "submitted_orders": 0,
+    "turnover": 19.59968365818777
+  },
+  "holdout_passed": true,
+  "model": "fixed_units_daily_rebalance",
+  "normal_robustness": {
+    "median_net_pnl_pct": 7.402909545272762,
+    "median_sharpe": 0.9495672861488182,
+    "positive_scenarios": 24,
+    "required_positive_scenarios": 23,
+    "scenarios": 30,
+    "worst_drawdown_pct": 19.989184496687248,
+    "worst_positive_contribution_share": 0.5938136458145632
+  },
+  "passed": true,
+  "robustness_passed": true,
+  "stressed_robustness": {
+    "median_net_pnl_pct": 5.488584379474448,
+    "median_sharpe": 0.767188402377547,
+    "positive_scenarios": 24,
+    "required_positive_scenarios": 23,
+    "scenarios": 30,
+    "worst_drawdown_pct": 20.594113700504412,
+    "worst_positive_contribution_share": 0.5928023795754003
+  }
+}

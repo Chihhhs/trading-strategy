@@ -25,7 +25,7 @@ python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 2
 ## App Imports
 
 - `apps/runners/live_runner.py` does not implement trading logic itself; it bootstraps `trading_strategy.live.main`.
-- `apps/runners/momentum_shadow_runner.py` emits isolated cross-sectional target weights and cannot place orders.
+- `apps/runners/momentum_shadow_runner.py` emits isolated cross-sectional targets and advances a resumable fixed-unit paper ledger; it has no exchange-order path and always records `execution_authorized=false`.
 - `apps/runners/paper_collector.py` caches every active Hyperliquid market without decisions or positions; `apps/runners/paper_runner.py` observes Decisions and Market Context; `apps/runners/paper_execution_runner.py` simulates the fixed live 38-coin contract. Each profile has a separate state and event-log directory.
 - `apps/live_config.py` remains an app-side override file and mutates `trading_strategy.live.config`.
   Its `LIVE_UNIVERSE` is the fixed 38-coin runtime entry contract (frozen

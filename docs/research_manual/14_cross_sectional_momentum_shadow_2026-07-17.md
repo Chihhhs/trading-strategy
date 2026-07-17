@@ -54,20 +54,38 @@ The final 120-day holdout was unlocked once, only after the development and robu
 
 The typed experiment adapter uses the fixed 00:00 UTC operational anchor. On the already-open holdout that anchor returned +15.42% net with 7.57% maximum drawdown; the six anchor results ranged from +13.61% to +19.78% net.
 
+## Execution-model audit
+
+The initial evaluator keeps portfolio weights constant between daily rebalances. A second replay holds fixed contract quantities, marks every 4h bar, applies funding to current notional, and pays turnover costs when quantities change. It independently passed the same gates:
+
+| Gate | Fixed-unit replay |
+|---|---:|
+| Positive development folds | 4/5 |
+| Median fold net / Sharpe | +5.75% / 0.84 |
+| Normal anchor scenarios | 24/30 |
+| Stressed anchor scenarios | 24/30 |
+| Stressed median net / Sharpe | +5.49% / 0.77 |
+| Stressed worst drawdown | 20.59% |
+| Stressed worst concentration | 59.28% |
+| Holdout net / Sharpe | +16.10% / 2.31 |
+| Holdout maximum drawdown | 7.47% |
+
+An exchange-constrained replay then rounded every target to current Hyperliquid [`szDecimals`](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/tick-and-lot-size) and skipped adjustments below the documented [10 USDC order minimum](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/error-responses). At 1,000 USDC initial paper equity it returned +16.32%, Sharpe 2.34, and 7.43% maximum drawdown. It simulated 651 executable adjustments and skipped 415 sub-minimum differences. The current seven-leg opening plan is feasible at 1,000 USDC; the current full plan first becomes feasible around 450 USDC.
+
 ## Shadow boundary
 
 The shadow runner emits desired portfolio weights and append-only observations. It never imports order handling and every snapshot contains `execution_authorized: false`.
 
 ```bash
 python apps/runners/momentum_shadow_runner.py
-python apps/runners/momentum_shadow_runner.py --fetch
+python apps/runners/momentum_shadow_runner.py --fetch --fetch-meta --fetch-funding --paper-state data/paper_strategies_momentum_shadow/state.json
 ```
 
-The first command evaluates the saved fixture. `--fetch` refreshes the current active-universe 4h fixture before producing a new observation. Re-running the same source bar is idempotent for the append-only log.
+The first command evaluates the saved fixture. The second command refreshes the fixed ten-asset manifest universe, metadata, and funding before advancing an isolated fixed-unit paper ledger. Missing assets, missing history, stale funding, changed experiment fingerprints, and timestamps outside the retained fixture fail closed. Re-running the same source bar processes zero bars and leaves the portfolio unchanged.
 
 ## Remaining risks
 
-- The universe is selected from assets active and liquid today, so delisted-asset survivorship bias remains.
+- The historical universe was selected from assets active and liquid today, so delisted-asset survivorship bias remains. Forward collection now freezes those ten manifest assets and fails rather than silently substituting a new coin.
 - Hyperliquid's public candle endpoint limits the test to 5,000 4h bars, roughly 833 days.
 - The untouched holdout is only 120 days and includes one market path.
 - The portfolio needs simultaneous long and short legs; execution slippage, partial fills, margin usage, and portfolio-level protection are not yet proven by paper fills.
@@ -78,4 +96,5 @@ The first command evaluates the saved fixture. `--fetch` refreshes the current a
 ```bash
 python backtest/run_independent_lab.py --fixture data/clean_room/hyperliquid_4h_current.json --output data/research_artifacts/independent_strategy_search_4h_actual_funding.json --funding-input data/clean_room/hyperliquid_4h_funding.json
 python backtest/run_independent_lab.py --fixture data/clean_room/hyperliquid_4h_current.json --output data/research_artifacts/independent_strategy_search_4h_actual_funding_holdout.json --funding-input data/clean_room/hyperliquid_4h_funding.json --unlock-holdout
+python backtest/run_independent_lab.py --fixture data/clean_room/hyperliquid_4h_current.json --output data/research_artifacts/independent_strategy_search_4h_actual_funding.json --funding-input data/clean_room/hyperliquid_4h_funding.json --meta-input data/clean_room/hyperliquid_meta_current.json --execution-replay-output data/research_artifacts/cross_sectional_momentum_fixed_unit_replay.json
 ```

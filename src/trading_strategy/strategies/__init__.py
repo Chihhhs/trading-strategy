@@ -9,7 +9,7 @@ from .definitions import (
     StrategyDefinition,
     TrendParameters,
 )
-from .cross_sectional_momentum import CrossSectionalMomentumStrategy, overlapping_momentum_weights
+from .cross_sectional_momentum import CrossSectionalMomentumStrategy, build_execution_plan, overlapping_momentum_weights
 from .cross_sectional_strength import CrossSectionalStrengthStrategy
 from .intraday_momentum import IntradayMomentumStrategy
 from .legacy_unified import LegacyUnifiedStrategy
@@ -116,6 +116,7 @@ __all__ = [
     "TrendStrategy",
     "available_strategy_names",
     "build_exit_policy",
+    "build_execution_plan",
     "evaluate_trend_entry_eligibility",
     "generate_raw_trend_candidate",
     "generate_trend_signal",
