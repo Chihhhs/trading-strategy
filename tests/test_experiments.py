@@ -15,12 +15,14 @@ if SRC not in sys.path:
 
 
 class ExperimentSpecTest(unittest.TestCase):
-    def test_live_trend_baseline_matches_50_coin_runtime_contract(self):
+    def test_live_trend_baseline_38_matches_runtime_contract(self):
+        from apps.live_config import LIVE_UNIVERSE
         from trading_strategy.experiments import load_experiment
 
-        spec = load_experiment(Path(ROOT) / "experiments" / "live_trend_baseline.json")
+        spec = load_experiment(Path(ROOT) / "experiments" / "live_trend_baseline_38.json")
         self.assertEqual(spec.strategy.name, "trend")
-        self.assertEqual(len(spec.coins), 50)
+        self.assertEqual(spec.coins, tuple(LIVE_UNIVERSE))
+        self.assertEqual(len(spec.coins), 38)
         self.assertEqual(spec.evaluation.universes, (spec.coins,))
         self.assertEqual(spec.portfolio.leverage, 5.0)
         self.assertEqual(spec.portfolio.risk_pct, 0.08)
@@ -29,6 +31,14 @@ class ExperimentSpecTest(unittest.TestCase):
         self.assertTrue(spec.strategy.parameters.derivatives_crowding_exit_enabled)
         self.assertEqual(spec.strategy.parameters.derivatives_crowding_action, "reduce")
         self.assertEqual(spec.strategy.parameters.derivatives_crowding_reduce_fraction, 0.75)
+
+    def test_live_trend_rsi_candidate_requires_sufficient_samples(self):
+        from trading_strategy.experiments import load_experiment
+
+        spec = load_experiment(Path(ROOT) / "experiments" / "live_trend_entry_rsi_ceiling_50_38.json")
+        self.assertEqual(spec.evaluation.min_trades, 10)
+        self.assertEqual(spec.evaluation.min_eligible_comparisons, 3)
+        self.assertTrue(spec.evaluation.require_complete_data)
 
     def _payload(self):
         return {

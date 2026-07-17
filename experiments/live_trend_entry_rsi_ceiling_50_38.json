@@ -26,6 +26,6 @@
   "portfolio": {"initial_capital": 1000.0, "leverage": 5.0, "risk_pct": 0.08, "max_positions": 2},
   "costs": {"fee_bps": 4.5, "slippage_bps": 2.0},
   "execution": {"exit_replay_path": "data/historical_prices/binance_1h_240d_live_38coins.json", "replay_metadata_path": "data/historical_prices/binance_1h_240d_live_38coins.metadata.json", "exit_replay_mode": "strict", "drawdown_source": "mark_to_market"},
-  "evaluation": {"baseline": "experiments/live_trend_baseline_38.json", "windows": [120, 180, 240], "universes": [["BTC", "ETH", "BNB", "NEO", "LTC", "ADA", "XRP", "IOTA", "XLM", "TRX", "ETC", "LINK", "FET", "ZEC", "DASH", "ATOM", "ALGO", "DOGE", "HBAR", "STX", "SOL", "HYPE", "XMR", "CC", "BCH", "SUI", "AVAX", "NEAR", "UNI", "TAO", "PAXG", "WLFI", "ASTER", "ONDO", "AAVE", "SKY", "DOT", "WLD"]], "min_trades": 1, "min_eligible_comparisons": 1, "require_majority": true, "require_complete_data": true},
+  "evaluation": {"baseline": "experiments/live_trend_baseline_38.json", "windows": [120, 180, 240], "universes": [["BTC", "ETH", "BNB", "NEO", "LTC", "ADA", "XRP", "IOTA", "XLM", "TRX", "ETC", "LINK", "FET", "ZEC", "DASH", "ATOM", "ALGO", "DOGE", "HBAR", "STX", "SOL", "HYPE", "XMR", "CC", "BCH", "SUI", "AVAX", "NEAR", "UNI", "TAO", "PAXG", "WLFI", "ASTER", "ONDO", "AAVE", "SKY", "DOT", "WLD"]], "min_trades": 10, "min_eligible_comparisons": 3, "require_majority": true, "require_complete_data": true},
   "target_environment": "research"
 }
