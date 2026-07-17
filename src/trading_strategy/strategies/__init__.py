@@ -9,7 +9,12 @@ from .definitions import (
     StrategyDefinition,
     TrendParameters,
 )
-from .cross_sectional_momentum import CrossSectionalMomentumStrategy, build_execution_plan, overlapping_momentum_weights
+from .cross_sectional_momentum import (
+    CrossSectionalMomentumStrategy,
+    build_execution_plan,
+    overlapping_momentum_weights,
+    reconcile_execution_plan,
+)
 from .cross_sectional_strength import CrossSectionalStrengthStrategy
 from .intraday_momentum import IntradayMomentumStrategy
 from .legacy_unified import LegacyUnifiedStrategy
@@ -126,5 +131,6 @@ __all__ = [
     "get_trend_structure_context",
     "is_signal_blocked_by_btc_filter",
     "overlapping_momentum_weights",
+    "reconcile_execution_plan",
     "resolve_strategy",
 ]
