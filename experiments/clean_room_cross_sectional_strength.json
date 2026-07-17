@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "name": "clean-room-cross-sectional-strength-v1",
+  "dataset": {
+    "id": "binance-spot-1d-1000d-48-risk-assets",
+    "path": "data/historical_prices/1000d_50coins.json"
+  },
+  "coins": ["ADA", "ALGO", "ANKR", "ARPA", "ATOM", "BAND", "BAT", "BNB", "BTC", "CELR", "CHZ", "CVC", "DASH", "DOGE", "DUSK", "ENJ", "ETC", "ETH", "FET", "HBAR", "HOT", "ICX", "IOST", "IOTA", "IOTX", "KAVA", "LINK", "LTC", "MTL", "NEO", "ONE", "ONG", "ONT", "QTUM", "RLC", "RVN", "STX", "TFUEL", "THETA", "TRX", "VET", "WIN", "XLM", "XRP", "XTZ", "ZEC", "ZIL", "ZRX"],
+  "strategy": {
+    "name": "cross_sectional_strength",
+    "required_capabilities": ["cash_filter", "cross_sectional", "long_only"],
+    "parameters": {
+      "timeframe": "1d",
+      "lookback_days": 90,
+      "rebalance_days": 7,
+      "top_n": 5,
+      "min_momentum_pct": 0.0,
+      "min_positive_fraction": 0.0
+    }
+  },
+  "portfolio": {
+    "initial_capital": 1000.0,
+    "leverage": 1.0,
+    "risk_pct": 0.02,
+    "max_positions": 5
+  },
+  "costs": {
+    "fee_bps": 4.5,
+    "slippage_bps": 2.0
+  },
+  "evaluation": {
+    "baseline": null,
+    "windows": [300, 600, 1000],
+    "min_trades": 30,
+    "min_eligible_comparisons": 3,
+    "require_majority": true,
+    "require_complete_data": true
+  },
+  "target_environment": "research"
+}

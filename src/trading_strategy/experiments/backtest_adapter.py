@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 
 from trading_strategy.backtest import PortfolioBacktester, load_derivatives_data, load_historical_data
+from trading_strategy.backtest.cross_sectional import CrossSectionalStrengthBacktester
+from trading_strategy.backtest.independent_lab import load_fixture, load_funding_fixture
+from trading_strategy.backtest.overlapping_momentum import OverlappingMomentumBacktester
 from trading_strategy.backtest.exit_replay import normalize_hourly_data
 from trading_strategy.backtest.fixture_metadata import require_complete_fixture
 from trading_strategy.backtest.types import BacktestConfig
@@ -44,7 +47,12 @@ class BacktestExperimentAdapter:
         )
 
     def run(self, spec):
+        definition = get_strategy_definition(spec.strategy.name)
+        if "overlapping_portfolio" in definition.capabilities:
+            return self._run_overlapping_momentum(spec)
         data_map = load_historical_data(spec.dataset.path)
+        if "cross_sectional" in definition.capabilities:
+            return self._run_cross_sectional(spec, data_map)
         derivatives = load_derivatives_data(spec.dataset.derivatives_path)
         exit_replay_data = self._load_exit_replay_data(
             spec.execution.exit_replay_path,
@@ -99,6 +107,87 @@ class BacktestExperimentAdapter:
                         exit_reason_counts=dict(result.portfolio.get("exit_reason_counts") or {}),
                         direction_summary=dict(result.portfolio.get("direction_summary") or {}),
                         missing_data_coins=tuple(result.portfolio.get("missing_data_coins") or ()),
+                        dataset_fingerprint=dataset_fingerprint,
+                        data_source=spec.dataset.id,
+                        version=2,
+                    )
+                )
+        return rows
+
+    def _run_overlapping_momentum(self, spec):
+        fixture = load_fixture(spec.dataset.path)
+        data_map = {coin.upper(): bars for coin, bars in fixture["data"].items()}
+        funding_data = (
+            {coin.upper(): rows for coin, rows in load_funding_fixture(spec.dataset.derivatives_path).items()}
+            if spec.dataset.derivatives_path
+            else None
+        )
+        dataset_fingerprint = self._file_fingerprint(spec.dataset.path)
+        rows = []
+        universes = spec.evaluation.universes or (spec.coins,)
+        for window in spec.evaluation.windows:
+            for universe in universes:
+                coins = tuple(coin for coin in universe if coin in spec.coins and coin in data_map)
+                metrics = OverlappingMomentumBacktester(
+                    fee_bps=spec.costs.fee_bps,
+                    slippage_bps=spec.costs.slippage_bps,
+                    parameters=spec.strategy.parameters,
+                    funding_data={coin: funding_data.get(coin, []) for coin in coins} if funding_data else None,
+                ).run({coin: data_map[coin] for coin in coins}, max_bars=window)
+                rows.append(
+                    ExperimentResult(
+                        experiment_name=spec.name,
+                        manifest_fingerprint=spec.fingerprint,
+                        dataset_id=spec.dataset.id,
+                        strategy_name=spec.strategy.name,
+                        window=window,
+                        universe=coins,
+                        trades=metrics.changed_legs,
+                        net_pnl_pct=metrics.net_pnl_pct,
+                        max_drawdown_pct=metrics.max_drawdown_pct,
+                        turnover=metrics.turnover,
+                        coin_contributions=metrics.coin_contributions,
+                        gross_pnl_pct=metrics.gross_pnl_pct,
+                        total_cost_pct=metrics.gross_pnl_pct - metrics.net_pnl_pct,
+                        fee_bps=spec.costs.fee_bps,
+                        slippage_bps=spec.costs.slippage_bps,
+                        dataset_fingerprint=dataset_fingerprint,
+                        data_source=spec.dataset.id,
+                        version=2,
+                    )
+                )
+        return rows
+
+    def _run_cross_sectional(self, spec, data_map):
+        rows = []
+        universes = spec.evaluation.universes or (spec.coins,)
+        dataset_fingerprint = self._file_fingerprint(spec.dataset.path)
+        for window in spec.evaluation.windows:
+            for universe in universes:
+                coins = tuple(coin for coin in universe if coin in spec.coins)
+                result = CrossSectionalStrengthBacktester(
+                    initial_capital=spec.portfolio.initial_capital,
+                    fee_bps=spec.costs.fee_bps,
+                    slippage_bps=spec.costs.slippage_bps,
+                    parameters=spec.strategy.parameters,
+                ).run(data_map, coins=coins, max_days=window)
+                rows.append(
+                    ExperimentResult(
+                        experiment_name=spec.name,
+                        manifest_fingerprint=spec.fingerprint,
+                        dataset_id=spec.dataset.id,
+                        strategy_name=spec.strategy.name,
+                        window=window,
+                        universe=coins,
+                        trades=result.trades,
+                        net_pnl_pct=result.net_pnl_pct,
+                        max_drawdown_pct=result.max_drawdown_pct,
+                        turnover=result.turnover,
+                        coin_contributions=result.coin_contributions,
+                        gross_pnl_pct=result.gross_pnl_pct,
+                        total_cost_pct=result.gross_pnl_pct - result.net_pnl_pct,
+                        fee_bps=spec.costs.fee_bps,
+                        slippage_bps=spec.costs.slippage_bps,
                         dataset_fingerprint=dataset_fingerprint,
                         data_source=spec.dataset.id,
                         version=2,

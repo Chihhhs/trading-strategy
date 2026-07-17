@@ -18,12 +18,14 @@
 ```bash
 python apps/runners/live_runner.py --live
 python apps/runners/paper_runner.py
+python apps/runners/momentum_shadow_runner.py
 python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 240
 ```
 
 ## App Imports
 
 - `apps/runners/live_runner.py` does not implement trading logic itself; it bootstraps `trading_strategy.live.main`.
+- `apps/runners/momentum_shadow_runner.py` emits isolated cross-sectional target weights and cannot place orders.
 - `apps/runners/paper_collector.py` caches every active Hyperliquid market without decisions or positions; `apps/runners/paper_runner.py` observes Decisions and Market Context; `apps/runners/paper_execution_runner.py` simulates the fixed live 38-coin contract. Each profile has a separate state and event-log directory.
 - `apps/live_config.py` remains an app-side override file and mutates `trading_strategy.live.config`.
   Its `LIVE_UNIVERSE` is the fixed 38-coin runtime entry contract (frozen
@@ -49,6 +51,9 @@ Current reusable module layout:
   - trend stop, trailing, and failure helpers
 - `src/trading_strategy/backtest/`
   - reusable backtest package
+  - `cross_sectional.py` evaluates portfolio-ranked strategies that cannot be represented by the per-coin engine
+  - `independent_lab.py` is an isolated research harness with direct public-data fixtures, locked holdouts, and no paper/live adapter
+  - `overlapping_momentum.py` exposes the approved shadow candidate through the typed experiment adapter
 - `src/trading_strategy/experiments/`
   - typed experiment specs, JSON manifest validation, result and promotion contracts
   - adapters translate one validated spec into backtest or approval-gated paper execution
@@ -77,6 +82,7 @@ Current reusable module layout:
 - Position lifecycle helpers live in `positions/`.
 - `strategies/legacy_unified_helpers.py` contains the retained legacy strategy implementation only.
 - Experiment orchestration belongs in `experiments/`; strategy-specific parameters belong beside strategy definitions.
+- Strategies with the `cross_sectional` capability are routed by the backtest adapter to a portfolio evaluator; they are not silently approximated as independent per-coin signals.
 - `market_context.py` is a research-only, causal classifier used by the backtest trend wrapper; it must not alter live behavior without a separate review.
 
 ## Cleanup Performed

@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "name": "cross-sectional-momentum-4h-v1",
+  "dataset": {
+    "id": "hyperliquid-current-active-4h-with-funding",
+    "path": "data/clean_room/hyperliquid_4h_current.json",
+    "derivatives_path": "data/clean_room/hyperliquid_4h_funding.json"
+  },
+  "coins": ["AAVE", "BTC", "ETH", "NEAR", "ONDO", "SOL", "SUI", "UNI", "XRP", "KBONK"],
+  "strategy": {
+    "name": "cross_sectional_momentum",
+    "required_capabilities": ["cross_sectional", "funding_aware", "market_neutral", "overlapping_portfolio"],
+    "parameters": {
+      "timeframe": "4h",
+      "lookback_bars": 84,
+      "rebalance_bars": 6,
+      "top_n": 3,
+      "overlap_cohorts": 7,
+      "cohort_spacing_bars": 6
+    }
+  },
+  "portfolio": {
+    "initial_capital": 1000.0,
+    "leverage": 1.0,
+    "risk_pct": 0.02,
+    "max_positions": 10
+  },
+  "costs": {
+    "fee_bps": 4.5,
+    "slippage_bps": 2.0
+  },
+  "evaluation": {
+    "baseline": null,
+    "windows": [720],
+    "universes": [["AAVE", "BTC", "ETH", "NEAR", "ONDO", "SOL", "SUI", "UNI", "XRP", "KBONK"]],
+    "min_trades": 100,
+    "min_eligible_comparisons": 1,
+    "require_majority": true,
+    "require_complete_data": true
+  },
+  "target_environment": "research"
+}

@@ -1,0 +1,1412 @@
+{
+  "bars": 1172,
+  "candidates": [
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "time_series",
+        "long_lookback": 90,
+        "lookback": 90,
+        "min_breadth": 0.0,
+        "name": "tsm-90",
+        "rebalance_days": 7,
+        "top_n": 99,
+        "volatility_lookback": 28,
+        "weighting": "equal"
+      },
+      "folds": [
+        {
+          "changed_legs": 111,
+          "coin_contributions": {
+            "AAVE": -3.5337402272426583,
+            "BNB": 0.6283834049226495,
+            "BTC": -0.6228281647433535,
+            "ETH": 1.8918063602033417,
+            "LINK": -3.453220585606346,
+            "NEAR": -2.527767307829465,
+            "SOL": -0.4064779458414671,
+            "SUI": -4.105622145487066,
+            "UNI": -4.828600566314284,
+            "XMR": -0.4126453573882434,
+            "XRP": -1.1252733630674139,
+            "ZEC": 12.097372883486175
+          },
+          "gross_pnl_pct": -11.344169548074312,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 29.729351099013517,
+          "max_positive_contribution_share": 0.8275916563035722,
+          "net_pnl_pct": -12.057951658255138,
+          "sharpe": -0.3732971156954757,
+          "turnover": 12.43203463203463
+        },
+        {
+          "changed_legs": 104,
+          "coin_contributions": {
+            "AAVE": 15.973345673020255,
+            "BNB": 0.5536408688825935,
+            "BTC": 2.4729696071925575,
+            "ETH": 0.13946804738911442,
+            "LINK": 2.57460845804364,
+            "NEAR": 1.979963362215892,
+            "SOL": 2.2792706195322228,
+            "SUI": 22.23782864961268,
+            "UNI": 4.55748957554878,
+            "XMR": -0.3285333051027831,
+            "XRP": 6.456715595535607,
+            "ZEC": 5.406947485914046
+          },
+          "gross_pnl_pct": 79.49342075243331,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 17.16329118101068,
+          "max_positive_contribution_share": 0.3440670773088884,
+          "net_pnl_pct": 78.52158077519604,
+          "sharpe": 3.278147532091034,
+          "turnover": 8.3504329004329
+        },
+        {
+          "changed_legs": 83,
+          "coin_contributions": {
+            "AAVE": 0.790753501043441,
+            "BNB": -1.8185415942850671,
+            "BTC": 0.1538233366780698,
+            "ETH": -1.5538867120983466,
+            "LINK": 1.937179654923667,
+            "NEAR": -4.911642455166134,
+            "SOL": -1.3785947888852577,
+            "SUI": -1.0954507237069793,
+            "UNI": -0.6806877070870652,
+            "XMR": 0.9803031055298348,
+            "XRP": 5.628823816503267,
+            "ZEC": -1.8229298414508954
+          },
+          "gross_pnl_pct": -10.735548147039854,
+          "invested_fraction": 0.8833333333333333,
+          "max_drawdown_pct": 37.24292077414156,
+          "max_positive_contribution_share": 0.5930769108171657,
+          "net_pnl_pct": -11.17144769877484,
+          "sharpe": -0.1896687658781835,
+          "turnover": 7.5285714285714285
+        },
+        {
+          "changed_legs": 93,
+          "coin_contributions": {
+            "AAVE": 3.191606579360123,
+            "BNB": 0.47726201099545407,
+            "BTC": 2.1797942685824268,
+            "ETH": 4.117936045090098,
+            "LINK": 1.887511939924656,
+            "NEAR": 2.166264664464363,
+            "SOL": -0.8875011382126995,
+            "SUI": -0.3940865170663244,
+            "UNI": 3.432816438699736,
+            "XMR": 41.239561995904666,
+            "XRP": -8.30519534056709,
+            "ZEC": 16.336498191432486
+          },
+          "gross_pnl_pct": 83.38262697655428,
+          "invested_fraction": 0.9416666666666667,
+          "max_drawdown_pct": 20.87224703367301,
+          "max_positive_contribution_share": 0.549646448854408,
+          "net_pnl_pct": 82.18123273488469,
+          "sharpe": 3.6936963280614683,
+          "turnover": 10.109090909090908
+        },
+        {
+          "changed_legs": 88,
+          "coin_contributions": {
+            "AAVE": -0.6457907914072096,
+            "BNB": -0.21382561970886493,
+            "BTC": -0.15649424729708183,
+            "ETH": -0.09815367967374611,
+            "LINK": -1.4761744882977732,
+            "NEAR": -0.7403262866735519,
+            "SOL": -2.4073149197927517,
+            "SUI": -1.3265718781861922,
+            "UNI": -3.346497039722661,
+            "XMR": 3.420695923376767,
+            "XRP": -2.3031234687465574,
+            "ZEC": 44.95604778604804
+          },
+          "gross_pnl_pct": 29.993035781681378,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 17.572858285909877,
+          "max_positive_contribution_share": 0.9292904883403645,
+          "net_pnl_pct": 29.403015395751297,
+          "sharpe": 1.4231551866065184,
+          "turnover": 6.996969696969697
+        },
+        {
+          "changed_legs": 9,
+          "coin_contributions": {
+            "BNB": -1.8264561370282912,
+            "XMR": -3.752466945830088,
+            "ZEC": -26.588641736457436
+          },
+          "gross_pnl_pct": -35.5601126986862,
+          "invested_fraction": 0.7,
+          "max_drawdown_pct": 55.3820887369719,
+          "max_positive_contribution_share": 0.0,
+          "net_pnl_pct": -35.7135583539085,
+          "sharpe": -1.1907086920352528,
+          "turnover": 3.666666666666667
+        }
+      ],
+      "median_sharpe": 1.4231551866065184,
+      "passed": false,
+      "positive_folds": 3,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 55.3820887369719,
+      "worst_positive_contribution_share": 0.9292904883403645
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "rotation",
+        "long_lookback": 90,
+        "lookback": 28,
+        "min_breadth": 0.5,
+        "name": "rotation-28",
+        "rebalance_days": 7,
+        "top_n": 3,
+        "volatility_lookback": 28,
+        "weighting": "equal"
+      },
+      "folds": [
+        {
+          "changed_legs": 20,
+          "coin_contributions": {
+            "BNB": 0.19296534738972126,
+            "ETH": -2.7745024652688133,
+            "LINK": -1.2482873483684636,
+            "NEAR": -3.1404439984752393,
+            "SOL": 0.9510399915024369,
+            "UNI": -0.3789236800209673,
+            "XMR": 4.617061684284682
+          },
+          "gross_pnl_pct": -3.5746161418267697,
+          "invested_fraction": 0.2916666666666667,
+          "max_drawdown_pct": 11.49050236703826,
+          "max_positive_contribution_share": 0.8014247474834417,
+          "net_pnl_pct": -3.991690723968888,
+          "sharpe": -0.19441846948444497,
+          "turnover": 6.666666666666667
+        },
+        {
+          "changed_legs": 41,
+          "coin_contributions": {
+            "AAVE": -13.03638613760489,
+            "NEAR": -9.41756576448213,
+            "SOL": 9.267806089593261,
+            "SUI": 7.908333973029153,
+            "UNI": 5.070818715987631,
+            "XMR": 1.0209241466728005,
+            "XRP": 17.987340365146327,
+            "ZEC": 1.2238357302705265
+          },
+          "gross_pnl_pct": 14.62595537063196,
+          "invested_fraction": 0.65,
+          "max_drawdown_pct": 23.811443873821666,
+          "max_positive_contribution_share": 0.42344017922763405,
+          "net_pnl_pct": 13.611870718602548,
+          "sharpe": 0.9255735315048689,
+          "turnover": 13.666666666666666
+        },
+        {
+          "changed_legs": 24,
+          "coin_contributions": {
+            "AAVE": 0.301913647470576,
+            "LINK": 1.1700538857611458,
+            "NEAR": 3.42061282669784,
+            "SOL": -0.6688577595062732,
+            "SUI": 15.8803666953937,
+            "UNI": -1.8256328107766555,
+            "XMR": 0.10672106808032156,
+            "XRP": 14.623238682636874
+          },
+          "gross_pnl_pct": 31.621991117473257,
+          "invested_fraction": 0.4083333333333333,
+          "max_drawdown_pct": 18.866787340299325,
+          "max_positive_contribution_share": 0.4472976475461952,
+          "net_pnl_pct": 30.93909951952154,
+          "sharpe": 1.7225639346300778,
+          "turnover": 8.0
+        },
+        {
+          "changed_legs": 23,
+          "coin_contributions": {
+            "AAVE": 7.407841880640141,
+            "BTC": 3.168502159954719,
+            "ETH": -0.24934780064539053,
+            "LINK": 7.149532592696813,
+            "SOL": 5.62028094419528,
+            "SUI": 1.4350695865476981,
+            "UNI": 13.253270156959505,
+            "XMR": 8.2033745116283,
+            "XRP": 7.889224672292687,
+            "ZEC": -3.244689956704449
+          },
+          "gross_pnl_pct": 61.37156085126847,
+          "invested_fraction": 0.475,
+          "max_drawdown_pct": 14.472342954376153,
+          "max_positive_contribution_share": 0.24485462943234004,
+          "net_pnl_pct": 60.56915542548238,
+          "sharpe": 3.727990710217896,
+          "turnover": 7.666666666666666
+        },
+        {
+          "changed_legs": 26,
+          "coin_contributions": {
+            "BNB": 9.9255290368383,
+            "ETH": 5.091521515422897,
+            "LINK": 9.066595152623568,
+            "NEAR": -3.1347603329729603,
+            "SOL": 4.070424731201086,
+            "SUI": -2.716322475573625,
+            "UNI": -0.22069327404453332,
+            "XMR": -1.7642658271241598,
+            "XRP": -3.2081892665731493,
+            "ZEC": 64.97417030277495
+          },
+          "gross_pnl_pct": 109.05804291741252,
+          "invested_fraction": 0.5833333333333334,
+          "max_drawdown_pct": 18.208985437909185,
+          "max_positive_contribution_share": 0.6976849319527879,
+          "net_pnl_pct": 107.88330875333729,
+          "sharpe": 3.4347803783831536,
+          "turnover": 8.666666666666668
+        },
+        {
+          "changed_legs": 17,
+          "coin_contributions": {
+            "AAVE": -7.626195616950955,
+            "BNB": -5.0595719637615995,
+            "ETH": -1.6363714865506658,
+            "LINK": 2.9439744605534335,
+            "NEAR": -3.995909699710944,
+            "SUI": -8.87743014755413,
+            "UNI": -1.288645061502421,
+            "XMR": -2.586426174246305,
+            "ZEC": -6.69481532748822
+          },
+          "gross_pnl_pct": -31.280710504490152,
+          "invested_fraction": 0.3,
+          "max_drawdown_pct": 37.94598250841359,
+          "max_positive_contribution_share": 1.0,
+          "net_pnl_pct": -31.533430100515815,
+          "sharpe": -2.698222944374153,
+          "turnover": 5.666666666666667
+        }
+      ],
+      "median_sharpe": 1.7225639346300778,
+      "passed": false,
+      "positive_folds": 4,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 37.94598250841359,
+      "worst_positive_contribution_share": 0.6976849319527879
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "rotation",
+        "long_lookback": 90,
+        "lookback": 14,
+        "min_breadth": 0.5,
+        "name": "rotation-14",
+        "rebalance_days": 7,
+        "top_n": 3,
+        "volatility_lookback": 28,
+        "weighting": "equal"
+      },
+      "folds": [
+        {
+          "changed_legs": 21,
+          "coin_contributions": {
+            "AAVE": -0.10472898928501884,
+            "BNB": -5.520007022162339,
+            "ETH": 0.31967001518195337,
+            "LINK": 5.145827212169566,
+            "NEAR": -4.612884638384317,
+            "SOL": 5.805788092809612,
+            "UNI": 5.773572618753941,
+            "XMR": 1.6700799049057855,
+            "XRP": 1.9707785327018263,
+            "ZEC": 2.07195375741539
+          },
+          "gross_pnl_pct": 11.012853856659287,
+          "invested_fraction": 0.3,
+          "max_drawdown_pct": 11.380351125903069,
+          "max_positive_contribution_share": 0.25511346542243585,
+          "net_pnl_pct": 10.508718877765922,
+          "sharpe": 1.0272722598682373,
+          "turnover": 7.0
+        },
+        {
+          "changed_legs": 43,
+          "coin_contributions": {
+            "AAVE": -3.8805416147778047,
+            "BTC": 1.4458964860158554,
+            "LINK": -4.817925314162166,
+            "NEAR": 2.6268130826921046,
+            "SOL": -5.538433644332399,
+            "SUI": 21.62241178636351,
+            "UNI": -0.4106699625595027,
+            "XMR": -0.7742922795555329,
+            "XRP": 16.14086942358616,
+            "ZEC": -5.262561292416995
+          },
+          "gross_pnl_pct": 17.49373246255692,
+          "invested_fraction": 0.5916666666666667,
+          "max_drawdown_pct": 27.91175947871647,
+          "max_positive_contribution_share": 0.5168375693732595,
+          "net_pnl_pct": 16.403747696221416,
+          "sharpe": 1.107561469854694,
+          "turnover": 14.333333333333334
+        },
+        {
+          "changed_legs": 32,
+          "coin_contributions": {
+            "AAVE": -3.237528231761639,
+            "LINK": -11.205269786088353,
+            "NEAR": 4.4256321922817285,
+            "SOL": -12.675417495275921,
+            "SUI": -7.778993101064798,
+            "UNI": 3.504872785019147,
+            "XMR": -1.4801867141888359,
+            "XRP": 16.38664550650462,
+            "ZEC": 8.508900844109416
+          },
+          "gross_pnl_pct": -9.692577365928557,
+          "invested_fraction": 0.4083333333333333,
+          "max_drawdown_pct": 45.93748274888787,
+          "max_positive_contribution_share": 0.4991963651921058,
+          "net_pnl_pct": -10.316745424784756,
+          "sharpe": -0.19946375607203728,
+          "turnover": 10.666666666666666
+        },
+        {
+          "changed_legs": 43,
+          "coin_contributions": {
+            "AAVE": 15.988440159721938,
+            "BNB": -1.1185757323648053,
+            "BTC": 0.2962662693828055,
+            "ETH": 8.70337469303919,
+            "LINK": 2.790255753706183,
+            "NEAR": -4.803016686017754,
+            "SOL": 2.486812354165783,
+            "SUI": 33.91481209688991,
+            "UNI": 5.898042124571433,
+            "XMR": -1.0901331077447487,
+            "XRP": 3.5625478279178804,
+            "ZEC": -6.153920674173081
+          },
+          "gross_pnl_pct": 73.51431861841621,
+          "invested_fraction": 0.65,
+          "max_drawdown_pct": 20.831106234393992,
+          "max_positive_contribution_share": 0.4605453314467431,
+          "net_pnl_pct": 71.90464923763507,
+          "sharpe": 3.155437365332927,
+          "turnover": 14.333333333333334
+        },
+        {
+          "changed_legs": 36,
+          "coin_contributions": {
+            "AAVE": -1.3789068776260107,
+            "BNB": 0.15552585652452933,
+            "ETH": -1.019881899675638,
+            "LINK": 1.9667314236227047,
+            "NEAR": 0.7102457851495585,
+            "SOL": 1.18516972551049,
+            "UNI": -2.4724612468355884,
+            "XMR": -1.7642658271241598,
+            "XRP": -4.064559666448408,
+            "ZEC": 19.991937155517693
+          },
+          "gross_pnl_pct": 8.054325279265706,
+          "invested_fraction": 0.4666666666666667,
+          "max_drawdown_pct": 17.94210644204057,
+          "max_positive_contribution_share": 0.8326639708104776,
+          "net_pnl_pct": 7.214498038763706,
+          "sharpe": 0.6513798748974872,
+          "turnover": 11.999999999999998
+        },
+        {
+          "changed_legs": 23,
+          "coin_contributions": {
+            "AAVE": -2.654366331875109,
+            "BNB": 0.5316409886069925,
+            "ETH": -5.350535460928666,
+            "LINK": -3.537894892885222,
+            "NEAR": -3.0320916283085695,
+            "SUI": -7.127536795375439,
+            "UNI": 0.5879461427010344,
+            "XMR": -8.857591854442095,
+            "XRP": -1.9432713034576456,
+            "ZEC": -2.9279692642758386
+          },
+          "gross_pnl_pct": -30.567458918521794,
+          "invested_fraction": 0.3,
+          "max_drawdown_pct": 35.36546079210572,
+          "max_positive_contribution_share": 0.5251454989609696,
+          "net_pnl_pct": -30.912715657953306,
+          "sharpe": -2.976402932931891,
+          "turnover": 7.666666666666666
+        }
+      ],
+      "median_sharpe": 1.0272722598682373,
+      "passed": false,
+      "positive_folds": 4,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 45.93748274888787,
+      "worst_positive_contribution_share": 0.8326639708104776
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "rotation",
+        "long_lookback": 90,
+        "lookback": 14,
+        "min_breadth": 0.5,
+        "name": "rotation-14-diversified",
+        "rebalance_days": 7,
+        "top_n": 5,
+        "volatility_lookback": 28,
+        "weighting": "inverse_vol"
+      },
+      "folds": [
+        {
+          "changed_legs": 42,
+          "coin_contributions": {
+            "AAVE": -2.9262205968370374,
+            "BNB": -3.6050555312511605,
+            "BTC": 2.2609929929721,
+            "ETH": 0.17710880566008363,
+            "LINK": 2.5650514574406587,
+            "NEAR": -1.4587405087457002,
+            "SOL": 3.4558918092960553,
+            "UNI": 2.966682045921643,
+            "XMR": 2.945394887701231,
+            "XRP": 1.2551689830933548,
+            "ZEC": -1.4548760208953377
+          },
+          "gross_pnl_pct": 5.034987157439796,
+          "invested_fraction": 0.3,
+          "max_drawdown_pct": 11.920222349137097,
+          "max_positive_contribution_share": 0.22115880302357657,
+          "net_pnl_pct": 4.574798157181648,
+          "sharpe": 0.6264479561414174,
+          "turnover": 6.752994060088291
+        },
+        {
+          "changed_legs": 86,
+          "coin_contributions": {
+            "AAVE": -2.301729523329083,
+            "BNB": -4.455778554463553,
+            "BTC": -0.9313814816305435,
+            "ETH": -0.7153541308612794,
+            "LINK": -3.8548397334253948,
+            "NEAR": -3.218138517119279,
+            "SOL": 0.5202286673493215,
+            "SUI": 10.905603698717503,
+            "UNI": -0.22832553236576958,
+            "XMR": -0.5902822426502281,
+            "XRP": 9.281679240374487,
+            "ZEC": -3.7034199614348102
+          },
+          "gross_pnl_pct": -2.477067419961032,
+          "invested_fraction": 0.5916666666666667,
+          "max_drawdown_pct": 29.615905116252563,
+          "max_positive_contribution_share": 0.526649648011072,
+          "net_pnl_pct": -3.363764631299726,
+          "sharpe": -0.009556772638531857,
+          "turnover": 14.046848220009428
+        },
+        {
+          "changed_legs": 60,
+          "coin_contributions": {
+            "AAVE": 4.163797716148309,
+            "BNB": -2.228198584091843,
+            "BTC": -0.32125670376510596,
+            "LINK": 7.84893435178897,
+            "NEAR": -0.2228661121009435,
+            "SOL": -8.35724954644972,
+            "SUI": -3.529225523892859,
+            "UNI": -0.9244065187914663,
+            "XMR": -2.219637394436829,
+            "XRP": 4.508480411220041,
+            "ZEC": 2.0800592453996125
+          },
+          "gross_pnl_pct": -6.084177941032354,
+          "invested_fraction": 0.4083333333333333,
+          "max_drawdown_pct": 38.9720436842293,
+          "max_positive_contribution_share": 0.42195686768163293,
+          "net_pnl_pct": -6.72418448132529,
+          "sharpe": 0.008606192416011358,
+          "turnover": 10.516491385425669
+        },
+        {
+          "changed_legs": 86,
+          "coin_contributions": {
+            "AAVE": 12.485387498904158,
+            "BNB": -1.357960814895257,
+            "BTC": 1.4821398248789963,
+            "ETH": 16.862609779283005,
+            "LINK": 8.08994095299219,
+            "NEAR": -3.7936322790576673,
+            "SOL": 1.3130006945709616,
+            "SUI": 15.947331525243376,
+            "UNI": 6.087708008827332,
+            "XMR": 15.52501573128735,
+            "XRP": 5.212604165011575,
+            "ZEC": 1.8793650402104634
+          },
+          "gross_pnl_pct": 113.39107721840512,
+          "invested_fraction": 0.65,
+          "max_drawdown_pct": 12.483584563237848,
+          "max_positive_contribution_share": 0.19865216792326065,
+          "net_pnl_pct": 111.62602013062477,
+          "sharpe": 4.99218754254421,
+          "turnover": 12.773916450622957
+        },
+        {
+          "changed_legs": 66,
+          "coin_contributions": {
+            "AAVE": -0.7680380352711307,
+            "BNB": 0.7175947774357676,
+            "BTC": -3.8968428684627257,
+            "ETH": -0.7060128666518495,
+            "LINK": -1.2606515607319229,
+            "NEAR": 1.3371240060311007,
+            "SOL": 0.9523004365872136,
+            "SUI": -0.6229095443345556,
+            "UNI": -1.4318339757376264,
+            "XMR": -1.4314318625267597,
+            "XRP": -2.4769224332183044,
+            "ZEC": 2.5486087221480966
+          },
+          "gross_pnl_pct": -10.530957364868765,
+          "invested_fraction": 0.4666666666666667,
+          "max_drawdown_pct": 18.952966760049293,
+          "max_positive_contribution_share": 0.45874359274279647,
+          "net_pnl_pct": -11.18177267911764,
+          "sharpe": -0.46971968925373636,
+          "turnover": 11.228415610544008
+        },
+        {
+          "changed_legs": 47,
+          "coin_contributions": {
+            "AAVE": -3.6200507218319897,
+            "BNB": 1.74205324975087,
+            "BTC": -1.642167226001408,
+            "ETH": -0.5964471373734821,
+            "LINK": -3.1033006447163745,
+            "NEAR": -2.220542259579057,
+            "SOL": -4.645143838677932,
+            "SUI": -4.734494738641235,
+            "UNI": 0.2507323483780075,
+            "XMR": -3.1355177590432297,
+            "XRP": -2.418394820292045,
+            "ZEC": -3.876446887083832
+          },
+          "gross_pnl_pct": -25.64323278250187,
+          "invested_fraction": 0.3,
+          "max_drawdown_pct": 31.352741912048376,
+          "max_positive_contribution_share": 0.8741799676726728,
+          "net_pnl_pct": -26.02910727678901,
+          "sharpe": -2.803088381434796,
+          "turnover": 8.002009696403311
+        }
+      ],
+      "median_sharpe": 0.008606192416011358,
+      "passed": false,
+      "positive_folds": 2,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 38.9720436842293,
+      "worst_positive_contribution_share": 0.22115880302357657
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "dual",
+        "long_lookback": 90,
+        "lookback": 28,
+        "min_breadth": 0.5,
+        "name": "dual-28-90",
+        "rebalance_days": 7,
+        "top_n": 3,
+        "volatility_lookback": 28,
+        "weighting": "equal"
+      },
+      "folds": [
+        {
+          "changed_legs": 22,
+          "coin_contributions": {
+            "BNB": -5.327041674772618,
+            "BTC": -1.901492414504058,
+            "ETH": 0.31967001518195337,
+            "NEAR": -2.835179670924033,
+            "SOL": 1.61629110173291,
+            "XMR": 4.617061684284682
+          },
+          "gross_pnl_pct": -4.606223610298132,
+          "invested_fraction": 0.2916666666666667,
+          "max_drawdown_pct": 11.49050236703826,
+          "max_positive_contribution_share": 0.704569757248444,
+          "net_pnl_pct": -5.0600303238578554,
+          "sharpe": -0.4410778801354176,
+          "turnover": 7.333333333333333
+        },
+        {
+          "changed_legs": 41,
+          "coin_contributions": {
+            "AAVE": -13.03638613760489,
+            "BTC": -0.8337513675659676,
+            "NEAR": -4.354371935380996,
+            "SOL": 11.463628737212435,
+            "SUI": 14.301427219050856,
+            "UNI": 6.681852984943193,
+            "XMR": -0.8111348771475049,
+            "XRP": 18.78559054526907,
+            "ZEC": 1.2238357302705265
+          },
+          "gross_pnl_pct": 31.745930870705784,
+          "invested_fraction": 0.65,
+          "max_drawdown_pct": 18.55993362311786,
+          "max_positive_contribution_share": 0.358118623187233,
+          "net_pnl_pct": 30.580387464491054,
+          "sharpe": 1.63922923974085,
+          "turnover": 13.666666666666666
+        },
+        {
+          "changed_legs": 24,
+          "coin_contributions": {
+            "AAVE": 0.301913647470576,
+            "LINK": 1.1700538857611458,
+            "NEAR": 3.42061282669784,
+            "SOL": -0.6688577595062732,
+            "SUI": 15.8803666953937,
+            "UNI": -1.8256328107766555,
+            "XMR": 0.10672106808032156,
+            "XRP": 14.623238682636874
+          },
+          "gross_pnl_pct": 31.621991117473257,
+          "invested_fraction": 0.4083333333333333,
+          "max_drawdown_pct": 18.866787340299325,
+          "max_positive_contribution_share": 0.4472976475461952,
+          "net_pnl_pct": 30.93909951952154,
+          "sharpe": 1.7225639346300778,
+          "turnover": 8.0
+        },
+        {
+          "changed_legs": 20,
+          "coin_contributions": {
+            "AAVE": 0.533091709677757,
+            "BTC": 2.946910398847373,
+            "ETH": -0.24934780064539053,
+            "LINK": 7.149532592696813,
+            "SUI": -3.483036711542398,
+            "UNI": 13.253270156959505,
+            "XMR": 38.21286999806482,
+            "XRP": 7.889224672292687,
+            "ZEC": 3.666530918874256
+          },
+          "gross_pnl_pct": 94.83218255940811,
+          "invested_fraction": 0.475,
+          "max_drawdown_pct": 14.47234295437613,
+          "max_positive_contribution_share": 0.5188340506889223,
+          "net_pnl_pct": 93.8633607972556,
+          "sharpe": 4.872725222593259,
+          "turnover": 7.666666666666666
+        },
+        {
+          "changed_legs": 24,
+          "coin_contributions": {
+            "BNB": 14.215044853817645,
+            "ETH": 5.091521515422897,
+            "LINK": 9.066595152623568,
+            "NEAR": -3.1347603329729603,
+            "SOL": 4.070424731201086,
+            "SUI": -2.716322475573625,
+            "UNI": -0.22069327404453332,
+            "XRP": -3.2081892665731493,
+            "ZEC": 65.3367328240137
+          },
+          "gross_pnl_pct": 122.76217282134456,
+          "invested_fraction": 0.5833333333333334,
+          "max_drawdown_pct": 18.208985437909185,
+          "max_positive_contribution_share": 0.6681992188275602,
+          "net_pnl_pct": 121.60650384036535,
+          "sharpe": 3.7027932076634555,
+          "turnover": 8.0
+        },
+        {
+          "changed_legs": 5,
+          "coin_contributions": {
+            "XMR": -30.50868534271563,
+            "ZEC": -10.04222299123233
+          },
+          "gross_pnl_pct": -37.447822450114565,
+          "invested_fraction": 0.23333333333333334,
+          "max_drawdown_pct": 46.83312337324311,
+          "max_positive_contribution_share": 0.0,
+          "net_pnl_pct": -37.56971992863021,
+          "sharpe": -2.0628989844960195,
+          "turnover": 3.0
+        }
+      ],
+      "median_sharpe": 1.7225639346300778,
+      "passed": false,
+      "positive_folds": 4,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 46.83312337324311,
+      "worst_positive_contribution_share": 0.6681992188275602
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "dual",
+        "long_lookback": 90,
+        "lookback": 28,
+        "min_breadth": 0.5,
+        "name": "dual-28-90-inverse-vol",
+        "rebalance_days": 7,
+        "top_n": 3,
+        "volatility_lookback": 28,
+        "weighting": "inverse_vol"
+      },
+      "folds": [
+        {
+          "changed_legs": 26,
+          "coin_contributions": {
+            "BNB": -4.0542168241232535,
+            "BTC": -1.4900532589917739,
+            "ETH": 0.41842556913561746,
+            "NEAR": -1.6917522970734393,
+            "SOL": 1.438265850709251,
+            "XMR": 6.48663985999755
+          },
+          "gross_pnl_pct": -0.020233987400197773,
+          "invested_fraction": 0.2916666666666667,
+          "max_drawdown_pct": 10.777328076628589,
+          "max_positive_contribution_share": 0.7774640179599897,
+          "net_pnl_pct": -0.5042621196977959,
+          "sharpe": 0.08040163318700504,
+          "turnover": 7.463210713343952
+        },
+        {
+          "changed_legs": 55,
+          "coin_contributions": {
+            "AAVE": -12.75817095460005,
+            "BTC": -1.4278822698870064,
+            "NEAR": -4.605634505884881,
+            "SOL": 15.794364986114553,
+            "SUI": 12.097471156707325,
+            "UNI": 6.253371876958961,
+            "XMR": -1.1293469946978107,
+            "XRP": 19.838826807929614,
+            "ZEC": -0.6596748649352611
+          },
+          "gross_pnl_pct": 32.157159275703975,
+          "invested_fraction": 0.65,
+          "max_drawdown_pct": 19.15946269276661,
+          "max_positive_contribution_share": 0.36749433181949154,
+          "net_pnl_pct": 30.911028089484248,
+          "sharpe": 1.6835044415086173,
+          "turnover": 14.570321317694784
+        },
+        {
+          "changed_legs": 33,
+          "coin_contributions": {
+            "AAVE": -0.36229125387366623,
+            "LINK": 2.228127731368313,
+            "NEAR": 3.8735238895095963,
+            "SOL": -0.5306430482897371,
+            "SUI": 16.485095223664366,
+            "UNI": -2.1099062874806647,
+            "XMR": 0.2849189465371338,
+            "XRP": 12.470695947749812
+          },
+          "gross_pnl_pct": 30.81078878926753,
+          "invested_fraction": 0.4083333333333333,
+          "max_drawdown_pct": 18.60988361467014,
+          "max_positive_contribution_share": 0.4664401135805495,
+          "net_pnl_pct": 30.084973302364816,
+          "sharpe": 1.6926997216645279,
+          "turnover": 8.557019333209722
+        },
+        {
+          "changed_legs": 30,
+          "coin_contributions": {
+            "AAVE": 0.238489859509455,
+            "BTC": 5.652826731743139,
+            "ETH": -0.2374047712721483,
+            "LINK": 7.342496748976521,
+            "SUI": -1.97701455609861,
+            "UNI": 8.309850130380761,
+            "XMR": 39.61286217791593,
+            "XRP": 9.599522786427967,
+            "ZEC": 4.440961831423223
+          },
+          "gross_pnl_pct": 100.63072517724704,
+          "invested_fraction": 0.475,
+          "max_drawdown_pct": 15.399848904307714,
+          "max_positive_contribution_share": 0.5267877278310906,
+          "net_pnl_pct": 99.58392500089485,
+          "sharpe": 4.985721866288643,
+          "turnover": 8.04516666245485
+        },
+        {
+          "changed_legs": 42,
+          "coin_contributions": {
+            "BNB": 20.85809077742208,
+            "ETH": 6.3717160796661245,
+            "LINK": 7.593855130029189,
+            "NEAR": -3.6292953450173315,
+            "SOL": 4.121433858571262,
+            "SUI": -2.096038978430881,
+            "UNI": -0.050611486531430216,
+            "XRP": -3.4080231557487046,
+            "ZEC": 36.993658929189245
+          },
+          "gross_pnl_pct": 83.26847035744971,
+          "invested_fraction": 0.5833333333333334,
+          "max_drawdown_pct": 17.369167984775235,
+          "max_positive_contribution_share": 0.4871512449586216,
+          "net_pnl_pct": 82.29279123074737,
+          "sharpe": 3.3012984934891083,
+          "turnover": 8.210071360479027
+        },
+        {
+          "changed_legs": 5,
+          "coin_contributions": {
+            "XMR": -23.215552253851953,
+            "ZEC": -6.822830531346693
+          },
+          "gross_pnl_pct": -30.726748372818236,
+          "invested_fraction": 0.23333333333333334,
+          "max_drawdown_pct": 46.83312337324313,
+          "max_positive_contribution_share": 0.0,
+          "net_pnl_pct": -30.847326982139222,
+          "sharpe": -1.482297309727024,
+          "turnover": 2.6794143624677096
+        }
+      ],
+      "median_sharpe": 1.6926997216645279,
+      "passed": false,
+      "positive_folds": 4,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 46.83312337324313,
+      "worst_positive_contribution_share": 0.5267877278310906
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "dual",
+        "long_lookback": 90,
+        "lookback": 28,
+        "min_breadth": 0.5,
+        "name": "dual-28-90-diversified",
+        "rebalance_days": 7,
+        "top_n": 5,
+        "volatility_lookback": 28,
+        "weighting": "inverse_vol"
+      },
+      "folds": [
+        {
+          "changed_legs": 38,
+          "coin_contributions": {
+            "AAVE": -0.7075007359161445,
+            "BNB": -1.938841760122474,
+            "BTC": -0.4170369464468708,
+            "ETH": 0.13536009445527306,
+            "NEAR": -1.6431130406704502,
+            "SOL": -1.6150516722319346,
+            "SUI": -4.206281535783718,
+            "XMR": 8.213620394921344,
+            "ZEC": 1.5372030763467739
+          },
+          "gross_pnl_pct": -1.6676287221497388,
+          "invested_fraction": 0.2916666666666667,
+          "max_drawdown_pct": 10.259045999919962,
+          "max_positive_contribution_share": 0.8308181150306547,
+          "net_pnl_pct": -2.0628968387693347,
+          "sharpe": -0.11883711922218473,
+          "turnover": 6.1947668865751275
+        },
+        {
+          "changed_legs": 83,
+          "coin_contributions": {
+            "AAVE": -5.4554299520128335,
+            "BNB": -2.992879179473146,
+            "BTC": 10.350657192607345,
+            "LINK": 4.755729074230623,
+            "NEAR": -1.9828372825875409,
+            "SOL": 7.407557382604272,
+            "SUI": 11.446211491561115,
+            "UNI": 3.3833045032364026,
+            "XMR": -1.8849059669900528,
+            "XRP": 9.807453639781782,
+            "ZEC": -2.4722471528677317
+          },
+          "gross_pnl_pct": 32.65084324935559,
+          "invested_fraction": 0.65,
+          "max_drawdown_pct": 16.270180595096523,
+          "max_positive_contribution_share": 0.24275694136851422,
+          "net_pnl_pct": 31.519680210210478,
+          "sharpe": 1.9042407166397621,
+          "turnover": 13.171427674858958
+        },
+        {
+          "changed_legs": 50,
+          "coin_contributions": {
+            "AAVE": -0.022429016955002934,
+            "LINK": 10.423368442367936,
+            "NEAR": 1.9471729931563035,
+            "SOL": -2.0961760901250592,
+            "SUI": 7.690224472969433,
+            "UNI": 0.8343513487544877,
+            "XMR": -2.8472714579380503,
+            "XRP": 9.416581238326717
+          },
+          "gross_pnl_pct": 21.743482407942196,
+          "invested_fraction": 0.4083333333333333,
+          "max_drawdown_pct": 21.822208759325814,
+          "max_positive_contribution_share": 0.34387279366379336,
+          "net_pnl_pct": 21.217858240369413,
+          "sharpe": 1.2948480435439418,
+          "turnover": 6.654784769452538
+        },
+        {
+          "changed_legs": 47,
+          "coin_contributions": {
+            "AAVE": -0.20220757757879498,
+            "BNB": 1.2044649623210517,
+            "BTC": 4.247578274367457,
+            "ETH": 7.76457369485936,
+            "LINK": 4.842235322775537,
+            "SOL": -2.5538057662488227,
+            "SUI": 0.7876413562384976,
+            "UNI": 4.8735019877386865,
+            "XMR": 37.225556586026556,
+            "XRP": 5.993627359882159,
+            "ZEC": 3.825128494853688
+          },
+          "gross_pnl_pct": 92.36445413962626,
+          "invested_fraction": 0.475,
+          "max_drawdown_pct": 13.821455576453722,
+          "max_positive_contribution_share": 0.5260498917826975,
+          "net_pnl_pct": 91.27749733714174,
+          "sharpe": 5.30402475525356,
+          "turnover": 8.714422336402198
+        },
+        {
+          "changed_legs": 66,
+          "coin_contributions": {
+            "AAVE": -1.6603741292729768,
+            "BNB": 13.543068197743224,
+            "BTC": 1.1598439833738814,
+            "ETH": 1.8417567694456862,
+            "LINK": 6.327374591370753,
+            "NEAR": -2.860393175253397,
+            "SOL": 3.501048372496136,
+            "SUI": -0.8281330576801655,
+            "UNI": 0.14859552886445038,
+            "XRP": -2.5092955044338514,
+            "ZEC": 15.80266757236347
+          },
+          "gross_pnl_pct": 35.16144465879469,
+          "invested_fraction": 0.5833333333333334,
+          "max_drawdown_pct": 18.307874813558982,
+          "max_positive_contribution_share": 0.37337054673408215,
+          "net_pnl_pct": 34.49312418960835,
+          "sharpe": 2.0225658273522344,
+          "turnover": 7.623891556405037
+        },
+        {
+          "changed_legs": 5,
+          "coin_contributions": {
+            "XMR": -23.215552253851953,
+            "ZEC": -6.822830531346693
+          },
+          "gross_pnl_pct": -30.726748372818236,
+          "invested_fraction": 0.23333333333333334,
+          "max_drawdown_pct": 46.83312337324313,
+          "max_positive_contribution_share": 0.0,
+          "net_pnl_pct": -30.847326982139222,
+          "sharpe": -1.482297309727024,
+          "turnover": 2.6794143624677096
+        }
+      ],
+      "median_sharpe": 1.9042407166397621,
+      "passed": false,
+      "positive_folds": 4,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 46.83312337324313,
+      "worst_positive_contribution_share": 0.5260498917826975
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 0.0,
+        "family": "pullback",
+        "long_lookback": 90,
+        "lookback": 14,
+        "min_breadth": 0.5,
+        "name": "pullback-14-90",
+        "rebalance_days": 7,
+        "top_n": 3,
+        "volatility_lookback": 28,
+        "weighting": "equal"
+      },
+      "folds": [
+        {
+          "changed_legs": 21,
+          "coin_contributions": {
+            "AAVE": 1.7968182765784564,
+            "BNB": 7.670598200925896,
+            "BTC": -1.901492414504058,
+            "ETH": 10.026446086353198,
+            "NEAR": -8.23830129857821,
+            "SOL": -3.9211687657617516,
+            "UNI": -2.3439795709790747,
+            "XMR": 1.895483803124117,
+            "ZEC": 2.332772625307115
+          },
+          "gross_pnl_pct": 6.059380323228281,
+          "invested_fraction": 0.3,
+          "max_drawdown_pct": 16.252753976357226,
+          "max_positive_contribution_share": 0.4226623300225599,
+          "net_pnl_pct": 5.577740210365922,
+          "sharpe": 0.6981466144921662,
+          "turnover": 6.999999999999999
+        },
+        {
+          "changed_legs": 41,
+          "coin_contributions": {
+            "AAVE": 5.024977521369559,
+            "BNB": 1.6476643782316613,
+            "BTC": -2.71721526171003,
+            "ETH": -2.974525865347629,
+            "NEAR": 8.96896338640718,
+            "SUI": 4.725676353714586,
+            "UNI": 5.235363833873922,
+            "XMR": -9.276284138253228,
+            "XRP": -7.124913027938816,
+            "ZEC": -14.478828129603425
+          },
+          "gross_pnl_pct": -12.66205935074688,
+          "invested_fraction": 0.5916666666666667,
+          "max_drawdown_pct": 33.87022114987008,
+          "max_positive_contribution_share": 0.3503139312559146,
+          "net_pnl_pct": -13.43472959690436,
+          "sharpe": -0.9078720574184129,
+          "turnover": 13.666666666666668
+        },
+        {
+          "changed_legs": 34,
+          "coin_contributions": {
+            "AAVE": -0.3456385107920532,
+            "BNB": 0.6238217555101155,
+            "BTC": 0.631599632963228,
+            "LINK": -4.921548980238095,
+            "NEAR": -9.149135123356652,
+            "SOL": -8.614146600489187,
+            "SUI": 4.402180117485669,
+            "UNI": -3.4027921696557994,
+            "XMR": 0.9092198015156294,
+            "XRP": -5.0517066438232385,
+            "ZEC": -0.69030396346598
+          },
+          "gross_pnl_pct": -25.980316677406513,
+          "invested_fraction": 0.4083333333333333,
+          "max_drawdown_pct": 44.86002927656518,
+          "max_positive_contribution_share": 0.6703669722937209,
+          "net_pnl_pct": -26.52377784232054,
+          "sharpe": -1.5487353160934418,
+          "turnover": 11.333333333333332
+        },
+        {
+          "changed_legs": 40,
+          "coin_contributions": {
+            "AAVE": -0.2504567756769512,
+            "BNB": 4.532893970175337,
+            "BTC": 1.632964298389898,
+            "ETH": 1.0398987358416638,
+            "LINK": -3.1878290221652708,
+            "SOL": 2.9769155716274764,
+            "SUI": -6.291508116910187,
+            "XMR": 37.747877063243,
+            "XRP": -8.862452340705321,
+            "ZEC": 26.47286980375682
+          },
+          "gross_pnl_pct": 69.06113684634035,
+          "invested_fraction": 0.65,
+          "max_drawdown_pct": 16.971566220101778,
+          "max_positive_contribution_share": 0.5073406215173225,
+          "net_pnl_pct": 67.38381430812079,
+          "sharpe": 3.7764489782657695,
+          "turnover": 15.333333333333334
+        },
+        {
+          "changed_legs": 30,
+          "coin_contributions": {
+            "AAVE": -9.139588295043184,
+            "BNB": 1.738605761994309,
+            "BTC": -2.4293688002453573,
+            "ETH": 1.7529417974601018,
+            "LINK": -1.9298087321790023,
+            "NEAR": -4.522740996978757,
+            "UNI": -11.509792662237306,
+            "XMR": -1.5003518978061845,
+            "XRP": -7.7939621224258495,
+            "ZEC": -2.9088348809776408
+          },
+          "gross_pnl_pct": -34.97454645372304,
+          "invested_fraction": 0.4666666666666667,
+          "max_drawdown_pct": 43.6553077940728,
+          "max_positive_contribution_share": 0.5020529629371615,
+          "net_pnl_pct": -35.39596864084087,
+          "sharpe": -2.2601601399295426,
+          "turnover": 10.0
+        },
+        {
+          "changed_legs": 10,
+          "coin_contributions": {
+            "BNB": -0.8085505910876385,
+            "XMR": 12.93753499864044,
+            "ZEC": -18.50465734245379
+          },
+          "gross_pnl_pct": -8.927153728589676,
+          "invested_fraction": 0.175,
+          "max_drawdown_pct": 25.199013179227624,
+          "max_positive_contribution_share": 1.0,
+          "net_pnl_pct": -9.163712359257358,
+          "sharpe": -0.4744502155460222,
+          "turnover": 4.0
+        }
+      ],
+      "median_sharpe": -0.4744502155460222,
+      "passed": false,
+      "positive_folds": 2,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 44.86002927656518,
+      "worst_positive_contribution_share": 0.5073406215173225
+    },
+    {
+      "candidate": {
+        "carry_bps_per_day": 1.0,
+        "family": "reversal_long_short",
+        "long_lookback": 90,
+        "lookback": 56,
+        "min_breadth": 0.0,
+        "name": "market-neutral-reversal-56",
+        "rebalance_days": 7,
+        "top_n": 3,
+        "volatility_lookback": 28,
+        "weighting": "equal"
+      },
+      "folds": [
+        {
+          "changed_legs": 56,
+          "coin_contributions": {
+            "AAVE": -0.5031339086941583,
+            "BNB": 2.1145811938420858,
+            "BTC": -1.3781982119850857,
+            "ETH": 1.5961889324436584,
+            "LINK": -3.4774972420018555,
+            "NEAR": 0.8350885796606118,
+            "SOL": 2.8737431155618913,
+            "SUI": -8.950798502464275,
+            "UNI": 13.338334248390208,
+            "XMR": -5.378634882818407,
+            "XRP": -4.260608854098143,
+            "ZEC": 6.152019643084906
+          },
+          "gross_pnl_pct": 1.8106716332236594,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 15.067614096070628,
+          "max_positive_contribution_share": 0.4956654106255108,
+          "net_pnl_pct": -0.012378490781495,
+          "sharpe": 0.13882290319615578,
+          "turnover": 9.333333333333332
+        },
+        {
+          "changed_legs": 50,
+          "coin_contributions": {
+            "AAVE": -4.26965226711241,
+            "BNB": 0.859254359515458,
+            "BTC": 0.4168756837829838,
+            "ETH": -0.037630925489084976,
+            "LINK": -0.27025433372741736,
+            "NEAR": 17.60689736926294,
+            "SOL": -4.753810479611776,
+            "SUI": -23.435461448439042,
+            "UNI": -2.2365010517503463,
+            "XMR": 0.9360724429535227,
+            "XRP": 1.8255537540386544,
+            "ZEC": 2.93684591069718
+          },
+          "gross_pnl_pct": -11.321660119988309,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 14.275359947002064,
+          "max_positive_contribution_share": 0.7162662047837244,
+          "net_pnl_pct": -12.871815795134955,
+          "sharpe": -1.1818791083609048,
+          "turnover": 8.666666666666668
+        },
+        {
+          "changed_legs": 54,
+          "coin_contributions": {
+            "AAVE": 15.23641674790626,
+            "BNB": 1.4130431989820305,
+            "BTC": 3.3704431635049614,
+            "ETH": -2.6484482603006154,
+            "LINK": 1.0776990980262697,
+            "NEAR": -6.801773652549434,
+            "SOL": 5.899047884470615,
+            "SUI": -6.053396610921807,
+            "UNI": -6.596815924365097,
+            "XMR": 4.132417892268514,
+            "XRP": -12.130367790790554,
+            "ZEC": -9.463340930455908
+          },
+          "gross_pnl_pct": -13.22002842285459,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 18.331022380359048,
+          "max_positive_contribution_share": 0.48945945812352937,
+          "net_pnl_pct": -14.75546901879028,
+          "sharpe": -1.390741619394623,
+          "turnover": 9.0
+        },
+        {
+          "changed_legs": 58,
+          "coin_contributions": {
+            "AAVE": -2.783388953613876,
+            "BNB": 0.3735629339065665,
+            "BTC": -2.786635253837992,
+            "ETH": 1.4394640307616307,
+            "LINK": 1.4401038860889497,
+            "NEAR": 6.378160832223112,
+            "SOL": 3.3246042698709433,
+            "SUI": 9.320228722368451,
+            "UNI": -1.7421525179358843,
+            "XMR": -7.275518032613779,
+            "XRP": -2.8757924665949566,
+            "ZEC": -4.7890248356709035
+          },
+          "gross_pnl_pct": -1.451916923710983,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 11.15583877601084,
+          "max_positive_contribution_share": 0.4183954282109238,
+          "net_pnl_pct": -3.23752052683578,
+          "sharpe": -0.1746522108119432,
+          "turnover": 9.666666666666664
+        },
+        {
+          "changed_legs": 50,
+          "coin_contributions": {
+            "AAVE": 1.9399675586652785,
+            "BNB": -1.1707652588136714,
+            "BTC": 0.05354998201368408,
+            "ETH": -2.5198468336525472,
+            "LINK": -9.034311795762674,
+            "NEAR": 1.0174456661142266,
+            "SOL": -2.3423486464536984,
+            "SUI": -6.374519182025331,
+            "UNI": 4.8236655752204225,
+            "XMR": -5.152964408655395,
+            "XRP": -0.1708082067883001,
+            "ZEC": -48.14432774872693
+          },
+          "gross_pnl_pct": -50.49675662846509,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 53.37362990655253,
+          "max_positive_contribution_share": 0.6156852748779084,
+          "net_pnl_pct": -51.35156308834189,
+          "sharpe": -4.873510938029098,
+          "turnover": 8.333333333333332
+        },
+        {
+          "changed_legs": 61,
+          "coin_contributions": {
+            "AAVE": 6.425352147901893,
+            "BNB": 4.520770079202105,
+            "BTC": 0.3493926704564086,
+            "ETH": 0.5962730464297649,
+            "LINK": 1.046099789989674,
+            "NEAR": -12.808002021340558,
+            "SOL": -0.2928846330263375,
+            "SUI": 8.84391590264848,
+            "UNI": 0.27534473545057325,
+            "XMR": -1.4000372606755311,
+            "XRP": 0.8831501306451441,
+            "ZEC": 16.544109412428366
+          },
+          "gross_pnl_pct": 26.372232893239044,
+          "invested_fraction": 1.0,
+          "max_drawdown_pct": 12.616250742922766,
+          "max_positive_contribution_share": 0.419003608917723,
+          "net_pnl_pct": 23.948081068936244,
+          "sharpe": 2.2745526962188944,
+          "turnover": 11.333333333333332
+        }
+      ],
+      "median_sharpe": -0.1746522108119432,
+      "passed": false,
+      "positive_folds": 1,
+      "required_positive_folds": 5,
+      "worst_drawdown_pct": 53.37362990655253,
+      "worst_positive_contribution_share": 0.419003608917723
+    }
+  ],
+  "coins": [
+    "AAVE",
+    "BNB",
+    "BTC",
+    "ETH",
+    "LINK",
+    "NEAR",
+    "SOL",
+    "SUI",
+    "UNI",
+    "XMR",
+    "XRP",
+    "ZEC"
+  ],
+  "development_fold_starts": [
+    331,
+    451,
+    571,
+    691,
+    811,
+    931
+  ],
+  "fixture": {
+    "generated_at": "2026-07-17T05:45:27.433111+00:00",
+    "interval": "1d",
+    "schema_version": 1,
+    "selection": {
+      "day_notional_volume": {
+        "AAVE": 9642385.715570001,
+        "BNB": 5052878.727860001,
+        "BTC": 1834455165.5994499,
+        "ETH": 1007677969.3384501,
+        "LINK": 5653564.302749998,
+        "NEAR": 27690388.508980002,
+        "SOL": 190307800.7504801,
+        "SUI": 10250188.738594998,
+        "UNI": 7323697.344309997,
+        "XMR": 4770355.89808,
+        "XRP": 18730776.558399998,
+        "ZEC": 138600839.26460004
+      },
+      "max_assets": 12,
+      "min_bars": 1100,
+      "rule": "top current day notional volume with minimum history",
+      "volume_pool": 100
+    },
+    "venue": "hyperliquid"
+  },
+  "holdout": null,
+  "holdout_days": 120,
+  "holdout_unlocked": false,
+  "selected": null
+}

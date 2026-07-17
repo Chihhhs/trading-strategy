@@ -1,0 +1,1 @@
+{"completed_coins": ["AAVE", "BTC", "ETH", "NEAR", "ONDO", "SOL", "SUI", "UNI", "XRP", "kBONK"], "data_directory": "data\\clean_room\\hyperliquid_4h_funding", "generated_at": "2026-07-17T05:59:11.879863+00:00", "schema_version": 1, "source_fixture": "data/clean_room/hyperliquid_4h_current.json", "venue": "hyperliquid"}

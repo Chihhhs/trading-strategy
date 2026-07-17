@@ -97,6 +97,26 @@ class LegacyUnifiedParameters:
     dead_cat_filter_enabled: bool = True
 
 
+@dataclass(frozen=True)
+class CrossSectionalStrengthParameters:
+    timeframe: str = "1d"
+    lookback_days: int = 90
+    rebalance_days: int = 7
+    top_n: int = 5
+    min_momentum_pct: float = 0.0
+    min_positive_fraction: float = 0.5
+
+
+@dataclass(frozen=True)
+class CrossSectionalMomentumParameters:
+    timeframe: str = "4h"
+    lookback_bars: int = 84
+    rebalance_bars: int = 6
+    top_n: int = 3
+    overlap_cohorts: int = 7
+    cohort_spacing_bars: int = 6
+
+
 def _validate_parameter_types(name: str, parameter_type: type, values: dict[str, Any]):
     for field in fields(parameter_type):
         if field.name not in values or values[field.name] is None:

@@ -2,11 +2,15 @@
 
 from .base import BaseStrategy, Strategy, StrategyContext, StrategySignal
 from .definitions import (
+    CrossSectionalMomentumParameters,
+    CrossSectionalStrengthParameters,
     IntradayMomentumParameters,
     LegacyUnifiedParameters,
     StrategyDefinition,
     TrendParameters,
 )
+from .cross_sectional_momentum import CrossSectionalMomentumStrategy, overlapping_momentum_weights
+from .cross_sectional_strength import CrossSectionalStrengthStrategy
 from .intraday_momentum import IntradayMomentumStrategy
 from .legacy_unified import LegacyUnifiedStrategy
 from .trend import (
@@ -22,6 +26,24 @@ from .trend import (
 
 
 _STRATEGY_DEFINITIONS = {
+    "cross_sectional_momentum": StrategyDefinition(
+        name="cross_sectional_momentum",
+        factory=CrossSectionalMomentumStrategy,
+        parameter_type=CrossSectionalMomentumParameters,
+        capabilities=frozenset({"cross_sectional", "market_neutral", "overlapping_portfolio", "funding_aware"}),
+        default_timeframe="4h",
+        min_bars=121,
+        context_bars=None,
+    ),
+    "cross_sectional_strength": StrategyDefinition(
+        name="cross_sectional_strength",
+        factory=CrossSectionalStrengthStrategy,
+        parameter_type=CrossSectionalStrengthParameters,
+        capabilities=frozenset({"cross_sectional", "long_only", "cash_filter"}),
+        default_timeframe="1d",
+        min_bars=92,
+        context_bars=None,
+    ),
     "intraday_momentum": StrategyDefinition(
         name="intraday_momentum",
         factory=IntradayMomentumStrategy,
@@ -83,6 +105,8 @@ def resolve_strategy(name="trend"):
 
 __all__ = [
     "BaseStrategy",
+    "CrossSectionalMomentumStrategy",
+    "CrossSectionalStrengthStrategy",
     "IntradayMomentumStrategy",
     "LegacyUnifiedStrategy",
     "Strategy",
@@ -100,5 +124,6 @@ __all__ = [
     "get_strategy_definition",
     "get_trend_structure_context",
     "is_signal_blocked_by_btc_filter",
+    "overlapping_momentum_weights",
     "resolve_strategy",
 ]
