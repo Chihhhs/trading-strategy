@@ -16,9 +16,9 @@ Protection, execution, reconciliation, and logging are shared live-safety requir
 
 ## `optimize_existing_trend` Baseline
 
-The declared current live universe is the 50-coin `experiments/live_trend_baseline.json` reference. The checked-in `apps/live_config.py` still narrows the launcher to BTC/ETH/BNB, while historical live cache data shows broad-universe scanning. This is configuration drift: do not silently choose either source or change live config during research work.
+The declared current live universe is the fixed 38-coin `apps/live_config.py::LIVE_UNIVERSE` contract. `experiments/live_trend_baseline_38.json` is the matching active research baseline, with daily data, derivatives data, and strict causal 1h replay fixtures for those same coins. The older 50-coin reference is historical research evidence only and must not be used as a live-parity or promotion baseline.
 
-The local repository contains only a BTC/ETH/BNB 1h fixture. Therefore 50-coin Market Context and Momentum-Decay comparisons are diagnostic only until a matching 50-coin causal 1h replay fixture exists. The former BTC/ETH/BNB replay result is invalidated because it used the wrong universe.
+Market Context and Momentum-Decay remain diagnostic only. The former BTC/ETH/BNB replay is invalid because it used the wrong universe; the historical 50-coin attribution produced no cross-fold hypothesis; and no 38-coin result currently authorizes a shadow, paper, or live gate.
 
 Promotion path:
 

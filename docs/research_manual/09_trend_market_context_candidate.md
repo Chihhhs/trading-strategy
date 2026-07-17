@@ -7,24 +7,29 @@ This is an `optimize_existing_trend` research candidate. It does not change pape
 - Market-context entry filter: classifies completed daily OHLCV as trend, range, compression, breakout, exhaustion, reversal, or unknown. It blocks new trend entries in range, compression, exhaustion, and unknown states.
 - Momentum-decay time limit: when an open trend position remains directionally valid but enters confirmed exhaustion, it sets a one-time three-bar deadline. It does not alter TP/SL, staged stop progression, ATR trailing, or position size.
 
-## Evaluation
+## Active 38-Coin Evaluation Contract
 
-The declared live reference is the 50-coin `experiments/live_trend_baseline.json`. A checked-in launcher override still specifies BTC/ETH/BNB; this mismatch is recorded as configuration drift and must be resolved separately from strategy research.
+The active live-parity reference is the fixed 38-coin `apps/live_config.py::LIVE_UNIVERSE` contract, represented by `experiments/live_trend_baseline_38.json`. It uses matching daily, derivatives, and strict causal 1h replay fixtures, mark-to-market drawdown, 4.5 bps fee, and 2 bps slippage.
 
-Compare these frozen manifests only against the 50-coin reference, with identical costs, windows, and universe:
+The corresponding research-only manifests are:
 
-- `experiments/trend_market_context_entry.json`
-- `experiments/trend_momentum_decay_time_limit.json`
-- `experiments/trend_market_context_combined.json`
+- `experiments/trend_market_context_entry_38.json`
+- `experiments/trend_momentum_decay_time_limit_38.json`
+- `experiments/trend_market_context_combined_38.json`
 
-The canonical 50-coin 1h replay fixture is `data/historical_prices/binance_1h_240d_live_50coins.json`, with an integrity sidecar at `data/historical_prices/binance_1h_240d_live_50coins.json.metadata.json`. It contains 5,760 contiguous bars for each declared coin and is required for MTM replay. Shadow mode remains unavailable unless a separate candidate improves this baseline.
+They exist to preserve a comparable experiment surface. They do not authorize a replay run, shadow mode, paper execution, or a live entry gate until a new pre-defined hypothesis passes the frozen 38-coin gate.
 
 ## Invalidated Three-Coin Result
 
-The previous BTC/ETH/BNB strict-replay comparison is invalidated. It did not use the declared 50-coin live universe, so it cannot reject or promote Market Context or Momentum-Decay. It remains an implementation smoke test only.
-# Trend Entry Attribution Prerequisite (2026-07-15)
+The previous BTC/ETH/BNB strict-replay comparison is invalidated. It did not use the declared live universe, so it cannot reject or promote Market Context or Momentum-Decay. It remains an implementation smoke test only.
 
-Before changing the Trend entry filter, run `backtest/backtest_runner.py --trend-entry-attribution-report`. The report uses the checked-in 50-coin `live_trend_baseline.json` only as a research configuration reference; it is not live runtime or promotion authority. It records raw Trend candidates and their existing eligibility outcome, applies a 13 bps forward-label cost, and reports fixed walk-forward consistency. Neither Market Context nor Momentum-Decay may enter shadow from this report.
+## Historical 50-Coin Evidence
+
+The older `experiments/live_trend_baseline.json`, `trend_market_context_*.json` manifests, and 50-coin artifacts are retained as historical evidence. They are not rewritten or deleted, and are not active promotion authority.
+
+### Trend Entry Attribution Prerequisite (2026-07-15)
+
+The historical attribution report records raw Trend candidates and their existing eligibility outcome, applies a 13 bps forward-label cost, and reports fixed walk-forward consistency. It does not authorize Market Context or Momentum-Decay to enter shadow.
 
 
 ## Attribution And Replay Result (2026-07-15)
@@ -42,4 +47,4 @@ This evidence blocks the next filter-hypothesis step and all shadow promotion. I
 - The Binance 1h fixture has all 50 declared coins, 5,760 contiguous bars per coin, zero gaps, and a matching SHA-256 metadata checksum.
 - Strict causal replay with 4.5 bps fee and 2.0 bps slippage produced: 120d `-11.3%` net / `59.3214%` MTM drawdown; 180d `-23.1%` / `60.6270%`; 240d `-1.0%` / `40.4937%`.
 
-The baseline fails the cost-adjusted performance and non-worsening-drawdown gates. No paper candidate, shadow configuration, live-review bundle, or live configuration update may be created from it. A future candidate must state one pre-defined hypothesis and compare against this exact fixture, manifest, costs, and universe.
+The historical baseline fails the cost-adjusted performance and non-worsening-drawdown gates. No paper candidate, shadow configuration, live-review bundle, or live configuration update may be created from it. Any future Market Context hypothesis must be pre-defined and compare against the active 38-coin contract.
