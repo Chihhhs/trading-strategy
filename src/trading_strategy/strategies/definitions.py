@@ -115,6 +115,7 @@ class CrossSectionalMomentumParameters:
     top_n: int = 3
     overlap_cohorts: int = 7
     cohort_spacing_bars: int = 6
+    rebalance_hour_utc: int = 0
 
 
 def _validate_parameter_types(name: str, parameter_type: type, values: dict[str, Any]):

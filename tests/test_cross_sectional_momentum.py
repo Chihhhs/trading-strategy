@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -19,6 +20,7 @@ class CrossSectionalMomentumTest(unittest.TestCase):
         self.assertEqual(parameters.timeframe, "4h")
         self.assertEqual(parameters.lookback_bars, 84)
         self.assertEqual(parameters.overlap_cohorts, 7)
+        self.assertEqual(parameters.rebalance_hour_utc, 0)
         self.assertIn("market_neutral", definition.capabilities)
 
     def test_target_is_market_neutral_and_uses_only_prior_bars(self):
@@ -52,9 +54,18 @@ class CrossSectionalMomentumTest(unittest.TestCase):
 
         spec = load_experiment(Path(ROOT) / "experiments" / "cross_sectional_momentum_4h.json")
         result = BacktestExperimentAdapter().run(spec)[0]
-        self.assertAlmostEqual(result.net_pnl_pct, 15.48440181843571)
-        self.assertAlmostEqual(result.max_drawdown_pct, 7.073705975584908)
-        self.assertEqual(result.trades, 574)
+        self.assertAlmostEqual(result.net_pnl_pct, 15.419487512379959)
+        self.assertAlmostEqual(result.max_drawdown_pct, 7.5670947728549045)
+        self.assertEqual(result.trades, 593)
+
+    def test_shadow_snapshot_uses_fixed_midnight_utc_anchor(self):
+        from apps.runners.momentum_shadow_runner import build_snapshot
+
+        snapshot = build_snapshot(Path(ROOT) / "data" / "clean_room" / "hyperliquid_4h_current.json")
+        source = datetime.fromtimestamp(snapshot["source_bar_time"] / 1000, timezone.utc)
+        self.assertEqual(source.hour, 0)
+        self.assertLessEqual(snapshot["source_bar_time"], snapshot["market_data_time"])
+        self.assertFalse(snapshot["execution_authorized"])
 
 
 if __name__ == "__main__":

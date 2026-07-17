@@ -22,9 +22,14 @@ def build_snapshot(fixture_path):
     fixture = load_fixture(fixture_path)
     timestamps, closes = _aligned_closes(fixture["data"])
     parameters = get_strategy_definition("cross_sectional_momentum").parse_parameters({})
+    signal_index = next(
+        index
+        for index in range(len(timestamps) - 1, -1, -1)
+        if datetime.fromtimestamp(timestamps[index] / 1000, timezone.utc).hour == parameters.rebalance_hour_utc
+    )
     weights = overlapping_momentum_weights(
         closes,
-        index=len(timestamps) - 1,
+        index=signal_index,
         lookback_bars=parameters.lookback_bars,
         top_n=parameters.top_n,
         overlap_cohorts=parameters.overlap_cohorts,
@@ -33,7 +38,8 @@ def build_snapshot(fixture_path):
     return {
         "schema_version": 1,
         "observed_at": datetime.now(timezone.utc).isoformat(),
-        "source_bar_time": timestamps[-1],
+        "source_bar_time": timestamps[signal_index],
+        "market_data_time": timestamps[-1],
         "strategy": "cross_sectional_momentum",
         "parameters": asdict(parameters),
         "weights": dict(sorted(weights.items())),

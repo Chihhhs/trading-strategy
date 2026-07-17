@@ -13,6 +13,7 @@ Date: 2026-07-17
 - Signal: rank each asset by its trailing 84-bar (14-day) return.
 - Portfolio: long the strongest three and short the weakest three at half gross exposure per sleeve.
 - Overlap: average seven cohorts spaced six bars apart; update once per day.
+- Operational rebalance anchor: 00:00 UTC. All six 4h anchors remained positive on the already-open holdout; 00:00 UTC was chosen as a clock convention, not as the best result.
 - Costs: 6.5 bps one way plus the exact hourly Hyperliquid funding paid or received by each historical position.
 - Stress: 10 bps one way plus an additional 1 bp daily gross-exposure drag.
 - No leverage multiplier, regime filter, stop tuning, or date-specific exception.
@@ -51,7 +52,7 @@ The final 120-day holdout was unlocked once, only after the development and robu
 | Changed legs | 574 |
 | Highest single-coin share of positive contribution | 32.56% |
 
-The typed experiment adapter reproduces the same holdout result from `experiments/cross_sectional_momentum_4h.json`.
+The typed experiment adapter uses the fixed 00:00 UTC operational anchor. On the already-open holdout that anchor returned +15.42% net with 7.57% maximum drawdown; the six anchor results ranged from +13.61% to +19.78% net.
 
 ## Shadow boundary
 

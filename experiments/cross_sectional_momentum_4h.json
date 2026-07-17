@@ -16,7 +16,8 @@
       "rebalance_bars": 6,
       "top_n": 3,
       "overlap_cohorts": 7,
-      "cohort_spacing_bars": 6
+      "cohort_spacing_bars": 6,
+      "rebalance_hour_utc": 0
     }
   },
   "portfolio": {
