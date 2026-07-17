@@ -62,15 +62,17 @@ cached price for an entry, or affect live mode.
 Universe contract (2026-07-16): `apps/live_config.py` fixes live entry
 scanning to 38 coins: the 20 still-active members of the historical reference
 plus 18 currently active Hyperliquid perps selected from the market-cap
-ranking. Paper loads every active Hyperliquid perp from `meta` for broader data collection.
-Paper and live prefer Hyperliquid K-lines and prices.
+ranking. `paper_collector` loads every active Hyperliquid perp from `meta` for
+broader data collection. `paper_runner` observes signals, Decisions, and Market
+Context without positions; `paper_execution_runner` is the isolated fixed-38
+simulation. Paper and live prefer Hyperliquid K-lines and prices.
 contract. Binance USDⓈ-M Futures is an explicit per-coin fallback only when
 Hyperliquid market data is unavailable; its cache is source-tagged. Data coverage does not make a coin executable on Hyperliquid;
 the exchange eligibility gate remains required before any order attempt.
 Live unit tests write any unmocked event records only to an OS temporary
 directory, never to `data/trade_history`.
-Paper permits 10 concurrent simulated positions to maintain observation
-coverage; the live cap remains 2.
+Only the fixed-38 paper execution profile can create simulated positions; its
+cap is the same two positions as live. Collector and observer have no position capacity.
 
 ## Complete: Module Cleanup
 
@@ -84,7 +86,7 @@ coverage; the live cap remains 2.
 
 ## Deferred Research
 
-- Trend: the canonical 50-coin causal replay baseline failed its cost-adjusted performance and drawdown gate. No candidate exists until a new pre-defined entry, BTC-regime, or universe hypothesis is supported by attribution.
+- Trend: fixed 38-coin attribution supports one RSI-ceiling diagnostic. It improved the relative 120/180/240d windows but is not promotable because of a four-trade 120d sample and 240d coin concentration. Next action is one stricter OOS/absolute-performance validation only; no paper/live change.
 - Short-cycle alpha: `intraday_momentum` remains a negative control; VWAP is research-only. Follow the frozen OOS and random-baseline process in `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md`.
 - Funding, basis, OI, and L2 remain context or observe-only inputs. See `.agents/current_decisions.md` for their evidence and constraints.
 

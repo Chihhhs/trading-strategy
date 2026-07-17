@@ -52,8 +52,18 @@ STRATEGY_OVERRIDES = {
 }
 
 MODE_STRATEGY_OVERRIDES = {
-    "paper": {"max_positions": 10, "coin_universe": None},
+    "paper": {"max_positions": 10, "coin_universe": None, "paper_execution_enabled": False},
     "live": {"max_positions": 2, "coin_universe": list(LIVE_UNIVERSE)},
+}
+
+PAPER_PROFILE_STRATEGY_OVERRIDES = {
+    "collector": {"coin_universe": None, "paper_execution_enabled": False},
+    "observer": {"coin_universe": None, "paper_execution_enabled": False},
+    "execution": {
+        "coin_universe": list(LIVE_UNIVERSE),
+        "max_positions": 2,
+        "paper_execution_enabled": True,
+    },
 }
 
 # Circuit-breaker overrides merged into trading_strategy.live.config.CIRCUIT
@@ -76,6 +86,7 @@ def apply_overrides(live_config_module):
         {key: value for key, value in STRATEGY_OVERRIDES.items() if value is not None}
     )
     live_config_module.MODE_STRATEGY_OVERRIDES.update(MODE_STRATEGY_OVERRIDES)
+    live_config_module.PAPER_PROFILE_STRATEGY_OVERRIDES.update(PAPER_PROFILE_STRATEGY_OVERRIDES)
     live_config_module.set_mode(live_config_module.MODE)
     live_config_module.CIRCUIT.update(
         {key: value for key, value in CIRCUIT_OVERRIDES.items() if value is not None}

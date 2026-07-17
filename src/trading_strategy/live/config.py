@@ -12,6 +12,9 @@ if load_dotenv is not None:
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 LIVE_STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live")
 PAPER_STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_strategies_live_paper")
+PAPER_COLLECTOR_STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_collector")
+PAPER_OBSERVER_STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_observer")
+PAPER_EXECUTION_STATE_DIR = os.path.join(PROJECT_ROOT, "data", "paper_execution")
 STATE_DIR = LIVE_STATE_DIR
 HL_API_LOG_DIR = os.path.join(PROJECT_ROOT, "data", "hl_api")
 TRADE_HISTORY_DIR = os.path.join(PROJECT_ROOT, "data", "trade_history")
@@ -21,6 +24,7 @@ BYBIT_API = "https://api.bybit.com"
 
 MODE = "paper"
 MODE_STRATEGY_OVERRIDES = {}
+PAPER_PROFILE_STRATEGY_OVERRIDES = {}
 
 STRATEGY = {
     "name": "trend",
@@ -86,6 +90,9 @@ CIRCUIT = {
 
 os.makedirs(LIVE_STATE_DIR, exist_ok=True)
 os.makedirs(PAPER_STATE_DIR, exist_ok=True)
+os.makedirs(PAPER_COLLECTOR_STATE_DIR, exist_ok=True)
+os.makedirs(PAPER_OBSERVER_STATE_DIR, exist_ok=True)
+os.makedirs(PAPER_EXECUTION_STATE_DIR, exist_ok=True)
 os.makedirs(HL_API_LOG_DIR, exist_ok=True)
 os.makedirs(TRADE_HISTORY_DIR, exist_ok=True)
 
@@ -103,6 +110,8 @@ def get_api_log_path(now=None):
 
 
 def get_trade_log_path(now=None):
+    if MODE == "paper":
+        return os.path.join(TRADE_HISTORY_DIR, f"paper_{get_paper_profile()}", f"{_date_stamp(now)}.jsonl")
     return os.path.join(TRADE_HISTORY_DIR, f"{_date_stamp(now)}.jsonl")
 
 
@@ -130,10 +139,23 @@ def is_debug_api():
 
 
 def get_state_dir():
-    return LIVE_STATE_DIR if MODE == "live" else PAPER_STATE_DIR
+    if MODE == "live":
+        return LIVE_STATE_DIR
+    return {
+        "collector": PAPER_COLLECTOR_STATE_DIR,
+        "observer": PAPER_OBSERVER_STATE_DIR,
+        "execution": PAPER_EXECUTION_STATE_DIR,
+    }[get_paper_profile()]
+
+
+def get_paper_profile():
+    profile = get_env("PAPER_PROFILE", "observer").lower()
+    return profile if profile in {"collector", "observer", "execution"} else "observer"
 
 
 def set_mode(mode):
     global MODE
     MODE = mode
     STRATEGY.update(MODE_STRATEGY_OVERRIDES.get(MODE, {}))
+    if MODE == "paper":
+        STRATEGY.update(PAPER_PROFILE_STRATEGY_OVERRIDES.get(get_paper_profile(), {}))

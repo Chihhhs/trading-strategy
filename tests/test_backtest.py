@@ -152,6 +152,7 @@ class BacktestModuleTest(unittest.TestCase):
 
     def test_timestamp_iso_normalizes_numeric_and_iso_values(self):
         self.assertEqual(timestamp_iso({"ts": 0}), "1970-01-01T00:00:00+00:00")
+        self.assertEqual(timestamp_iso({"time": 0}), "1970-01-01T00:00:00+00:00")
         self.assertEqual(
             timestamp_iso({"time": "2026-01-01T00:00:00Z"}),
             "2026-01-01T00:00:00+00:00",

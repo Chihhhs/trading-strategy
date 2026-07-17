@@ -308,6 +308,24 @@ def check_entries(state, coins):
                     )
                     continue
 
+        if config.MODE == "paper" and not config.STRATEGY.get("paper_execution_enabled", True):
+            bump_summary_blocker(summary, "paper_observation_only")
+            _record_decision(
+                summary, state, name, btc_dir, allowed=False, action="observation_only",
+                reasons=("paper_observation_only",), signal=sig, market_context=market_context,
+            )
+            log_entry_skipped(
+                state,
+                name,
+                btc_dir,
+                "paper_observation_only",
+                signal_direction=signal_value(sig, "direction"),
+                signal_score=signal_value(sig, "score"),
+                sl=signal_value(sig, "sl"),
+                tp=target_tp,
+            )
+            continue
+
         entry = prices[name]
         atr = calc_atr(
             [d["high"] for d in klines],

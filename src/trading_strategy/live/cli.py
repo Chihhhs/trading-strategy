@@ -84,6 +84,40 @@ def build_protection_blockers(protection_summary):
     ]
 
 
+def run_collector_once():
+    """Refresh raw paper market data without producing decisions or positions."""
+    state = load_state()
+    try:
+        coins = load_coin_list()
+        prices = get_current_prices(coins)
+        cache = state.setdefault("_data_cache", {})
+        valid_klines = 0
+        for coin in coins:
+            klines = get_klines(coin["symbol"], 60) or []
+            if klines:
+                cache[coin["name"]] = klines
+            if len(klines) >= 50:
+                valid_klines += 1
+        summary = {
+            "paper_profile": config.get_paper_profile(),
+            "coins_scanned": len(coins),
+            "priced_coins": len(prices),
+            "priced_ratio": round(len(prices) / len(coins), 4) if coins else 0.0,
+            "valid_klines": valid_klines,
+            "cached_coins": len(cache),
+            "positions_opened": 0,
+            "decisions_observed": 0,
+        }
+        record_trade_event("collector_summary", **summary)
+        print(
+            f'collector: {summary["coins_scanned"]} coins | '
+            f'{summary["priced_coins"]} priced | {summary["valid_klines"]} with usable K-lines'
+        )
+        return state
+    finally:
+        save_state(state)
+
+
 def run_once():
     state = load_state()
     history_start_index = len(state.get("history") or [])
@@ -292,6 +326,11 @@ def main():
             print("Live mode requires HL_ACCOUNT_ADDRESS")
             sys.exit(1)
         print("Running in live mode")
+    if "--collector" in args:
+        if config.MODE != "paper" or config.get_paper_profile() != "collector":
+            raise RuntimeError("--collector must be run through apps/runners/paper_collector.py")
+        run_collector_once()
+        return
     if "--reset" in args:
         path = get_state_path(config.get_state_dir())
         if os.path.exists(path):

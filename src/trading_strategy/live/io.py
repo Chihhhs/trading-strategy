@@ -53,7 +53,11 @@ def debug_api_log(event, payload):
 def append_trade_record(record):
     try:
         with _IO_LOCK:
-            with open(config.get_trade_log_path(), "a", encoding="utf-8") as handle:
+            path = config.get_trade_log_path()
+            import os
+
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "a", encoding="utf-8") as handle:
                 handle.write(json.dumps(record, ensure_ascii=False) + "\n")
     except Exception:
         pass

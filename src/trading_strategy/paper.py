@@ -1,6 +1,5 @@
 import os
 import json
-import shutil
 import sys
 from datetime import datetime, timedelta
 
@@ -13,32 +12,8 @@ from trading_strategy.shared.state import load_state as load_shared_state
 from trading_strategy.shared.state import save_state as save_shared_state
 from trading_strategy.shared.trade_history import apply_closed_trade
 from trading_strategy.market_data import WATCHLIST, get_binance_klines, get_current_prices
-from trading_strategy.strategies import StrategyContext, generate_trend_signal, get_strategy, get_strategy_definition
+from trading_strategy.strategies import StrategyContext, get_strategy, get_strategy_definition
 from trading_strategy.strategies.base import signal_value
-
-
-STRATEGIES = {
-    "A_trend_conservative": {
-        "initial_balance": 1000.0,
-        "max_positions": 2,
-        "max_hold_days": 14,
-        "leverage": 3,
-        "risk_per_trade": 0.05,
-        "max_daily_loss_pct": 10.0,
-        "max_consecutive_losses": 5,
-        "cooldown_hours": 24,
-    },
-    "B_trend_aggressive": {
-        "initial_balance": 1000.0,
-        "max_positions": 3,
-        "max_hold_days": 30,
-        "leverage": 5,
-        "risk_per_trade": 0.08,
-        "max_daily_loss_pct": 10.0,
-        "max_consecutive_losses": 5,
-        "cooldown_hours": 24,
-    },
-}
 
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -54,7 +29,8 @@ def _to_circuit(params):
     }
 
 
-def load_state(name):
+def _legacy_loop_removed():
+    raise RuntimeError("legacy paper loop removed")
     params = STRATEGIES[name]
     return load_shared_state(
         MULTI_STATE_DIR,
@@ -446,12 +422,6 @@ def run_experiment_once(session):
     return state
 
 
-def reset_states():
-    if os.path.exists(MULTI_STATE_DIR):
-        shutil.rmtree(MULTI_STATE_DIR)
-    os.makedirs(MULTI_STATE_DIR, exist_ok=True)
-
-
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if "--experiment" in argv:
@@ -477,30 +447,12 @@ def main(argv=None):
             f"positions={len(state['positions'])}, strategy={session.strategy_name}"
         )
         return state
-    if "--reset" in argv:
-        reset_states()
-        print("reset complete")
-        return
-
-    results = run_all()
-    for name, state in results.items():
-        stats = state["stats"]
-        total = stats["total_trades"]
-        wr = stats["wins"] / total * 100 if total else 0
-        print(f"{name}: balance=${state['balance']:.2f}, trades={total}, win_rate={wr:.1f}%")
+    raise SystemExit("paper experiments require --experiment and --approval-result")
 
 
 __all__ = [
     "MULTI_STATE_DIR",
-    "STRATEGIES",
     "WATCHLIST",
-    "calc_position_size",
-    "generate_trend_signal",
-    "get_binance_klines",
-    "load_state",
     "main",
-    "reset_states",
-    "run_all",
-    "run_once",
-    "save_state",
+    "run_experiment_once",
 ]

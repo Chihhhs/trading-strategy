@@ -95,7 +95,7 @@ Trend:
 
 - Capability exists in backtest, paper, and live wiring.
 - Current canonical live-like baseline is not good enough for live alpha promotion.
-- Live uses the fixed 38-coin `LIVE_UNIVERSE` in `apps/live_config.py`: 20 active members retained from the historical reference plus 18 active Hyperliquid market-cap leaders, frozen on 2026-07-16. Paper has no configured universe and collects every active Hyperliquid perp from `meta`. The historical 50-coin experiment remains research evidence, not runtime authority.
+- Live and `paper_execution_runner` use the fixed 38-coin `LIVE_UNIVERSE` in `apps/live_config.py`. `paper_collector` caches every active Hyperliquid perp and `paper_runner` observes all of them without simulated positions; their state and logs are separate. The historical 50-coin experiment remains research evidence, not runtime authority.
 - Next research should target entry quality, BTC regime, and universe selection.
 - Stop-stage, ATR trail, close-confirmed stop, and failure-exit tuning are not the priority unless new evidence changes the baseline.
 
@@ -127,6 +127,8 @@ Live and paper:
 python apps/runners/live_runner.py --live
 python apps/runners/live_runner.py --live --loop
 python apps/runners/paper_runner.py
+python apps/runners/paper_collector.py
+python apps/runners/paper_execution_runner.py
 ```
 
 Representative trend backtest:

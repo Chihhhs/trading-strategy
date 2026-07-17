@@ -2,6 +2,34 @@ from tests.live_test_support import check_entries, live, patch, unittest
 
 
 class LiveEntriesTest(unittest.TestCase):
+    def test_observer_profile_records_decision_without_opening_position(self):
+        old_mode = live.config.MODE
+        old_strategy = dict(live.config.STRATEGY)
+        live.config.set_mode("paper")
+        live.config.STRATEGY["paper_execution_enabled"] = False
+        try:
+            state = {"balance": 100.0, "positions": [], "history": []}
+            bars = [
+                {"time": index, "open": 100.0, "high": 101.0, "low": 99.0, "close": 100.0, "volume": 100.0}
+                for index in range(60)
+            ]
+            with patch("trading_strategy.live.engine.entries.get_klines", return_value=bars), patch(
+                "trading_strategy.live.engine.entries.get_current_prices", return_value={"BTC": 100.0}
+            ), patch("trading_strategy.live.engine.entries.get_btc_direction", return_value="neutral"), patch(
+                "trading_strategy.live.engine.entries.generate_signal",
+                return_value={"direction": "long", "score": 3, "sl": 90.0, "tp": 110.0, "reason": "TREND_BUY"},
+            ), patch("trading_strategy.live.engine.entries.record_trade_event"), patch(
+                "trading_strategy.live.engine.entries.observe_market_context", return_value={}
+            ):
+                summary = check_entries(state, [{"name": "BTC", "symbol": "BTCUSDT"}])
+            self.assertEqual(state["positions"], [])
+            self.assertEqual(summary["positions_opened"], 0)
+            self.assertEqual(summary["decision_action_counts"].get("observation_only"), 1)
+        finally:
+            live.config.STRATEGY.clear()
+            live.config.STRATEGY.update(old_strategy)
+            live.config.set_mode(old_mode)
+
     @patch("trading_strategy.live.engine.entries.record_trade_event")
     @patch("trading_strategy.live.engine.entries.get_klines")
     def test_paper_refreshes_every_coin_cache_when_position_limit_is_reached(

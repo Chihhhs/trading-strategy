@@ -1,0 +1,716 @@
+{
+  "metadata": {
+    "mode": "paper",
+    "market_data_source": "hyperliquid"
+  },
+  "coins": [
+    {
+      "name": "BTC",
+      "symbol": "BTCUSDT"
+    },
+    {
+      "name": "ETH",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "name": "ATOM",
+      "symbol": "ATOMUSDT"
+    },
+    {
+      "name": "DYDX",
+      "symbol": "DYDXUSDT"
+    },
+    {
+      "name": "SOL",
+      "symbol": "SOLUSDT"
+    },
+    {
+      "name": "AVAX",
+      "symbol": "AVAXUSDT"
+    },
+    {
+      "name": "BNB",
+      "symbol": "BNBUSDT"
+    },
+    {
+      "name": "APE",
+      "symbol": "APEUSDT"
+    },
+    {
+      "name": "OP",
+      "symbol": "OPUSDT"
+    },
+    {
+      "name": "LTC",
+      "symbol": "LTCUSDT"
+    },
+    {
+      "name": "ARB",
+      "symbol": "ARBUSDT"
+    },
+    {
+      "name": "DOGE",
+      "symbol": "DOGEUSDT"
+    },
+    {
+      "name": "INJ",
+      "symbol": "INJUSDT"
+    },
+    {
+      "name": "SUI",
+      "symbol": "SUIUSDT"
+    },
+    {
+      "name": "kPEPE",
+      "symbol": "kPEPEUSDT"
+    },
+    {
+      "name": "CRV",
+      "symbol": "CRVUSDT"
+    },
+    {
+      "name": "LDO",
+      "symbol": "LDOUSDT"
+    },
+    {
+      "name": "LINK",
+      "symbol": "LINKUSDT"
+    },
+    {
+      "name": "STX",
+      "symbol": "STXUSDT"
+    },
+    {
+      "name": "CFX",
+      "symbol": "CFXUSDT"
+    },
+    {
+      "name": "GMX",
+      "symbol": "GMXUSDT"
+    },
+    {
+      "name": "SNX",
+      "symbol": "SNXUSDT"
+    },
+    {
+      "name": "XRP",
+      "symbol": "XRPUSDT"
+    },
+    {
+      "name": "BCH",
+      "symbol": "BCHUSDT"
+    },
+    {
+      "name": "APT",
+      "symbol": "APTUSDT"
+    },
+    {
+      "name": "AAVE",
+      "symbol": "AAVEUSDT"
+    },
+    {
+      "name": "COMP",
+      "symbol": "COMPUSDT"
+    },
+    {
+      "name": "WLD",
+      "symbol": "WLDUSDT"
+    },
+    {
+      "name": "YGG",
+      "symbol": "YGGUSDT"
+    },
+    {
+      "name": "TRX",
+      "symbol": "TRXUSDT"
+    },
+    {
+      "name": "kSHIB",
+      "symbol": "kSHIBUSDT"
+    },
+    {
+      "name": "UNI",
+      "symbol": "UNIUSDT"
+    },
+    {
+      "name": "SEI",
+      "symbol": "SEIUSDT"
+    },
+    {
+      "name": "RUNE",
+      "symbol": "RUNEUSDT"
+    },
+    {
+      "name": "ZRO",
+      "symbol": "ZROUSDT"
+    },
+    {
+      "name": "DOT",
+      "symbol": "DOTUSDT"
+    },
+    {
+      "name": "BANANA",
+      "symbol": "BANANAUSDT"
+    },
+    {
+      "name": "TRB",
+      "symbol": "TRBUSDT"
+    },
+    {
+      "name": "BIGTIME",
+      "symbol": "BIGTIMEUSDT"
+    },
+    {
+      "name": "KAS",
+      "symbol": "KASUSDT"
+    },
+    {
+      "name": "BLUR",
+      "symbol": "BLURUSDT"
+    },
+    {
+      "name": "TIA",
+      "symbol": "TIAUSDT"
+    },
+    {
+      "name": "BSV",
+      "symbol": "BSVUSDT"
+    },
+    {
+      "name": "ADA",
+      "symbol": "ADAUSDT"
+    },
+    {
+      "name": "MINA",
+      "symbol": "MINAUSDT"
+    },
+    {
+      "name": "POLYX",
+      "symbol": "POLYXUSDT"
+    },
+    {
+      "name": "GAS",
+      "symbol": "GASUSDT"
+    },
+    {
+      "name": "PENDLE",
+      "symbol": "PENDLEUSDT"
+    },
+    {
+      "name": "FET",
+      "symbol": "FETUSDT"
+    },
+    {
+      "name": "NEAR",
+      "symbol": "NEARUSDT"
+    },
+    {
+      "name": "MEME",
+      "symbol": "MEMEUSDT"
+    },
+    {
+      "name": "ORDI",
+      "symbol": "ORDIUSDT"
+    },
+    {
+      "name": "NEO",
+      "symbol": "NEOUSDT"
+    },
+    {
+      "name": "ZEN",
+      "symbol": "ZENUSDT"
+    },
+    {
+      "name": "FIL",
+      "symbol": "FILUSDT"
+    },
+    {
+      "name": "PYTH",
+      "symbol": "PYTHUSDT"
+    },
+    {
+      "name": "SUSHI",
+      "symbol": "SUSHIUSDT"
+    },
+    {
+      "name": "IMX",
+      "symbol": "IMXUSDT"
+    },
+    {
+      "name": "kBONK",
+      "symbol": "kBONKUSDT"
+    },
+    {
+      "name": "GMT",
+      "symbol": "GMTUSDT"
+    },
+    {
+      "name": "SUPER",
+      "symbol": "SUPERUSDT"
+    },
+    {
+      "name": "JUP",
+      "symbol": "JUPUSDT"
+    },
+    {
+      "name": "kLUNC",
+      "symbol": "kLUNCUSDT"
+    },
+    {
+      "name": "RSR",
+      "symbol": "RSRUSDT"
+    },
+    {
+      "name": "GALA",
+      "symbol": "GALAUSDT"
+    },
+    {
+      "name": "JTO",
+      "symbol": "JTOUSDT"
+    },
+    {
+      "name": "ACE",
+      "symbol": "ACEUSDT"
+    },
+    {
+      "name": "WIF",
+      "symbol": "WIFUSDT"
+    },
+    {
+      "name": "CAKE",
+      "symbol": "CAKEUSDT"
+    },
+    {
+      "name": "PEOPLE",
+      "symbol": "PEOPLEUSDT"
+    },
+    {
+      "name": "ENS",
+      "symbol": "ENSUSDT"
+    },
+    {
+      "name": "ETC",
+      "symbol": "ETCUSDT"
+    },
+    {
+      "name": "XAI",
+      "symbol": "XAIUSDT"
+    },
+    {
+      "name": "MANTA",
+      "symbol": "MANTAUSDT"
+    },
+    {
+      "name": "UMA",
+      "symbol": "UMAUSDT"
+    },
+    {
+      "name": "ONDO",
+      "symbol": "ONDOUSDT"
+    },
+    {
+      "name": "ALT",
+      "symbol": "ALTUSDT"
+    },
+    {
+      "name": "ZETA",
+      "symbol": "ZETAUSDT"
+    },
+    {
+      "name": "DYM",
+      "symbol": "DYMUSDT"
+    },
+    {
+      "name": "W",
+      "symbol": "WUSDT"
+    },
+    {
+      "name": "STRK",
+      "symbol": "STRKUSDT"
+    },
+    {
+      "name": "TAO",
+      "symbol": "TAOUSDT"
+    },
+    {
+      "name": "AR",
+      "symbol": "ARUSDT"
+    },
+    {
+      "name": "kFLOKI",
+      "symbol": "kFLOKIUSDT"
+    },
+    {
+      "name": "BOME",
+      "symbol": "BOMEUSDT"
+    },
+    {
+      "name": "ETHFI",
+      "symbol": "ETHFIUSDT"
+    },
+    {
+      "name": "ENA",
+      "symbol": "ENAUSDT"
+    },
+    {
+      "name": "MNT",
+      "symbol": "MNTUSDT"
+    },
+    {
+      "name": "TNSR",
+      "symbol": "TNSRUSDT"
+    },
+    {
+      "name": "SAGA",
+      "symbol": "SAGAUSDT"
+    },
+    {
+      "name": "MERL",
+      "symbol": "MERLUSDT"
+    },
+    {
+      "name": "HBAR",
+      "symbol": "HBARUSDT"
+    },
+    {
+      "name": "POPCAT",
+      "symbol": "POPCATUSDT"
+    },
+    {
+      "name": "EIGEN",
+      "symbol": "EIGENUSDT"
+    },
+    {
+      "name": "REZ",
+      "symbol": "REZUSDT"
+    },
+    {
+      "name": "NOT",
+      "symbol": "NOTUSDT"
+    },
+    {
+      "name": "TURBO",
+      "symbol": "TURBOUSDT"
+    },
+    {
+      "name": "BRETT",
+      "symbol": "BRETTUSDT"
+    },
+    {
+      "name": "IO",
+      "symbol": "IOUSDT"
+    },
+    {
+      "name": "ZK",
+      "symbol": "ZKUSDT"
+    },
+    {
+      "name": "RENDER",
+      "symbol": "RENDERUSDT"
+    },
+    {
+      "name": "POL",
+      "symbol": "POLUSDT"
+    },
+    {
+      "name": "CELO",
+      "symbol": "CELOUSDT"
+    },
+    {
+      "name": "HMSTR",
+      "symbol": "HMSTRUSDT"
+    },
+    {
+      "name": "kNEIRO",
+      "symbol": "kNEIROUSDT"
+    },
+    {
+      "name": "GOAT",
+      "symbol": "GOATUSDT"
+    },
+    {
+      "name": "MOODENG",
+      "symbol": "MOODENGUSDT"
+    },
+    {
+      "name": "GRASS",
+      "symbol": "GRASSUSDT"
+    },
+    {
+      "name": "PURR",
+      "symbol": "PURRUSDT"
+    },
+    {
+      "name": "PNUT",
+      "symbol": "PNUTUSDT"
+    },
+    {
+      "name": "XLM",
+      "symbol": "XLMUSDT"
+    },
+    {
+      "name": "SAND",
+      "symbol": "SANDUSDT"
+    },
+    {
+      "name": "IOTA",
+      "symbol": "IOTAUSDT"
+    },
+    {
+      "name": "ALGO",
+      "symbol": "ALGOUSDT"
+    },
+    {
+      "name": "HYPE",
+      "symbol": "HYPEUSDT"
+    },
+    {
+      "name": "ME",
+      "symbol": "MEUSDT"
+    },
+    {
+      "name": "MOVE",
+      "symbol": "MOVEUSDT"
+    },
+    {
+      "name": "VIRTUAL",
+      "symbol": "VIRTUALUSDT"
+    },
+    {
+      "name": "PENGU",
+      "symbol": "PENGUUSDT"
+    },
+    {
+      "name": "USUAL",
+      "symbol": "USUALUSDT"
+    },
+    {
+      "name": "FARTCOIN",
+      "symbol": "FARTCOINUSDT"
+    },
+    {
+      "name": "AIXBT",
+      "symbol": "AIXBTUSDT"
+    },
+    {
+      "name": "BIO",
+      "symbol": "BIOUSDT"
+    },
+    {
+      "name": "GRIFFAIN",
+      "symbol": "GRIFFAINUSDT"
+    },
+    {
+      "name": "SPX",
+      "symbol": "SPXUSDT"
+    },
+    {
+      "name": "S",
+      "symbol": "SUSDT"
+    },
+    {
+      "name": "MORPHO",
+      "symbol": "MORPHOUSDT"
+    },
+    {
+      "name": "TRUMP",
+      "symbol": "TRUMPUSDT"
+    },
+    {
+      "name": "MELANIA",
+      "symbol": "MELANIAUSDT"
+    },
+    {
+      "name": "ANIME",
+      "symbol": "ANIMEUSDT"
+    },
+    {
+      "name": "VINE",
+      "symbol": "VINEUSDT"
+    },
+    {
+      "name": "VVV",
+      "symbol": "VVVUSDT"
+    },
+    {
+      "name": "BERA",
+      "symbol": "BERAUSDT"
+    },
+    {
+      "name": "LAYER",
+      "symbol": "LAYERUSDT"
+    },
+    {
+      "name": "KAITO",
+      "symbol": "KAITOUSDT"
+    },
+    {
+      "name": "NIL",
+      "symbol": "NILUSDT"
+    },
+    {
+      "name": "PAXG",
+      "symbol": "PAXGUSDT"
+    },
+    {
+      "name": "BABY",
+      "symbol": "BABYUSDT"
+    },
+    {
+      "name": "WCT",
+      "symbol": "WCTUSDT"
+    },
+    {
+      "name": "HYPER",
+      "symbol": "HYPERUSDT"
+    },
+    {
+      "name": "ZORA",
+      "symbol": "ZORAUSDT"
+    },
+    {
+      "name": "INIT",
+      "symbol": "INITUSDT"
+    },
+    {
+      "name": "NXPC",
+      "symbol": "NXPCUSDT"
+    },
+    {
+      "name": "SOPH",
+      "symbol": "SOPHUSDT"
+    },
+    {
+      "name": "RESOLV",
+      "symbol": "RESOLVUSDT"
+    },
+    {
+      "name": "SYRUP",
+      "symbol": "SYRUPUSDT"
+    },
+    {
+      "name": "PUMP",
+      "symbol": "PUMPUSDT"
+    },
+    {
+      "name": "PROVE",
+      "symbol": "PROVEUSDT"
+    },
+    {
+      "name": "XPL",
+      "symbol": "XPLUSDT"
+    },
+    {
+      "name": "WLFI",
+      "symbol": "WLFIUSDT"
+    },
+    {
+      "name": "LINEA",
+      "symbol": "LINEAUSDT"
+    },
+    {
+      "name": "SKY",
+      "symbol": "SKYUSDT"
+    },
+    {
+      "name": "ASTER",
+      "symbol": "ASTERUSDT"
+    },
+    {
+      "name": "AVNT",
+      "symbol": "AVNTUSDT"
+    },
+    {
+      "name": "STBL",
+      "symbol": "STBLUSDT"
+    },
+    {
+      "name": "0G",
+      "symbol": "0GUSDT"
+    },
+    {
+      "name": "HEMI",
+      "symbol": "HEMIUSDT"
+    },
+    {
+      "name": "APEX",
+      "symbol": "APEXUSDT"
+    },
+    {
+      "name": "2Z",
+      "symbol": "2ZUSDT"
+    },
+    {
+      "name": "ZEC",
+      "symbol": "ZECUSDT"
+    },
+    {
+      "name": "MON",
+      "symbol": "MONUSDT"
+    },
+    {
+      "name": "MET",
+      "symbol": "METUSDT"
+    },
+    {
+      "name": "MEGA",
+      "symbol": "MEGAUSDT"
+    },
+    {
+      "name": "CC",
+      "symbol": "CCUSDT"
+    },
+    {
+      "name": "ICP",
+      "symbol": "ICPUSDT"
+    },
+    {
+      "name": "AERO",
+      "symbol": "AEROUSDT"
+    },
+    {
+      "name": "STABLE",
+      "symbol": "STABLEUSDT"
+    },
+    {
+      "name": "FOGO",
+      "symbol": "FOGOUSDT"
+    },
+    {
+      "name": "LIT",
+      "symbol": "LITUSDT"
+    },
+    {
+      "name": "XMR",
+      "symbol": "XMRUSDT"
+    },
+    {
+      "name": "AXS",
+      "symbol": "AXSUSDT"
+    },
+    {
+      "name": "DASH",
+      "symbol": "DASHUSDT"
+    },
+    {
+      "name": "SKR",
+      "symbol": "SKRUSDT"
+    },
+    {
+      "name": "AZTEC",
+      "symbol": "AZTECUSDT"
+    },
+    {
+      "name": "CHIP",
+      "symbol": "CHIPUSDT"
+    },
+    {
+      "name": "GRAM",
+      "symbol": "GRAMUSDT"
+    },
+    {
+      "name": "CASHCAT",
+      "symbol": "CASHCATUSDT"
+    }
+  ]
+}

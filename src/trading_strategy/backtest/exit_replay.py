@@ -19,9 +19,15 @@ def timestamp_ms(bar):
             return int(value)
         if isinstance(value, str) and value.strip().isdigit():
             return int(value)
-    value = bar.get("time") or bar.get("date")
-    if not value:
+    value = bar.get("time")
+    if value is None:
+        value = bar.get("date")
+    if value is None:
         return None
+    if isinstance(value, (int, float)):
+        return int(value)
+    if isinstance(value, str) and value.strip().isdigit():
+        return int(value)
     try:
         parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     except ValueError:

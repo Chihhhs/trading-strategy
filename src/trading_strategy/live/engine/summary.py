@@ -75,6 +75,8 @@ def build_strategy_snapshot():
         "risk_per_trade": config.STRATEGY["risk_per_trade"],
         "max_positions": config.STRATEGY["max_positions"],
         "market_data_source": config.get_market_data_source(),
+        "paper_profile": config.get_paper_profile() if config.MODE == "paper" else None,
+        "paper_execution_enabled": config.STRATEGY.get("paper_execution_enabled", True),
         "derivatives_crowding_exit_enabled": config.STRATEGY.get("derivatives_crowding_exit_enabled", False),
         "derivatives_crowding_action": config.STRATEGY.get("derivatives_crowding_action"),
         "derivatives_crowding_reduce_fraction": config.STRATEGY.get("derivatives_crowding_reduce_fraction"),

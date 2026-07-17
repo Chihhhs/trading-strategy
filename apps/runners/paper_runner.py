@@ -19,6 +19,7 @@ def main(argv=None):
         from trading_strategy.paper import main as experiment_main
 
         return experiment_main(argv)
+    os.environ["PAPER_PROFILE"] = "observer"
     return load_live_main()()
 
 

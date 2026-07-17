@@ -29,11 +29,19 @@ class LiveHelpersTest(unittest.TestCase):
         old_mode = config.MODE
         old_strategy = dict(config.STRATEGY)
         old_mode_overrides = dict(config.MODE_STRATEGY_OVERRIDES)
+        old_profile_overrides = dict(config.PAPER_PROFILE_STRATEGY_OVERRIDES)
         try:
             apply_overrides(config)
-            config.set_mode("paper")
-            self.assertEqual(config.STRATEGY["max_positions"], 10)
-            self.assertIsNone(config.STRATEGY["coin_universe"])
+            with patch.dict(os.environ, {"PAPER_PROFILE": "observer"}):
+                config.set_mode("paper")
+                self.assertEqual(config.STRATEGY["max_positions"], 10)
+                self.assertIsNone(config.STRATEGY["coin_universe"])
+                self.assertFalse(config.STRATEGY["paper_execution_enabled"])
+            with patch.dict(os.environ, {"PAPER_PROFILE": "execution"}):
+                config.set_mode("paper")
+                self.assertEqual(config.STRATEGY["max_positions"], 2)
+                self.assertEqual(config.STRATEGY["coin_universe"], list(LIVE_UNIVERSE))
+                self.assertTrue(config.STRATEGY["paper_execution_enabled"])
             config.set_mode("live")
             self.assertEqual(config.STRATEGY["max_positions"], 2)
             self.assertEqual(config.STRATEGY["coin_universe"], list(LIVE_UNIVERSE))
@@ -42,6 +50,8 @@ class LiveHelpersTest(unittest.TestCase):
             config.STRATEGY.update(old_strategy)
             config.MODE_STRATEGY_OVERRIDES.clear()
             config.MODE_STRATEGY_OVERRIDES.update(old_mode_overrides)
+            config.PAPER_PROFILE_STRATEGY_OVERRIDES.clear()
+            config.PAPER_PROFILE_STRATEGY_OVERRIDES.update(old_profile_overrides)
             config.set_mode(old_mode)
 
     def test_test_events_write_to_the_temp_history_directory(self):
@@ -293,11 +303,18 @@ class LiveHelpersTest(unittest.TestCase):
             config.LIVE_STATE_DIR = old_live_state_dir
             config.set_mode(old_mode)
 
-    def test_get_state_dir_separates_paper_and_live(self):
+    def test_get_state_dir_separates_paper_profiles_and_live(self):
         old_mode = config.MODE
         try:
-            config.set_mode("paper")
-            self.assertEqual(config.get_state_dir(), config.PAPER_STATE_DIR)
+            with patch.dict(os.environ, {"PAPER_PROFILE": "collector"}):
+                config.set_mode("paper")
+                self.assertEqual(config.get_state_dir(), config.PAPER_COLLECTOR_STATE_DIR)
+            with patch.dict(os.environ, {"PAPER_PROFILE": "observer"}):
+                config.set_mode("paper")
+                self.assertEqual(config.get_state_dir(), config.PAPER_OBSERVER_STATE_DIR)
+            with patch.dict(os.environ, {"PAPER_PROFILE": "execution"}):
+                config.set_mode("paper")
+                self.assertEqual(config.get_state_dir(), config.PAPER_EXECUTION_STATE_DIR)
             config.set_mode("live")
             self.assertEqual(config.get_state_dir(), config.LIVE_STATE_DIR)
         finally:
@@ -316,9 +333,9 @@ class LiveHelpersTest(unittest.TestCase):
 
     def test_paper_klines_fall_back_to_persisted_cache_after_network_failure(self):
         old_mode = config.MODE
-        old_paper_state_dir = config.PAPER_STATE_DIR
+        old_paper_state_dir = config.PAPER_OBSERVER_STATE_DIR
         tmpdir = tempfile.mkdtemp()
-        config.PAPER_STATE_DIR = tmpdir
+        config.PAPER_OBSERVER_STATE_DIR = tmpdir
         config.set_mode("paper")
         online_bars = [
             {"time": 1, "open": 10.0, "high": 11.0, "low": 9.0, "close": 10.5, "volume": 100.0},
@@ -335,13 +352,13 @@ class LiveHelpersTest(unittest.TestCase):
             ):
                 self.assertEqual(market.get_klines("BTCUSDT", 2), online_bars)
         finally:
-            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.PAPER_OBSERVER_STATE_DIR = old_paper_state_dir
             config.set_mode(old_mode)
 
     def test_paper_market_data_prefers_hyperliquid(self):
         old_mode = config.MODE
-        old_paper_state_dir = config.PAPER_STATE_DIR
-        config.PAPER_STATE_DIR = tempfile.mkdtemp()
+        old_paper_state_dir = config.PAPER_OBSERVER_STATE_DIR
+        config.PAPER_OBSERVER_STATE_DIR = tempfile.mkdtemp()
         config.set_mode("paper")
         try:
             with patch("trading_strategy.live.market.hl_info_post", return_value=[{"t": 1, "o": "1", "h": "2", "l": "0.5", "c": "1.5", "v": "10"}]) as hl_info_post:
@@ -354,13 +371,13 @@ class LiveHelpersTest(unittest.TestCase):
                 market.get_ticker("CCUSDT")
             self.assertEqual(hl_info_post.call_args_list[0].args[0], {"type": "allMids"})
         finally:
-            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.PAPER_OBSERVER_STATE_DIR = old_paper_state_dir
             config.set_mode(old_mode)
 
     def test_paper_market_data_falls_back_to_binance_for_missing_hyperliquid_coin(self):
         old_mode = config.MODE
-        old_paper_state_dir = config.PAPER_STATE_DIR
-        config.PAPER_STATE_DIR = tempfile.mkdtemp()
+        old_paper_state_dir = config.PAPER_OBSERVER_STATE_DIR
+        config.PAPER_OBSERVER_STATE_DIR = tempfile.mkdtemp()
         config.set_mode("paper")
         try:
             with patch("trading_strategy.live.market.hl_info_post", return_value=None), patch(
@@ -376,14 +393,14 @@ class LiveHelpersTest(unittest.TestCase):
             self.assertEqual(ticker["price"], 1.0)
             self.assertIn("fapi.binance.com/fapi/v1/ticker/24hr", api_get.call_args.args[0])
         finally:
-            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.PAPER_OBSERVER_STATE_DIR = old_paper_state_dir
             config.set_mode(old_mode)
 
     def test_paper_cache_rejects_legacy_binance_spot_metadata(self):
         old_mode = config.MODE
-        old_paper_state_dir = config.PAPER_STATE_DIR
+        old_paper_state_dir = config.PAPER_OBSERVER_STATE_DIR
         tmpdir = tempfile.mkdtemp()
-        config.PAPER_STATE_DIR = tmpdir
+        config.PAPER_OBSERVER_STATE_DIR = tmpdir
         config.set_mode("paper")
         try:
             path = os.path.join(tmpdir, "market_data", "BTCUSDT_1d.json")
@@ -392,7 +409,7 @@ class LiveHelpersTest(unittest.TestCase):
                 handle.write('{"metadata":{"interval":"1d","market_data_source":"binance"},"klines":[]}')
             self.assertIsNone(market._load_cached_klines("BTCUSDT", "1d"))
         finally:
-            config.PAPER_STATE_DIR = old_paper_state_dir
+            config.PAPER_OBSERVER_STATE_DIR = old_paper_state_dir
             config.set_mode(old_mode)
 
     def test_live_klines_never_fall_back_to_paper_cache(self):

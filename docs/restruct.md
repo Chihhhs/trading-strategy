@@ -24,7 +24,7 @@ python backtest/backtest_runner.py --coins BTC,ETH --strategy trend --max-days 2
 ## App Imports
 
 - `apps/runners/live_runner.py` does not implement trading logic itself; it bootstraps `trading_strategy.live.main`.
-- `apps/runners/paper_runner.py` bootstraps the same `trading_strategy.live.main` in paper mode, preserving the separate paper state directory and current Decision/cache workflow.
+- `apps/runners/paper_collector.py` caches every active Hyperliquid market without decisions or positions; `apps/runners/paper_runner.py` observes Decisions and Market Context; `apps/runners/paper_execution_runner.py` simulates the fixed live 38-coin contract. Each profile has a separate state and event-log directory.
 - `apps/live_config.py` remains an app-side override file and mutates `trading_strategy.live.config`.
   Its `LIVE_UNIVERSE` is the fixed 38-coin runtime entry contract (frozen
   2026-07-16); it is not a daily market-cap refresh and must be changed only

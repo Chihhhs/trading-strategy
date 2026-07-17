@@ -14,8 +14,12 @@ Research modes are defined in `.agents/research_modes.md`: `optimize_existing_tr
 - Live uses the fixed 38-coin `LIVE_UNIVERSE` in `apps/live_config.py`: the
   20 still-active historical members plus the 2026-07-16 market-cap leaders
   that have active Hyperliquid perps. It is a deliberate static contract, not
-  a daily ranking. Paper deliberately has no configured universe and loads all
-  active Hyperliquid perps from `meta` for data collection. Do not substitute
+  a daily ranking. Future paper work is split: `paper_collector` refreshes all
+  active Hyperliquid market data, `paper_runner` observes Decisions and Market
+  Context without positions, and `paper_execution_runner` simulates only the
+  fixed live 38 universe in its own state directory. The prior mixed paper
+  directory is retained as legacy evidence and must not be used for evaluation.
+  Do not substitute
   the old 3-coin override or the historical 50-coin research fixture for live.
 - Paper and live prefer Hyperliquid market data for the fixed 38-coin universe.
   A coin with missing Hyperliquid price or K-lines may fall back to Binance USDⓈ-M
@@ -25,10 +29,9 @@ Research modes are defined in `.agents/research_modes.md`: `optimize_existing_tr
   is active and tradable on Hyperliquid before submitting an order.
 - Live unit-test event records are isolated in an OS temporary directory; do
   not treat them as paper or live observation evidence.
-- Position capacity is mode-specific: paper permits 10 concurrent simulated
-  positions for evidence collection; live remains capped at 2.
-- Paper refreshes every active Hyperliquid perp K-line cache before checking
-  its position limit, so a full paper portfolio cannot stop offline-data accumulation.
+- Only `paper_execution_runner` can create simulated positions; it is capped at
+  the same two positions and fixed 38-coin universe as live. Collector and
+  observer never create positions, so their coverage cannot be blocked by capacity.
 - Live entry is blocked when protection status is unknown, ambiguous, or unverified.
 - Unknown or ambiguous protection orders must not be automatically canceled or replaced.
 - Strategy promotion path is always: research -> cost-adjusted backtest -> gate -> bounded paper observation -> explicit live review.
@@ -43,7 +46,7 @@ Research modes are defined in `.agents/research_modes.md`: `optimize_existing_tr
 | P1 | Live decision architecture | Implemented in observe-only mode. Each signal path emits a reason-coded `Decision` event and summary aggregation without changing entry behavior. Live uses the frozen 38-coin contract; paper loads every active Hyperliquid perp and source-tags any per-coin fallback cache. Paper-mode K-line cache may resolve pending observations while offline; it never supplies a live decision or entry price. | Continue collecting paper observations through `apps/runners/paper_runner.py`; keep Hyperliquid execution eligibility explicit and do not equate fallback data coverage with order eligibility. | `apps/live_config.py`, `apps/runners/paper_runner.py`, `src/trading_strategy/live/decision.py`, `src/trading_strategy/live/market.py`, Hyperliquid public `meta` |
 | P1 | Live market context | Implemented as a hypothetical annotation in `Decision`; it is not a live gate. | Compare observed hypothetical outcomes only after enough normal-run samples exist. | `src/trading_strategy/live/decision.py`, `docs/research_manual/09_trend_market_context_candidate.md` |
 | Complete | Module cleanup | Removed obsolete app/versioned wrappers and the `core` package. Shared helpers now live in `shared/`, strategy hooks in `strategies/`, and position helpers in `positions/`. | Keep canonical runner commands and persisted schemas stable. Retain the public `legacy_unified` negative-control strategy under `strategies/`. | `docs/restruct.md`, live/backtest tests |
-| P1 | Trend strategy | `optimize_existing_trend`: canonical 50-coin causal replay is complete, but the baseline fails the performance and drawdown gate. | Do not create a paper candidate. Develop one new pre-defined entry, BTC-regime, or universe hypothesis only after attribution evidence supports it. | `data/research_artifacts/live_trend_baseline_1h_replay_50coin.json`, `docs/research_manual/09_trend_market_context_candidate.md` |
+| P1 | Trend strategy | Fixed live-38 research baseline and one RSI-ceiling diagnostic are complete. The candidate improves all three relative windows but has an insufficient 120d sample and concentrated 240d gains. | Run one stricter OOS/absolute-performance and concentration validation only. Do not create an observer, paper, or live candidate. | `docs/research_manual/11_live_trend_38_entry_quality_diagnostic_2026-07-17.md` |
 | P1 | Trend market context | `optimize_existing_trend` research-only candidate: causal regime entry filter plus momentum-decay time limit. | Blocked: attribution produced no cross-fold hypothesis and the canonical baseline is negative with severe MTM drawdown. No shadow or promotion. | `data/research_artifacts/trend_entry_attribution_50coin.json`, `data/research_artifacts/live_trend_baseline_1h_replay_50coin.json` |
 | P1 | Intraday momentum | `new_alpha_research`; rejected for paper/live. Keep only as a wiring baseline and negative control. | Measurement integrity, frozen short-cycle baselines, one-factor ablation, and research reports only. | `.agents/research_modes.md`, `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md` |
 | P1 | Intraday turnover | Turnover reduction alone is not enough. Current issue is negative or weak raw edge plus 13 bps round-trip cost. | Collect per-trade diagnostics and compare frozen candidates. Do not promote if net PnL remains negative. | `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md` |

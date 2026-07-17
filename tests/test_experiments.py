@@ -315,6 +315,36 @@ class ExperimentSpecTest(unittest.TestCase):
         self.assertEqual(diff["costs.slippage_bps"], {"baseline": 2.0, "candidate": 3.0})
         self.assertNotIn("name", diff)
 
+    def test_entry_quality_diagnostic_never_authorizes_paper_or_live(self):
+        from backtest.run_entry_quality_diagnostic import build_diagnostic
+        from trading_strategy.experiments import ExperimentResult, ExperimentSpec
+
+        baseline = ExperimentSpec.from_mapping(self._payload())
+        candidate_payload = self._payload()
+        candidate_payload["strategy"]["parameters"]["trend_rsi_max_long"] = 50.0
+        candidate = ExperimentSpec.from_mapping(candidate_payload)
+        baseline_row = ExperimentResult("baseline", "a", "fixture", "trend", 120, ("BTC",), 5, -5.0, 20.0, 1.0, {"BTC": -5.0})
+        candidate_row = ExperimentResult("candidate", "b", "fixture", "trend", 120, ("BTC",), 5, -4.0, 19.0, 0.8, {"BTC": -4.0})
+        report = build_diagnostic(baseline, candidate, [baseline_row], [candidate_row])
+        self.assertEqual(report["status"], "research_follow_up")
+        self.assertTrue(report["research_only"])
+        self.assertIn("live", report["does_not_authorize"])
+
+    def test_btc_regime_attribution_is_causal_and_marks_small_buckets(self):
+        from trading_strategy.backtest.regime_attribution import btc_regime_at, portfolio_attribution, research_verdict
+
+        bars = [{"time": index * 86_400_000, "close": 100.0 + index} for index in range(8)]
+        self.assertEqual(btc_regime_at(bars, 7 * 86_400_000, threshold_pct=3.0), "bull")
+        self.assertEqual(btc_regime_at(bars, 5 * 86_400_000, threshold_pct=3.0), "neutral")
+        report = portfolio_attribution([
+            {"coin": "BTC", "direction": "long", "entry_time": 7 * 86_400_000, "exit_time": 8 * 86_400_000, "pnl": 1.0, "gross_pnl": 1.1, "cost": 0.1, "hold_bars": 1, "exit_reason": "EOD"}
+        ], bars)
+        self.assertEqual(report["buckets"]["bull:long"]["trades"], 1)
+        self.assertTrue(report["buckets"]["bull:long"]["insufficient_sample"])
+        self.assertEqual(report["buckets"]["bull:long"]["coin_concentration"]["top_1"]["coin"], "BTC")
+        self.assertEqual(report["buckets"]["bull:long"]["coin_concentration"]["leave_one_coin_out"][0]["net_pnl_without_coin"], 0.0)
+        self.assertEqual(research_verdict(report), "insufficient_sample")
+
     def test_promotion_requires_majority_of_eligible_comparisons(self):
         from trading_strategy.experiments import EvaluationGate, ExperimentResult, evaluate_candidate
 

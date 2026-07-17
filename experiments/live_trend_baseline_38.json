@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "name": "live-trend-baseline-38",
+  "dataset": {
+    "id": "binance-240d-live-38coins",
+    "path": "data/historical_prices/binance_1d_300d_live_38coins.json",
+    "derivatives_path": "data/derivatives/bybit_oi_binance_funding_basis_240d_live_38coins.json"
+  },
+  "coins": ["BTC", "ETH", "BNB", "NEO", "LTC", "ADA", "XRP", "IOTA", "XLM", "TRX", "ETC", "LINK", "FET", "ZEC", "DASH", "ATOM", "ALGO", "DOGE", "HBAR", "STX", "SOL", "HYPE", "XMR", "CC", "BCH", "SUI", "AVAX", "NEAR", "UNI", "TAO", "PAXG", "WLFI", "ASTER", "ONDO", "AAVE", "SKY", "DOT", "WLD"],
+  "strategy": {
+    "name": "trend",
+    "parameters": {
+      "timeframe": "1d",
+      "min_score": 3,
+      "atr_trailing_enabled": false,
+      "adaptive_atr_trailing_enabled": false,
+      "failure_exit_enabled": false,
+      "trend_entry_filter_enabled": true,
+      "trend_rsi_min_long": 45.0,
+      "trend_rsi_max_long": 75.0,
+      "trend_rsi_min_short": 30.0,
+      "trend_rsi_max_short": 55.0,
+      "trend_max_atr_pct": 8.0,
+      "trend_price_position_lookback": 60,
+      "trend_long_max_price_position": 0.85,
+      "trend_short_min_price_position": 0.25,
+      "trend_max_roc_60_long": 120.0,
+      "trend_min_roc_60_short": -120.0,
+      "derivatives_crowding_exit_enabled": true,
+      "derivatives_crowding_action": "reduce",
+      "derivatives_crowding_reduce_fraction": 0.75,
+      "derivatives_crowding_funding_z_lookback": 30,
+      "derivatives_crowding_funding_z_threshold": 0.75,
+      "derivatives_crowding_basis_abs_threshold_pct": 0.03
+    }
+  },
+  "portfolio": {"initial_capital": 1000.0, "leverage": 5.0, "risk_pct": 0.08, "max_positions": 2},
+  "costs": {"fee_bps": 4.5, "slippage_bps": 2.0},
+  "execution": {
+    "exit_replay_path": "data/historical_prices/binance_1h_240d_live_38coins.json",
+    "replay_metadata_path": "data/historical_prices/binance_1h_240d_live_38coins.metadata.json",
+    "exit_replay_mode": "strict",
+    "drawdown_source": "mark_to_market"
+  },
+  "evaluation": {"windows": [120, 180, 240], "universes": [["BTC", "ETH", "BNB", "NEO", "LTC", "ADA", "XRP", "IOTA", "XLM", "TRX", "ETC", "LINK", "FET", "ZEC", "DASH", "ATOM", "ALGO", "DOGE", "HBAR", "STX", "SOL", "HYPE", "XMR", "CC", "BCH", "SUI", "AVAX", "NEAR", "UNI", "TAO", "PAXG", "WLFI", "ASTER", "ONDO", "AAVE", "SKY", "DOT", "WLD"]], "min_trades": 1, "min_eligible_comparisons": 1, "require_majority": false, "require_complete_data": true},
+  "target_environment": "research"
+}

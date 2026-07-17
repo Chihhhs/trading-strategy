@@ -1,0 +1,393 @@
+{
+  "checksum_sha256": "f9b2dac0e6d5ef3507078bfda9eb46c8b2831ca7d2583f40a0e9916fc334291c",
+  "coins": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "NEO",
+    "LTC",
+    "ADA",
+    "XRP",
+    "IOTA",
+    "XLM",
+    "TRX",
+    "ETC",
+    "LINK",
+    "FET",
+    "ZEC",
+    "DASH",
+    "ATOM",
+    "ALGO",
+    "DOGE",
+    "HBAR",
+    "STX",
+    "SOL",
+    "HYPE",
+    "XMR",
+    "CC",
+    "BCH",
+    "SUI",
+    "AVAX",
+    "NEAR",
+    "UNI",
+    "TAO",
+    "PAXG",
+    "WLFI",
+    "ASTER",
+    "ONDO",
+    "AAVE",
+    "SKY",
+    "DOT",
+    "WLD"
+  ],
+  "complete": true,
+  "coverage": {
+    "AAVE": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ADA": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ALGO": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ASTER": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ATOM": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "AVAX": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "BCH": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "BNB": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "BTC": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "CC": {
+      "daily_bars": 258,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "DASH": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "DOGE": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "DOT": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ETC": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ETH": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "FET": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "HBAR": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "HYPE": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "IOTA": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "LINK": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "LTC": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "NEAR": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "NEO": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ONDO": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "PAXG": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "SKY": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "SOL": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "STX": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "SUI": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "TAO": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "TRX": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "UNI": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "WLD": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "WLFI": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "XLM": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "XMR": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "XRP": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    },
+    "ZEC": {
+      "daily_bars": 300,
+      "daily_expected_bars": 300,
+      "daily_source": "binance_usdm",
+      "hourly_bars": 5760,
+      "hourly_expected_bars": 5760,
+      "hourly_source": "binance_usdm"
+    }
+  },
+  "coverage_bars": {
+    "AAVE": 5760,
+    "ADA": 5760,
+    "ALGO": 5760,
+    "ASTER": 5760,
+    "ATOM": 5760,
+    "AVAX": 5760,
+    "BCH": 5760,
+    "BNB": 5760,
+    "BTC": 5760,
+    "CC": 5760,
+    "DASH": 5760,
+    "DOGE": 5760,
+    "DOT": 5760,
+    "ETC": 5760,
+    "ETH": 5760,
+    "FET": 5760,
+    "HBAR": 5760,
+    "HYPE": 5760,
+    "IOTA": 5760,
+    "LINK": 5760,
+    "LTC": 5760,
+    "NEAR": 5760,
+    "NEO": 5760,
+    "ONDO": 5760,
+    "PAXG": 5760,
+    "SKY": 5760,
+    "SOL": 5760,
+    "STX": 5760,
+    "SUI": 5760,
+    "TAO": 5760,
+    "TRX": 5760,
+    "UNI": 5760,
+    "WLD": 5760,
+    "WLFI": 5760,
+    "XLM": 5760,
+    "XMR": 5760,
+    "XRP": 5760,
+    "ZEC": 5760
+  },
+  "end_date_exclusive": "2026-07-16",
+  "interval": "1h",
+  "market_data_policy": "binance_usdm_then_binance_spot_historical_only"
+}
