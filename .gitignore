@@ -25,3 +25,4 @@ data/trade_history/*
 data/hl_api/*
 data/l2_observations/
 data/paper_candidates/
+data/paper_strategies_momentum_shadow/
