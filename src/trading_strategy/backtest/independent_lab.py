@@ -220,7 +220,7 @@ def load_fixture(path):
 
 def load_funding_fixture(path):
     manifest_path = Path(path)
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
     data_directory = Path(manifest["data_directory"])
     if not data_directory.is_absolute() and not data_directory.is_dir():
         data_directory = manifest_path.parent / data_directory.name
@@ -315,7 +315,7 @@ def fetch_hyperliquid_funding_fixture(
     data_dir = output.with_suffix("")
     data_dir.mkdir(parents=True, exist_ok=True)
     if output.is_file():
-        payload = json.loads(output.read_text(encoding="utf-8"))
+        payload = json.loads(output.read_text(encoding="utf-8-sig"))
         legacy_data = payload.pop("data", {})
         for coin, rows in legacy_data.items():
             coin_path = data_dir / f"{coin}.json"

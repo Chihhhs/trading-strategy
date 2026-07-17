@@ -67,7 +67,7 @@ class IndependentLabTest(unittest.TestCase):
             )
             manifest.write_text(
                 json.dumps({"completed_coins": ["BTC"], "data_directory": str(data_dir)}),
-                encoding="utf-8",
+                encoding="utf-8-sig",
             )
             with patch(
                 "trading_strategy.backtest.independent_lab._post",
