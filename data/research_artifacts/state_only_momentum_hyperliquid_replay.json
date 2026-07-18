@@ -1,0 +1,180 @@
+{
+  "candidate": {
+    "base_hold": 0,
+    "coin": "ETH",
+    "continuation_threshold": 0.5,
+    "decision_interval": 4,
+    "efficiency_lookback": 24,
+    "efficiency_threshold": 0.4,
+    "entry_lookback": 12,
+    "entry_requires_trend": true,
+    "entry_threshold": 1.0,
+    "long_weight": 0.5,
+    "max_hold": null,
+    "maximum_entry_funding_payment": 1.25e-05,
+    "short_weight": 0.0,
+    "trend_lookback": 168
+  },
+  "capital_replay": {
+    "100": {
+      "fees": 1.4786311410000001,
+      "funding_pnl": -0.062298464454920016,
+      "max_drawdown_pct": 6.424387748291527,
+      "max_observed_holding_bars": 28,
+      "net_return_pct": -3.208869605454878,
+      "orders": 46,
+      "sharpe": -1.0330787585869003,
+      "skipped_small_orders": 0,
+      "state_counts": {
+        "bearish_cash": 185,
+        "between_decisions": 135,
+        "crowded_funding_filter": 2,
+        "decay_exit": 23,
+        "flat": 3826,
+        "impulse_entry": 23,
+        "range_filter": 104,
+        "strong_trend": 22
+      },
+      "turnover_x": 22.7481714
+    },
+    "20": {
+      "fees": 0.0,
+      "funding_pnl": 0.0,
+      "max_drawdown_pct": 0.0,
+      "max_observed_holding_bars": 0,
+      "net_return_pct": 0.0,
+      "orders": 0,
+      "sharpe": 0.0,
+      "skipped_small_orders": 39,
+      "state_counts": {
+        "bearish_cash": 185,
+        "crowded_funding_filter": 3,
+        "flat": 3985,
+        "impulse_entry": 39,
+        "minimum_notional_block": 39,
+        "range_filter": 108
+      },
+      "turnover_x": 0.0
+    },
+    "25": {
+      "fees": 0.36684608350000003,
+      "funding_pnl": -0.015455002001416007,
+      "max_drawdown_pct": 6.378736101372406,
+      "max_observed_holding_bars": 28,
+      "net_return_pct": -3.21076434200559,
+      "orders": 46,
+      "sharpe": -1.044086739263645,
+      "skipped_small_orders": 0,
+      "state_counts": {
+        "bearish_cash": 185,
+        "between_decisions": 135,
+        "crowded_funding_filter": 2,
+        "decay_exit": 23,
+        "flat": 3826,
+        "impulse_entry": 23,
+        "range_filter": 104,
+        "strong_trend": 22
+      },
+      "turnover_x": 22.575143600000004
+    },
+    "30": {
+      "fees": 0.441688208,
+      "funding_pnl": -0.018594384704757005,
+      "max_drawdown_pct": 6.407840280194721,
+      "max_observed_holding_bars": 28,
+      "net_return_pct": -3.1953419756824974,
+      "orders": 46,
+      "sharpe": -1.032938136689094,
+      "skipped_small_orders": 0,
+      "state_counts": {
+        "bearish_cash": 185,
+        "between_decisions": 135,
+        "crowded_funding_filter": 2,
+        "decay_exit": 23,
+        "flat": 3826,
+        "impulse_entry": 23,
+        "range_filter": 104,
+        "strong_trend": 22
+      },
+      "turnover_x": 22.650677333333327
+    },
+    "50": {
+      "fees": 0.7379940815000001,
+      "funding_pnl": -0.031104817455990006,
+      "max_drawdown_pct": 6.412308883966933,
+      "max_observed_holding_bars": 28,
+      "net_return_pct": -3.214617797911923,
+      "orders": 46,
+      "sharpe": -1.0376994572227813,
+      "skipped_small_orders": 0,
+      "state_counts": {
+        "bearish_cash": 185,
+        "between_decisions": 135,
+        "crowded_funding_filter": 2,
+        "decay_exit": 23,
+        "flat": 3826,
+        "impulse_entry": 23,
+        "range_filter": 104,
+        "strong_trend": 22
+      },
+      "turnover_x": 22.707510199999998
+    }
+  },
+  "data": {
+    "bars": 4320,
+    "end": 1784386800000,
+    "source": "Hyperliquid public candleSnapshot and fundingHistory",
+    "start": 1768838400000
+  },
+  "decision": "rejected_cross_venue",
+  "execution_authorized": false,
+  "fixture_sha256": "2f7fd39d03bc074860a58b3dcdf5b2e7e1ae49ec60c8825e4c01c11d9c5e5de5",
+  "generated_at": "2026-07-18T16:06:36.750271+00:00",
+  "normal": {
+    "fees": 0.7379940815000001,
+    "funding_pnl": -0.031104817455990006,
+    "max_drawdown_pct": 6.412308883966933,
+    "max_observed_holding_bars": 28,
+    "net_return_pct": -3.214617797911923,
+    "orders": 46,
+    "sharpe": -1.0376994572227813,
+    "skipped_small_orders": 0,
+    "state_counts": {
+      "bearish_cash": 185,
+      "between_decisions": 135,
+      "crowded_funding_filter": 2,
+      "decay_exit": 23,
+      "flat": 3826,
+      "impulse_entry": 23,
+      "range_filter": 104,
+      "strong_trend": 22
+    },
+    "turnover_x": 22.707510199999998
+  },
+  "review": [
+    "normal_net_return_not_positive",
+    "stressed_net_return_not_positive"
+  ],
+  "schema_version": 1,
+  "stressed": {
+    "fees": 1.1302128599999999,
+    "funding_pnl": -0.030935330886554008,
+    "max_drawdown_pct": 6.927801080298535,
+    "max_observed_holding_bars": 28,
+    "net_return_pct": -3.9747763817730375,
+    "orders": 46,
+    "sharpe": -1.290799505529799,
+    "skipped_small_orders": 0,
+    "state_counts": {
+      "bearish_cash": 185,
+      "between_decisions": 135,
+      "crowded_funding_filter": 2,
+      "decay_exit": 23,
+      "flat": 3826,
+      "impulse_entry": 23,
+      "range_filter": 104,
+      "strong_trend": 22
+    },
+    "turnover_x": 22.604257200000006
+  }
+}

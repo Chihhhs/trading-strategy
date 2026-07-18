@@ -1,0 +1,4019 @@
+{
+  "candidates": [
+    {
+      "candidate": {
+        "coin": "BTC",
+        "days": 7,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -1.6178142824205488,
+        "median_sharpe": -0.06362622106155445,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 114,
+        "worst_drawdown_pct": 21.74404600165576
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.6569924725,
+          "funding_pnl": -0.16768516444697876,
+          "max_drawdown_pct": 13.094336116393546,
+          "net_return_pct": 8.582168726105888,
+          "orders": 20,
+          "sharpe": 1.1607369063808124,
+          "skipped_small_orders": 90,
+          "turnover_x": 20.215153
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.59258350645,
+          "funding_pnl": -1.1383666347601502,
+          "max_drawdown_pct": 14.301666197127883,
+          "net_return_pct": -1.6178142824205488,
+          "orders": 19,
+          "sharpe": -0.06362622106155445,
+          "skipped_small_orders": 74,
+          "turnover_x": 18.23333866
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8560212986,
+          "funding_pnl": -0.11445212156956948,
+          "max_drawdown_pct": 21.74404600165576,
+          "net_return_pct": -14.189326840339122,
+          "orders": 29,
+          "sharpe": -1.7789880208154842,
+          "skipped_small_orders": 81,
+          "turnover_x": 26.339116880000006
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7803105531,
+          "funding_pnl": -0.32121702474928504,
+          "max_drawdown_pct": 6.295757139055991,
+          "net_return_pct": 4.9236608443013585,
+          "orders": 24,
+          "sharpe": 1.0478941655187186,
+          "skipped_small_orders": 62,
+          "turnover_x": 24.00955548
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6832147360999999,
+          "funding_pnl": -0.00931749166895873,
+          "max_drawdown_pct": 18.849043953843914,
+          "net_return_pct": -10.013476455537928,
+          "orders": 22,
+          "sharpe": -1.499776939714088,
+          "skipped_small_orders": 81,
+          "turnover_x": 21.021991879999995
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -3.1499647556744725,
+        "median_sharpe": -0.25201512852840796,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 114,
+        "worst_drawdown_pct": 22.24816661907132
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.005846169,
+          "funding_pnl": -0.15882894187659607,
+          "max_drawdown_pct": 13.457159574096034,
+          "net_return_pct": 7.095260703046624,
+          "orders": 20,
+          "sharpe": 0.9850528483587873,
+          "skipped_small_orders": 88,
+          "turnover_x": 20.11692338
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9060592700000001,
+          "funding_pnl": -1.1165241515372124,
+          "max_drawdown_pct": 14.799734940556075,
+          "net_return_pct": -3.1499647556744725,
+          "orders": 19,
+          "sharpe": -0.25201512852840796,
+          "skipped_small_orders": 85,
+          "turnover_x": 18.121185399999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3059158679999996,
+          "funding_pnl": -0.11046838993433376,
+          "max_drawdown_pct": 22.24816661907132,
+          "net_return_pct": -15.471090564668643,
+          "orders": 29,
+          "sharpe": -1.9540937318428042,
+          "skipped_small_orders": 81,
+          "turnover_x": 26.118317360000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.191272535,
+          "funding_pnl": -0.31244643916644127,
+          "max_drawdown_pct": 6.462452632862092,
+          "net_return_pct": 3.4789629542668843,
+          "orders": 24,
+          "sharpe": 0.7684737327452202,
+          "skipped_small_orders": 70,
+          "turnover_x": 23.825450700000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.0475368289999998,
+          "funding_pnl": -0.01005580020980471,
+          "max_drawdown_pct": 19.540009354598066,
+          "net_return_pct": -11.201667952619676,
+          "orders": 22,
+          "sharpe": -1.6989450631197967,
+          "skipped_small_orders": 81,
+          "turnover_x": 20.950736579999994
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "ETH",
+        "days": 7,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -0.8253883499659942,
+        "median_sharpe": 0.07580247584272787,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 123,
+        "worst_drawdown_pct": 20.46191987804339
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.7931601443999999,
+          "funding_pnl": 0.08361998480279345,
+          "max_drawdown_pct": 15.315510990861391,
+          "net_return_pct": 10.095151680805635,
+          "orders": 24,
+          "sharpe": 1.142243053409666,
+          "skipped_small_orders": 88,
+          "turnover_x": 24.40492752
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6785468527499999,
+          "funding_pnl": -0.8937609927435779,
+          "max_drawdown_pct": 19.864976253931477,
+          "net_return_pct": -15.18271369098706,
+          "orders": 22,
+          "sharpe": -1.3806801620436016,
+          "skipped_small_orders": 89,
+          "turnover_x": 20.878364700000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9266855253499999,
+          "funding_pnl": -0.23059884349231408,
+          "max_drawdown_pct": 17.621395000133333,
+          "net_return_pct": 16.017193262315477,
+          "orders": 27,
+          "sharpe": 1.3077531518576841,
+          "skipped_small_orders": 81,
+          "turnover_x": 28.513400779999994
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8105523244000002,
+          "funding_pnl": -0.7648818505830348,
+          "max_drawdown_pct": 20.46191987804339,
+          "net_return_pct": -0.8253883499659942,
+          "orders": 24,
+          "sharpe": 0.07580247584272787,
+          "skipped_small_orders": 82,
+          "turnover_x": 24.94007152
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8529200134,
+          "funding_pnl": -0.010407477234093928,
+          "max_drawdown_pct": 18.38525998931615,
+          "net_return_pct": -6.519298981268207,
+          "orders": 26,
+          "sharpe": -0.5098245329264475,
+          "skipped_small_orders": 87,
+          "turnover_x": 26.24369272
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -2.444027614168387,
+        "median_sharpe": -0.08377375923650347,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 123,
+        "worst_drawdown_pct": 20.949063823562586
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.211780976,
+          "funding_pnl": 0.08192647855375498,
+          "max_drawdown_pct": 15.778873645786362,
+          "net_return_pct": 8.507252602507464,
+          "orders": 24,
+          "sharpe": 0.9920471944318682,
+          "skipped_small_orders": 91,
+          "turnover_x": 24.235619520000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.0388243719999999,
+          "funding_pnl": -0.8945501526724191,
+          "max_drawdown_pct": 20.710104421756327,
+          "net_return_pct": -16.369212754344876,
+          "orders": 22,
+          "sharpe": -1.5039345822066879,
+          "skipped_small_orders": 94,
+          "turnover_x": 20.77648744
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.4157649580000002,
+          "funding_pnl": -0.22825967760972982,
+          "max_drawdown_pct": 17.90432205389485,
+          "net_return_pct": 14.3639487591809,
+          "orders": 27,
+          "sharpe": 1.200414319987483,
+          "skipped_small_orders": 88,
+          "turnover_x": 28.31529916
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.2392708380000002,
+          "funding_pnl": -0.7561546479842719,
+          "max_drawdown_pct": 20.949063823562586,
+          "net_return_pct": -2.444027614168387,
+          "orders": 24,
+          "sharpe": -0.08377375923650347,
+          "skipped_small_orders": 87,
+          "turnover_x": 24.785416760000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3040236870000002,
+          "funding_pnl": -0.008743829889527443,
+          "max_drawdown_pct": 19.131176041407816,
+          "net_return_pct": -7.889841304379219,
+          "orders": 26,
+          "sharpe": -0.6525248328929163,
+          "skipped_small_orders": 89,
+          "turnover_x": 26.08047374
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "SOL",
+        "days": 7,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": 1.0484088220389154,
+        "median_sharpe": 0.25943761243395347,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 118,
+        "worst_drawdown_pct": 31.618179702286564
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.647717239,
+          "funding_pnl": -0.3201868395712358,
+          "max_drawdown_pct": 21.955582622693615,
+          "net_return_pct": -1.002208157142559,
+          "orders": 22,
+          "sharpe": 0.11579478428499484,
+          "skipped_small_orders": 85,
+          "turnover_x": 19.9297612
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6967849654999999,
+          "funding_pnl": -0.9525761888122817,
+          "max_drawdown_pct": 17.57408050525956,
+          "net_return_pct": 11.848497691375393,
+          "orders": 21,
+          "sharpe": 1.0319243116564916,
+          "skipped_small_orders": 83,
+          "turnover_x": 21.439537400000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.753355525,
+          "funding_pnl": -0.13606885188704002,
+          "max_drawdown_pct": 31.618179702286564,
+          "net_return_pct": -6.093448753773901,
+          "orders": 26,
+          "sharpe": -0.20554611727583702,
+          "skipped_small_orders": 70,
+          "turnover_x": 23.180170000000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7725337750000002,
+          "funding_pnl": -0.5181618139805002,
+          "max_drawdown_pct": 18.20549910489373,
+          "net_return_pct": 1.0484088220389154,
+          "orders": 26,
+          "sharpe": 0.25943761243395347,
+          "skipped_small_orders": 74,
+          "turnover_x": 23.77027
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7704210149999999,
+          "funding_pnl": -0.3351142779305203,
+          "max_drawdown_pct": 14.662211618635624,
+          "net_return_pct": 7.978329414138763,
+          "orders": 23,
+          "sharpe": 0.854759651880392,
+          "skipped_small_orders": 94,
+          "turnover_x": 23.705262
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 1.7553962543175539,
+        "median_sharpe": 0.32766884515879624,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 116,
+        "worst_drawdown_pct": 32.032266591752425
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.9827003300000001,
+          "funding_pnl": -0.3130247548410397,
+          "max_drawdown_pct": 18.083918234663766,
+          "net_return_pct": 1.7553962543175539,
+          "orders": 20,
+          "sharpe": 0.32766884515879624,
+          "skipped_small_orders": 91,
+          "turnover_x": 19.6540066
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.07197687,
+          "funding_pnl": -0.9525761888122817,
+          "max_drawdown_pct": 18.027002508431877,
+          "net_return_pct": 10.480823860375343,
+          "orders": 21,
+          "sharpe": 0.9367499631578952,
+          "skipped_small_orders": 83,
+          "turnover_x": 21.439537400000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.1590084999999999,
+          "funding_pnl": -0.13606885188704002,
+          "max_drawdown_pct": 32.032266591752425,
+          "net_return_pct": -7.437041423773749,
+          "orders": 26,
+          "sharpe": -0.2990548684840295,
+          "skipped_small_orders": 66,
+          "turnover_x": 23.180170000000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.1826550999999998,
+          "funding_pnl": -0.5183181585131402,
+          "max_drawdown_pct": 18.49661800340615,
+          "net_return_pct": -0.17598317702640642,
+          "orders": 26,
+          "sharpe": 0.14414026022915796,
+          "skipped_small_orders": 76,
+          "turnover_x": 23.653102
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.1798676000000003,
+          "funding_pnl": -0.3351031724169303,
+          "max_drawdown_pct": 14.986296337487993,
+          "net_return_pct": 6.487388735165944,
+          "orders": 23,
+          "sharpe": 0.7289606383384255,
+          "skipped_small_orders": 96,
+          "turnover_x": 23.597352
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "BNB",
+        "days": 7,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": 2.7903604057221365,
+        "median_sharpe": 0.4551789445379195,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 106,
+        "worst_drawdown_pct": 23.768263588655046
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.4815412355,
+          "funding_pnl": -0.21169992756005174,
+          "max_drawdown_pct": 9.954865639239529,
+          "net_return_pct": 25.35113767387984,
+          "orders": 14,
+          "sharpe": 2.749160643928961,
+          "skipped_small_orders": 101,
+          "turnover_x": 14.816653399999996
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8087680185000001,
+          "funding_pnl": -0.8790520738141707,
+          "max_drawdown_pct": 19.752091743424995,
+          "net_return_pct": -18.12510018462845,
+          "orders": 28,
+          "sharpe": -1.928519706260374,
+          "skipped_small_orders": 57,
+          "turnover_x": 24.8851698
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7511168924999998,
+          "funding_pnl": -0.1302729046389498,
+          "max_drawdown_pct": 11.36821384693153,
+          "net_return_pct": 2.7903604057221365,
+          "orders": 22,
+          "sharpe": 0.4551789445379195,
+          "skipped_small_orders": 89,
+          "turnover_x": 23.111288999999996
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6314887475,
+          "funding_pnl": -0.6539152602699811,
+          "max_drawdown_pct": 9.397489177158846,
+          "net_return_pct": 14.513251984459874,
+          "orders": 19,
+          "sharpe": 2.257541417583651,
+          "skipped_small_orders": 88,
+          "turnover_x": 19.430423
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6392091679999999,
+          "funding_pnl": -0.14155184395232415,
+          "max_drawdown_pct": 23.768263588655046,
+          "net_return_pct": -20.186322023904623,
+          "orders": 23,
+          "sharpe": -2.0815229075008967,
+          "skipped_small_orders": 74,
+          "turnover_x": 19.667974399999995
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 1.424090878040829,
+        "median_sharpe": 0.29573992944717264,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 106,
+        "worst_drawdown_pct": 24.703683410751264
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.73859169,
+          "funding_pnl": -0.2100441464402667,
+          "max_drawdown_pct": 10.020329987034005,
+          "net_return_pct": 24.19160789511945,
+          "orders": 14,
+          "sharpe": 2.634164848599922,
+          "skipped_small_orders": 103,
+          "turnover_x": 14.771833799999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.2386754399999997,
+          "funding_pnl": -0.8807908195517957,
+          "max_drawdown_pct": 20.99398691290897,
+          "net_return_pct": -19.49116539710367,
+          "orders": 28,
+          "sharpe": -2.087618684232237,
+          "skipped_small_orders": 72,
+          "turnover_x": 24.7735088
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.15189362,
+          "funding_pnl": -0.12911389597969988,
+          "max_drawdown_pct": 12.374348638826993,
+          "net_return_pct": 1.424090878040829,
+          "orders": 22,
+          "sharpe": 0.29573992944717264,
+          "skipped_small_orders": 93,
+          "turnover_x": 23.037872399999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9649262100000001,
+          "funding_pnl": -0.6415608705890515,
+          "max_drawdown_pct": 9.760124728867915,
+          "net_return_pct": 13.097596054821658,
+          "orders": 19,
+          "sharpe": 2.0650655540071727,
+          "skipped_small_orders": 78,
+          "turnover_x": 19.2985242
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.98000641,
+          "funding_pnl": -0.14184067915204013,
+          "max_drawdown_pct": 24.703683410751264,
+          "net_return_pct": -21.30090095630409,
+          "orders": 23,
+          "sharpe": -2.209156105444132,
+          "skipped_small_orders": 78,
+          "turnover_x": 19.600128199999997
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 7,
+        "kind": "absolute_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": 6.948861015127528,
+        "median_sharpe": 0.8069239311459371,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 440,
+        "worst_drawdown_pct": 29.69556409882601
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.4237788168499996,
+          "funding_pnl": -0.3044416960467021,
+          "max_drawdown_pct": 12.053789408085736,
+          "net_return_pct": 11.879804974206753,
+          "orders": 85,
+          "sharpe": 1.199343140868529,
+          "skipped_small_orders": 57,
+          "turnover_x": 43.80857897999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.2667872581000004,
+          "funding_pnl": -1.0296823731531595,
+          "max_drawdown_pct": 25.328491087386496,
+          "net_return_pct": -13.846935262506321,
+          "orders": 88,
+          "sharpe": -1.0265685840542964,
+          "skipped_small_orders": 32,
+          "turnover_x": 38.97806948
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.5137661265999993,
+          "funding_pnl": -0.13351632075756187,
+          "max_drawdown_pct": 13.284145518519786,
+          "net_return_pct": 36.11866310528493,
+          "orders": 78,
+          "sharpe": 2.385690982045346,
+          "skipped_small_orders": 62,
+          "turnover_x": 46.577419280000015
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3349237381999994,
+          "funding_pnl": -0.7679277542361509,
+          "max_drawdown_pct": 17.06636042723355,
+          "net_return_pct": 6.948861015127528,
+          "orders": 85,
+          "sharpe": 0.8069239311459371,
+          "skipped_small_orders": 65,
+          "turnover_x": 41.07457656
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.5476803849,
+          "funding_pnl": -0.2697197326109878,
+          "max_drawdown_pct": 29.69556409882601,
+          "net_return_pct": -24.67337223502202,
+          "orders": 104,
+          "sharpe": -2.2962322656576375,
+          "skipped_small_orders": 43,
+          "turnover_x": 47.62093491999999
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 4.796517256465327,
+        "median_sharpe": 0.6095144088443561,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 440,
+        "worst_drawdown_pct": 31.19211239742915
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 2.171017848,
+          "funding_pnl": -0.3060103285195023,
+          "max_drawdown_pct": 12.585701663643423,
+          "net_return_pct": 9.699995772961124,
+          "orders": 85,
+          "sharpe": 1.0152426781596084,
+          "skipped_small_orders": 56,
+          "turnover_x": 43.42035696
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.9273956119999995,
+          "funding_pnl": -1.0243042969271867,
+          "max_drawdown_pct": 26.664917505281394,
+          "net_return_pct": -16.66838864545417,
+          "orders": 88,
+          "sharpe": -1.3323319363692208,
+          "skipped_small_orders": 29,
+          "turnover_x": 38.54791224
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.307775121,
+          "funding_pnl": -0.13029618750369523,
+          "max_drawdown_pct": 13.718097537609776,
+          "net_return_pct": 33.7237906937927,
+          "orders": 78,
+          "sharpe": 2.262902278302269,
+          "skipped_small_orders": 62,
+          "turnover_x": 46.15550242000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.0340932109999996,
+          "funding_pnl": -0.7631316167672708,
+          "max_drawdown_pct": 17.812765277769838,
+          "net_return_pct": 4.796517256465327,
+          "orders": 85,
+          "sharpe": 0.6095144088443561,
+          "skipped_small_orders": 58,
+          "turnover_x": 40.681864219999994
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.353185951000001,
+          "funding_pnl": -0.2696627791316541,
+          "max_drawdown_pct": 31.19211239742915,
+          "net_return_pct": -26.47565152586334,
+          "orders": 104,
+          "sharpe": -2.494544348426481,
+          "skipped_small_orders": 46,
+          "turnover_x": 47.06371902
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 7,
+        "kind": "long_cash_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": -0.6163872515330682,
+        "median_sharpe": 0.050266903313198656,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 263,
+        "worst_drawdown_pct": 28.02113944302268
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.8595495330499995,
+          "funding_pnl": -0.8155470927165069,
+          "max_drawdown_pct": 11.902952483976748,
+          "net_return_pct": -0.6163872515330682,
+          "orders": 53,
+          "sharpe": 0.050266903313198656,
+          "skipped_small_orders": 36,
+          "turnover_x": 26.447677940000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7163353742999999,
+          "funding_pnl": -1.792253949664984,
+          "max_drawdown_pct": 9.964686006619871,
+          "net_return_pct": 12.711885352070107,
+          "orders": 43,
+          "sharpe": 1.2793547317431357,
+          "skipped_small_orders": 36,
+          "turnover_x": 22.041088440000006
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7778885250500003,
+          "funding_pnl": -0.17382920425058573,
+          "max_drawdown_pct": 28.02113944302268,
+          "net_return_pct": -5.272833458601111,
+          "orders": 55,
+          "sharpe": -0.42595458642358114,
+          "skipped_small_orders": 22,
+          "turnover_x": 23.935031540000008
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8492838815499998,
+          "funding_pnl": -1.1721552323546929,
+          "max_drawdown_pct": 10.11706588996063,
+          "net_return_pct": 26.147359772190647,
+          "orders": 49,
+          "sharpe": 2.799556588349598,
+          "skipped_small_orders": 46,
+          "turnover_x": 26.131811739999993
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8660142100999999,
+          "funding_pnl": -0.2999637426724675,
+          "max_drawdown_pct": 25.87870490027917,
+          "net_return_pct": -22.01773990554483,
+          "orders": 63,
+          "sharpe": -2.8652630465732196,
+          "skipped_small_orders": 15,
+          "turnover_x": 26.646591080000004
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -1.9803636482042641,
+        "median_sharpe": -0.11653815858900322,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 263,
+        "worst_drawdown_pct": 28.52582568039821
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.314892894,
+          "funding_pnl": -0.813128228602143,
+          "max_drawdown_pct": 12.155236362075982,
+          "net_return_pct": -1.9803636482042641,
+          "orders": 53,
+          "sharpe": -0.11653815858900322,
+          "skipped_small_orders": 42,
+          "turnover_x": 26.297857880000006
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.0916714110000003,
+          "funding_pnl": -1.7772312044347298,
+          "max_drawdown_pct": 9.329080782289868,
+          "net_return_pct": 10.827964873130579,
+          "orders": 43,
+          "sharpe": 1.1440310862184047,
+          "skipped_small_orders": 35,
+          "turnover_x": 21.833428220000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.193787464,
+          "funding_pnl": -0.1727127919373602,
+          "max_drawdown_pct": 28.52582568039821,
+          "net_return_pct": -6.505415491874844,
+          "orders": 55,
+          "sharpe": -0.561149496484355,
+          "skipped_small_orders": 26,
+          "turnover_x": 23.875749280000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.2993330880000002,
+          "funding_pnl": -1.165397232244577,
+          "max_drawdown_pct": 10.350211295082733,
+          "net_return_pct": 24.365009814110806,
+          "orders": 49,
+          "sharpe": 2.6276613489887493,
+          "skipped_small_orders": 46,
+          "turnover_x": 25.986661759999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3224444130000002,
+          "funding_pnl": -0.2970979639518744,
+          "max_drawdown_pct": 26.602866538645376,
+          "net_return_pct": -23.331640121703757,
+          "orders": 63,
+          "sharpe": -3.0706223017756797,
+          "skipped_small_orders": 9,
+          "turnover_x": 26.448888259999993
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 7,
+        "kind": "top_bottom_pair"
+      },
+      "normal": {
+        "median_net_return_pct": 3.559308749737733,
+        "median_sharpe": 0.551845570435103,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 689,
+        "worst_drawdown_pct": 18.344974279992186
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.8452715047,
+          "funding_pnl": -0.23327872354110982,
+          "max_drawdown_pct": 12.944811043108395,
+          "net_return_pct": -6.070888456482049,
+          "orders": 135,
+          "sharpe": -0.8915097127559913,
+          "skipped_small_orders": 112,
+          "turnover_x": 56.777584759999996
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.55815411765,
+          "funding_pnl": -0.034394972027019334,
+          "max_drawdown_pct": 10.31367210843256,
+          "net_return_pct": 6.6489878206457576,
+          "orders": 114,
+          "sharpe": 0.8795017908065583,
+          "skipped_small_orders": 121,
+          "turnover_x": 47.943203620000006
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.0497803013999993,
+          "funding_pnl": -0.08153932373119432,
+          "max_drawdown_pct": 14.870849820368036,
+          "net_return_pct": 3.559308749737733,
+          "orders": 157,
+          "sharpe": 0.551845570435103,
+          "skipped_small_orders": 124,
+          "turnover_x": 63.070163120000025
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.6479040421999995,
+          "funding_pnl": -0.3463726031527395,
+          "max_drawdown_pct": 11.694554718259075,
+          "net_return_pct": 6.544394709294465,
+          "orders": 124,
+          "sharpe": 1.0952749184861783,
+          "skipped_small_orders": 108,
+          "turnover_x": 50.704739759999995
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.0096087219000007,
+          "funding_pnl": -0.24194988026907424,
+          "max_drawdown_pct": 18.344974279992186,
+          "net_return_pct": -14.343581204338108,
+          "orders": 159,
+          "sharpe": -2.4244535446263176,
+          "skipped_small_orders": 94,
+          "turnover_x": 61.83411451999996
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -0.4401509974465645,
+        "median_sharpe": 0.0715643953612646,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 689,
+        "worst_drawdown_pct": 20.903325047606724
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 2.8045721570000004,
+          "funding_pnl": -0.23049626102185708,
+          "max_drawdown_pct": 14.405157754139319,
+          "net_return_pct": -8.82530430944385,
+          "orders": 135,
+          "sharpe": -1.3556360107748826,
+          "skipped_small_orders": 120,
+          "turnover_x": 56.091443139999996
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.3701817720000005,
+          "funding_pnl": -0.02607396949036868,
+          "max_drawdown_pct": 10.813513419529775,
+          "net_return_pct": 4.47797230321898,
+          "orders": 114,
+          "sharpe": 0.6358844690336534,
+          "skipped_small_orders": 119,
+          "turnover_x": 47.403635439999995
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 3.0955659340000006,
+          "funding_pnl": -0.07809788922331919,
+          "max_drawdown_pct": 15.836476957010703,
+          "net_return_pct": -0.4401509974465645,
+          "orders": 157,
+          "sharpe": 0.0715643953612646,
+          "skipped_small_orders": 118,
+          "turnover_x": 61.91131868000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.5147218829999995,
+          "funding_pnl": -0.3416568932036854,
+          "max_drawdown_pct": 12.546441581271473,
+          "net_return_pct": 4.133736124792575,
+          "orders": 124,
+          "sharpe": 0.7317393144788445,
+          "skipped_small_orders": 105,
+          "turnover_x": 50.294437659999986
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 3.034435837999998,
+          "funding_pnl": -0.24048369330750483,
+          "max_drawdown_pct": 20.903325047606724,
+          "net_return_pct": -17.43147789541517,
+          "orders": 159,
+          "sharpe": -3.0300692076598987,
+          "skipped_small_orders": 94,
+          "turnover_x": 60.68871676
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "BTC",
+        "days": 14,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -5.641438821581913,
+        "median_sharpe": -0.8274470441810218,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 80,
+        "worst_drawdown_pct": 17.909906211748616
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.519943918,
+          "funding_pnl": -0.1532421246729474,
+          "max_drawdown_pct": 17.909906211748616,
+          "net_return_pct": -9.996008085345832,
+          "orders": 17,
+          "sharpe": -1.2412956878640578,
+          "skipped_small_orders": 95,
+          "turnover_x": 15.998274400000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.39627291795,
+          "funding_pnl": -1.5118362379879988,
+          "max_drawdown_pct": 7.14342157797182,
+          "net_return_pct": 22.55209968812395,
+          "orders": 11,
+          "sharpe": 2.496120194418372,
+          "skipped_small_orders": 95,
+          "turnover_x": 12.193012860000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.49606227515,
+          "funding_pnl": -0.1700313942372706,
+          "max_drawdown_pct": 7.849803944863465,
+          "net_return_pct": 15.201422661225283,
+          "orders": 15,
+          "sharpe": 1.914329414351183,
+          "skipped_small_orders": 78,
+          "turnover_x": 15.263454620000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6438826985499999,
+          "funding_pnl": -0.37031371224090187,
+          "max_drawdown_pct": 10.606009345700397,
+          "net_return_pct": -5.641438821581913,
+          "orders": 21,
+          "sharpe": -1.08670118616736,
+          "skipped_small_orders": 74,
+          "turnover_x": 19.81177534
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.48733110334999996,
+          "funding_pnl": -0.016502103765609212,
+          "max_drawdown_pct": 12.750117228901669,
+          "net_return_pct": -5.697120414231083,
+          "orders": 16,
+          "sharpe": -0.8274470441810218,
+          "skipped_small_orders": 86,
+          "turnover_x": 14.994803179999998
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -6.758583432330956,
+        "median_sharpe": -0.9965759159851411,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 80,
+        "worst_drawdown_pct": 18.670223157189426
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.7974834829999998,
+          "funding_pnl": -0.15132801016778466,
+          "max_drawdown_pct": 18.670223157189426,
+          "net_return_pct": -11.167421759735529,
+          "orders": 17,
+          "sharpe": -1.4029261085288804,
+          "skipped_small_orders": 90,
+          "turnover_x": 15.949669660000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.60765901,
+          "funding_pnl": -1.5136889303053005,
+          "max_drawdown_pct": 7.255102006574388,
+          "net_return_pct": 21.39871194898939,
+          "orders": 11,
+          "sharpe": 2.384288280870065,
+          "skipped_small_orders": 96,
+          "turnover_x": 12.1531802
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.759783721,
+          "funding_pnl": -0.16975972299490377,
+          "max_drawdown_pct": 8.11155767358186,
+          "net_return_pct": 14.125158887810073,
+          "orders": 15,
+          "sharpe": 1.7914755631298085,
+          "skipped_small_orders": 87,
+          "turnover_x": 15.195674420000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9864020120000002,
+          "funding_pnl": -0.37001068316526525,
+          "max_drawdown_pct": 11.17893732616807,
+          "net_return_pct": -6.857178809130593,
+          "orders": 21,
+          "sharpe": -1.335503738037311,
+          "skipped_small_orders": 73,
+          "turnover_x": 19.72804024
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.749740159,
+          "funding_pnl": -0.016502103765609212,
+          "max_drawdown_pct": 13.194003413134215,
+          "net_return_pct": -6.758583432330956,
+          "orders": 16,
+          "sharpe": -0.9965759159851411,
+          "skipped_small_orders": 92,
+          "turnover_x": 14.994803179999998
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "ETH",
+        "days": 14,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -3.0915786190830907,
+        "median_sharpe": -0.16505776053029228,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 65,
+        "worst_drawdown_pct": 24.401446649490165
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.3625489959,
+          "funding_pnl": 0.0789831960734187,
+          "max_drawdown_pct": 15.971058018088492,
+          "net_return_pct": -3.2966315996531548,
+          "orders": 12,
+          "sharpe": -0.20126679481219245,
+          "skipped_small_orders": 97,
+          "turnover_x": 11.15535372
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.31675366904999996,
+          "funding_pnl": -1.0529760841157294,
+          "max_drawdown_pct": 24.401446649490165,
+          "net_return_pct": -11.399133506331394,
+          "orders": 11,
+          "sharpe": -0.9481455994562479,
+          "skipped_small_orders": 104,
+          "turnover_x": 9.74626674
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.42921768435,
+          "funding_pnl": -0.26457041401882875,
+          "max_drawdown_pct": 14.247195659214107,
+          "net_return_pct": 21.761353803262384,
+          "orders": 13,
+          "sharpe": 1.735034239946774,
+          "skipped_small_orders": 104,
+          "turnover_x": 13.20669798
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5820893624,
+          "funding_pnl": -0.8858165413048827,
+          "max_drawdown_pct": 16.39084715201711,
+          "net_return_pct": 7.831572192590075,
+          "orders": 18,
+          "sharpe": 0.879501395613784,
+          "skipped_small_orders": 89,
+          "turnover_x": 17.910441919999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.30937681385,
+          "funding_pnl": 0.051910504308358855,
+          "max_drawdown_pct": 18.609272627048977,
+          "net_return_pct": -3.0915786190830907,
+          "orders": 11,
+          "sharpe": -0.16505776053029228,
+          "skipped_small_orders": 99,
+          "turnover_x": 9.519286580000001
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -3.9354015848021784,
+        "median_sharpe": -0.2528126824760659,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 65,
+        "worst_drawdown_pct": 24.677206908685434
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.555165119,
+          "funding_pnl": 0.07887493761812844,
+          "max_drawdown_pct": 16.205446702162686,
+          "net_return_pct": -4.195217099763882,
+          "orders": 12,
+          "sharpe": -0.2967712906805907,
+          "skipped_small_orders": 101,
+          "turnover_x": 11.103302380000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.485600115,
+          "funding_pnl": -1.05270791362544,
+          "max_drawdown_pct": 24.677206908685434,
+          "net_return_pct": -12.1896023384509,
+          "orders": 11,
+          "sharpe": -1.024971974303196,
+          "skipped_small_orders": 103,
+          "turnover_x": 9.7120023
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6579096489999999,
+          "funding_pnl": -0.2603045718986412,
+          "max_drawdown_pct": 14.392856169913982,
+          "net_return_pct": 20.442194371402735,
+          "orders": 13,
+          "sharpe": 1.6495145090731456,
+          "skipped_small_orders": 97,
+          "turnover_x": 13.158192979999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8898932110000001,
+          "funding_pnl": -0.8749912246576458,
+          "max_drawdown_pct": 16.83475318897536,
+          "net_return_pct": 6.349154799884338,
+          "orders": 18,
+          "sharpe": 0.7481123316913714,
+          "skipped_small_orders": 89,
+          "turnover_x": 17.797864219999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.4733283650000001,
+          "funding_pnl": 0.05196160419896034,
+          "max_drawdown_pct": 18.777619691655133,
+          "net_return_pct": -3.9354015848021784,
+          "orders": 11,
+          "sharpe": -0.2528126824760659,
+          "skipped_small_orders": 97,
+          "turnover_x": 9.466567300000001
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "SOL",
+        "days": 14,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -1.120790461037302,
+        "median_sharpe": 0.112462022027484,
+        "positive": 1,
+        "total_blocked_starts": 0,
+        "total_orders": 74,
+        "worst_drawdown_pct": 32.51092653360674
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.4716300030000001,
+          "funding_pnl": -0.1705709687179572,
+          "max_drawdown_pct": 32.51092653360674,
+          "net_return_pct": -18.310201943436212,
+          "orders": 17,
+          "sharpe": -1.4976472285932916,
+          "skipped_small_orders": 88,
+          "turnover_x": 14.511692400000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.425470006,
+          "funding_pnl": -0.697885224518694,
+          "max_drawdown_pct": 20.58047081433716,
+          "net_return_pct": -1.120790461037302,
+          "orders": 15,
+          "sharpe": 0.112462022027484,
+          "skipped_small_orders": 75,
+          "turnover_x": 13.0913848
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.30119329499999997,
+          "funding_pnl": -0.37793266626894007,
+          "max_drawdown_pct": 18.082131531544633,
+          "net_return_pct": 3.5427480774621323,
+          "orders": 12,
+          "sharpe": 0.46096988190122273,
+          "skipped_small_orders": 98,
+          "turnover_x": 9.267486
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.45191159000000003,
+          "funding_pnl": -0.6189742613083404,
+          "max_drawdown_pct": 21.612265119384567,
+          "net_return_pct": -0.05257170261659949,
+          "orders": 14,
+          "sharpe": 0.1517935952443383,
+          "skipped_small_orders": 98,
+          "turnover_x": 13.904972
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.41286817000000003,
+          "funding_pnl": -0.06880132706641004,
+          "max_drawdown_pct": 24.612486986940183,
+          "net_return_pct": -13.269738994132707,
+          "orders": 16,
+          "sharpe": -1.1253789535649963,
+          "skipped_small_orders": 68,
+          "turnover_x": 12.703636
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -1.9802805347668206,
+        "median_sharpe": 0.02440722158547352,
+        "positive": 1,
+        "total_blocked_starts": 0,
+        "total_orders": 74,
+        "worst_drawdown_pct": 33.11991132265515
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.7228804700000002,
+          "funding_pnl": -0.1693035305011452,
+          "max_drawdown_pct": 33.11991132265515,
+          "net_return_pct": -19.139866437002663,
+          "orders": 17,
+          "sharpe": -1.571381676913488,
+          "skipped_small_orders": 91,
+          "turnover_x": 14.457609400000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6498588399999999,
+          "funding_pnl": -0.6930785323834439,
+          "max_drawdown_pct": 20.934499319869502,
+          "net_return_pct": -1.9802805347668206,
+          "orders": 15,
+          "sharpe": 0.04772190809701747,
+          "skipped_small_orders": 73,
+          "turnover_x": 12.997176800000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.45745919999999995,
+          "funding_pnl": -0.36380728059650996,
+          "max_drawdown_pct": 18.305720125141576,
+          "net_return_pct": 2.426086418807105,
+          "orders": 12,
+          "sharpe": 0.38779129407934654,
+          "skipped_small_orders": 90,
+          "turnover_x": 9.149184
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6865331,
+          "funding_pnl": -0.6093939601686197,
+          "max_drawdown_pct": 21.859305945869178,
+          "net_return_pct": -1.351952940337342,
+          "orders": 14,
+          "sharpe": 0.02440722158547352,
+          "skipped_small_orders": 84,
+          "turnover_x": 13.730662000000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6351818,
+          "funding_pnl": -0.06880132706641004,
+          "max_drawdown_pct": 24.809831196940213,
+          "net_return_pct": -14.170121494132747,
+          "orders": 16,
+          "sharpe": -1.2116620212178355,
+          "skipped_small_orders": 68,
+          "turnover_x": 12.703636
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "BNB",
+        "days": 14,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": 3.7977866581007103,
+        "median_sharpe": 0.5666146128391163,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 61,
+        "worst_drawdown_pct": 19.332978040720185
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.290678869,
+          "funding_pnl": -0.2791278019496624,
+          "max_drawdown_pct": 11.780695949710296,
+          "net_return_pct": 3.7977866581007103,
+          "orders": 9,
+          "sharpe": 0.5666146128391163,
+          "skipped_small_orders": 102,
+          "turnover_x": 8.943965200000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.547058876,
+          "funding_pnl": -1.3759658315626695,
+          "max_drawdown_pct": 12.789842939396834,
+          "net_return_pct": -4.5342494151252355,
+          "orders": 18,
+          "sharpe": -0.3296604307580565,
+          "skipped_small_orders": 84,
+          "turnover_x": 16.832580799999995
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.303173091,
+          "funding_pnl": 0.04048844892466905,
+          "max_drawdown_pct": 19.332978040720185,
+          "net_return_pct": -3.2180092841505803,
+          "orders": 10,
+          "sharpe": -0.2632520436562297,
+          "skipped_small_orders": 103,
+          "turnover_x": 9.328402800000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5646329455000001,
+          "funding_pnl": -0.778142138778701,
+          "max_drawdown_pct": 11.432387931884769,
+          "net_return_pct": 12.352069831442613,
+          "orders": 17,
+          "sharpe": 1.9697034069005275,
+          "skipped_small_orders": 58,
+          "turnover_x": 17.3733214
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.23283371149999998,
+          "funding_pnl": -0.21738585360396911,
+          "max_drawdown_pct": 14.299149691508429,
+          "net_return_pct": 7.3275408697921485,
+          "orders": 7,
+          "sharpe": 0.8543731807834397,
+          "skipped_small_orders": 86,
+          "turnover_x": 7.164114199999999
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 2.9044499021007475,
+        "median_sharpe": 0.46433261316442476,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 61,
+        "worst_drawdown_pct": 19.556650084901573
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.44719825999999996,
+          "funding_pnl": -0.2791278019496624,
+          "max_drawdown_pct": 12.338640382873988,
+          "net_return_pct": 2.9044499021007475,
+          "orders": 9,
+          "sharpe": 0.46433261316442476,
+          "skipped_small_orders": 102,
+          "turnover_x": 8.943965200000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8319949900000001,
+          "funding_pnl": -1.3643440399217228,
+          "max_drawdown_pct": 13.210769785714815,
+          "net_return_pct": -5.627532491843301,
+          "orders": 18,
+          "sharpe": -0.45024590186666447,
+          "skipped_small_orders": 80,
+          "turnover_x": 16.639899800000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.46523969000000004,
+          "funding_pnl": 0.038196569381530994,
+          "max_drawdown_pct": 19.556650084901573,
+          "net_return_pct": -4.086904195236718,
+          "orders": 10,
+          "sharpe": -0.36898916119897046,
+          "skipped_small_orders": 90,
+          "turnover_x": 9.3047938
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8631348600000002,
+          "funding_pnl": -0.7644418812777004,
+          "max_drawdown_pct": 11.733926393611494,
+          "net_return_pct": 11.063164109444656,
+          "orders": 17,
+          "sharpe": 1.789706845428836,
+          "skipped_small_orders": 54,
+          "turnover_x": 17.262697199999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.35820571,
+          "funding_pnl": -0.21738585360396911,
+          "max_drawdown_pct": 14.411290816987943,
+          "net_return_pct": 6.485365906792162,
+          "orders": 7,
+          "sharpe": 0.7752351559821121,
+          "skipped_small_orders": 87,
+          "turnover_x": 7.164114199999999
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 14,
+        "kind": "absolute_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": -6.093755991760785,
+        "median_sharpe": -0.44301402709681326,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 322,
+        "worst_drawdown_pct": 18.060380500689234
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.9894529079500001,
+          "funding_pnl": -0.18245808793032733,
+          "max_drawdown_pct": 13.93563152514724,
+          "net_return_pct": -6.093755991760785,
+          "orders": 65,
+          "sharpe": -0.44301402709681326,
+          "skipped_small_orders": 65,
+          "turnover_x": 30.44470486
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.0502704745,
+          "funding_pnl": -1.358723231196438,
+          "max_drawdown_pct": 17.702893937663433,
+          "net_return_pct": -14.335503411393002,
+          "orders": 73,
+          "sharpe": -1.1981021460609307,
+          "skipped_small_orders": 51,
+          "turnover_x": 32.316014599999995
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9374065713999999,
+          "funding_pnl": -0.28395793738648983,
+          "max_drawdown_pct": 13.808740314150668,
+          "net_return_pct": 17.806010982427157,
+          "orders": 59,
+          "sharpe": 1.3720683590291989,
+          "skipped_small_orders": 74,
+          "turnover_x": 28.843279120000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.96290607465,
+          "funding_pnl": -0.9154751665722816,
+          "max_drawdown_pct": 10.944998597857813,
+          "net_return_pct": 15.011127517555556,
+          "orders": 57,
+          "sharpe": 1.5118065818146862,
+          "skipped_small_orders": 64,
+          "turnover_x": 29.627879220000008
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9955207808000004,
+          "funding_pnl": -0.16371820146757263,
+          "max_drawdown_pct": 18.060380500689234,
+          "net_return_pct": -13.564113964535007,
+          "orders": 68,
+          "sharpe": -1.0322595628336908,
+          "skipped_small_orders": 62,
+          "turnover_x": 30.631408639999997
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -7.621860789714773,
+        "median_sharpe": -0.594210285405297,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 322,
+        "worst_drawdown_pct": 19.365372739630114
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.5164584349999994,
+          "funding_pnl": -0.18231138945731754,
+          "max_drawdown_pct": 14.303642567564124,
+          "net_return_pct": -7.621860789714773,
+          "orders": 65,
+          "sharpe": -0.594210285405297,
+          "skipped_small_orders": 66,
+          "turnover_x": 30.32916869999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.607569627,
+          "funding_pnl": -1.3526426829154272,
+          "max_drawdown_pct": 19.27811975324918,
+          "net_return_pct": -15.968953350830928,
+          "orders": 73,
+          "sharpe": -1.3543580187608666,
+          "skipped_small_orders": 55,
+          "turnover_x": 32.15139254000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.4304083070000007,
+          "funding_pnl": -0.27864398046327354,
+          "max_drawdown_pct": 13.904484248993532,
+          "net_return_pct": 16.448316717473467,
+          "orders": 59,
+          "sharpe": 1.2911128429789598,
+          "skipped_small_orders": 77,
+          "turnover_x": 28.60816614000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.4700732689999996,
+          "funding_pnl": -0.9089846703448403,
+          "max_drawdown_pct": 10.852043522396027,
+          "net_return_pct": 13.671704133310447,
+          "orders": 57,
+          "sharpe": 1.4031778962403798,
+          "skipped_small_orders": 77,
+          "turnover_x": 29.401465380000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.513384154,
+          "funding_pnl": -0.16583245701248614,
+          "max_drawdown_pct": 19.365372739630114,
+          "net_return_pct": -15.01171092522503,
+          "orders": 68,
+          "sharpe": -1.1714472710546053,
+          "skipped_small_orders": 65,
+          "turnover_x": 30.26768308
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 14,
+        "kind": "long_cash_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": -0.5677076501650058,
+        "median_sharpe": 0.09364563055361211,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 199,
+        "worst_drawdown_pct": 20.486822347019473
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.48183363085,
+          "funding_pnl": -0.6829191708502019,
+          "max_drawdown_pct": 20.486822347019473,
+          "net_return_pct": -12.520931603400342,
+          "orders": 33,
+          "sharpe": -1.5148444855073067,
+          "skipped_small_orders": 42,
+          "turnover_x": 14.82565018
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9059386667499998,
+          "funding_pnl": -1.7921341583325165,
+          "max_drawdown_pct": 15.39377938864408,
+          "net_return_pct": -0.5677076501650058,
+          "orders": 57,
+          "sharpe": 0.09364563055361211,
+          "skipped_small_orders": 24,
+          "turnover_x": 27.875035899999993
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.36093971355000004,
+          "funding_pnl": -0.054988670988562416,
+          "max_drawdown_pct": 19.83981298852421,
+          "net_return_pct": 4.004753230922864,
+          "orders": 25,
+          "sharpe": 0.555328929843166,
+          "skipped_small_orders": 45,
+          "turnover_x": 11.10583734
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.05417869895,
+          "funding_pnl": -1.2416651484089474,
+          "max_drawdown_pct": 11.248393896370157,
+          "net_return_pct": 22.96271030528194,
+          "orders": 63,
+          "sharpe": 2.3194487623769144,
+          "skipped_small_orders": 49,
+          "turnover_x": 32.436267660000006
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.34795810009999995,
+          "funding_pnl": -0.39393965687622856,
+          "max_drawdown_pct": 18.30752174151081,
+          "net_return_pct": -1.5416355139524107,
+          "orders": 21,
+          "sharpe": -0.020576583945835947,
+          "skipped_small_orders": 42,
+          "turnover_x": 10.70640308
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -1.9074825596716805,
+        "median_sharpe": -0.04088025373306712,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 199,
+        "worst_drawdown_pct": 20.919876149484885
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.737793804,
+          "funding_pnl": -0.6816584138739687,
+          "max_drawdown_pct": 20.919876149484885,
+          "net_return_pct": -13.427590850347881,
+          "orders": 33,
+          "sharpe": -1.6383987870632912,
+          "skipped_small_orders": 36,
+          "turnover_x": 14.755876080000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3861131599999996,
+          "funding_pnl": -1.7871393873358368,
+          "max_drawdown_pct": 16.051256458798914,
+          "net_return_pct": -1.9074825596716805,
+          "orders": 57,
+          "sharpe": -0.04088025373306712,
+          "skipped_small_orders": 31,
+          "turnover_x": 27.72226319999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.554480012,
+          "funding_pnl": -0.05310669907123578,
+          "max_drawdown_pct": 20.264709844806326,
+          "net_return_pct": 3.137571737257483,
+          "orders": 25,
+          "sharpe": 0.4678843559456568,
+          "skipped_small_orders": 46,
+          "turnover_x": 11.089600240000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.6112206249999994,
+          "funding_pnl": -1.2313582277530575,
+          "max_drawdown_pct": 11.622242344315204,
+          "net_return_pct": 21.436047248893743,
+          "orders": 63,
+          "sharpe": 2.1909025615915056,
+          "skipped_small_orders": 60,
+          "turnover_x": 32.224412500000014
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.535320154,
+          "funding_pnl": -0.39393965687622856,
+          "max_drawdown_pct": 18.66028776512938,
+          "net_return_pct": -2.2711684787524278,
+          "orders": 21,
+          "sharpe": -0.09869377081762652,
+          "skipped_small_orders": 43,
+          "turnover_x": 10.70640308
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 14,
+        "kind": "top_bottom_pair"
+      },
+      "normal": {
+        "median_net_return_pct": 0.20652040894559853,
+        "median_sharpe": 0.1279223729581298,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 512,
+        "worst_drawdown_pct": 15.745125548078542
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.3330454202000002,
+          "funding_pnl": -0.16607037532716779,
+          "max_drawdown_pct": 10.75702653677192,
+          "net_return_pct": 0.20652040894559853,
+          "orders": 97,
+          "sharpe": 0.1279223729581298,
+          "skipped_small_orders": 154,
+          "turnover_x": 41.016782160000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.34704678485,
+          "funding_pnl": 0.0011384439817723015,
+          "max_drawdown_pct": 11.420284966875894,
+          "net_return_pct": -4.816198681736528,
+          "orders": 106,
+          "sharpe": -0.5250434174558855,
+          "skipped_small_orders": 97,
+          "turnover_x": 41.44759338000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3582142067,
+          "funding_pnl": -0.07547322571123449,
+          "max_drawdown_pct": 8.557133877551127,
+          "net_return_pct": 3.181885135177498,
+          "orders": 105,
+          "sharpe": 0.5000610555944882,
+          "skipped_small_orders": 130,
+          "turnover_x": 41.791206360000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.4370037864000003,
+          "funding_pnl": -0.4106538136869967,
+          "max_drawdown_pct": 5.730712637802626,
+          "net_return_pct": 18.203344799826105,
+          "orders": 104,
+          "sharpe": 2.740771046392481,
+          "skipped_small_orders": 130,
+          "turnover_x": 44.215501120000006
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3191444279000006,
+          "funding_pnl": -0.3138938158096035,
+          "max_drawdown_pct": 15.745125548078542,
+          "net_return_pct": -6.123336487419184,
+          "orders": 100,
+          "sharpe": -0.8280617260352471,
+          "skipped_small_orders": 131,
+          "turnover_x": 40.58905932
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -1.8847533354000578,
+        "median_sharpe": -0.21563119270793757,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 512,
+        "worst_drawdown_pct": 17.188131611926615
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 2.0237522010000006,
+          "funding_pnl": -0.15648035160000426,
+          "max_drawdown_pct": 11.21145238271739,
+          "net_return_pct": -1.8847533354000578,
+          "orders": 97,
+          "sharpe": -0.21563119270793757,
+          "skipped_small_orders": 143,
+          "turnover_x": 40.47504402
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.051667966,
+          "funding_pnl": -0.010182630631120824,
+          "max_drawdown_pct": 12.19096843896752,
+          "net_return_pct": -7.046685233062333,
+          "orders": 106,
+          "sharpe": -0.8211574871552638,
+          "skipped_small_orders": 111,
+          "turnover_x": 41.03335932000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.0626350659999995,
+          "funding_pnl": -0.07486450692495951,
+          "max_drawdown_pct": 9.641993435994511,
+          "net_return_pct": 0.5909321595500616,
+          "orders": 105,
+          "sharpe": 0.1986925895628025,
+          "skipped_small_orders": 133,
+          "turnover_x": 41.25270132
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 2.18543887,
+          "funding_pnl": -0.416428314534581,
+          "max_drawdown_pct": 6.013157113459511,
+          "net_return_pct": 15.815122692530759,
+          "orders": 104,
+          "sharpe": 2.4222441678102338,
+          "skipped_small_orders": 138,
+          "turnover_x": 43.7087774
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.9965117519999989,
+          "funding_pnl": -0.31739442301757026,
+          "max_drawdown_pct": 17.188131611926615,
+          "net_return_pct": -8.227255460235327,
+          "orders": 100,
+          "sharpe": -1.1609079647596263,
+          "skipped_small_orders": 133,
+          "turnover_x": 39.93023503999998
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "BTC",
+        "days": 28,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -1.903532713494116,
+        "median_sharpe": -0.3182338308002149,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 59,
+        "worst_drawdown_pct": 31.838793918560025
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.4546942575500001,
+          "funding_pnl": -0.10800106951777969,
+          "max_drawdown_pct": 31.838793918560025,
+          "net_return_pct": -26.384792654135325,
+          "orders": 17,
+          "sharpe": -3.6733530523250075,
+          "skipped_small_orders": 82,
+          "turnover_x": 13.99059254
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.2641310204,
+          "funding_pnl": -1.910335329007701,
+          "max_drawdown_pct": 13.916270882365433,
+          "net_return_pct": 11.742499301184651,
+          "orders": 7,
+          "sharpe": 1.3815406686356022,
+          "skipped_small_orders": 102,
+          "turnover_x": 8.12710832
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.32280549535,
+          "funding_pnl": -0.2283906611801602,
+          "max_drawdown_pct": 15.506689298810505,
+          "net_return_pct": -4.341310313060209,
+          "orders": 11,
+          "sharpe": -0.4302169453241075,
+          "skipped_small_orders": 85,
+          "turnover_x": 9.93247678
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.34332921415,
+          "funding_pnl": -0.41938814259693985,
+          "max_drawdown_pct": 5.596756287382332,
+          "net_return_pct": -1.903532713494116,
+          "orders": 11,
+          "sharpe": -0.3182338308002149,
+          "skipped_small_orders": 72,
+          "turnover_x": 10.563975820000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.43670147560000006,
+          "funding_pnl": 0.040007042169964105,
+          "max_drawdown_pct": 7.013172817578672,
+          "net_return_pct": 11.665303133140249,
+          "orders": 13,
+          "sharpe": 1.9392689721359857,
+          "skipped_small_orders": 105,
+          "turnover_x": 13.436968480000003
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -2.8409705291940535,
+        "median_sharpe": -0.5112019223375608,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 59,
+        "worst_drawdown_pct": 32.49518564464486
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.698331471,
+          "funding_pnl": -0.10764035373382269,
+          "max_drawdown_pct": 32.49518564464486,
+          "net_return_pct": -27.32842220986733,
+          "orders": 17,
+          "sharpe": -3.808804092706917,
+          "skipped_small_orders": 79,
+          "turnover_x": 13.966629419999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.40438032399999996,
+          "funding_pnl": -1.9133965079248738,
+          "max_drawdown_pct": 14.239872419739596,
+          "net_return_pct": 10.831609602950309,
+          "orders": 7,
+          "sharpe": 1.2876792716812249,
+          "skipped_small_orders": 102,
+          "turnover_x": 8.08760648
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.49470043,
+          "funding_pnl": -0.21544549066310406,
+          "max_drawdown_pct": 16.149983765131125,
+          "net_return_pct": -5.64181852172595,
+          "orders": 11,
+          "sharpe": -0.6022713720218563,
+          "skipped_small_orders": 84,
+          "turnover_x": 9.8940086
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5281987910000001,
+          "funding_pnl": -0.41938814259693985,
+          "max_drawdown_pct": 5.888522036783339,
+          "net_return_pct": -2.8409705291940535,
+          "orders": 11,
+          "sharpe": -0.5112019223375608,
+          "skipped_small_orders": 80,
+          "turnover_x": 10.563975820000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6700633930000002,
+          "funding_pnl": 0.04050800592541022,
+          "max_drawdown_pct": 7.090281257459774,
+          "net_return_pct": 10.666347270651123,
+          "orders": 13,
+          "sharpe": 1.7812080670042871,
+          "skipped_small_orders": 104,
+          "turnover_x": 13.40126786
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "ETH",
+        "days": 28,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": 2.6518310312808158,
+        "median_sharpe": 0.41467372406714065,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 54,
+        "worst_drawdown_pct": 18.951639890599136
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.32227931644999996,
+          "funding_pnl": 0.09922279617153278,
+          "max_drawdown_pct": 17.274847900771373,
+          "net_return_pct": -14.178107040556887,
+          "orders": 11,
+          "sharpe": -1.5390832469831963,
+          "skipped_small_orders": 97,
+          "turnover_x": 9.916286659999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.3227071055,
+          "funding_pnl": -1.4886574030704953,
+          "max_drawdown_pct": 16.76552617970565,
+          "net_return_pct": 3.3004669828592625,
+          "orders": 10,
+          "sharpe": 0.45801173271261036,
+          "skipped_small_orders": 104,
+          "turnover_x": 9.9294494
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.099993816,
+          "funding_pnl": -0.213080690252242,
+          "max_drawdown_pct": 12.800098428699414,
+          "net_return_pct": 49.25339498749581,
+          "orders": 4,
+          "sharpe": 3.38673571782879,
+          "skipped_small_orders": 116,
+          "turnover_x": 3.0767328
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.43930458910000003,
+          "funding_pnl": -0.9771181793931208,
+          "max_drawdown_pct": 18.951639890599136,
+          "net_return_pct": -1.892913536986085,
+          "orders": 14,
+          "sharpe": -0.0059895891081302504,
+          "skipped_small_orders": 99,
+          "turnover_x": 13.51706428
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.46451953209999997,
+          "funding_pnl": 0.25508304774058094,
+          "max_drawdown_pct": 14.136751145695815,
+          "net_return_pct": 2.6518310312808158,
+          "orders": 15,
+          "sharpe": 0.41467372406714065,
+          "skipped_small_orders": 93,
+          "turnover_x": 14.29290868
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 1.674775000818518,
+        "median_sharpe": 0.31831090496684095,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 54,
+        "worst_drawdown_pct": 19.405943152734118
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.49341755600000003,
+          "funding_pnl": 0.09827252317547687,
+          "max_drawdown_pct": 17.772130925460782,
+          "net_return_pct": -14.908379039649288,
+          "orders": 11,
+          "sharpe": -1.6281724130943087,
+          "skipped_small_orders": 98,
+          "turnover_x": 9.868351120000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.49577938000000005,
+          "funding_pnl": -1.4885428866960395,
+          "max_drawdown_pct": 17.09775815082457,
+          "net_return_pct": 2.3108963872080945,
+          "orders": 10,
+          "sharpe": 0.3739233719567781,
+          "skipped_small_orders": 105,
+          "turnover_x": 9.9155876
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.162245531,
+          "funding_pnl": -0.20232207656063508,
+          "max_drawdown_pct": 15.447627240989359,
+          "net_return_pct": 42.392845390878705,
+          "orders": 4,
+          "sharpe": 2.9140090843943747,
+          "skipped_small_orders": 113,
+          "turnover_x": 3.24491062
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6730080230000001,
+          "funding_pnl": -0.976280837879494,
+          "max_drawdown_pct": 19.405943152734118,
+          "net_return_pct": -2.8960542819589485,
+          "orders": 14,
+          "sharpe": -0.09703958949410897,
+          "skipped_small_orders": 99,
+          "turnover_x": 13.460160459999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7107400680000001,
+          "funding_pnl": 0.2533643863094052,
+          "max_drawdown_pct": 14.502196895825936,
+          "net_return_pct": 1.674775000818518,
+          "orders": 15,
+          "sharpe": 0.31831090496684095,
+          "skipped_small_orders": 97,
+          "turnover_x": 14.214801360000001
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "SOL",
+        "days": 28,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -2.087850241607403,
+        "median_sharpe": -0.0037410204233094308,
+        "positive": 1,
+        "total_blocked_starts": 0,
+        "total_orders": 53,
+        "worst_drawdown_pct": 32.84350476716611
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.3378303825,
+          "funding_pnl": -0.27360432429952164,
+          "max_drawdown_pct": 32.84350476716611,
+          "net_return_pct": -24.183209413598817,
+          "orders": 13,
+          "sharpe": -1.998691400234738,
+          "skipped_small_orders": 77,
+          "turnover_x": 10.394781000000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.262775331,
+          "funding_pnl": -1.9341105104705192,
+          "max_drawdown_pct": 16.880692055888012,
+          "net_return_pct": 22.57034831705902,
+          "orders": 8,
+          "sharpe": 1.700273206845018,
+          "skipped_small_orders": 77,
+          "turnover_x": 8.0853948
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.2726831250000001,
+          "funding_pnl": -0.3242997538727199,
+          "max_drawdown_pct": 19.414069601616767,
+          "net_return_pct": -3.119765757745041,
+          "orders": 11,
+          "sharpe": -0.0037410204233094308,
+          "skipped_small_orders": 108,
+          "turnover_x": 8.390250000000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.255784685,
+          "funding_pnl": -0.6161017817648504,
+          "max_drawdown_pct": 20.759093431950426,
+          "net_return_pct": -1.5303729335297,
+          "orders": 9,
+          "sharpe": 0.021803215673861887,
+          "skipped_small_orders": 86,
+          "turnover_x": 7.870297999999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.33229416999999994,
+          "funding_pnl": -0.15743095080388003,
+          "max_drawdown_pct": 14.75502100852648,
+          "net_return_pct": -2.087850241607403,
+          "orders": 12,
+          "sharpe": -0.04298884738837874,
+          "skipped_small_orders": 96,
+          "turnover_x": 10.224436000000003
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -2.9461463416074474,
+        "median_sharpe": -0.04491742048260287,
+        "positive": 1,
+        "total_blocked_starts": 0,
+        "total_orders": 53,
+        "worst_drawdown_pct": 33.13191916448108
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.51973905,
+          "funding_pnl": -0.27360432429952164,
+          "max_drawdown_pct": 33.13191916448108,
+          "net_return_pct": -25.04859199259887,
+          "orders": 13,
+          "sharpe": -2.0763930337749397,
+          "skipped_small_orders": 79,
+          "turnover_x": 10.394781000000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.39956294,
+          "funding_pnl": -1.9268070958683583,
+          "max_drawdown_pct": 17.301358278217183,
+          "net_return_pct": 20.677385872263265,
+          "orders": 8,
+          "sharpe": 1.600804991970623,
+          "skipped_small_orders": 74,
+          "turnover_x": 7.991258800000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.4168267000000001,
+          "funding_pnl": -0.32361677264555994,
+          "max_drawdown_pct": 19.472041552089937,
+          "net_return_pct": -3.679735665290762,
+          "orders": 11,
+          "sharpe": -0.043208821599073036,
+          "skipped_small_orders": 108,
+          "turnover_x": 8.336534000000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.39052190000000003,
+          "funding_pnl": -0.6159433206542505,
+          "max_drawdown_pct": 21.15057255367374,
+          "net_return_pct": -2.2532768013086013,
+          "orders": 9,
+          "sharpe": -0.04491742048260287,
+          "skipped_small_orders": 90,
+          "turnover_x": 7.810438
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5112218,
+          "funding_pnl": -0.15743095080388003,
+          "max_drawdown_pct": 15.03025450852653,
+          "net_return_pct": -2.9461463416074474,
+          "orders": 12,
+          "sharpe": -0.12504161201844213,
+          "skipped_small_orders": 94,
+          "turnover_x": 10.224436000000003
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "BNB",
+        "days": 28,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -3.0082578539891935,
+        "median_sharpe": -0.141649989876873,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 65,
+        "worst_drawdown_pct": 39.22916187507642
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.40100345349999994,
+          "funding_pnl": -0.07365779172011712,
+          "max_drawdown_pct": 39.22916187507642,
+          "net_return_pct": -32.61394249044018,
+          "orders": 15,
+          "sharpe": -4.112629041229068,
+          "skipped_small_orders": 80,
+          "turnover_x": 12.338567799999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.387573238,
+          "funding_pnl": -1.3682756889945427,
+          "max_drawdown_pct": 13.832883168246124,
+          "net_return_pct": -3.0082578539891935,
+          "orders": 12,
+          "sharpe": -0.141649989876873,
+          "skipped_small_orders": 91,
+          "turnover_x": 11.9253304
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6118981895,
+          "funding_pnl": -0.34596475732249843,
+          "max_drawdown_pct": 32.01211943083243,
+          "net_return_pct": -20.59134589364504,
+          "orders": 22,
+          "sharpe": -2.6155578578657157,
+          "skipped_small_orders": 86,
+          "turnover_x": 18.827636599999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.286368862,
+          "funding_pnl": -0.8871098746901674,
+          "max_drawdown_pct": 7.976662206886798,
+          "net_return_pct": 20.509322526619677,
+          "orders": 9,
+          "sharpe": 2.9120357095446203,
+          "skipped_small_orders": 92,
+          "turnover_x": 8.811349600000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.2410464095,
+          "funding_pnl": -0.0642684958216661,
+          "max_drawdown_pct": 11.9107029888188,
+          "net_return_pct": 8.919550189356485,
+          "orders": 7,
+          "sharpe": 1.0090010577841069,
+          "skipped_small_orders": 101,
+          "turnover_x": 7.416812600000001
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -3.885542138699871,
+        "median_sharpe": -0.22833150892207169,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 65,
+        "worst_drawdown_pct": 39.854677522364135
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.6158796900000001,
+          "funding_pnl": -0.07447083328165718,
+          "max_drawdown_pct": 39.854677522364135,
+          "net_return_pct": -33.490093670563226,
+          "orders": 15,
+          "sharpe": -4.227993707906394,
+          "skipped_small_orders": 81,
+          "turnover_x": 12.3175938
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5922879500000001,
+          "funding_pnl": -1.3671058213499407,
+          "max_drawdown_pct": 14.205331950578426,
+          "net_return_pct": -3.885542138699871,
+          "orders": 12,
+          "sharpe": -0.22833150892207169,
+          "skipped_small_orders": 92,
+          "turnover_x": 11.845759000000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9354655500000001,
+          "funding_pnl": -0.34361103110940916,
+          "max_drawdown_pct": 32.7294494567268,
+          "net_return_pct": -21.511861382218722,
+          "orders": 22,
+          "sharpe": -2.7488367745797815,
+          "skipped_small_orders": 87,
+          "turnover_x": 18.709311
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.43882242000000005,
+          "funding_pnl": -0.86226737160026,
+          "max_drawdown_pct": 8.337896020555979,
+          "net_return_pct": 18.81555755879962,
+          "orders": 9,
+          "sharpe": 2.7389635263265824,
+          "skipped_small_orders": 90,
+          "turnover_x": 8.776448400000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.37084063,
+          "funding_pnl": -0.0642684958216661,
+          "max_drawdown_pct": 11.96265066425296,
+          "net_return_pct": 8.07788288635658,
+          "orders": 7,
+          "sharpe": 0.9299394005218515,
+          "skipped_small_orders": 100,
+          "turnover_x": 7.416812600000001
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 28,
+        "kind": "absolute_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": 11.14652714997122,
+        "median_sharpe": 1.090572121766302,
+        "positive": 4,
+        "total_blocked_starts": 0,
+        "total_orders": 234,
+        "worst_drawdown_pct": 36.55331337018906
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.5969553343,
+          "funding_pnl": -0.36054106226809873,
+          "max_drawdown_pct": 36.55331337018906,
+          "net_return_pct": -35.82347279313629,
+          "orders": 47,
+          "sharpe": -3.87127058369093,
+          "skipped_small_orders": 66,
+          "turnover_x": 18.367856439999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.0992541371499998,
+          "funding_pnl": -1.8407111320908964,
+          "max_drawdown_pct": 19.003778113412096,
+          "net_return_pct": 5.647063461518331,
+          "orders": 67,
+          "sharpe": 0.6206436121390523,
+          "skipped_small_orders": 52,
+          "turnover_x": 33.82320422
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.51706918965,
+          "funding_pnl": -0.3078014133465009,
+          "max_drawdown_pct": 17.50788577991583,
+          "net_return_pct": 26.463792794007148,
+          "orders": 30,
+          "sharpe": 1.8556461675376168,
+          "skipped_small_orders": 94,
+          "turnover_x": 15.909821220000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6502572069500001,
+          "funding_pnl": -1.1016051798501194,
+          "max_drawdown_pct": 12.654909224873245,
+          "net_return_pct": 22.631053226399732,
+          "orders": 37,
+          "sharpe": 2.0914335918778364,
+          "skipped_small_orders": 74,
+          "turnover_x": 20.007914059999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9242192693500003,
+          "funding_pnl": -0.2795721556646111,
+          "max_drawdown_pct": 15.67812309168014,
+          "net_return_pct": 11.14652714997122,
+          "orders": 53,
+          "sharpe": 1.090572121766302,
+          "skipped_small_orders": 67,
+          "turnover_x": 28.437515980000008
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 9.638476663101002,
+        "median_sharpe": 0.9700510893743144,
+        "positive": 4,
+        "total_blocked_starts": 0,
+        "total_orders": 234,
+        "worst_drawdown_pct": 37.42004336155935
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.9106358230000003,
+          "funding_pnl": -0.3613609785861692,
+          "max_drawdown_pct": 37.42004336155935,
+          "net_return_pct": -36.75745258117258,
+          "orders": 47,
+          "sharpe": -3.992257263382105,
+          "skipped_small_orders": 66,
+          "turnover_x": 18.212716459999992
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.6671523330000004,
+          "funding_pnl": -1.8380071786794905,
+          "max_drawdown_pct": 19.358907462580145,
+          "net_return_pct": 4.694026731040957,
+          "orders": 67,
+          "sharpe": 0.5521208736208152,
+          "skipped_small_orders": 56,
+          "turnover_x": 33.34304666
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.793168942,
+          "funding_pnl": -0.30583203264917425,
+          "max_drawdown_pct": 17.56309911146254,
+          "net_return_pct": 25.19154295190189,
+          "orders": 30,
+          "sharpe": 1.7830624949420386,
+          "skipped_small_orders": 90,
+          "turnover_x": 15.863378840000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9990006840000002,
+          "funding_pnl": -1.101745338428671,
+          "max_drawdown_pct": 12.94598571384913,
+          "net_return_pct": 21.293250829142686,
+          "orders": 37,
+          "sharpe": 1.978564136137152,
+          "skipped_small_orders": 73,
+          "turnover_x": 19.980013679999995
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.41010171,
+          "funding_pnl": -0.27757854194972353,
+          "max_drawdown_pct": 15.912920185533508,
+          "net_return_pct": 9.638476663101002,
+          "orders": 53,
+          "sharpe": 0.9700510893743144,
+          "skipped_small_orders": 68,
+          "turnover_x": 28.2020342
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 28,
+        "kind": "long_cash_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": -1.3745852097252542,
+        "median_sharpe": -0.012956410897695126,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 157,
+        "worst_drawdown_pct": 28.15032065747881
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.2799566783,
+          "funding_pnl": -0.7367624651832942,
+          "max_drawdown_pct": 22.292810525548468,
+          "net_return_pct": -14.589358286966592,
+          "orders": 19,
+          "sharpe": -1.8880931712665134,
+          "skipped_small_orders": 32,
+          "turnover_x": 8.61405164
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8426543430499999,
+          "funding_pnl": -1.9806976791868633,
+          "max_drawdown_pct": 14.803237081647714,
+          "net_return_pct": 17.090189955526313,
+          "orders": 49,
+          "sharpe": 1.4985705256883646,
+          "skipped_small_orders": 49,
+          "turnover_x": 25.927825939999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5393373440000001,
+          "funding_pnl": -0.17959637400928066,
+          "max_drawdown_pct": 28.15032065747881,
+          "net_return_pct": -15.647831436018578,
+          "orders": 41,
+          "sharpe": -1.7872184909466606,
+          "skipped_small_orders": 25,
+          "turnover_x": 16.594995199999996
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.48671901135000006,
+          "funding_pnl": -1.3132662478944201,
+          "max_drawdown_pct": 9.268990612693228,
+          "net_return_pct": 29.569471481511233,
+          "orders": 27,
+          "sharpe": 2.7510159641180056,
+          "skipped_small_orders": 66,
+          "turnover_x": 14.975969579999996
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.35274761795,
+          "funding_pnl": -0.23871798691265977,
+          "max_drawdown_pct": 14.25832450767337,
+          "net_return_pct": -1.3745852097252542,
+          "orders": 21,
+          "sharpe": -0.012956410897695126,
+          "skipped_small_orders": 41,
+          "turnover_x": 10.853772860000001
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -2.1060435711606873,
+        "median_sharpe": -0.09410491399807663,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 157,
+        "worst_drawdown_pct": 28.760780448784285
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.428501602,
+          "funding_pnl": -0.7356763651257333,
+          "max_drawdown_pct": 22.58479750156792,
+          "net_return_pct": -15.183051304851459,
+          "orders": 19,
+          "sharpe": -1.9739034923560046,
+          "skipped_small_orders": 32,
+          "turnover_x": 8.570032040000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.2819821709999997,
+          "funding_pnl": -1.9685622404010905,
+          "max_drawdown_pct": 15.438437788110148,
+          "net_return_pct": 15.334444635997869,
+          "orders": 49,
+          "sharpe": 1.3680026944000978,
+          "skipped_small_orders": 45,
+          "turnover_x": 25.63964342
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8274609860000002,
+          "funding_pnl": -0.17750194399798896,
+          "max_drawdown_pct": 28.760780448784285,
+          "net_return_pct": -16.679862483795958,
+          "orders": 41,
+          "sharpe": -1.9210721694758863,
+          "skipped_small_orders": 25,
+          "turnover_x": 16.54921972
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.7445157560000001,
+          "funding_pnl": -1.3028928325083673,
+          "max_drawdown_pct": 9.262645874150044,
+          "net_return_pct": 28.148896807983313,
+          "orders": 27,
+          "sharpe": 2.6439024420683594,
+          "skipped_small_orders": 68,
+          "turnover_x": 14.89031512
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.541395996,
+          "funding_pnl": -0.2384438119803632,
+          "max_drawdown_pct": 14.64789722005001,
+          "net_return_pct": -2.1060435711606873,
+          "orders": 21,
+          "sharpe": -0.09410491399807663,
+          "skipped_small_orders": 40,
+          "turnover_x": 10.827919920000001
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 28,
+        "kind": "top_bottom_pair"
+      },
+      "normal": {
+        "median_net_return_pct": 5.545182380998326,
+        "median_sharpe": 0.8101194182691498,
+        "positive": 4,
+        "total_blocked_starts": 0,
+        "total_orders": 343,
+        "worst_drawdown_pct": 11.247258224448442
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.7431517808000003,
+          "funding_pnl": -0.3057207935873138,
+          "max_drawdown_pct": 8.860277114402182,
+          "net_return_pct": -6.094465148774586,
+          "orders": 60,
+          "sharpe": -0.8709916949878252,
+          "skipped_small_orders": 159,
+          "turnover_x": 22.866208640000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.2367677634,
+          "funding_pnl": -0.1999697356805171,
+          "max_drawdown_pct": 11.247258224448442,
+          "net_return_pct": 16.685445001838772,
+          "orders": 92,
+          "sharpe": 1.8325582643852616,
+          "skipped_small_orders": 146,
+          "turnover_x": 38.054392720000024
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8560737198000001,
+          "funding_pnl": 0.1907049102990977,
+          "max_drawdown_pct": 8.764373146459892,
+          "net_return_pct": 5.545182380998326,
+          "orders": 66,
+          "sharpe": 0.8101194182691498,
+          "skipped_small_orders": 180,
+          "turnover_x": 26.340729840000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8520812020499999,
+          "funding_pnl": -0.32283228356972765,
+          "max_drawdown_pct": 7.391880105038117,
+          "net_return_pct": 13.04277102876059,
+          "orders": 62,
+          "sharpe": 1.9254483360464438,
+          "skipped_small_orders": 137,
+          "turnover_x": 26.217883140000012
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8659897246,
+          "funding_pnl": -0.2792237472597622,
+          "max_drawdown_pct": 10.770492020515277,
+          "net_return_pct": 1.801293056280362,
+          "orders": 63,
+          "sharpe": 0.38265979649500753,
+          "skipped_small_orders": 154,
+          "turnover_x": 26.64583768
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 3.7049352694046522,
+        "median_sharpe": 0.5839864252345716,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 343,
+        "worst_drawdown_pct": 12.136719885933767
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.1325000190000003,
+          "funding_pnl": -0.3044310513686262,
+          "max_drawdown_pct": 9.47129195820654,
+          "net_return_pct": -7.751472582537433,
+          "orders": 60,
+          "sharpe": -1.1381795841846225,
+          "skipped_small_orders": 157,
+          "turnover_x": 22.650000379999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.8922661440000001,
+          "funding_pnl": -0.2174636832190227,
+          "max_drawdown_pct": 11.406729167285945,
+          "net_return_pct": 14.930987287361797,
+          "orders": 92,
+          "sharpe": 1.6576919130488288,
+          "skipped_small_orders": 148,
+          "turnover_x": 37.845322880000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3119039399999997,
+          "funding_pnl": 0.18552786980233058,
+          "max_drawdown_pct": 8.870733513020445,
+          "net_return_pct": 3.7049352694046522,
+          "orders": 66,
+          "sharpe": 0.5839864252345716,
+          "skipped_small_orders": 180,
+          "turnover_x": 26.238078800000004
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.2932822170000005,
+          "funding_pnl": -0.3364712494881616,
+          "max_drawdown_pct": 8.304014107543157,
+          "net_return_pct": 10.7597978224238,
+          "orders": 62,
+          "sharpe": 1.6344156025023635,
+          "skipped_small_orders": 164,
+          "turnover_x": 25.86564434
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.3186344380000004,
+          "funding_pnl": -0.27510070445959534,
+          "max_drawdown_pct": 12.136719885933767,
+          "net_return_pct": -0.022960580919273443,
+          "orders": 63,
+          "sharpe": 0.0908072811427663,
+          "skipped_small_orders": 156,
+          "turnover_x": 26.372688760000003
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "BTC",
+        "days": 56,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -3.972334513516851,
+        "median_sharpe": -0.4047630246022505,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 42,
+        "worst_drawdown_pct": 18.768110875178934
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.4743579158500001,
+          "funding_pnl": 0.26118588281980626,
+          "max_drawdown_pct": 18.768110875178934,
+          "net_return_pct": -18.038942066060383,
+          "orders": 16,
+          "sharpe": -2.432416992933625,
+          "skipped_small_orders": 89,
+          "turnover_x": 14.59562818
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.1035169434,
+          "funding_pnl": -2.5620367956189085,
+          "max_drawdown_pct": 10.309965330693737,
+          "net_return_pct": 23.41546452196217,
+          "orders": 3,
+          "sharpe": 2.284527125263894,
+          "skipped_small_orders": 106,
+          "turnover_x": 3.1851367200000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.27056560960000003,
+          "funding_pnl": -0.2065196471584043,
+          "max_drawdown_pct": 11.08632052306061,
+          "net_return_pct": -3.972334513516851,
+          "orders": 9,
+          "sharpe": -0.4047630246022505,
+          "skipped_small_orders": 105,
+          "turnover_x": 8.325095680000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.18504277805,
+          "funding_pnl": -0.8313841334861053,
+          "max_drawdown_pct": 11.52008186313741,
+          "net_return_pct": -6.121755823072306,
+          "orders": 6,
+          "sharpe": -1.1549997050062097,
+          "skipped_small_orders": 70,
+          "turnover_x": 5.69362394
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.2557325303,
+          "funding_pnl": 0.29319543946721066,
+          "max_drawdown_pct": 6.091525894051985,
+          "net_return_pct": 9.959301818334598,
+          "orders": 8,
+          "sharpe": 1.7208269080416014,
+          "skipped_small_orders": 99,
+          "turnover_x": 7.86869324
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -5.0399020878488905,
+        "median_sharpe": -0.5502087565952932,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 42,
+        "worst_drawdown_pct": 19.80123254555638
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.727210079,
+          "funding_pnl": 0.25821431545557294,
+          "max_drawdown_pct": 19.80123254555638,
+          "net_return_pct": -19.11112057708887,
+          "orders": 16,
+          "sharpe": -2.6071844753260276,
+          "skipped_small_orders": 89,
+          "turnover_x": 14.54420158
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.159256836,
+          "funding_pnl": -2.5620367956189085,
+          "max_drawdown_pct": 10.515107656267485,
+          "net_return_pct": 22.526638523362188,
+          "orders": 3,
+          "sharpe": 2.2031070763677625,
+          "skipped_small_orders": 105,
+          "turnover_x": 3.1851367200000005
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.41424801800000005,
+          "funding_pnl": -0.19373761782438406,
+          "max_drawdown_pct": 11.45567262716436,
+          "net_return_pct": -5.0399020878488905,
+          "orders": 9,
+          "sharpe": -0.5502087565952932,
+          "skipped_small_orders": 90,
+          "turnover_x": 8.284960360000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.28468119699999994,
+          "funding_pnl": -0.8313841334861053,
+          "max_drawdown_pct": 12.038083086879459,
+          "net_return_pct": -6.924576477172295,
+          "orders": 6,
+          "sharpe": -1.3172089381189713,
+          "skipped_small_orders": 73,
+          "turnover_x": 5.69362394
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.39343466200000005,
+          "funding_pnl": 0.29319543946721066,
+          "max_drawdown_pct": 6.23273025930724,
+          "net_return_pct": 9.15880979973469,
+          "orders": 8,
+          "sharpe": 1.5888362301001067,
+          "skipped_small_orders": 102,
+          "turnover_x": 7.86869324
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "ETH",
+        "days": 56,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": 19.729172198741594,
+        "median_sharpe": 1.919646481280407,
+        "positive": 4,
+        "total_blocked_starts": 0,
+        "total_orders": 31,
+        "worst_drawdown_pct": 18.353461103929046
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.18122020084999999,
+          "funding_pnl": -0.12207573169302254,
+          "max_drawdown_pct": 18.353461103929046,
+          "net_return_pct": -4.003093865086205,
+          "orders": 7,
+          "sharpe": -0.252871814841215,
+          "skipped_small_orders": 104,
+          "turnover_x": 5.576006179999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.3502889039,
+          "funding_pnl": -1.821915906728774,
+          "max_drawdown_pct": 17.37611310730286,
+          "net_return_pct": 1.3167023787424625,
+          "orders": 11,
+          "sharpe": 0.2924600470411639,
+          "skipped_small_orders": 107,
+          "turnover_x": 10.77812012
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.09919211444999998,
+          "funding_pnl": -0.15370390467344464,
+          "max_drawdown_pct": 12.25363250246615,
+          "net_return_pct": 44.712313961753416,
+          "orders": 4,
+          "sharpe": 3.1442727998285687,
+          "skipped_small_orders": 116,
+          "turnover_x": 3.0520650599999994
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.1701857612,
+          "funding_pnl": -1.2770966749931998,
+          "max_drawdown_pct": 12.876723195079776,
+          "net_return_pct": 21.598343127613397,
+          "orders": 5,
+          "sharpe": 1.919646481280407,
+          "skipped_small_orders": 104,
+          "turnover_x": 5.23648496
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.11277820514999999,
+          "funding_pnl": 0.4026933045208207,
+          "max_drawdown_pct": 9.781021272967083,
+          "net_return_pct": 19.729172198741594,
+          "orders": 4,
+          "sharpe": 2.0661689749051,
+          "skipped_small_orders": 113,
+          "turnover_x": 3.47009862
+        }
+      ],
+      "passed": true,
+      "stressed": {
+        "median_net_return_pct": 19.005977511641614,
+        "median_sharpe": 1.850104574619784,
+        "positive": 4,
+        "total_blocked_starts": 0,
+        "total_orders": 31,
+        "worst_drawdown_pct": 18.619193986188698
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.278094837,
+          "funding_pnl": -0.125125224072118,
+          "max_drawdown_pct": 18.619193986188698,
+          "net_return_pct": -5.004477351344305,
+          "orders": 7,
+          "sharpe": -0.3545788377160981,
+          "skipped_small_orders": 102,
+          "turnover_x": 5.56189674
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.538234452,
+          "funding_pnl": -1.822919964123883,
+          "max_drawdown_pct": 17.679599611984877,
+          "net_return_pct": 0.2709053153523433,
+          "orders": 11,
+          "sharpe": 0.20735520994229503,
+          "skipped_small_orders": 106,
+          "turnover_x": 10.764689039999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.160734419,
+          "funding_pnl": -0.13698993293501982,
+          "max_drawdown_pct": 15.274406788523399,
+          "net_return_pct": 37.39678564852991,
+          "orders": 4,
+          "sharpe": 2.627186328824501,
+          "skipped_small_orders": 116,
+          "turnover_x": 3.21468838
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.260778744,
+          "funding_pnl": -1.2772554447927829,
+          "max_drawdown_pct": 12.940975021827562,
+          "net_return_pct": 20.72919403021438,
+          "orders": 5,
+          "sharpe": 1.850104574619784,
+          "skipped_small_orders": 104,
+          "turnover_x": 5.215574879999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.17350493099999997,
+          "funding_pnl": 0.4026933045208207,
+          "max_drawdown_pct": 9.888876452941975,
+          "net_return_pct": 19.005977511641614,
+          "orders": 4,
+          "sharpe": 1.9962778243486905,
+          "skipped_small_orders": 113,
+          "turnover_x": 3.47009862
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "SOL",
+        "days": 56,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": -8.305299848566694,
+        "median_sharpe": -0.6303126512669915,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 61,
+        "worst_drawdown_pct": 30.66394835393821
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.5846580025,
+          "funding_pnl": 0.1528093582756871,
+          "max_drawdown_pct": 30.66394835393821,
+          "net_return_pct": -28.962357288448725,
+          "orders": 21,
+          "sharpe": -2.6073617693008826,
+          "skipped_small_orders": 74,
+          "turnover_x": 17.989477
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.2625912835,
+          "funding_pnl": -1.849472227236962,
+          "max_drawdown_pct": 23.55632612162568,
+          "net_return_pct": 13.084772978526349,
+          "orders": 9,
+          "sharpe": 1.108286424782275,
+          "skipped_small_orders": 94,
+          "turnover_x": 8.0797318
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.35481660499999995,
+          "funding_pnl": -0.37793660183964006,
+          "max_drawdown_pct": 19.676005093810833,
+          "net_return_pct": 3.8350935863208147,
+          "orders": 14,
+          "sharpe": 0.4816692842793951,
+          "skipped_small_orders": 88,
+          "turnover_x": 10.917434
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.253680895,
+          "funding_pnl": -0.46686902928327995,
+          "max_drawdown_pct": 25.07781200061633,
+          "net_return_pct": -8.305299848566694,
+          "orders": 9,
+          "sharpe": -0.6303126512669915,
+          "skipped_small_orders": 104,
+          "turnover_x": 7.805565999999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.19668011999999999,
+          "funding_pnl": -0.06054746069899993,
+          "max_drawdown_pct": 20.842444257733806,
+          "net_return_pct": -13.279655161397697,
+          "orders": 8,
+          "sharpe": -1.0906623179154236,
+          "skipped_small_orders": 87,
+          "turnover_x": 6.051696
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -8.996465108196116,
+        "median_sharpe": -0.6954700036988737,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 61,
+        "worst_drawdown_pct": 31.45671028951975
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.88794864,
+          "funding_pnl": 0.14513063980472107,
+          "max_drawdown_pct": 31.45671028951975,
+          "net_return_pct": -29.832969184390723,
+          "orders": 21,
+          "sharpe": -2.739337377810308,
+          "skipped_small_orders": 75,
+          "turnover_x": 17.758972800000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.39943599,
+          "funding_pnl": -1.8599171051984422,
+          "max_drawdown_pct": 22.80939795802691,
+          "net_return_pct": 12.59607453760312,
+          "orders": 9,
+          "sharpe": 1.090354862776291,
+          "skipped_small_orders": 93,
+          "turnover_x": 7.9887198
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5426261999999998,
+          "funding_pnl": -0.3630645302085,
+          "max_drawdown_pct": 19.743800898300655,
+          "net_return_pct": 2.505791579583283,
+          "orders": 14,
+          "sharpe": 0.39227674442702837,
+          "skipped_small_orders": 88,
+          "turnover_x": 10.852524
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.3869927,
+          "funding_pnl": -0.46726370409799994,
+          "max_drawdown_pct": 25.449341831051154,
+          "net_return_pct": -8.996465108196116,
+          "orders": 9,
+          "sharpe": -0.6954700036988737,
+          "skipped_small_orders": 104,
+          "turnover_x": 7.739853999999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.3025848,
+          "funding_pnl": -0.06054746069899993,
+          "max_drawdown_pct": 21.06722385850229,
+          "net_return_pct": -13.983823901397729,
+          "orders": 8,
+          "sharpe": -1.1568458096026373,
+          "skipped_small_orders": 85,
+          "turnover_x": 6.051696
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "coin": "BNB",
+        "days": 56,
+        "kind": "single_tsmom"
+      },
+      "normal": {
+        "median_net_return_pct": 0.28223431441183333,
+        "median_sharpe": 0.1860278664145857,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 33,
+        "worst_drawdown_pct": 17.57156420388226
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.34482976449999997,
+          "funding_pnl": 0.040114551122427,
+          "max_drawdown_pct": 16.48683644756639,
+          "net_return_pct": -5.755130426754873,
+          "orders": 11,
+          "sharpe": -0.5549953873061729,
+          "skipped_small_orders": 90,
+          "turnover_x": 10.610146599999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.034428602,
+          "funding_pnl": -1.5243432213048143,
+          "max_drawdown_pct": 12.836588095795044,
+          "net_return_pct": 3.6244963533903274,
+          "orders": 1,
+          "sharpe": 0.5029846941429947,
+          "skipped_small_orders": 100,
+          "turnover_x": 1.0593416
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.39159773900000006,
+          "funding_pnl": -0.4874092402790411,
+          "max_drawdown_pct": 16.438767924313236,
+          "net_return_pct": -2.880893958558106,
+          "orders": 13,
+          "sharpe": -0.23305283911018784,
+          "skipped_small_orders": 84,
+          "turnover_x": 12.0491612
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.16812432,
+          "funding_pnl": -0.9098805641608189,
+          "max_drawdown_pct": 7.880423644002632,
+          "net_return_pct": 25.286070231678437,
+          "orders": 5,
+          "sharpe": 3.5305542225608773,
+          "skipped_small_orders": 87,
+          "turnover_x": 5.173055999999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.093553694,
+          "funding_pnl": 0.10071085120586601,
+          "max_drawdown_pct": 17.57156420388226,
+          "net_return_pct": 0.28223431441183333,
+          "orders": 3,
+          "sharpe": 0.1860278664145857,
+          "skipped_small_orders": 102,
+          "turnover_x": 2.8785752000000002
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -0.3884232355880757,
+        "median_sharpe": 0.12178672773627905,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 33,
+        "worst_drawdown_pct": 17.694137863908367
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.5282409499999999,
+          "funding_pnl": 0.03918261072257706,
+          "max_drawdown_pct": 16.975892023713847,
+          "net_return_pct": -6.7305264245544505,
+          "orders": 11,
+          "sharpe": -0.6722877203208715,
+          "skipped_small_orders": 93,
+          "turnover_x": 10.564818999999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.05296708,
+          "funding_pnl": -1.5243432213048143,
+          "max_drawdown_pct": 12.960480342861324,
+          "net_return_pct": 2.9565266493902786,
+          "orders": 1,
+          "sharpe": 0.4396264980674935,
+          "skipped_small_orders": 98,
+          "turnover_x": 1.0593416
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6011206700000001,
+          "funding_pnl": -0.48749675585684105,
+          "max_drawdown_pct": 16.63561790284549,
+          "net_return_pct": -3.8192971237136053,
+          "orders": 13,
+          "sharpe": -0.34944607770810193,
+          "skipped_small_orders": 83,
+          "turnover_x": 12.0224134
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.2586528,
+          "funding_pnl": -0.9098805641608189,
+          "max_drawdown_pct": 7.940360989140327,
+          "net_return_pct": 24.446112359678374,
+          "orders": 5,
+          "sharpe": 3.4145077077985233,
+          "skipped_small_orders": 85,
+          "turnover_x": 5.173055999999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.14392876,
+          "funding_pnl": 0.10071085120586601,
+          "max_drawdown_pct": 17.694137863908367,
+          "net_return_pct": -0.3884232355880757,
+          "orders": 3,
+          "sharpe": 0.12178672773627905,
+          "skipped_small_orders": 100,
+          "turnover_x": 2.8785752000000002
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 56,
+        "kind": "absolute_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": 3.418254997152914,
+        "median_sharpe": 0.4696775725720095,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 164,
+        "worst_drawdown_pct": 32.898790082297765
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.4810477015499999,
+          "funding_pnl": -0.030725650329348635,
+          "max_drawdown_pct": 18.153230186943937,
+          "net_return_pct": -9.76790070375838,
+          "orders": 31,
+          "sharpe": -0.7939410053824355,
+          "skipped_small_orders": 94,
+          "turnover_x": 14.801467739999996
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.0067720805999996,
+          "funding_pnl": -1.811864222520118,
+          "max_drawdown_pct": 32.898790082297765,
+          "net_return_pct": -23.41439260624033,
+          "orders": 67,
+          "sharpe": -2.2366259930824777,
+          "skipped_small_orders": 48,
+          "turnover_x": 30.97760248000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6885833025499999,
+          "funding_pnl": -0.21335046559877685,
+          "max_drawdown_pct": 14.67883715999594,
+          "net_return_pct": 26.608734463702355,
+          "orders": 35,
+          "sharpe": 1.9669391131399458,
+          "skipped_small_orders": 90,
+          "turnover_x": 21.18717854
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.32385708030000004,
+          "funding_pnl": -1.1373204926873555,
+          "max_drawdown_pct": 12.757903581820429,
+          "net_return_pct": 18.69637685402532,
+          "orders": 17,
+          "sharpe": 1.7433202783167059,
+          "skipped_small_orders": 92,
+          "turnover_x": 9.96483324
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.23963872725000002,
+          "funding_pnl": -0.0037767741735781468,
+          "max_drawdown_pct": 15.096385255027943,
+          "net_return_pct": 3.418254997152914,
+          "orders": 14,
+          "sharpe": 0.4696775725720095,
+          "skipped_small_orders": 98,
+          "turnover_x": 7.3734993
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": 4.9141433581497695,
+        "median_sharpe": 0.5986437471075918,
+        "positive": 3,
+        "total_blocked_starts": 0,
+        "total_orders": 163,
+        "worst_drawdown_pct": 33.2205649916995
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.7362975690000002,
+          "funding_pnl": -0.03326141547742086,
+          "max_drawdown_pct": 18.740801838573308,
+          "net_return_pct": -11.112895938754807,
+          "orders": 31,
+          "sharpe": -0.9338699752858312,
+          "skipped_small_orders": 92,
+          "turnover_x": 14.725951380000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.5290299319999998,
+          "funding_pnl": -1.7976624598989261,
+          "max_drawdown_pct": 33.2205649916995,
+          "net_return_pct": -24.824355488198023,
+          "orders": 67,
+          "sharpe": -2.4204898153695664,
+          "skipped_small_orders": 56,
+          "turnover_x": 30.58059864000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.0538019849999998,
+          "funding_pnl": -0.2123828259562586,
+          "max_drawdown_pct": 14.91310223618213,
+          "net_return_pct": 25.29750254288732,
+          "orders": 35,
+          "sharpe": 1.8840592522484243,
+          "skipped_small_orders": 90,
+          "turnover_x": 21.076039700000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.4974944499999999,
+          "funding_pnl": -1.1264388424369554,
+          "max_drawdown_pct": 12.859506247555464,
+          "net_return_pct": 17.382538489726063,
+          "orders": 17,
+          "sharpe": 1.645136347873781,
+          "skipped_small_orders": 93,
+          "turnover_x": 9.949889
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.35064910399999993,
+          "funding_pnl": -0.01834663892503562,
+          "max_drawdown_pct": 15.21199729479954,
+          "net_return_pct": 4.9141433581497695,
+          "orders": 13,
+          "sharpe": 0.5986437471075918,
+          "skipped_small_orders": 97,
+          "turnover_x": 7.01298208
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 56,
+        "kind": "long_cash_rotation"
+      },
+      "normal": {
+        "median_net_return_pct": -4.771053128720393,
+        "median_sharpe": -0.3848647379926359,
+        "positive": 1,
+        "total_blocked_starts": 0,
+        "total_orders": 131,
+        "worst_drawdown_pct": 20.85418262005524
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.44062681714999996,
+          "funding_pnl": -0.7606328547445661,
+          "max_drawdown_pct": 19.86269426831433,
+          "net_return_pct": -13.304129343789173,
+          "orders": 29,
+          "sharpe": -1.6171409785366286,
+          "skipped_small_orders": 34,
+          "turnover_x": 13.557748219999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6050875031500001,
+          "funding_pnl": -2.046248298998808,
+          "max_drawdown_pct": 20.85418262005524,
+          "net_return_pct": -4.376073604297604,
+          "orders": 37,
+          "sharpe": -0.30004046291539843,
+          "skipped_small_orders": 66,
+          "turnover_x": 18.61807702000001
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6240907666499999,
+          "funding_pnl": -0.3214439659253137,
+          "max_drawdown_pct": 18.19071495017315,
+          "net_return_pct": -9.777503465150716,
+          "orders": 43,
+          "sharpe": -1.4017882503289365,
+          "skipped_small_orders": 7,
+          "turnover_x": 19.20279282
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.3470229919,
+          "funding_pnl": -1.3092368805608816,
+          "max_drawdown_pct": 12.757903581820429,
+          "net_return_pct": 30.650068255078345,
+          "orders": 17,
+          "sharpe": 2.6418432114575836,
+          "skipped_small_orders": 94,
+          "turnover_x": 10.677630519999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.0917497984,
+          "funding_pnl": -0.12769676596022486,
+          "max_drawdown_pct": 17.57156420388226,
+          "net_return_pct": -4.771053128720393,
+          "orders": 5,
+          "sharpe": -0.3848647379926359,
+          "skipped_small_orders": 43,
+          "turnover_x": 2.82307072
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -5.62791618657884,
+        "median_sharpe": -0.4308301922562848,
+        "positive": 1,
+        "total_blocked_starts": 0,
+        "total_orders": 131,
+        "worst_drawdown_pct": 21.46463637241186
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.6767561209999999,
+          "funding_pnl": -0.7604584410103911,
+          "max_drawdown_pct": 20.523930491813434,
+          "net_return_pct": -14.19467846942084,
+          "orders": 29,
+          "sharpe": -1.7323845776248306,
+          "skipped_small_orders": 40,
+          "turnover_x": 13.53512242
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9241264380000002,
+          "funding_pnl": -2.0410370375894176,
+          "max_drawdown_pct": 21.46463637241186,
+          "net_return_pct": -5.62791618657884,
+          "orders": 37,
+          "sharpe": -0.4308301922562848,
+          "skipped_small_orders": 64,
+          "turnover_x": 18.48252876
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.958802251,
+          "funding_pnl": -0.3215314815031137,
+          "max_drawdown_pct": 18.632551504028694,
+          "net_return_pct": -10.684306786606257,
+          "orders": 43,
+          "sharpe": -1.536940176683566,
+          "skipped_small_orders": 6,
+          "turnover_x": 19.176045019999997
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5299752320000001,
+          "funding_pnl": -1.296572418010481,
+          "max_drawdown_pct": 12.825616577006304,
+          "net_return_pct": 29.07600164937907,
+          "orders": 17,
+          "sharpe": 2.5351345641824796,
+          "skipped_small_orders": 91,
+          "turnover_x": 10.59950464
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.141153536,
+          "funding_pnl": -0.12769676596022486,
+          "max_drawdown_pct": 17.694137863908367,
+          "net_return_pct": -5.173746189520411,
+          "orders": 5,
+          "sharpe": -0.42957639283920845,
+          "skipped_small_orders": 41,
+          "turnover_x": 2.82307072
+        }
+      ]
+    },
+    {
+      "candidate": {
+        "days": 56,
+        "kind": "top_bottom_pair"
+      },
+      "normal": {
+        "median_net_return_pct": -3.6948385475459977,
+        "median_sharpe": -0.5379717197876498,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 275,
+        "worst_drawdown_pct": 26.860255374709663
+      },
+      "normal_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 0.8825233910999999,
+          "funding_pnl": -0.11235988267303275,
+          "max_drawdown_pct": 10.364140266426002,
+          "net_return_pct": -3.6948385475459977,
+          "orders": 68,
+          "sharpe": -0.5379717197876498,
+          "skipped_small_orders": 171,
+          "turnover_x": 27.154565880000003
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.6487333593000001,
+          "funding_pnl": -0.02966404923813649,
+          "max_drawdown_pct": 26.860255374709663,
+          "net_return_pct": -18.72475481707626,
+          "orders": 52,
+          "sharpe": -2.4364508518838086,
+          "skipped_small_orders": 167,
+          "turnover_x": 19.961026439999998
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.8912928511500003,
+          "funding_pnl": 0.03841475685525547,
+          "max_drawdown_pct": 13.637653658932269,
+          "net_return_pct": -8.42487418858916,
+          "orders": 70,
+          "sharpe": -1.0130797237189733,
+          "skipped_small_orders": 159,
+          "turnover_x": 27.424395419999993
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.5128111429999999,
+          "funding_pnl": -0.3014624180031852,
+          "max_drawdown_pct": 10.067537408245297,
+          "net_return_pct": 5.700196877993657,
+          "orders": 38,
+          "sharpe": 0.8756064742555277,
+          "skipped_small_orders": 172,
+          "turnover_x": 15.778804399999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.66011452585,
+          "funding_pnl": -0.02008926574096934,
+          "max_drawdown_pct": 9.239088216683811,
+          "net_return_pct": 2.9078584168180655,
+          "orders": 47,
+          "sharpe": 0.5802890874881442,
+          "skipped_small_orders": 174,
+          "turnover_x": 20.311216180000002
+        }
+      ],
+      "passed": false,
+      "stressed": {
+        "median_net_return_pct": -5.617969045748305,
+        "median_sharpe": -0.8683728872705127,
+        "positive": 2,
+        "total_blocked_starts": 0,
+        "total_orders": 276,
+        "worst_drawdown_pct": 27.698088341957174
+      },
+      "stressed_folds": [
+        {
+          "blocked_starts": 0,
+          "fees": 1.3486364810000004,
+          "funding_pnl": -0.11234806857419613,
+          "max_drawdown_pct": 11.418124159947451,
+          "net_return_pct": -5.617969045748305,
+          "orders": 68,
+          "sharpe": -0.8683728872705127,
+          "skipped_small_orders": 173,
+          "turnover_x": 26.972729620000006
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.9905410550000001,
+          "funding_pnl": -0.023814456688154313,
+          "max_drawdown_pct": 27.698088341957174,
+          "net_return_pct": -20.235319691576294,
+          "orders": 52,
+          "sharpe": -2.641267917196806,
+          "skipped_small_orders": 161,
+          "turnover_x": 19.810821099999995
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.365472027,
+          "funding_pnl": 0.03887340310066493,
+          "max_drawdown_pct": 14.293216788266239,
+          "net_return_pct": -9.753653246398553,
+          "orders": 70,
+          "sharpe": -1.1998013135069645,
+          "skipped_small_orders": 161,
+          "turnover_x": 27.30944053999999
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 0.785751545,
+          "funding_pnl": -0.2243812785873868,
+          "max_drawdown_pct": 10.771074483458987,
+          "net_return_pct": 5.420953906625092,
+          "orders": 39,
+          "sharpe": 0.9325653119388688,
+          "skipped_small_orders": 168,
+          "turnover_x": 15.715030900000002
+        },
+        {
+          "blocked_starts": 0,
+          "fees": 1.005436433,
+          "funding_pnl": -0.01915947690455844,
+          "max_drawdown_pct": 10.330853438781007,
+          "net_return_pct": 1.4402282489910379,
+          "orders": 47,
+          "sharpe": 0.3332529519905577,
+          "skipped_small_orders": 164,
+          "turnover_x": 20.108728660000008
+        }
+      ]
+    }
+  ],
+  "capital": 50.0,
+  "data": {
+    "bars": 6980,
+    "development_start": 1716969600000,
+    "end": 1784347200000,
+    "holdout_bars": 1080,
+    "holdout_start": 1768809600000,
+    "start": 1683849600000
+  },
+  "execution_authorized": false,
+  "fixture_sha256": "ac88f12070373c38b8bc25e8ae75072ae3b79edb0fdea794bfc440bf0e8a997b",
+  "gate": {
+    "blocked_starts": 0,
+    "median_normal_sharpe": "above 0.5",
+    "positive_folds": "at least 4/5 normal and stressed",
+    "worst_stressed_drawdown_pct": "at most 25"
+  },
+  "generated_at": "2026-07-18T15:34:18.811286+00:00",
+  "minimum_order_notional": 10.0,
+  "passing_candidates": 1,
+  "schema_version": 1,
+  "sources": {
+    "funding": "Hyperliquid public fundingHistory",
+    "prices": "Binance USD-M perpetual public klines"
+  },
+  "winner": {
+    "candidate": {
+      "coin": "ETH",
+      "days": 56,
+      "kind": "single_tsmom"
+    },
+    "normal": {
+      "median_net_return_pct": 19.729172198741594,
+      "median_sharpe": 1.919646481280407,
+      "positive": 4,
+      "total_blocked_starts": 0,
+      "total_orders": 31,
+      "worst_drawdown_pct": 18.353461103929046
+    },
+    "normal_folds": [
+      {
+        "blocked_starts": 0,
+        "fees": 0.18122020084999999,
+        "funding_pnl": -0.12207573169302254,
+        "max_drawdown_pct": 18.353461103929046,
+        "net_return_pct": -4.003093865086205,
+        "orders": 7,
+        "sharpe": -0.252871814841215,
+        "skipped_small_orders": 104,
+        "turnover_x": 5.576006179999999
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.3502889039,
+        "funding_pnl": -1.821915906728774,
+        "max_drawdown_pct": 17.37611310730286,
+        "net_return_pct": 1.3167023787424625,
+        "orders": 11,
+        "sharpe": 0.2924600470411639,
+        "skipped_small_orders": 107,
+        "turnover_x": 10.77812012
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.09919211444999998,
+        "funding_pnl": -0.15370390467344464,
+        "max_drawdown_pct": 12.25363250246615,
+        "net_return_pct": 44.712313961753416,
+        "orders": 4,
+        "sharpe": 3.1442727998285687,
+        "skipped_small_orders": 116,
+        "turnover_x": 3.0520650599999994
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.1701857612,
+        "funding_pnl": -1.2770966749931998,
+        "max_drawdown_pct": 12.876723195079776,
+        "net_return_pct": 21.598343127613397,
+        "orders": 5,
+        "sharpe": 1.919646481280407,
+        "skipped_small_orders": 104,
+        "turnover_x": 5.23648496
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.11277820514999999,
+        "funding_pnl": 0.4026933045208207,
+        "max_drawdown_pct": 9.781021272967083,
+        "net_return_pct": 19.729172198741594,
+        "orders": 4,
+        "sharpe": 2.0661689749051,
+        "skipped_small_orders": 113,
+        "turnover_x": 3.47009862
+      }
+    ],
+    "passed": true,
+    "stressed": {
+      "median_net_return_pct": 19.005977511641614,
+      "median_sharpe": 1.850104574619784,
+      "positive": 4,
+      "total_blocked_starts": 0,
+      "total_orders": 31,
+      "worst_drawdown_pct": 18.619193986188698
+    },
+    "stressed_folds": [
+      {
+        "blocked_starts": 0,
+        "fees": 0.278094837,
+        "funding_pnl": -0.125125224072118,
+        "max_drawdown_pct": 18.619193986188698,
+        "net_return_pct": -5.004477351344305,
+        "orders": 7,
+        "sharpe": -0.3545788377160981,
+        "skipped_small_orders": 102,
+        "turnover_x": 5.56189674
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.538234452,
+        "funding_pnl": -1.822919964123883,
+        "max_drawdown_pct": 17.679599611984877,
+        "net_return_pct": 0.2709053153523433,
+        "orders": 11,
+        "sharpe": 0.20735520994229503,
+        "skipped_small_orders": 106,
+        "turnover_x": 10.764689039999999
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.160734419,
+        "funding_pnl": -0.13698993293501982,
+        "max_drawdown_pct": 15.274406788523399,
+        "net_return_pct": 37.39678564852991,
+        "orders": 4,
+        "sharpe": 2.627186328824501,
+        "skipped_small_orders": 116,
+        "turnover_x": 3.21468838
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.260778744,
+        "funding_pnl": -1.2772554447927829,
+        "max_drawdown_pct": 12.940975021827562,
+        "net_return_pct": 20.72919403021438,
+        "orders": 5,
+        "sharpe": 1.850104574619784,
+        "skipped_small_orders": 104,
+        "turnover_x": 5.215574879999999
+      },
+      {
+        "blocked_starts": 0,
+        "fees": 0.17350493099999997,
+        "funding_pnl": 0.4026933045208207,
+        "max_drawdown_pct": 9.888876452941975,
+        "net_return_pct": 19.005977511641614,
+        "orders": 4,
+        "sharpe": 1.9962778243486905,
+        "skipped_small_orders": 113,
+        "turnover_x": 3.47009862
+      }
+    ]
+  }
+}
