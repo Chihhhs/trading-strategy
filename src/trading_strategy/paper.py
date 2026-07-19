@@ -293,8 +293,9 @@ def _update_experiment_positions(state, prices, data_cache, strategy, params):
                     pos["derivatives_crowding_reductions"] = reductions
         if not reason:
             try:
-                if datetime.now() - datetime.fromisoformat(pos["entry_time"]) > timedelta(
-                    days=int(params.get("max_hold_days", 30))
+                max_hold_days = params.get("max_hold_days")
+                if max_hold_days is not None and datetime.now() - datetime.fromisoformat(pos["entry_time"]) > timedelta(
+                    days=int(max_hold_days)
                 ):
                     reason = "TIME"
             except (TypeError, ValueError):

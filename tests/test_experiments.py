@@ -79,6 +79,24 @@ class ExperimentSpecTest(unittest.TestCase):
         definition = get_strategy_definition("intraday_momentum")
         self.assertEqual(definition.context_bars, 90)
 
+    def test_trend_pullback_paper_parameters_disable_time_fallback(self):
+        from trading_strategy.experiments.paper_adapter import PaperSession
+        from trading_strategy.paper import _experiment_params
+
+        session = PaperSession(
+            "pullback",
+            "fingerprint",
+            "trend_pullback_reclaim",
+            "4h",
+            ("BNB",),
+            {"max_hold_days": None},
+            25.0,
+            1.0,
+            0.02,
+            1,
+        )
+        self.assertIsNone(_experiment_params(session)["max_hold_days"])
+
     def test_intraday_exit_preserves_global_bars_since_entry_with_rolling_context(self):
         from trading_strategy.strategies import StrategyContext, get_strategy
 

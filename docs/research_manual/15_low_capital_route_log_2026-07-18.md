@@ -200,3 +200,25 @@ Three of 36 development candidates passed, all neighboring BTC channel variants.
 The once-opened holdout returned -2.29% normally and -2.62% stressed across 20 orders, with no minimum-order skips. Removing the extra stress cost explains only about 0.34 percentage points, so false breakouts rather than fees caused the failure. The longest observed hold was 33 four-hour bars, confirming that the implementation imposed no elapsed-time exit.
 
 Review: a trailing channel can preserve a strong trend for days, but the entry state still lacks enough information to distinguish continuation from false breakout. This exact route and opened interval are closed. Any additional entry-quality hypothesis must use a separately declared validation source rather than reusing this holdout.
+
+## Route 19: native 4h moving-average state momentum
+
+Decision: rejected in the locked holdout.
+
+The new fixture was fetched independently after the close-channel route. One of 144 candidates passed development: BNB with a six-bar fast average, 42-bar slow average, and 12-bar slow-average slope. It produced 4/5 positive folds, +2.92% normal and +2.72% stressed median return, 13.40% stressed worst drawdown, and 73 orders.
+
+The independent holdout returned -1.98% normally and -2.08% under stress across six orders, with no minimum-order skips. The route entered only three times in the holdout and failed because its state classification did not transfer to the new regime, not because of execution friction.
+
+Review: a conventional trend state can be executable and cost-aware while still being regime-fragile. The full moving-average family is closed; the next route switches from continuation entries to trend-pullback reclaim entries.
+
+## Route 20: native 4h trend-pullback reclaim
+
+Decision: passed the locked holdout; paper candidate only.
+
+This route enters only after a six-bar drawdown of at least 2% is followed by a positive reclaim while the preceding 84-bar trend remains positive. It exits when the six-bar return reaches zero or the longer trend turns negative. No elapsed-time condition exists in the research or typed strategy.
+
+Two of 288 candidates passed development, and they were neighboring BNB variants. The selected candidate produced 4/5 positive folds, +1.61% normal and +1.44% stressed median return, 3.95% stressed worst drawdown, and 40 orders. Its fresh Hyperliquid holdout returned +0.95% normally and +0.84% under stress, with 0.47% stressed drawdown and no minimum-order skips.
+
+The capital replay found the first executable balance at about $21: $20 and below produced no executable orders because the 50% target notional rounded below the $10 exchange minimum, while $21–100 executed all six holdout orders. The strategy is therefore paper-eligible from $25 with a small operational buffer, not from the user's lower balances.
+
+Review: this is the first route with both development and independent holdout support, but the holdout contains only six trades. It is not a live replacement. The typed strategy and isolated paper manifest are added for observation; paper results must reach the existing 60-day/10-trade boundary before any live review.

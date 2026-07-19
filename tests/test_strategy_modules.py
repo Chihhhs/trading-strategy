@@ -63,6 +63,40 @@ class StrategyModulesTest(unittest.TestCase):
         strategy = resolve_strategy("intraday_momentum")
         self.assertEqual(strategy.name, "intraday_momentum")
 
+    def test_trend_pullback_reclaim_has_state_exit_without_time_limit(self):
+        prices = [100.0 + index * 0.5 for index in range(100)]
+        prices.extend([148.0, 146.0, 144.0, 142.0, 140.0, 139.0, 140.0])
+        bars = [build_bar(price, index) for index, price in enumerate(prices)]
+        strategy = resolve_strategy("trend_pullback_reclaim")
+        signal = strategy.generate_signal(
+            StrategyContext(
+                coin="BNB",
+                window=bars,
+                current_bar=bars[-1],
+                config={"pullback_lookback": 6, "trend_lookback": 84, "entry_drawdown": 0.02},
+            )
+        )
+        self.assertIsNotNone(signal)
+        self.assertEqual(signal.reason, "TREND_PULLBACK_RECLAIM")
+        self.assertIsNone(signal.tp)
+        self.assertLess(signal.sl, bars[-1]["close"])
+
+        recovered = bars + [build_bar(150.0, len(bars))]
+        result = strategy.evaluate_open_position(
+            {"bars_since_entry": 10000},
+            StrategyContext(
+                coin="BNB",
+                window=recovered,
+                current_bar=recovered[-1],
+                config={"pullback_lookback": 6, "trend_lookback": 84, "exit_recovery": 0.0},
+            ),
+        )
+        self.assertEqual(result["exit_reason"], "PULLBACK_RECOVERED")
+
+    def test_trend_pullback_reclaim_is_registered(self):
+        self.assertIn("trend_pullback_reclaim", available_strategy_names())
+        self.assertEqual(resolve_strategy("trend_pullback_reclaim").name, "trend_pullback_reclaim")
+
     def test_resolve_strategy_returns_legacy_unified(self):
         self.assertIn("legacy_unified", available_strategy_names())
         strategy = resolve_strategy("legacy_unified")

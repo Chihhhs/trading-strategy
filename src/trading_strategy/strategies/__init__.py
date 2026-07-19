@@ -7,6 +7,7 @@ from .definitions import (
     IntradayMomentumParameters,
     LegacyUnifiedParameters,
     StrategyDefinition,
+    TrendPullbackReclaimParameters,
     TrendParameters,
 )
 from .cross_sectional_momentum import (
@@ -17,6 +18,7 @@ from .cross_sectional_momentum import (
 )
 from .cross_sectional_strength import CrossSectionalStrengthStrategy
 from .intraday_momentum import IntradayMomentumStrategy
+from .trend_pullback_reclaim import TrendPullbackReclaimStrategy
 from .legacy_unified import LegacyUnifiedStrategy
 from .trend import (
     TrendStrategy,
@@ -57,6 +59,15 @@ _STRATEGY_DEFINITIONS = {
         default_timeframe="15m",
         min_bars=50,
         context_bars=90,
+    ),
+    "trend_pullback_reclaim": StrategyDefinition(
+        name="trend_pullback_reclaim",
+        factory=TrendPullbackReclaimStrategy,
+        parameter_type=TrendPullbackReclaimParameters,
+        capabilities=frozenset({"long_only", "state_exit", "protective_sl", "short_horizon"}),
+        default_timeframe="4h",
+        min_bars=100,
+        context_bars=120,
     ),
     "legacy_unified": StrategyDefinition(
         name="legacy_unified",

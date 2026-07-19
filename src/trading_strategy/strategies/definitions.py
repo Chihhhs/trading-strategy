@@ -88,6 +88,20 @@ class IntradayMomentumParameters:
 
 
 @dataclass(frozen=True)
+class TrendPullbackReclaimParameters:
+    timeframe: str = "4h"
+    pullback_lookback: int = 6
+    entry_drawdown: float = 0.02
+    trend_lookback: int = 84
+    minimum_trend: float = 0.0
+    exit_recovery: float = 0.0
+    maximum_entry_funding_payment: float = 0.0000125
+    atr_period: int = 14
+    stop_atr_multiple: float = 3.0
+    max_hold_days: int | None = None
+
+
+@dataclass(frozen=True)
 class LegacyUnifiedParameters:
     timeframe: str = "1d"
     min_score: int = 4

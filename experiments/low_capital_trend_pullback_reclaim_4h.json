@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "name": "low-capital-trend-pullback-reclaim-4h",
+  "dataset": {
+    "id": "hyperliquid-native-4h-low-capital-pullback",
+    "path": "data/clean_room/hyperliquid_4h_low_capital_pullback.json"
+  },
+  "coins": ["BNB"],
+  "strategy": {
+    "name": "trend_pullback_reclaim",
+    "required_capabilities": ["long_only", "protective_sl", "short_horizon", "state_exit"],
+    "parameters": {
+      "timeframe": "4h",
+      "pullback_lookback": 6,
+      "entry_drawdown": 0.02,
+      "trend_lookback": 84,
+      "minimum_trend": 0.0,
+      "exit_recovery": 0.0,
+      "maximum_entry_funding_payment": 0.0000125,
+      "atr_period": 14,
+      "stop_atr_multiple": 3.0,
+      "max_hold_days": null
+    }
+  },
+  "portfolio": {
+    "initial_capital": 25.0,
+    "leverage": 1.0,
+    "risk_pct": 0.02,
+    "max_positions": 1
+  },
+  "costs": {
+    "fee_bps": 6.5,
+    "slippage_bps": 0.0
+  },
+  "evaluation": {
+    "baseline": null,
+    "windows": [120],
+    "universes": [["BNB"]],
+    "min_trades": 5,
+    "min_eligible_comparisons": 1,
+    "require_majority": true,
+    "require_complete_data": true
+  },
+  "target_environment": "paper"
+}
