@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "name": "low-capital-short-breakdown-4h",
+  "dataset": {
+    "id": "hyperliquid-native-4h-low-capital-variants",
+    "path": "data/clean_room/hyperliquid_4h_low_capital_variants.json"
+  },
+  "coins": ["ETH"],
+  "strategy": {
+    "name": "short_breakdown",
+    "required_capabilities": ["protective_sl", "short_horizon", "short_only", "state_exit"],
+    "parameters": {
+      "timeframe": "4h",
+      "lookback": 12,
+      "entry_drawdown": 0.01,
+      "trend_lookback": 84,
+      "minimum_downtrend": 0.0,
+      "exit_recovery": 0.0,
+      "maximum_entry_funding_payment": -0.0000125,
+      "atr_period": 14,
+      "stop_atr_multiple": 3.0,
+      "max_hold_days": null
+    }
+  },
+  "portfolio": {
+    "initial_capital": 50.0,
+    "leverage": 1.0,
+    "risk_pct": 0.02,
+    "max_positions": 1
+  },
+  "costs": {
+    "fee_bps": 6.5,
+    "slippage_bps": 0.0
+  },
+  "evaluation": {
+    "baseline": null,
+    "windows": [120],
+    "universes": [["ETH"]],
+    "min_trades": 5,
+    "min_eligible_comparisons": 1,
+    "require_majority": true,
+    "require_complete_data": true
+  },
+  "target_environment": "paper"
+}

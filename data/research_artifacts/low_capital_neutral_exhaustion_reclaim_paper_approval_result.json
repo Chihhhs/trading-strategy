@@ -1,0 +1,10 @@
+{
+  "status": "approved_for_paper",
+  "passed_comparisons": 2,
+  "eligible_comparisons": 2,
+  "reasons": [],
+  "baseline_fingerprint": "",
+  "candidate_fingerprint": "5868b7f27e9e786982f0f3150b9ffce62255a2897a28947785cfc58617a8e6e0",
+  "config_diff": {},
+  "version": 1
+}

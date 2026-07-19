@@ -97,6 +97,50 @@ class StrategyModulesTest(unittest.TestCase):
         self.assertIn("trend_pullback_reclaim", available_strategy_names())
         self.assertEqual(resolve_strategy("trend_pullback_reclaim").name, "trend_pullback_reclaim")
 
+    def test_short_breakdown_generates_short_without_time_exit(self):
+        prices = [200.0 - index * 0.5 for index in range(110)]
+        bars = [build_bar(price, index) for index, price in enumerate(prices)]
+        strategy = resolve_strategy("short_breakdown")
+        signal = strategy.generate_signal(
+            StrategyContext(
+                coin="ETH",
+                window=bars,
+                current_bar=bars[-1],
+                config={"lookback": 12, "trend_lookback": 84, "entry_drawdown": 0.01},
+            )
+        )
+        self.assertIsNotNone(signal)
+        self.assertEqual(signal.direction, "short")
+        self.assertIsNone(signal.tp)
+        self.assertGreater(signal.sl, bars[-1]["close"])
+
+    def test_neutral_exhaustion_reclaim_generates_state_exit(self):
+        prices = [100.0 + index * 0.05 for index in range(50)]
+        prices.extend([100.0, 98.0, 96.0, 95.0, 94.0, 95.0])
+        bars = [build_bar(price, index) for index, price in enumerate(prices)]
+        strategy = resolve_strategy("neutral_exhaustion_reclaim")
+        signal = strategy.generate_signal(
+            StrategyContext(
+                coin="BTC",
+                window=bars,
+                current_bar=bars[-1],
+                config={"pullback_lookback": 6, "trend_lookback": 42, "entry_drawdown": 0.02},
+            )
+        )
+        self.assertIsNotNone(signal)
+        self.assertEqual(signal.reason, "NEUTRAL_EXHAUSTION_RECLAIM")
+        recovered = bars + [build_bar(102.0, len(bars))]
+        result = strategy.evaluate_open_position(
+            {},
+            StrategyContext(
+                coin="BTC",
+                window=recovered,
+                current_bar=recovered[-1],
+                config={"pullback_lookback": 6, "trend_lookback": 42, "exit_recovery": 0.01},
+            ),
+        )
+        self.assertEqual(result["exit_reason"], "PULLBACK_RECOVERED")
+
     def test_resolve_strategy_returns_legacy_unified(self):
         self.assertIn("legacy_unified", available_strategy_names())
         strategy = resolve_strategy("legacy_unified")

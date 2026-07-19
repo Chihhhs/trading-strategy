@@ -164,7 +164,6 @@ def simulate(
     timestamps, prices, funding = aligned(asset)
     cash = float(capital)
     size = 0.0
-    holding = False
     age = 0
     curve = []
     states = {}
@@ -181,24 +180,31 @@ def simulate(
             cash += payment
             funding_pnl += payment
         equity = cash + size * price
-        target_holding, state = classifier(candidate, prices, funding[index], index, holding)
+        target, state = classifier(candidate, prices, funding[index], index, bool(size))
+        if isinstance(target, bool):
+            target_direction = 1 if target else 0
+        else:
+            target_direction = int(target)
+        current_direction = 1 if size > 0 else -1 if size < 0 else 0
         states[state] = states.get(state, 0) + 1
-        if target_holding != holding:
-            target_size = _rounded_size((0.5 * equity / price) if target_holding else 0.0, asset["sz_decimals"])
+        if target_direction != current_direction:
+            target_size = _rounded_size(
+                (target_direction * 0.5 * equity / price) if target_direction else 0.0,
+                asset["sz_decimals"],
+            )
             delta = target_size - size
             notional = abs(delta) * price
             if delta and notional >= min_notional:
                 fee = notional * cost_bps / 10_000.0
                 cash -= delta * price + fee
                 size = target_size
-                holding = bool(size)
                 age = 0
                 fees += fee
                 turnover += notional
                 orders += 1
             elif delta:
                 skipped += 1
-        if holding:
+        if size:
             age += 1
             max_observed_holding_bars = max(max_observed_holding_bars, age)
         curve.append(cash + size * price)

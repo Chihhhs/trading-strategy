@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "status": "approved_for_paper",
+  "gate_kind": "custom_native_low_capital_holdout",
+  "execution_authorized": false,
+  "candidate_fingerprint": "62cb39dfb80f0841092c72e6f3b210f955346cdd573de3bd5f9935fac4976156",
+  "development": {
+    "positive_folds": 4,
+    "folds": 5,
+    "stressed_median_return_pct": 7.301033078808272,
+    "stressed_worst_drawdown_pct": 11.94166621054016,
+    "orders": 215
+  },
+  "holdout": {
+    "normal_return_pct": 8.687713766222593,
+    "stressed_return_pct": 8.005251494294185,
+    "stressed_max_drawdown_pct": 6.154712264244234,
+    "orders": 38,
+    "skipped_small_orders": 0
+  },
+  "capital_boundary": {
+    "minimum_executable_capital_usdc": 21,
+    "paper_buffer_capital_usdc": 50,
+    "minimum_order_notional_usdc": 10
+  },
+  "evidence_artifact": "data/research_artifacts/low_capital_hyperliquid_4h_variants.json",
+  "paper_boundary": {
+    "minimum_observation_days": 60,
+    "minimum_closed_trades": 10,
+    "live_promotion": "blocked"
+  }
+}

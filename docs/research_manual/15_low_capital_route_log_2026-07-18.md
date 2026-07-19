@@ -219,6 +219,57 @@ This route enters only after a six-bar drawdown of at least 2% is followed by a 
 
 Two of 288 candidates passed development, and they were neighboring BNB variants. The selected candidate produced 4/5 positive folds, +1.61% normal and +1.44% stressed median return, 3.95% stressed worst drawdown, and 40 orders. Its fresh Hyperliquid holdout returned +0.95% normally and +0.84% under stress, with 0.47% stressed drawdown and no minimum-order skips.
 
-The capital replay found the first executable balance at about $21: $20 and below produced no executable orders because the 50% target notional rounded below the $10 exchange minimum, while $21–100 executed all six holdout orders. The strategy is therefore paper-eligible from $25 with a small operational buffer, not from the user's lower balances.
+The capital replay found the first executable balance at about $21: $20 and below produced no executable orders because the 50% target notional rounded below the $10 exchange minimum, while $21 and above executed all six holdout orders. The strategy is therefore paper-eligible from $25 with a small operational buffer, not from the user's lower balances.
 
 Review: this is the first route with both development and independent holdout support, but the holdout contains only six trades. It is not a live replacement. The typed strategy and isolated paper manifest are added for observation; paper results must reach the existing 60-day/10-trade boundary before any live review.
+
+## Routes 21-22: native 4h variants under test
+
+Two new structures share one newly fetched Hyperliquid fixture, with their own fixed candidate grids and the same no-time-exit rule:
+
+1. `native_4h_short_breakdown`: short-only continuation after a confirmed downtrend and downside acceleration; exit on recovery or trend reversal.
+2. `native_4h_volatility_breakout`: long-only breakout only when realized volatility expands; exit on trailing channel or trend decay.
+
+Each route will be independently ranked and can unlock the new holdout only if its own development gates pass. A failed route will be closed rather than repaired with its holdout.
+
+## Route 21: native 4h short breakdown
+
+Decision: passed the locked holdout; second paper candidate.
+
+The route opens a 50% short only when the 84-bar trend is negative and the latest 12-bar return is below -1%, while funding is not too negative for a short. It exits on recovery or trend reversal, with no elapsed-time exit. Seven of 288 candidates passed development; the selected ETH candidate produced 4/5 positive folds, +7.30% stressed median return, 11.94% stressed worst drawdown, and 215 development orders.
+
+The fresh holdout returned +8.69% normally and +8.01% under stress across 38 orders, with 6.15% stressed drawdown and no minimum-order skips. The longest observed hold was 42 four-hour bars.
+
+Review: the result is materially different from the long-only pullback candidate and remains paper-only. A typed short state strategy must preserve the same no-time-limit rule and retain protective stops before paper starts.
+
+## Route 22: native 4h volatility expansion breakout
+
+Decision: rejected in the locked holdout.
+
+Five of 288 candidates passed development, including a BTC breakout with 4/5 positive folds, +3.23% stressed median return, 2.02% stressed worst drawdown, and 40 orders. The fresh holdout returned -2.70% normally and -3.04% under stress across 20 orders.
+
+Review: realized-volatility confirmation did not solve the false-breakout problem. This route is closed and will not be papered.
+
+## Route 23: native 4h neutral-zone exhaustion reclaim
+
+Status: development under test.
+
+This route will only buy a sharp downside move that reclaims the prior bar while the longer trend remains inside a neutral range. It is deliberately a different regime hypothesis from both trend continuation routes; no time-based exit is allowed.
+
+Decision: passed the locked holdout; third paper candidate.
+
+Thirteen of 288 candidates passed development. The selected BTC candidate required a 12-bar drawdown of at least 2%, a 42-bar trend within +/-10%, and a 1% recovery target. All five development folds were positive, with +1.93% stressed median return, 5.91% stressed worst drawdown, and 40 orders.
+
+The fresh holdout returned +6.70% normally and +6.30% under stress across 22 orders, with 2.18% stressed drawdown and no minimum-order skips. The longest observed hold was 24 four-hour bars. Capital replay had no skips at $25 and above.
+
+Review: this is the third structurally distinct paper candidate. It is a neutral-regime exhaustion hypothesis, not a replacement for the trend candidates. Its paper session will be evaluated independently for 60 days and 10 closed trades.
+
+## Paper candidate set
+
+The current isolated paper set contains exactly three candidates, all with `max_hold_days = null` and protective stop loss only:
+
+1. BNB `trend_pullback_reclaim` long, paper buffer $25.
+2. ETH `short_breakdown` short, paper buffer $50 because the $25 replay still had two minimum-order skips.
+3. BTC `neutral_exhaustion_reclaim` long, paper buffer $25.
+
+All three have `execution_authorized: false`; live replacement remains blocked until each reaches the paper observation boundary.

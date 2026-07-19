@@ -6,6 +6,8 @@ from .definitions import (
     CrossSectionalStrengthParameters,
     IntradayMomentumParameters,
     LegacyUnifiedParameters,
+    NeutralExhaustionReclaimParameters,
+    ShortBreakdownParameters,
     StrategyDefinition,
     TrendPullbackReclaimParameters,
     TrendParameters,
@@ -18,6 +20,8 @@ from .cross_sectional_momentum import (
 )
 from .cross_sectional_strength import CrossSectionalStrengthStrategy
 from .intraday_momentum import IntradayMomentumStrategy
+from .neutral_exhaustion_reclaim import NeutralExhaustionReclaimStrategy
+from .short_breakdown import ShortBreakdownStrategy
 from .trend_pullback_reclaim import TrendPullbackReclaimStrategy
 from .legacy_unified import LegacyUnifiedStrategy
 from .trend import (
@@ -68,6 +72,24 @@ _STRATEGY_DEFINITIONS = {
         default_timeframe="4h",
         min_bars=100,
         context_bars=120,
+    ),
+    "short_breakdown": StrategyDefinition(
+        name="short_breakdown",
+        factory=ShortBreakdownStrategy,
+        parameter_type=ShortBreakdownParameters,
+        capabilities=frozenset({"short_only", "state_exit", "protective_sl", "short_horizon"}),
+        default_timeframe="4h",
+        min_bars=100,
+        context_bars=120,
+    ),
+    "neutral_exhaustion_reclaim": StrategyDefinition(
+        name="neutral_exhaustion_reclaim",
+        factory=NeutralExhaustionReclaimStrategy,
+        parameter_type=NeutralExhaustionReclaimParameters,
+        capabilities=frozenset({"long_only", "state_exit", "protective_sl", "short_horizon"}),
+        default_timeframe="4h",
+        min_bars=60,
+        context_bars=100,
     ),
     "legacy_unified": StrategyDefinition(
         name="legacy_unified",
