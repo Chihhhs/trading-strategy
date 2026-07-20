@@ -273,3 +273,36 @@ The current isolated paper set contains exactly three candidates, all with `max_
 3. BTC `neutral_exhaustion_reclaim` long, paper buffer $25.
 
 All three have `execution_authorized: false`; live replacement remains blocked until each reaches the paper observation boundary.
+
+## Route 24: clean-room live-38 daily regime-ranked momentum
+
+Decision: retain as a research candidate; do not promote to paper or live yet.
+
+This route was evaluated independently on the frozen `LIVE_UNIVERSE` of 38
+coins using `backtesting.py` 0.6.5.  The report records the library's built-in
+`Buy & Hold Return [%]` for every coin and fold, plus a separate executable
+portfolio replay.  The replay uses the same causal signal, executes a state
+observed at a close on the next open, caps the account at two positions, and
+checks 20/25/50/100 USDC balances against the 10 USDC minimum order.  There is
+no elapsed-time exit and all artifacts set `execution_authorized=false`.
+
+Five predeclared parameter variants were tested.  The selected development
+candidate is seven-day cross-sectional momentum, a 42-day BTC regime, and the
+strongest two coins in a positive regime (weakest two in a negative regime).
+At 25 USDC it returned +27.95% and +4.15% across the two development folds at
+normal fees, and +26.89% and +1.46% at 10 bps stress.  The unlocked 80-day
+holdout returned +6.37% normally and +3.89% at 10 bps, beating the custom
+equal-weight buy-and-hold benchmark by 17.34 and 14.86 percentage points.
+
+The evidence is not promotion-grade.  Holdout portfolio drawdown reached
+-33.53% normally and -33.92% under stress, with 67 entries in 80 daily bars.
+At an additional 15 bps one-way cost, development fold two fell to -2.27%
+and the holdout was only +0.44%.  The route therefore remains a paper-research
+candidate only after a drawdown/turnover redesign and a fresh validation
+interval; it must not change the live 38-coin configuration.
+
+The neighboring 28-day momentum/14-day BTC regime/top-one route had a smaller
+roughly 14% holdout drawdown, but its positive result was concentrated in the
+top two coins (about 96%) and only seven coins traded.  The shorter 14/7
+variants failed the absolute development-return gate.  These are retained as
+negative or cautionary evidence rather than tuned against the opened holdout.
