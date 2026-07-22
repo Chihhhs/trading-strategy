@@ -493,3 +493,37 @@ incumbent while its longer trend remained valid; its notional was also 14.16
 USDC with no skip.  These are observations only, not promotion evidence.  The
 paper loop must accumulate new completed 4h bars and closed trades before any
 further decision is made.
+
+## Route 32: Hyperliquid-native 4h cross-sectional dispersion state
+
+Decision: rejected in the locked holdout; route closed.
+
+This route kept the fixed Route 30 selector and tested whether new entries
+should be allowed only when the 38-coin momentum cross-section showed a clear
+rotation opportunity.  The state measured the gap between the 75th or 90th
+percentile 12-bar momentum and median momentum, divided by its own causal 42-
+or 84-bar rolling median.  Twelve combinations of quantile, lookback, and
+1.0/1.25/1.5 minimum dispersion ratio were predeclared.  Incumbents still
+exited only on 42-bar trend failure or a stronger eligible coin, with one
+position, volatility scaling, next-open execution, and no time limit.
+
+The selected development candidate used the 75th percentile, 42-bar state
+lookback, and ratio at least 1.0.  At 50 USDC and 10 bps it returned +42.20%,
++8.46%, and +29.84% in the three development folds, with drawdowns between
+-9.31% and -9.74%, 29/38/48 entries, and no minimum-order skips.  It remained
+positive and above executable buy-and-hold in every development fold at 15
+bps, so the holdout was unlocked once without further tuning.
+
+The locked holdout rejected the hypothesis.  It returned -4.90% at 6.5 bps,
+-5.80% at 10 bps, and -7.06% at 15 bps across 40 entries.  The 10 bps
+drawdown was -16.29%; no entry was skipped at 50 USDC.  Although it still beat
+the deeply negative equal-weight buy-and-hold reference, absolute return was
+negative and only 5 of 38 per-coin strategy runs were positive.  Elevated
+cross-sectional dispersion therefore identified relative winners but did not
+protect account equity in this holdout regime.  The route is closed,
+`execution_authorized=false`, and is not added to paper.
+
+Next research should stop adding market-wide opportunity gates to Route 30
+and instead test whether trend quality at the selected coin level, such as
+path efficiency or multi-horizon momentum agreement, can reject noisy leaders
+without suppressing the baseline selector's profitable regime.
