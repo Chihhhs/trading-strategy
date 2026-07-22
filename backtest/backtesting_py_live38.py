@@ -104,11 +104,12 @@ def build_strategy():
 
         def next(self):
             target = int(self.data.Signal[-1])
+            size = float(self.data.PositionSize[-1]) if hasattr(self.data, "PositionSize") else 0.5
             if not self.position:
                 if target > 0:
-                    self.buy(size=0.5, tag="regime_rank_long")
+                    self.buy(size=size, tag="regime_rank_long")
                 elif target < 0:
-                    self.sell(size=0.5, tag="regime_rank_short")
+                    self.sell(size=size, tag="regime_rank_short")
             elif self.position.is_long and target <= 0:
                 self.position.close()
             elif self.position.is_short and target >= 0:
@@ -124,9 +125,11 @@ def _buy_hold_net_return(raw_return_pct, fee_bps):
     return (gross_ratio * (1.0 - fee) ** 2 - 1.0) * 100.0
 
 
-def run_coin(frame, signal, *, start, end, fee_bps):
+def run_coin(frame, signal, *, start, end, fee_bps, position_size=None):
     data = frame.iloc[start:end].copy()
     data["Signal"] = signal.iloc[start:end].astype(int).to_numpy()
+    if position_size is not None:
+        data["PositionSize"] = position_size.iloc[start:end].astype(float).to_numpy()
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         stats = FractionalBacktest(
@@ -201,6 +204,9 @@ def simulate_portfolio(
     max_positions=MAX_PORTFOLIO_POSITIONS,
     allocation_per_position=ALLOCATION_PER_POSITION,
     min_order_usd=MIN_ORDER_USD,
+    volatility=None,
+    volatility_target=None,
+    volatility_floor=0.5,
 ):
     """Replay the same states as an executable small-account portfolio.
 
@@ -249,10 +255,15 @@ def simulate_portfolio(
     def open_position(coin, side, price):
         nonlocal cash, total_fees, entries, skipped_entries
         equity = mark(opens.iloc[current_bar])
+        scale = 1.0
+        if volatility is not None and volatility_target is not None:
+            observed_vol = float(volatility.iloc[current_bar][coin])
+            if np.isfinite(observed_vol) and observed_vol > 0.0:
+                scale = max(volatility_floor, min(1.0, volatility_target / observed_vol))
         # The exchange minimum is checked on order notional; fees are charged
         # separately.  A $20 account therefore correctly surfaces the tiny
         # fee-buffer shortfall instead of silently placing a sub-minimum order.
-        notional = equity * allocation_per_position
+        notional = equity * allocation_per_position * scale
         if notional < min_order_usd:
             skipped_entries += 1
             return

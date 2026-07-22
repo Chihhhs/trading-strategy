@@ -306,3 +306,34 @@ roughly 14% holdout drawdown, but its positive result was concentrated in the
 top two coins (about 96%) and only seven coins traded.  The shorter 14/7
 variants failed the absolute development-return gate.  These are retained as
 negative or cautionary evidence rather than tuned against the opened holdout.
+
+## Route 25: clean-room live-38 4h volatility-scaled strength
+
+Decision: retain as a short-cycle research candidate; paper requires an
+explicit cost-review decision, and live remains blocked.
+
+The frozen 38-coin Binance 1h fixture was resampled to 1,441 common 4h bars.
+Five variants were evaluated with `backtesting.py` 0.6.5, its built-in
+`Buy & Hold Return [%]` for every coin/fold, and a separate executable replay.
+The signal ranks 3/24-bar moving-average strength, follows the strongest two
+coins when BTC's 252-bar regime is positive, and follows the weakest two when
+the regime is negative.  Each state is observed at a 4h close and executed at
+the next open; there is no minimum or maximum holding duration.  Position size
+is 50% per leg, scaled between 50% and 100% of that amount by 42-bar realized
+volatility, with at most two positions and a 10 USDC minimum order.
+
+The selected 1.5%-target-volatility variant passed all three development folds
+at 6.5 and 10 bps.  At 50 USDC it returned +22.10% normally and +18.08% under
+10 bps stress on the 60-day holdout, versus an executable equal-weight
+buy-and-hold return of -10.73%; stressed drawdown was -22.5% across 126
+entries, with no minimum-order skips.  The per-coin holdout mean was only
++0.61% normally and +0.52% stressed, while 30/38 coins beat their individual
+Buy & Hold baselines, so the portfolio result is a rotation effect rather than
+uniform coin alpha.
+
+The route is cost-sensitive: at an additional 15 bps one-way cost, development
+fold two fell to -0.76%, although the holdout remained +12.57% with -23.3%
+drawdown.  A 25 USDC account also skipped hundreds of scaled entries below the
+minimum; 50 USDC is the first tested balance with zero skips.  The artifact is
+therefore research-only (`execution_authorized=false`) and does not alter the
+live 38-coin or existing three-candidate paper configuration.
