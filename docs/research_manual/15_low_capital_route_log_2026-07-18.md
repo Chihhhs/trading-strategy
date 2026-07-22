@@ -527,3 +527,37 @@ Next research should stop adding market-wide opportunity gates to Route 30
 and instead test whether trend quality at the selected coin level, such as
 path efficiency or multi-horizon momentum agreement, can reject noisy leaders
 without suppressing the baseline selector's profitable regime.
+
+## Route 33: Hyperliquid-native 4h path-efficiency confirmation
+
+Decision: rejected in the locked holdout; route closed.
+
+This route kept Route 30's 12-bar momentum, 42-bar positive-trend requirement,
+single-position limit, volatility scaling, and no-time-exit rule.  It added a
+coin-level path-efficiency confirmation: absolute net price movement divided
+by the sum of absolute bar returns.  Twelve combinations were predeclared
+across 12/24-bar efficiency windows, 0.25/0.40/0.55 minimum efficiency, and
+0.5%/1.0% switch margins.  Efficiency confirmed new candidates only; an
+incumbent still remained until its 42-bar trend failed or a materially
+stronger eligible coin appeared.
+
+The development winner used a 12-bar efficiency window, minimum efficiency
+0.55, and 1% switch margin.  At 50 USDC and 10 bps it returned +49.39%,
++17.82%, and +24.81% across the three development folds, with drawdowns from
+-5.70% to -8.70%, 26/31/39 entries, and no minimum-order skips.  All three
+folds remained positive and above executable buy-and-hold at 15 bps, so the
+holdout was unlocked once without changing the grid.
+
+The locked holdout returned -4.48% at 6.5 bps, -5.36% at 10 bps, and -6.59%
+at 15 bps across 37 entries.  Drawdown deteriorated to -24.67% at 10 bps and
+-25.51% at 15 bps.  Only 6 of 38 per-coin strategy runs were positive.  Path
+efficiency removed noisy entries in development but did not prevent a clean-
+looking leader from becoming a losing incumbent when the market regime
+changed.  The route is closed, remains `execution_authorized=false`, and is
+not added to paper.  Its thresholds must not be retuned against the opened
+holdout.
+
+The next bounded route should test multi-horizon momentum agreement as a
+separate hypothesis.  It should not combine dispersion or path efficiency,
+so any improvement can be attributed to confirmation across horizons rather
+than another layered filter.
