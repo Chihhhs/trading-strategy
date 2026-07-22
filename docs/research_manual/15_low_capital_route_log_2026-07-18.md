@@ -561,3 +561,73 @@ The next bounded route should test multi-horizon momentum agreement as a
 separate hypothesis.  It should not combine dispersion or path efficiency,
 so any improvement can be attributed to confirmation across horizons rather
 than another layered filter.
+
+## Route 30 trade-level attribution checkpoint
+
+Before opening another route, Route 30 was replayed trade by trade at 50 USDC
+and 10 bps across the three development folds and the already-known OOS
+benchmark.  The diagnostic recorded entry and exit momentum, trend, rank,
+volatility, market breadth, maximum favorable/adverse excursion, giveback,
+holding bars, and exit reason for 250 trades.
+
+The initial assumption that delayed exits caused most losses was rejected.
+Only 15.91% of losing PnL came from trades that first reached at least 2%
+unrealized profit and later closed negative.  There were 126 initial failures
+with almost no favorable excursion, losing 65.31 USDC in aggregate, versus 23
+giveback losses losing 12.35 USDC.  Stronger-selector exits made +50.36 USDC,
+while trend-failure exits lost 19.92 USDC.  The evidence therefore pointed to
+entry continuation quality, not an elapsed holding problem or a general need
+for earlier exits.
+
+Trades whose 3/6/24-bar entry momentum was all positive had positive aggregate
+PnL in each development fold and in the known OOS benchmark.  This was treated
+as diagnostic evidence for one bounded multi-horizon experiment, not proof of
+a tradable counterfactual rule.
+
+## Route 34: Hyperliquid-native 4h multi-horizon momentum agreement
+
+Decision: rejected in the known OOS benchmark; route closed.
+
+Route 34 kept Route 30's 12-bar ranking, 42-bar trend, one-position limit,
+volatility scaling, and state-based holding rule.  Six predeclared candidates
+required either 3/6-bar, 6/24-bar, or 3/6/24-bar momentum to be positive for a
+new candidate, with 0.5% or 1% switch margins.  Confirmation did not create a
+time exit and did not force a valid incumbent out.
+
+The development winner required positive 6- and 24-bar momentum with a 0.5%
+switch margin.  At 50 USDC and 10 bps it returned +27.70%, +11.44%, and
++34.13% across the three development folds, with drawdowns between -8.07%
+and -11.78%, and no minimum-order skips.  The already-known 300-bar OOS segment
+was then used only as a diagnostic benchmark, not described as a sealed
+holdout.
+
+The benchmark returned +0.39% at 6.5 bps, -1.24% at 10 bps, and -3.54% at 15
+bps across 63 entries.  Drawdown reached -23.10% at 10 bps and -24.64% at 15
+bps.  Route 30 had previously returned about +2.72% on the same 10 bps segment,
+so the confirmation rule made the executable sequence worse.  The apparent
+trade-level association did not survive the counterfactual replay because
+filtering entries changed later incumbents and switches.  Route 34 remains
+`execution_authorized=false` and is not added to paper.
+
+The expanded capital replay reinforced the rejection.  At 25 USDC the route
+skipped 203 entries and lost 9.53%; at 30 USDC it showed +6.56% but skipped 90
+entries, so that result is not a faithful execution of the signal.  At 40
+USDC it still skipped 17 entries and lost 2.58%.  Fifty USDC was the first
+tested zero-skip balance, where the strategy remained negative.
+
+## Research program freeze and forward boundary
+
+Routes 32, 33, and 34 each passed development and then failed the known OOS
+segment.  That segment has now been inspected repeatedly and is no longer a
+promotion holdout.  The frozen 38-coin fixture contains only 51 common 4h bars
+after the 1,200-bar research boundary, which is insufficient for a new outer
+test.  No further Route 30 entry/exit variants should be opened on this
+fixture.
+
+Route 30 and Route 31 remain the only active isolated selector paper ledgers.
+Their forward boundary is now explicit: at least 300 newly completed 4h bars,
+20 closed trades, positive net paper return after simulated costs, drawdown
+better than -25%, and zero 10-USDC minimum-order skips.  Passing these checks
+only permits manual research review; it never sets `execution_authorized=true`
+or changes live configuration.  Until enough genuinely new data exists, the
+correct research action is observation rather than another parameter route.

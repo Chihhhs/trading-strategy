@@ -39,6 +39,8 @@ VOLUME_LOOKBACK = 24
 VOLATILITY_FLOOR = 0.5
 FEE_BPS = 10.0
 DEFAULT_CAPITAL = 50.0
+FORWARD_MIN_COMPLETED_BARS = 300
+FORWARD_MIN_EXITS = 20
 
 ROUTE_CONFIGS = {
     "30": {
@@ -259,6 +261,8 @@ def _empty_state(route_id, capital):
         "cash": float(capital),
         "position": None,
         "last_processed_bar": None,
+        "paper_start_bar": None,
+        "completed_bars_observed": 0,
         "peak_equity": float(capital),
         "max_drawdown_pct": 0.0,
         "cycles": 0,
@@ -277,6 +281,10 @@ def _load_state(route_id, capital):
     try:
         state = json.loads(path.read_text(encoding="utf-8"))
         if state.get("schema_version") == 1 and state.get("route_id") == str(route_id):
+            if "paper_start_bar" not in state:
+                state["paper_start_bar"] = state.get("last_processed_bar")
+            if "completed_bars_observed" not in state:
+                state["completed_bars_observed"] = 1 if state.get("last_processed_bar") is not None else 0
             return state
     except (OSError, ValueError, TypeError):
         pass
@@ -314,6 +322,29 @@ def _record_event(state, route_id, event):
     state.setdefault("events", []).append(event)
     state["events"] = state["events"][-200:]
     _append_event(route_id, event)
+
+
+def forward_gate_status(state, *, min_completed_bars=FORWARD_MIN_COMPLETED_BARS, min_exits=FORWARD_MIN_EXITS):
+    snapshot = state.get("last_snapshot") or {}
+    initial = float(state.get("initial_capital", 0.0))
+    equity = float(snapshot.get("equity", initial))
+    checks = {
+        "completed_bars": int(state.get("completed_bars_observed", 0)) >= int(min_completed_bars),
+        "closed_trades": int(state.get("exits", 0)) >= int(min_exits),
+        "positive_net_return": equity > initial,
+        "drawdown_within_25pct": float(state.get("max_drawdown_pct", 0.0)) > -25.0,
+        "zero_minimum_order_skips": int(state.get("skipped_entries_below_min_order", 0)) == 0,
+    }
+    return {
+        "ready_for_manual_review": all(checks.values()),
+        "execution_authorized": False,
+        "checks": checks,
+        "observed_completed_bars": int(state.get("completed_bars_observed", 0)),
+        "required_completed_bars": int(min_completed_bars),
+        "closed_trades": int(state.get("exits", 0)),
+        "required_closed_trades": int(min_exits),
+        "net_return_pct": (equity / initial - 1.0) * 100.0 if initial else 0.0,
+    }
 
 
 def _close_position(state, route_id, price, reason, bar_time):
@@ -439,6 +470,9 @@ def run_once(route_id, *, capital=DEFAULT_CAPITAL):
     is_new_bar = state.get("last_processed_bar") != bar_time
     events = []
     if is_new_bar:
+        if state.get("paper_start_bar") is None:
+            state["paper_start_bar"] = bar_time
+        state["completed_bars_observed"] = int(state.get("completed_bars_observed", 0)) + 1
         position = state.get("position")
         desired = decision.get("target")
         current_coin = position.get("coin") if position else None
@@ -485,6 +519,7 @@ def run_once(route_id, *, capital=DEFAULT_CAPITAL):
         "skipped_entries_below_min_order": state["skipped_entries_below_min_order"],
         "max_drawdown_pct": state["max_drawdown_pct"],
         "execution_authorized": False,
+        "forward_gate": forward_gate_status(state),
         "state_path": str(_state_path(route_id)),
     }
 

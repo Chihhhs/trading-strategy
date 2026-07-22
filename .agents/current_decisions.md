@@ -1,6 +1,6 @@
 # Current Decisions For Agents
 
-Last updated: 2026-07-16
+Last updated: 2026-07-22
 
 Purpose: this file is the current decision register for repo agents. Prefer it over older narrative sections in `.agents/improve_plan.md` or historical research docs when deciding what is allowed next.
 
@@ -53,6 +53,7 @@ Research modes are defined in `.agents/research_modes.md`: `optimize_existing_tr
 | P1 | VWAP reversion | Research candidate only. Recent 12/24-bar windows improved, older windows failed. | Test regime/session-conditioned variants with OOS and random baseline. | `docs/research_manual/08_short_cycle_strategy_diagnosis_2026-07-14.md` |
 | P1 | Clean-room cross-sectional strength | `new_alpha_research`; v1 and breadth-gated v2 are rejected. V2 lowers drawdown but remains negative over 300/600 days and its latest window is not clean OOS after diagnosis. | Preserve as negative evidence. Reopen only with a genuinely new OOS period or forward observation; no paper/live wiring. | `docs/research_manual/12_clean_room_cross_sectional_strength_2026-07-17.md` |
 | P1 | Cross-sectional momentum | The 4h 14-day market-neutral momentum portfolio passed development, normal/stressed anchors, locked holdout, fixed-unit accounting, and lot-size/minimum-notional replay. The exchange-constrained holdout returned +16.32% net with 7.43% max DD at 1,000 USDC. | Run only the isolated fixed-ten-asset paper ledger with `execution_authorized=false`; collect forward evidence. No exchange orders or live-config change until execution reconciliation, point-in-time review, and separate live-safety approval. | `docs/research_manual/14_cross_sectional_momentum_shadow_2026-07-17.md`, `data/research_artifacts/cross_sectional_momentum_fixed_unit_replay.json` |
+| P1 | Clean-room 4h selector | Route 30 and the weaker volume-state Route 31 are isolated 50-USDC paper ledgers. Trade attribution showed initial failures dominate losing PnL, but dispersion, path-efficiency, and multi-horizon counterfactual routes 32-34 all failed the repeatedly inspected OOS benchmark. Only 51 common 4h bars remain outside the 1,200-bar research boundary. | Freeze new variants on this fixture. Observe Route 30/31 until each has 300 new completed 4h bars and 20 closed trades, positive net paper return, drawdown better than -25%, and zero minimum-order skips. Passing permits manual review only; `execution_authorized` remains false. | `docs/research_manual/15_low_capital_route_log_2026-07-18.md`, `data/research_artifacts/live38_route30_trade_attribution.json` |
 | P2 | Funding/basis/OI | Monitor and research context. Not standalone live alpha. | Improve data coverage, test as blocker/confidence modifier, keep live disabled. | `docs/research_manual/07_carry_funding_basis_backtest.md` |
 | P2 | L2/microstructure | Observe-only unless replay evidence proves value. | Collect spread, depth, imbalance, and adverse-selection diagnostics. | `docs/research_manual/06_alpha_discovery_plan.md` |
 

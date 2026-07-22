@@ -8,7 +8,7 @@ SRC = os.path.join(ROOT, "src")
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
-from trading_strategy.live.research_paper import compute_selector_decision  # noqa: E402
+from trading_strategy.live.research_paper import compute_selector_decision, forward_gate_status  # noqa: E402
 
 
 def _bars(coins, count=230):
@@ -49,6 +49,19 @@ class ResearchPaperSelectorTests(unittest.TestCase):
         decision = compute_selector_decision(rows, "31")
         self.assertEqual(decision["target"], "SLOW")
         self.assertGreaterEqual(decision["volume_ratio"], 1.10)
+
+    def test_forward_gate_never_authorizes_execution(self):
+        state = {
+            "initial_capital": 50.0,
+            "completed_bars_observed": 300,
+            "exits": 20,
+            "skipped_entries_below_min_order": 0,
+            "max_drawdown_pct": -10.0,
+            "last_snapshot": {"equity": 55.0},
+        }
+        result = forward_gate_status(state)
+        self.assertTrue(result["ready_for_manual_review"])
+        self.assertFalse(result["execution_authorized"])
 
 
 if __name__ == "__main__":
