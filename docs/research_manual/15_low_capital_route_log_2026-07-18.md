@@ -411,3 +411,56 @@ the third fold by 10.90 percentage points.  The failure is consistent with the
 4h routes: performance changes sign by market segment before costs or minimum
 order constraints become the primary issue.  Holdout stayed locked and the
 route is not paper/live eligible.
+
+## Route 30: Hyperliquid-native 4h single-position stateful selector
+
+Decision: holdout pass candidate; paper review only, live remains blocked.
+
+This route searched all 38 live coins but held at most one position.  It ranked
+12/6/24-bar cross-sectional momentum, required the selected coin's 42/84-bar
+trend to be positive, and kept the incumbent until its state failed or a new
+coin led by a fixed margin.  There is no elapsed-time exit.  Volatility scaling
+targeted 1.0% or 1.5% per 4h bar, and the bounded grid contained 192 candidates.
+
+The selected candidate is 12-bar raw momentum, 42-bar trend, at least +1%
+trend, a 1% score lead to switch, and a 1.5% volatility target.  At 50 USDC it
+returned +23.42%, +9.68%, and +30.59% under 10 bps in the three development
+folds, with stressed drawdowns of -12.70%, -11.52%, and -10.21%; every fold
+had zero minimum-order skips.  The unlocked 4h holdout returned +4.35%
+normally and +2.72% under 10 bps, versus -17.76% executable equal-weight
+buy-and-hold, with -18.44% stressed drawdown and 63 entries.  The 15 bps
+development returns remained +20.77%, +7.04%, and +26.99%.
+
+The full `backtesting.py` holdout report had 33/38 coins outperforming their
+individual Buy & Hold baselines, 62 trades, and no $50 minimum-order skips.
+This is the first current Hyperliquid 38-coin route with both development and
+holdout support.  It remains an isolated research candidate with
+`execution_authorized=false`; it does not replace the existing paper set.
+
+## Route 31: Hyperliquid-native 4h volume/volatility state confirmation
+
+Decision: holdout pass candidate; state filter retained as evidence, not a
+promotion over Route 30.
+
+Starting from the stateful selector, this route added current 4h volume divided
+by its 24-bar median and 42-bar realized volatility divided by its 168-bar
+median volatility.  It tested 120 predeclared combinations across raw or
+volatility-normalized momentum, 6/12/24-bar momentum, 42/84-bar trend, and
+five states: baseline, high volume, normal volatility, low volatility, and
+volume-plus-volatility expansion confirmation.  New entries required the
+state; incumbents still exited only on trend failure or a stronger eligible
+selector, with no time limit.
+
+To avoid selecting the baseline, the state-only development winner was fixed
+as 12-bar raw momentum, 42-bar trend, `volume_ratio >= 1.10`, and a 1.5%
+volatility target.  At 50 USDC it returned +8.50%, +3.94%, and +27.71% under
+10 bps in development, with no minimum-order skips.  The holdout returned
++2.39% normally and +1.00% under 10 bps, versus -17.76% executable
+buy-and-hold, with -20.30% stressed drawdown and 54 entries.  The 15 bps
+development returns were +7.83%, +1.72%, and +24.72%.  The full
+`backtesting.py` report had 33/38 coins beating individual Buy & Hold.
+
+The volume filter reduced turnover but also reduced holdout return and worsened
+drawdown versus Route 30, so Route 30 remains the preferred research candidate.
+The state route is independently holdout-supported but remains paper-only and
+`execution_authorized=false`.
