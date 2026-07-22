@@ -473,3 +473,23 @@ The state route is independently holdout-supported but remains paper-only and
 For the volume-state candidate, the same capital replay reached zero skips at
 40 USDC; 25 USDC skipped 209 entries and finished negative.  Both floors are
 driven by the 10 USDC order minimum and the 50% allocation rule.
+
+## Route 30/31 paper observation started
+
+Both holdout-supported routes now run through an isolated research-only paper
+runner.  The runner uses completed Hyperliquid 4h candles from the fixed 38-
+coin universe, one long position maximum, 50% allocation with the validated
+1.5% volatility target, 10 bps simulated fees, and no elapsed-time exit.  It
+does not call the normal live engine, send exchange orders, or change the
+existing three-candidate paper set.  State and event logs are separated under
+`data/paper_execution/route30/` and `data/paper_execution/route31/`, with
+`execution_authorized=false` persisted in every state and event.
+
+The first completed-bar cycle (2026-07-22 04:00 UTC) opened ONDO in both
+isolated ledgers at approximately 50 USDC capital.  Route 30's notional was
+14.16 USDC and had no minimum-order skip.  Route 31's high-volume selector
+ranked HBAR as the current eligible best, but correctly retained the ONDO
+incumbent while its longer trend remained valid; its notional was also 14.16
+USDC with no skip.  These are observations only, not promotion evidence.  The
+paper loop must accumulate new completed 4h bars and closed trades before any
+further decision is made.
