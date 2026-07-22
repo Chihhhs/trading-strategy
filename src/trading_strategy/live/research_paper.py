@@ -160,13 +160,8 @@ def _state_allows(volume_ratio, volatility_ratio, state_mode):
     raise ValueError(f"unsupported state mode: {state_mode}")
 
 
-def compute_selector_decision(bars_by_coin, route_id, *, initial_incumbent=None):
-    """Compute the latest causal target from aligned completed bars.
-
-    ``initial_incumbent`` lets a restarted paper process preserve the
-    stateful selector's incumbent instead of treating the fetched warmup
-    window as a new backtest.
-    """
+def compute_selector_decisions(bars_by_coin, route_id, *, initial_incumbent=None, after_bar_time=None):
+    """Compute chronological causal targets after an optional processed bar."""
     route = ROUTE_CONFIGS[str(route_id)]
     times, closes, volumes = _common_bars(bars_by_coin)
     coins = list(closes)
@@ -185,7 +180,7 @@ def compute_selector_decision(bars_by_coin, route_id, *, initial_incumbent=None)
         for coin in coins
     }
     incumbent = str(initial_incumbent).upper() if initial_incumbent in coins else None
-    latest = None
+    decisions = []
     for index, timestamp in enumerate(times):
         scores = {}
         trends = {}
@@ -208,6 +203,9 @@ def compute_selector_decision(bars_by_coin, route_id, *, initial_incumbent=None)
                 and _state_allows(volume_ratios[coin], volatility_ratios[coin], state_mode)
             )
 
+        if index < warmup or (after_bar_time is not None and int(timestamp) <= int(after_bar_time)):
+            continue
+
         ranked = sorted((coin for coin in coins if eligible.get(coin, False)), key=lambda coin: scores[coin], reverse=True)
         best = ranked[0] if ranked else None
         if incumbent is None:
@@ -219,8 +217,8 @@ def compute_selector_decision(bars_by_coin, route_id, *, initial_incumbent=None)
             if lead >= float(route["switch_margin"]):
                 incumbent = best
 
-        if index >= warmup:
-            latest = {
+        decisions.append(
+            {
                 "bar_time": int(timestamp),
                 "target": incumbent,
                 "best": best,
@@ -233,9 +231,19 @@ def compute_selector_decision(bars_by_coin, route_id, *, initial_incumbent=None)
                 "ranked": ranked[:5],
                 "common_bars": len(times),
             }
-    if latest is None:
+        )
+    if after_bar_time is None and not decisions:
         raise ValueError(f"need at least {warmup + 1} common completed {INTERVAL} bars; got {len(times)}")
-    return latest
+    return decisions
+
+
+def compute_selector_decision(bars_by_coin, route_id, *, initial_incumbent=None):
+    """Return the latest target for a fresh paper ledger or observation."""
+    return compute_selector_decisions(
+        bars_by_coin,
+        route_id,
+        initial_incumbent=initial_incumbent,
+    )[-1]
 
 
 def _state_path(route_id):
@@ -347,7 +355,7 @@ def forward_gate_status(state, *, min_completed_bars=FORWARD_MIN_COMPLETED_BARS,
     }
 
 
-def _close_position(state, route_id, price, reason, bar_time):
+def _close_position(state, route_id, price, reason, bar_time, *, execution_bar_time=None, price_source="current_mid"):
     position = state.get("position")
     if not position:
         return None
@@ -363,6 +371,8 @@ def _close_position(state, route_id, price, reason, bar_time):
         "route_id": str(route_id),
         "time": int(time.time() * 1000),
         "bar_time": int(bar_time),
+        "execution_bar_time": int(execution_bar_time) if execution_bar_time is not None else None,
+        "price_source": price_source,
         "coin": position["coin"],
         "price": price,
         "reason": reason,
@@ -376,7 +386,7 @@ def _close_position(state, route_id, price, reason, bar_time):
     return event
 
 
-def _open_position(state, route_id, coin, price, decision, bar_time):
+def _open_position(state, route_id, coin, price, decision, bar_time, *, execution_bar_time=None, price_source="current_mid"):
     if not coin or price is None or price <= 0:
         return None
     volatility = _finite(decision.get("volatility")) or 0.015
@@ -389,6 +399,8 @@ def _open_position(state, route_id, coin, price, decision, bar_time):
             "route_id": str(route_id),
             "time": int(time.time() * 1000),
             "bar_time": int(bar_time),
+            "execution_bar_time": int(execution_bar_time) if execution_bar_time is not None else None,
+            "price_source": price_source,
             "coin": coin,
             "reason": "below_min_order",
             "notional": notional,
@@ -404,6 +416,8 @@ def _open_position(state, route_id, coin, price, decision, bar_time):
         "entry_price": float(price),
         "entry_time": int(time.time() * 1000),
         "entry_bar_time": int(bar_time),
+        "execution_bar_time": int(execution_bar_time) if execution_bar_time is not None else None,
+        "price_source": price_source,
         "qty": notional / float(price),
         "notional": notional,
         "entry_fee": fee,
@@ -417,6 +431,8 @@ def _open_position(state, route_id, coin, price, decision, bar_time):
         "route_id": str(route_id),
         "time": int(time.time() * 1000),
         "bar_time": int(bar_time),
+        "execution_bar_time": int(execution_bar_time) if execution_bar_time is not None else None,
+        "price_source": price_source,
         "coin": coin,
         "price": float(price),
         "notional": notional,
@@ -453,6 +469,73 @@ def _universe():
     return FIXED_LIVE_UNIVERSE
 
 
+def _prices_at_bar(bars_by_coin, bar_time, field):
+    prices = {}
+    for coin, bars in bars_by_coin.items():
+        row = next((bar for bar in bars if int(_finite((bar or {}).get("time")) or -1) == int(bar_time)), None)
+        value = _finite((row or {}).get(field))
+        if value is None or value <= 0:
+            raise RuntimeError(f"{coin}: missing {field} for replay bar {bar_time}")
+        prices[coin] = value
+    return prices
+
+
+def _validate_replay_continuity(last_processed_bar, decisions):
+    expected = int(last_processed_bar) + INTERVAL_MS
+    for decision in decisions:
+        observed = int(decision["bar_time"])
+        if observed != expected:
+            raise RuntimeError(
+                f"paper replay history gap: expected completed bar {expected}, got {observed}; "
+                f"available cache window is {BAR_LIMIT} bars"
+            )
+        expected += INTERVAL_MS
+
+
+def _update_drawdown(state, prices):
+    equity = _equity(state, prices)
+    peak = max(float(state.get("peak_equity", state.get("initial_capital", 0.0))), equity)
+    state["peak_equity"] = peak
+    state["max_drawdown_pct"] = min(
+        float(state.get("max_drawdown_pct", 0.0)),
+        (equity / peak - 1.0) * 100.0 if peak else 0.0,
+    )
+    return equity
+
+
+def _apply_decision(state, route_id, decision, prices, *, execution_bar_time, price_source):
+    events = []
+    position = state.get("position")
+    desired = decision.get("target")
+    current_coin = position.get("coin") if position else None
+    if current_coin and current_coin != desired:
+        event = _close_position(
+            state,
+            route_id,
+            prices[current_coin],
+            "selector_target_changed",
+            decision["bar_time"],
+            execution_bar_time=execution_bar_time,
+            price_source=price_source,
+        )
+        if event:
+            events.append(event)
+    if desired and not state.get("position"):
+        event = _open_position(
+            state,
+            route_id,
+            desired,
+            prices[desired],
+            decision,
+            decision["bar_time"],
+            execution_bar_time=execution_bar_time,
+            price_source=price_source,
+        )
+        if event:
+            events.append(event)
+    return events
+
+
 def run_once(route_id, *, capital=DEFAULT_CAPITAL):
     route_id = str(route_id)
     if route_id not in ROUTE_CONFIGS:
@@ -460,37 +543,67 @@ def run_once(route_id, *, capital=DEFAULT_CAPITAL):
     state = _load_state(route_id, capital)
     universe = _universe()
     bars = _fetch_completed_bars(universe)
-    decision = compute_selector_decision(bars, route_id, initial_incumbent=(state.get("position") or {}).get("coin"))
+    common_times, _, _ = _common_bars(bars)
+    last_processed_bar = state.get("last_processed_bar")
+    if last_processed_bar is not None and int(common_times[-1]) < int(last_processed_bar):
+        raise RuntimeError(
+            f"paper replay data regressed: latest completed bar {common_times[-1]} "
+            f"is older than processed bar {last_processed_bar}"
+        )
+    incumbent = (state.get("last_decision") or {}).get("target") or (state.get("position") or {}).get("coin")
+    if last_processed_bar is None:
+        decisions = [compute_selector_decision(bars, route_id, initial_incumbent=incumbent)]
+    else:
+        decisions = compute_selector_decisions(
+            bars,
+            route_id,
+            initial_incumbent=incumbent,
+            after_bar_time=last_processed_bar,
+        )
+        _validate_replay_continuity(last_processed_bar, decisions)
     prices = get_current_prices([{"name": coin, "symbol": f"{coin}USDT"} for coin in universe]) or {}
     latest_prices = {
         coin: _finite(prices.get(coin)) or float(bars[coin][-1]["close"])
         for coin in universe
     }
+    time_positions = {int(value): index for index, value in enumerate(common_times)}
+    decision = decisions[-1] if decisions else state.get("last_decision") or compute_selector_decision(bars, route_id, initial_incumbent=incumbent)
     bar_time = int(decision["bar_time"])
-    is_new_bar = state.get("last_processed_bar") != bar_time
+    is_new_bar = bool(decisions)
     events = []
-    if is_new_bar:
+    historical_replay_bars = 0
+    for replay_decision in decisions:
+        replay_bar_time = int(replay_decision["bar_time"])
         if state.get("paper_start_bar") is None:
-            state["paper_start_bar"] = bar_time
+            state["paper_start_bar"] = replay_bar_time
         state["completed_bars_observed"] = int(state.get("completed_bars_observed", 0)) + 1
-        position = state.get("position")
-        desired = decision.get("target")
-        current_coin = position.get("coin") if position else None
-        if current_coin and current_coin != desired:
-            event = _close_position(state, route_id, latest_prices[current_coin], "selector_target_changed", bar_time)
-            if event:
-                events.append(event)
-        if desired and not state.get("position"):
-            event = _open_position(state, route_id, desired, latest_prices[desired], decision, bar_time)
-            if event:
-                events.append(event)
-        state["last_processed_bar"] = bar_time
-        state["last_decision"] = decision
+        _update_drawdown(state, _prices_at_bar(bars, replay_bar_time, "close"))
+        position = time_positions[replay_bar_time]
+        if position + 1 < len(common_times):
+            execution_bar_time = int(common_times[position + 1])
+            execution_prices = _prices_at_bar(bars, execution_bar_time, "open")
+            price_source = "next_bar_open_replay"
+            historical_replay_bars += 1
+        else:
+            execution_bar_time = None
+            execution_prices = latest_prices
+            price_source = "current_mid_or_latest_close"
+        events.extend(
+            _apply_decision(
+                state,
+                route_id,
+                replay_decision,
+                execution_prices,
+                execution_bar_time=execution_bar_time,
+                price_source=price_source,
+            )
+        )
+        _update_drawdown(state, execution_prices)
+        state["last_processed_bar"] = replay_bar_time
+        state["last_decision"] = replay_decision
+        _save_state(route_id, state)
 
-    equity = _equity(state, latest_prices)
-    peak = max(float(state.get("peak_equity", state.get("initial_capital", capital))), equity)
-    state["peak_equity"] = peak
-    state["max_drawdown_pct"] = min(float(state.get("max_drawdown_pct", 0.0)), (equity / peak - 1.0) * 100.0 if peak else 0.0)
+    equity = _update_drawdown(state, latest_prices)
     position = state.get("position")
     state["last_snapshot"] = {
         "time": int(time.time() * 1000),
@@ -501,6 +614,8 @@ def run_once(route_id, *, capital=DEFAULT_CAPITAL):
         "position": position,
         "price": latest_prices.get(position["coin"]) if position else None,
         "new_bar": is_new_bar,
+        "processed_new_bars": len(decisions),
+        "historical_replay_bars": historical_replay_bars,
     }
     state["cycles"] = int(state.get("cycles", 0)) + 1
     _save_state(route_id, state)
@@ -508,6 +623,8 @@ def run_once(route_id, *, capital=DEFAULT_CAPITAL):
         "route_id": route_id,
         "route_name": ROUTE_CONFIGS[route_id]["name"],
         "new_bar": is_new_bar,
+        "processed_new_bars": len(decisions),
+        "historical_replay_bars": historical_replay_bars,
         "bar_time": bar_time,
         "target": decision.get("target"),
         "equity": equity,

@@ -494,6 +494,23 @@ USDC with no skip.  These are observations only, not promotion evidence.  The
 paper loop must accumulate new completed 4h bars and closed trades before any
 further decision is made.
 
+### Disconnect catch-up replay
+
+The isolated Route 30/31 runner now catches up every unseen completed 4h bar
+after a network or process interruption.  Decisions are replayed in timestamp
+order; an intermediate historical decision executes at the next cached bar's
+open, while only the newest decision uses the current midpoint (falling back
+to the newest completed close).  Each recovered bar increments the same
+forward-observation counter exactly once, and state is saved after every bar.
+
+Replay is fail-closed.  The first unseen timestamp must be exactly four hours
+after the saved timestamp, every subsequent timestamp must remain contiguous,
+and a cache older than the saved state is rejected.  An interruption longer
+than the available 240-bar cache window therefore requires explicit recovery
+instead of silently skipping observations.  Replay remains simulation only:
+it does not call the live engine, submit exchange orders, change live config,
+or alter `execution_authorized=false`.
+
 ## Route 32: Hyperliquid-native 4h cross-sectional dispersion state
 
 Decision: rejected in the locked holdout; route closed.
