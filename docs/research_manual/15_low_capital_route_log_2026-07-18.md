@@ -437,6 +437,11 @@ This is the first current Hyperliquid 38-coin route with both development and
 holdout support.  It remains an isolated research candidate with
 `execution_authorized=false`; it does not replace the existing paper set.
 
+Supplementary holdout capital replay at 10 bps found the first tested balance
+with zero minimum-order skips at about 45 USDC (40 USDC still skipped 17
+entries; 25 USDC skipped 201 and finished negative).  This is an operational
+floor for the selector, not a promise that a smaller account can execute it.
+
 ## Route 31: Hyperliquid-native 4h volume/volatility state confirmation
 
 Decision: holdout pass candidate; state filter retained as evidence, not a
@@ -464,3 +469,7 @@ The volume filter reduced turnover but also reduced holdout return and worsened
 drawdown versus Route 30, so Route 30 remains the preferred research candidate.
 The state route is independently holdout-supported but remains paper-only and
 `execution_authorized=false`.
+
+For the volume-state candidate, the same capital replay reached zero skips at
+40 USDC; 25 USDC skipped 209 entries and finished negative.  Both floors are
+driven by the 10 USDC order minimum and the 50% allocation rule.
