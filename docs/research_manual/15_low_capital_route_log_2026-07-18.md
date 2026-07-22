@@ -649,39 +649,6 @@ only permits manual research review; it never sets `execution_authorized=true`
 or changes live configuration.  Until enough genuinely new data exists, the
 correct research action is observation rather than another parameter route.
 
-## Route 35: causal volume/volatility state classification
-
-Decision: measurement useful; transition strategy rejected and route closed.
-
-This bounded route first classified every live-38 coin into four causal 4h
-states using current volume versus the median of the prior 24 completed bars
-and 12-bar realized volatility versus the median of the prior 42 volatility
-values.  It measured future 1/3/6-bar returns for eligible momentum coins, the
-strongest selector, and state transitions before defining a trading rule.
-No thresholds were optimized and the repeatedly inspected 300-bar benchmark
-was labelled diagnostic-only rather than a new holdout.
-
-Only the high-volume/high-volatility state had positive mean strongest-selector
-returns at every horizon in all three development folds.  The proposed
-compression-to-expansion transition was inconsistent: its three-bar mean was
--3.47%, +0.61%, and +0.19% across development.  The only bounded strategy
-replay therefore required high-volume/high-volatility state to persist for two
-consecutive bars, while retaining Route 30's 12-bar momentum, 42-bar trend,
-one-position limit, volatility sizing, next-open execution, and no time exit.
-
-At 50 USDC and 15 bps, persistent expansion returned +14.74%, +10.31%, and
-+17.78% across development, with drawdowns of -9.08%, -11.55%, and -6.87%,
-28/39/48 entries, and no minimum-order skips.  It reduced turnover and
-drawdown, but beat Route 30's return in only the middle fold.  On the known
-benchmark it returned +1.40% with -19.96% drawdown, versus Route 30's +2.72%
-and -18.44%; both return and drawdown were worse.  The 51-bar post-boundary
-observation returned +0.84% across ten entries but trailed equal-weight buy and
-hold and had 94.30% positive-PnL concentration in its top two coins.
-
-The classifier is retained as diagnostic evidence, but the static states and
-persistent-expansion transition do not add robust executable value over Route
-30.  Route 35 is not added to paper, remains `execution_authorized=false`, and
-must not be retuned on the known benchmark.
 
 ## Route 35: causal volume/volatility state classification
 
@@ -716,3 +683,30 @@ The classifier is retained as diagnostic evidence, but the static states and
 persistent-expansion transition do not add robust executable value over Route
 30.  Route 35 is not added to paper, remains `execution_authorized=false`, and
 must not be retuned on the known benchmark.
+
+## Route 36: BTC-residual and cross-sectional excess momentum
+
+Decision: rejected in measurement; no strategy replay or paper candidate.
+
+This route tested whether Route 30's false leaders were merely coins carried
+by BTC or the broad market.  Three fixed 12-bar scores were compared before
+constructing a trading strategy: raw momentum, coin return after subtracting
+prior-42-bar rolling BTC beta exposure, and raw momentum minus the live-38
+cross-sectional median.  Eligibility remained positive raw momentum and at
+least 1% positive 42-bar trend.  Each score selected one strongest coin and
+measured its next 1/3/6-bar return in the three development folds.
+
+Cross-sectional excess produced exactly the same ranking and results as raw
+momentum because subtracting one same-bar median from every coin cannot change
+their order.  BTC-beta residual also failed the predeclared requirement to
+beat raw momentum at every horizon in all development folds.  Its 1/3/6-bar
+means were +0.28%/+0.79%/+1.46% versus raw +0.31%/+0.88%/+1.65% in fold 1;
++0.08%/+0.05%/+0.13% versus +0.12%/+0.10%/+0.11% in fold 2; and
++0.43%/+0.92%/+1.60% versus +0.41%/+0.94%/+1.66% in fold 3.
+
+Residual momentum lost less than raw in the already-known benchmark and was
+positive in the 51-bar post-boundary observation, but those segments cannot be
+used to reverse the development decision.  The post-boundary selection was
+also concentrated, choosing its most frequent coin 55.1% of the time.  Route
+36 is closed at measurement, remains `execution_authorized=false`, and no beta
+window or residual threshold may be tuned against the inspected data.

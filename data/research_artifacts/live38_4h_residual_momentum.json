@@ -1,0 +1,511 @@
+{
+  "bars": 1251,
+  "consistently_better_than_raw_in_development": {
+    "btc_beta_residual": false,
+    "cross_sectional_excess": false
+  },
+  "data_path": "data\\research_artifacts\\hyperliquid_live38_1h.json",
+  "data_sha256": "5076ec93cdfd5da838d63fdf2509c882bb7b1d7b9c82f45c5e095bafe2367620",
+  "decision": "rejected_no_consistent_measurement_improvement",
+  "decision_timeframe": "4h",
+  "eligibility": "raw momentum > 0 and 42-bar trend >= 0.01",
+  "execution_authorized": false,
+  "future_horizons_bars": [
+    1,
+    3,
+    6
+  ],
+  "research_boundary": {
+    "known_benchmark_is_not_holdout": true,
+    "post_boundary_is_observation_only_until_sample_is_sufficient": true,
+    "selection_allowed": [
+      "development_1",
+      "development_2",
+      "development_3"
+    ]
+  },
+  "schema_version": 1,
+  "scores": {
+    "btc_beta_residual": "12-bar compounded coin return minus prior-42-bar beta times BTC return",
+    "cross_sectional_excess": "12-bar return minus the same-bar live-38 median return",
+    "raw": "12-bar price return"
+  },
+  "segments": {
+    "development_1": {
+      "btc_beta_residual": {
+        "horizons": {
+          "1": {
+            "count": 231,
+            "mean_return_pct": 0.2837985487558877,
+            "median_return_pct": 0.0,
+            "positive_rate": 0.49783549783549785
+          },
+          "3": {
+            "count": 229,
+            "mean_return_pct": 0.7865890989605683,
+            "median_return_pct": -0.1402077624115705,
+            "positive_rate": 0.4759825327510917
+          },
+          "6": {
+            "count": 226,
+            "mean_return_pct": 1.459827694317186,
+            "median_return_pct": -0.3285146032073527,
+            "positive_rate": 0.46017699115044247
+          }
+        },
+        "selection_count": 232,
+        "top_coin_share": 0.15948275862068967,
+        "top_coins": {
+          "ASTER": 32,
+          "CC": 34,
+          "DASH": 27,
+          "HYPE": 37,
+          "STX": 23
+        }
+      },
+      "cross_sectional_excess": {
+        "horizons": {
+          "1": {
+            "count": 231,
+            "mean_return_pct": 0.310617887779829,
+            "median_return_pct": 0.0,
+            "positive_rate": 0.49783549783549785
+          },
+          "3": {
+            "count": 229,
+            "mean_return_pct": 0.8753677474777127,
+            "median_return_pct": -0.14116924965473787,
+            "positive_rate": 0.4759825327510917
+          },
+          "6": {
+            "count": 226,
+            "mean_return_pct": 1.6458416874336805,
+            "median_return_pct": -0.3285146032073527,
+            "positive_rate": 0.4646017699115044
+          }
+        },
+        "selection_count": 232,
+        "top_coin_share": 0.15948275862068967,
+        "top_coins": {
+          "ASTER": 33,
+          "CC": 33,
+          "DASH": 24,
+          "HYPE": 37,
+          "STX": 21
+        }
+      },
+      "raw": {
+        "horizons": {
+          "1": {
+            "count": 231,
+            "mean_return_pct": 0.310617887779829,
+            "median_return_pct": 0.0,
+            "positive_rate": 0.49783549783549785
+          },
+          "3": {
+            "count": 229,
+            "mean_return_pct": 0.8753677474777127,
+            "median_return_pct": -0.14116924965473787,
+            "positive_rate": 0.4759825327510917
+          },
+          "6": {
+            "count": 226,
+            "mean_return_pct": 1.6458416874336805,
+            "median_return_pct": -0.3285146032073527,
+            "positive_rate": 0.4646017699115044
+          }
+        },
+        "selection_count": 232,
+        "top_coin_share": 0.15948275862068967,
+        "top_coins": {
+          "ASTER": 33,
+          "CC": 33,
+          "DASH": 24,
+          "HYPE": 37,
+          "STX": 21
+        }
+      }
+    },
+    "development_2": {
+      "btc_beta_residual": {
+        "horizons": {
+          "1": {
+            "count": 284,
+            "mean_return_pct": 0.0759059439797766,
+            "median_return_pct": -0.11539196223778192,
+            "positive_rate": 0.47183098591549294
+          },
+          "3": {
+            "count": 282,
+            "mean_return_pct": 0.04875951170152311,
+            "median_return_pct": -0.2322062915794343,
+            "positive_rate": 0.4574468085106383
+          },
+          "6": {
+            "count": 279,
+            "mean_return_pct": 0.13191201799600644,
+            "median_return_pct": -0.48668977214069153,
+            "positive_rate": 0.45878136200716846
+          }
+        },
+        "selection_count": 285,
+        "top_coin_share": 0.20701754385964913,
+        "top_coins": {
+          "ALGO": 24,
+          "FET": 21,
+          "HYPE": 26,
+          "SKY": 20,
+          "TAO": 59
+        }
+      },
+      "cross_sectional_excess": {
+        "horizons": {
+          "1": {
+            "count": 285,
+            "mean_return_pct": 0.12379136210048623,
+            "median_return_pct": -0.11118713650358769,
+            "positive_rate": 0.47368421052631576
+          },
+          "3": {
+            "count": 283,
+            "mean_return_pct": 0.09723823881267718,
+            "median_return_pct": -0.3529062870699873,
+            "positive_rate": 0.45229681978798586
+          },
+          "6": {
+            "count": 280,
+            "mean_return_pct": 0.10549284956384115,
+            "median_return_pct": -0.4894269997861911,
+            "positive_rate": 0.45
+          }
+        },
+        "selection_count": 286,
+        "top_coin_share": 0.1993006993006993,
+        "top_coins": {
+          "ALGO": 24,
+          "HYPE": 23,
+          "SKY": 20,
+          "TAO": 57,
+          "ZEC": 20
+        }
+      },
+      "raw": {
+        "horizons": {
+          "1": {
+            "count": 285,
+            "mean_return_pct": 0.12379136210048623,
+            "median_return_pct": -0.11118713650358769,
+            "positive_rate": 0.47368421052631576
+          },
+          "3": {
+            "count": 283,
+            "mean_return_pct": 0.09723823881267718,
+            "median_return_pct": -0.3529062870699873,
+            "positive_rate": 0.45229681978798586
+          },
+          "6": {
+            "count": 280,
+            "mean_return_pct": 0.10549284956384115,
+            "median_return_pct": -0.4894269997861911,
+            "positive_rate": 0.45
+          }
+        },
+        "selection_count": 286,
+        "top_coin_share": 0.1993006993006993,
+        "top_coins": {
+          "ALGO": 24,
+          "HYPE": 23,
+          "SKY": 20,
+          "TAO": 57,
+          "ZEC": 20
+        }
+      }
+    },
+    "development_3": {
+      "btc_beta_residual": {
+        "horizons": {
+          "1": {
+            "count": 295,
+            "mean_return_pct": 0.43199907158193285,
+            "median_return_pct": -0.08460236886633776,
+            "positive_rate": 0.48135593220338985
+          },
+          "3": {
+            "count": 293,
+            "mean_return_pct": 0.9167081871207643,
+            "median_return_pct": 0.04477653709455964,
+            "positive_rate": 0.5017064846416383
+          },
+          "6": {
+            "count": 290,
+            "mean_return_pct": 1.6034885200364817,
+            "median_return_pct": 0.5727087199368652,
+            "positive_rate": 0.5275862068965518
+          }
+        },
+        "selection_count": 296,
+        "top_coin_share": 0.18243243243243243,
+        "top_coins": {
+          "DASH": 27,
+          "HYPE": 26,
+          "NEAR": 19,
+          "XMR": 18,
+          "ZEC": 54
+        }
+      },
+      "cross_sectional_excess": {
+        "horizons": {
+          "1": {
+            "count": 295,
+            "mean_return_pct": 0.4127986777385519,
+            "median_return_pct": -0.08460236886633776,
+            "positive_rate": 0.47796610169491527
+          },
+          "3": {
+            "count": 293,
+            "mean_return_pct": 0.9395075386589214,
+            "median_return_pct": -0.0398142003981361,
+            "positive_rate": 0.49829351535836175
+          },
+          "6": {
+            "count": 290,
+            "mean_return_pct": 1.662537595672283,
+            "median_return_pct": 0.49300138183596687,
+            "positive_rate": 0.5275862068965518
+          }
+        },
+        "selection_count": 296,
+        "top_coin_share": 0.1858108108108108,
+        "top_coins": {
+          "AAVE": 18,
+          "DASH": 26,
+          "HYPE": 26,
+          "NEAR": 21,
+          "ZEC": 55
+        }
+      },
+      "raw": {
+        "horizons": {
+          "1": {
+            "count": 295,
+            "mean_return_pct": 0.4127986777385519,
+            "median_return_pct": -0.08460236886633776,
+            "positive_rate": 0.47796610169491527
+          },
+          "3": {
+            "count": 293,
+            "mean_return_pct": 0.9395075386589214,
+            "median_return_pct": -0.0398142003981361,
+            "positive_rate": 0.49829351535836175
+          },
+          "6": {
+            "count": 290,
+            "mean_return_pct": 1.662537595672283,
+            "median_return_pct": 0.49300138183596687,
+            "positive_rate": 0.5275862068965518
+          }
+        },
+        "selection_count": 296,
+        "top_coin_share": 0.1858108108108108,
+        "top_coins": {
+          "AAVE": 18,
+          "DASH": 26,
+          "HYPE": 26,
+          "NEAR": 21,
+          "ZEC": 55
+        }
+      }
+    },
+    "known_benchmark_diagnostic_only": {
+      "btc_beta_residual": {
+        "horizons": {
+          "1": {
+            "count": 289,
+            "mean_return_pct": 0.023017072512063207,
+            "median_return_pct": -0.18134193028410683,
+            "positive_rate": 0.4671280276816609
+          },
+          "3": {
+            "count": 287,
+            "mean_return_pct": -0.06322820124665039,
+            "median_return_pct": -0.7608969513731356,
+            "positive_rate": 0.397212543554007
+          },
+          "6": {
+            "count": 284,
+            "mean_return_pct": -0.1838904892285637,
+            "median_return_pct": -0.8368378310227964,
+            "positive_rate": 0.40492957746478875
+          }
+        },
+        "selection_count": 289,
+        "top_coin_share": 0.2422145328719723,
+        "top_coins": {
+          "AAVE": 33,
+          "UNI": 21,
+          "WLD": 70,
+          "XLM": 34,
+          "ZEC": 17
+        }
+      },
+      "cross_sectional_excess": {
+        "horizons": {
+          "1": {
+            "count": 289,
+            "mean_return_pct": 0.04476938309604714,
+            "median_return_pct": -0.23139449795305245,
+            "positive_rate": 0.4602076124567474
+          },
+          "3": {
+            "count": 287,
+            "mean_return_pct": -0.14102527948602958,
+            "median_return_pct": -0.7899320793443021,
+            "positive_rate": 0.3902439024390244
+          },
+          "6": {
+            "count": 284,
+            "mean_return_pct": -0.3218030753752209,
+            "median_return_pct": -0.871318225251283,
+            "positive_rate": 0.4014084507042254
+          }
+        },
+        "selection_count": 289,
+        "top_coin_share": 0.23529411764705882,
+        "top_coins": {
+          "AAVE": 32,
+          "UNI": 26,
+          "WLD": 68,
+          "XLM": 33,
+          "ZEC": 16
+        }
+      },
+      "raw": {
+        "horizons": {
+          "1": {
+            "count": 289,
+            "mean_return_pct": 0.04476938309604714,
+            "median_return_pct": -0.23139449795305245,
+            "positive_rate": 0.4602076124567474
+          },
+          "3": {
+            "count": 287,
+            "mean_return_pct": -0.14102527948602958,
+            "median_return_pct": -0.7899320793443021,
+            "positive_rate": 0.3902439024390244
+          },
+          "6": {
+            "count": 284,
+            "mean_return_pct": -0.3218030753752209,
+            "median_return_pct": -0.871318225251283,
+            "positive_rate": 0.4014084507042254
+          }
+        },
+        "selection_count": 289,
+        "top_coin_share": 0.23529411764705882,
+        "top_coins": {
+          "AAVE": 32,
+          "UNI": 26,
+          "WLD": 68,
+          "XLM": 33,
+          "ZEC": 16
+        }
+      }
+    },
+    "post_boundary_observation": {
+      "btc_beta_residual": {
+        "horizons": {
+          "1": {
+            "count": 48,
+            "mean_return_pct": 0.128857832412535,
+            "median_return_pct": 0.034464403925876796,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 46,
+            "mean_return_pct": 0.38382267012748594,
+            "median_return_pct": 0.08926136508157212,
+            "positive_rate": 0.5217391304347826
+          },
+          "6": {
+            "count": 43,
+            "mean_return_pct": 0.030921788127350754,
+            "median_return_pct": 0.5538093099835217,
+            "positive_rate": 0.5581395348837209
+          }
+        },
+        "selection_count": 49,
+        "top_coin_share": 0.5510204081632653,
+        "top_coins": {
+          "CC": 4,
+          "LTC": 6,
+          "NEO": 6,
+          "ONDO": 27,
+          "SKY": 3
+        }
+      },
+      "cross_sectional_excess": {
+        "horizons": {
+          "1": {
+            "count": 48,
+            "mean_return_pct": -0.11241896515857945,
+            "median_return_pct": 0.02366565548532762,
+            "positive_rate": 0.5208333333333334
+          },
+          "3": {
+            "count": 46,
+            "mean_return_pct": -0.11932869473826856,
+            "median_return_pct": -0.012814291936513733,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 43,
+            "mean_return_pct": -0.7054820354868245,
+            "median_return_pct": 0.004239533651295702,
+            "positive_rate": 0.5116279069767442
+          }
+        },
+        "selection_count": 49,
+        "top_coin_share": 0.4897959183673469,
+        "top_coins": {
+          "LTC": 6,
+          "NEAR": 3,
+          "NEO": 4,
+          "ONDO": 24,
+          "ZEC": 6
+        }
+      },
+      "raw": {
+        "horizons": {
+          "1": {
+            "count": 48,
+            "mean_return_pct": -0.11241896515857945,
+            "median_return_pct": 0.02366565548532762,
+            "positive_rate": 0.5208333333333334
+          },
+          "3": {
+            "count": 46,
+            "mean_return_pct": -0.11932869473826856,
+            "median_return_pct": -0.012814291936513733,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 43,
+            "mean_return_pct": -0.7054820354868245,
+            "median_return_pct": 0.004239533651295702,
+            "positive_rate": 0.5116279069767442
+          }
+        },
+        "selection_count": 49,
+        "top_coin_share": 0.4897959183673469,
+        "top_coins": {
+          "LTC": 6,
+          "NEAR": 3,
+          "NEO": 4,
+          "ONDO": 24,
+          "ZEC": 6
+        }
+      }
+    }
+  },
+  "source_timeframe": "1h"
+}
