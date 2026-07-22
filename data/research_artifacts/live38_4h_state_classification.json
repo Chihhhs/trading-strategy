@@ -1,0 +1,2412 @@
+{
+  "bars": 1251,
+  "coins": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "NEO",
+    "LTC",
+    "ADA",
+    "XRP",
+    "IOTA",
+    "XLM",
+    "TRX",
+    "ETC",
+    "LINK",
+    "FET",
+    "ZEC",
+    "DASH",
+    "ATOM",
+    "ALGO",
+    "DOGE",
+    "HBAR",
+    "STX",
+    "SOL",
+    "HYPE",
+    "XMR",
+    "CC",
+    "BCH",
+    "SUI",
+    "AVAX",
+    "NEAR",
+    "UNI",
+    "TAO",
+    "PAXG",
+    "WLFI",
+    "ASTER",
+    "ONDO",
+    "AAVE",
+    "SKY",
+    "DOT",
+    "WLD"
+  ],
+  "data_path": "data\\research_artifacts\\hyperliquid_live38_1h.json",
+  "data_sha256": "5076ec93cdfd5da838d63fdf2509c882bb7b1d7b9c82f45c5e095bafe2367620",
+  "decision": "measurement_only",
+  "decision_timeframe": "4h",
+  "execution_authorized": false,
+  "momentum_observation": {
+    "future_horizons_bars": [
+      1,
+      3,
+      6
+    ],
+    "holding_rule": "diagnostic horizons only; no strategy holding-time rule is defined",
+    "minimum_trend": 0.01,
+    "momentum_bars": 12,
+    "trend_bars": 42
+  },
+  "research_boundary": {
+    "known_benchmark_is_not_holdout": true,
+    "post_boundary_is_observation_only_until_sample_is_sufficient": true,
+    "selection_allowed": [
+      "development_1",
+      "development_2",
+      "development_3"
+    ]
+  },
+  "schema_version": 1,
+  "segments": {
+    "development_1": {
+      "coin_opportunities": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 728,
+            "mean_return_pct": 0.05071952611397372,
+            "median_return_pct": 0.0,
+            "positive_rate": 0.49862637362637363
+          },
+          "3": {
+            "count": 728,
+            "mean_return_pct": 0.1763038266269912,
+            "median_return_pct": -0.18066349112917934,
+            "positive_rate": 0.45054945054945056
+          },
+          "6": {
+            "count": 728,
+            "mean_return_pct": 0.27706531293409337,
+            "median_return_pct": -0.43422337655533716,
+            "positive_rate": 0.4478021978021978
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 368,
+            "mean_return_pct": 0.0611461721311214,
+            "median_return_pct": -0.03084400621973238,
+            "positive_rate": 0.48641304347826086
+          },
+          "3": {
+            "count": 368,
+            "mean_return_pct": -0.02801946711256106,
+            "median_return_pct": -0.2080424240316736,
+            "positive_rate": 0.45108695652173914
+          },
+          "6": {
+            "count": 368,
+            "mean_return_pct": -0.3531908300627073,
+            "median_return_pct": -0.6126528967763556,
+            "positive_rate": 0.421195652173913
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 392,
+            "mean_return_pct": -0.14279430319321956,
+            "median_return_pct": -0.07967520795894023,
+            "positive_rate": 0.4744897959183674
+          },
+          "3": {
+            "count": 392,
+            "mean_return_pct": -0.2112237411520878,
+            "median_return_pct": -0.1735445076783193,
+            "positive_rate": 0.45408163265306123
+          },
+          "6": {
+            "count": 392,
+            "mean_return_pct": -0.12682069561503825,
+            "median_return_pct": -0.22775977543119108,
+            "positive_rate": 0.4744897959183674
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 371,
+            "mean_return_pct": -0.038534544273438276,
+            "median_return_pct": 0.03029712826507769,
+            "positive_rate": 0.5094339622641509
+          },
+          "3": {
+            "count": 371,
+            "mean_return_pct": 0.10880060279639184,
+            "median_return_pct": -0.015180430256767075,
+            "positive_rate": 0.49865229110512127
+          },
+          "6": {
+            "count": 371,
+            "mean_return_pct": -0.16911060864735375,
+            "median_return_pct": 0.14364949523162363,
+            "positive_rate": 0.5283018867924528
+          }
+        }
+      },
+      "strongest_selector": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 132,
+            "mean_return_pct": 0.4523840821208539,
+            "median_return_pct": 0.08975815885552407,
+            "positive_rate": 0.5303030303030303
+          },
+          "3": {
+            "count": 131,
+            "mean_return_pct": 1.6703403604118428,
+            "median_return_pct": 0.2026616226440625,
+            "positive_rate": 0.5038167938931297
+          },
+          "6": {
+            "count": 131,
+            "mean_return_pct": 3.1160138668363606,
+            "median_return_pct": 0.8877767875505427,
+            "positive_rate": 0.5343511450381679
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 34,
+            "mean_return_pct": 0.4151571031244276,
+            "median_return_pct": -0.18241103312028328,
+            "positive_rate": 0.4411764705882353
+          },
+          "3": {
+            "count": 34,
+            "mean_return_pct": 0.027894152168118178,
+            "median_return_pct": -0.5317180565299895,
+            "positive_rate": 0.4117647058823529
+          },
+          "6": {
+            "count": 32,
+            "mean_return_pct": -0.9878334551845568,
+            "median_return_pct": -0.9815714764679795,
+            "positive_rate": 0.28125
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 39,
+            "mean_return_pct": -0.15019714846411003,
+            "median_return_pct": -0.5759162303664911,
+            "positive_rate": 0.38461538461538464
+          },
+          "3": {
+            "count": 39,
+            "mean_return_pct": -0.6232712478265192,
+            "median_return_pct": -0.8878217655927223,
+            "positive_rate": 0.4358974358974359
+          },
+          "6": {
+            "count": 39,
+            "mean_return_pct": -0.30252938176110516,
+            "median_return_pct": -0.730875426344002,
+            "positive_rate": 0.41025641025641024
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 26,
+            "mean_return_pct": 0.14539925080990523,
+            "median_return_pct": 0.16811957948718037,
+            "positive_rate": 0.5769230769230769
+          },
+          "3": {
+            "count": 25,
+            "mean_return_pct": 0.20015217799852314,
+            "median_return_pct": -0.6508838972255959,
+            "positive_rate": 0.48
+          },
+          "6": {
+            "count": 24,
+            "mean_return_pct": 0.2988217191265616,
+            "median_return_pct": -0.571035820392729,
+            "positive_rate": 0.4166666666666667
+          }
+        }
+      },
+      "strongest_selector_transitions": {
+        "high_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 100,
+            "mean_return_pct": 0.679982995602307,
+            "median_return_pct": 0.1626112038170202,
+            "positive_rate": 0.56
+          },
+          "3": {
+            "count": 100,
+            "mean_return_pct": 2.640745043022381,
+            "median_return_pct": 1.2681865233489686,
+            "positive_rate": 0.58
+          },
+          "6": {
+            "count": 100,
+            "mean_return_pct": 4.488004180039939,
+            "median_return_pct": 1.6825759472749335,
+            "positive_rate": 0.57
+          }
+        },
+        "high_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": 1.9637540279999421,
+            "median_return_pct": 1.9637540279999421,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": 3.4599743591056944,
+            "median_return_pct": 3.4599743591056944,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": 8.594932358021124,
+            "median_return_pct": 8.594932358021124,
+            "positive_rate": 1.0
+          }
+        },
+        "high_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 18,
+            "mean_return_pct": 0.11186763934398522,
+            "median_return_pct": -1.3986086873514103,
+            "positive_rate": 0.3888888888888889
+          },
+          "3": {
+            "count": 18,
+            "mean_return_pct": 0.638651483719634,
+            "median_return_pct": -0.6981651470847672,
+            "positive_rate": 0.4444444444444444
+          },
+          "6": {
+            "count": 18,
+            "mean_return_pct": 0.20186250684928309,
+            "median_return_pct": -0.5090486944023864,
+            "positive_rate": 0.4444444444444444
+          }
+        },
+        "high_volume_high_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": -0.16755774432465342,
+            "median_return_pct": -0.16755774432465342,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": 4.715633194152935,
+            "median_return_pct": 4.715633194152935,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": 7.219787800549671,
+            "median_return_pct": 7.219787800549671,
+            "positive_rate": 1.0
+          }
+        },
+        "high_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 9,
+            "mean_return_pct": -0.6730242472838278,
+            "median_return_pct": -0.537123034745135,
+            "positive_rate": 0.3333333333333333
+          },
+          "3": {
+            "count": 9,
+            "mean_return_pct": -3.473913943227766,
+            "median_return_pct": -2.1989439618463558,
+            "positive_rate": 0.1111111111111111
+          },
+          "6": {
+            "count": 9,
+            "mean_return_pct": -0.9477385663848185,
+            "median_return_pct": -0.43982661907190357,
+            "positive_rate": 0.4444444444444444
+          }
+        },
+        "high_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 19,
+            "mean_return_pct": 0.1747035774313443,
+            "median_return_pct": -0.6700167504187671,
+            "positive_rate": 0.3157894736842105
+          },
+          "3": {
+            "count": 19,
+            "mean_return_pct": -0.09151037216169085,
+            "median_return_pct": -0.7299270072992692,
+            "positive_rate": 0.3157894736842105
+          },
+          "6": {
+            "count": 18,
+            "mean_return_pct": -1.1355614982811815,
+            "median_return_pct": -1.0129592371032448,
+            "positive_rate": 0.2777777777777778
+          }
+        },
+        "high_volume_low_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": -0.25183826387052966,
+            "median_return_pct": -0.25183826387052966,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 0.026427472134571417,
+            "median_return_pct": 0.026427472134571417,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": -1.13171763023302,
+            "median_return_pct": -1.13171763023302,
+            "positive_rate": 0.0
+          }
+        },
+        "high_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 10,
+            "mean_return_pct": -0.41591455620851203,
+            "median_return_pct": 0.14026474762087737,
+            "positive_rate": 0.6
+          },
+          "3": {
+            "count": 9,
+            "mean_return_pct": -1.3633413781127615,
+            "median_return_pct": -1.1578391147581635,
+            "positive_rate": 0.3333333333333333
+          },
+          "6": {
+            "count": 8,
+            "mean_return_pct": -1.062489878864166,
+            "median_return_pct": -1.9737350860051128,
+            "positive_rate": 0.25
+          }
+        },
+        "low_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 20,
+            "mean_return_pct": -0.07602306015095373,
+            "median_return_pct": -0.3349253623595061,
+            "positive_rate": 0.45
+          },
+          "3": {
+            "count": 19,
+            "mean_return_pct": -0.9518307389176216,
+            "median_return_pct": -1.3168385586790454,
+            "positive_rate": 0.3157894736842105
+          },
+          "6": {
+            "count": 19,
+            "mean_return_pct": -2.2333399517258083,
+            "median_return_pct": -1.6790217322435463,
+            "positive_rate": 0.3684210526315789
+          }
+        },
+        "low_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 3,
+            "mean_return_pct": 3.4193415698284304,
+            "median_return_pct": 0.4668592395971505,
+            "positive_rate": 0.6666666666666666
+          },
+          "3": {
+            "count": 3,
+            "mean_return_pct": 2.3032412252991614,
+            "median_return_pct": 0.7460545193687329,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 3,
+            "mean_return_pct": -0.3574944509053787,
+            "median_return_pct": 0.6589117027090197,
+            "positive_rate": 0.6666666666666666
+          }
+        },
+        "low_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 17,
+            "mean_return_pct": -0.2893996151151366,
+            "median_return_pct": -0.07648981294763324,
+            "positive_rate": 0.47058823529411764
+          },
+          "3": {
+            "count": 17,
+            "mean_return_pct": -1.417741619179953,
+            "median_return_pct": -0.8878217655927223,
+            "positive_rate": 0.4117647058823529
+          },
+          "6": {
+            "count": 17,
+            "mean_return_pct": -0.6438404001060934,
+            "median_return_pct": -0.3272812280838533,
+            "positive_rate": 0.4117647058823529
+          }
+        },
+        "low_volume_high_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": 1.8589029249135636,
+            "median_return_pct": 1.8589029249135636,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": 2.321733439935414,
+            "median_return_pct": 2.321733439935414,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": 0.07188136032178494,
+            "median_return_pct": 0.07188136032178494,
+            "positive_rate": 0.5
+          }
+        },
+        "low_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": -0.5779549497939018,
+            "median_return_pct": -0.5779549497939018,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": 3.5003891228103043,
+            "median_return_pct": 3.5003891228103043,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": 6.336552206421908,
+            "median_return_pct": 6.336552206421908,
+            "positive_rate": 1.0
+          }
+        },
+        "low_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 10,
+            "mean_return_pct": -0.33895592304501787,
+            "median_return_pct": -0.008646409223972418,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 10,
+            "mean_return_pct": -1.1142574149320728,
+            "median_return_pct": -0.48606407579592226,
+            "positive_rate": 0.4
+          },
+          "6": {
+            "count": 9,
+            "mean_return_pct": -3.031993884463407,
+            "median_return_pct": -3.7412648359136047,
+            "positive_rate": 0.0
+          }
+        },
+        "low_volume_low_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 3,
+            "mean_return_pct": -0.899891525821391,
+            "median_return_pct": -1.022472609561742,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 3,
+            "mean_return_pct": -3.9093751060876794,
+            "median_return_pct": -4.86627244615635,
+            "positive_rate": 0.3333333333333333
+          },
+          "6": {
+            "count": 3,
+            "mean_return_pct": -1.1183888599778626,
+            "median_return_pct": -1.1251867529880277,
+            "positive_rate": 0.3333333333333333
+          }
+        },
+        "low_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 12,
+            "mean_return_pct": 0.3797363101637363,
+            "median_return_pct": -0.04048488034813502,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 12,
+            "mean_return_pct": 0.2665952987334361,
+            "median_return_pct": -1.0515932067609757,
+            "positive_rate": 0.4166666666666667
+          },
+          "6": {
+            "count": 12,
+            "mean_return_pct": 0.0906918306839912,
+            "median_return_pct": -0.5926529393827595,
+            "positive_rate": 0.4166666666666667
+          }
+        }
+      },
+      "transitions": {
+        "high_volume_high_volatility": {
+          "high_volume_high_volatility": 1795,
+          "high_volume_low_volatility": 138,
+          "low_volume_high_volatility": 860,
+          "low_volume_low_volatility": 66
+        },
+        "high_volume_low_volatility": {
+          "high_volume_high_volatility": 186,
+          "high_volume_low_volatility": 1055,
+          "low_volume_high_volatility": 53,
+          "low_volume_low_volatility": 651
+        },
+        "low_volume_high_volatility": {
+          "high_volume_high_volatility": 727,
+          "high_volume_low_volatility": 74,
+          "low_volume_high_volatility": 1180,
+          "low_volume_low_volatility": 169
+        },
+        "low_volume_low_volatility": {
+          "high_volume_high_volatility": 147,
+          "high_volume_low_volatility": 673,
+          "low_volume_high_volatility": 61,
+          "low_volume_low_volatility": 1513
+        }
+      }
+    },
+    "development_2": {
+      "coin_opportunities": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 1111,
+            "mean_return_pct": -0.060172808439822055,
+            "median_return_pct": -0.09577443205760483,
+            "positive_rate": 0.46894689468946893
+          },
+          "3": {
+            "count": 1111,
+            "mean_return_pct": -0.2438176928455239,
+            "median_return_pct": -0.5071066352403286,
+            "positive_rate": 0.4158415841584158
+          },
+          "6": {
+            "count": 1111,
+            "mean_return_pct": -0.7086280083420449,
+            "median_return_pct": -1.0854549042826123,
+            "positive_rate": 0.37353735373537356
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 587,
+            "mean_return_pct": 0.10479271194014492,
+            "median_return_pct": 0.0304688040994483,
+            "positive_rate": 0.5059625212947189
+          },
+          "3": {
+            "count": 587,
+            "mean_return_pct": 0.033604631665404734,
+            "median_return_pct": -0.2400600150037402,
+            "positive_rate": 0.4565587734241908
+          },
+          "6": {
+            "count": 587,
+            "mean_return_pct": -0.42535732765671797,
+            "median_return_pct": -0.6801509863969879,
+            "positive_rate": 0.40034071550255534
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 660,
+            "mean_return_pct": -0.2804249180479243,
+            "median_return_pct": -0.12221122179604249,
+            "positive_rate": 0.45606060606060606
+          },
+          "3": {
+            "count": 660,
+            "mean_return_pct": -0.5105247438895945,
+            "median_return_pct": -0.4013042213413365,
+            "positive_rate": 0.41818181818181815
+          },
+          "6": {
+            "count": 660,
+            "mean_return_pct": -1.00997282331556,
+            "median_return_pct": -1.0785976375086603,
+            "positive_rate": 0.36666666666666664
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 564,
+            "mean_return_pct": -0.19892660329913647,
+            "median_return_pct": -0.15934820335862243,
+            "positive_rate": 0.4326241134751773
+          },
+          "3": {
+            "count": 564,
+            "mean_return_pct": -0.5078229102829186,
+            "median_return_pct": -0.3391465554880124,
+            "positive_rate": 0.4237588652482269
+          },
+          "6": {
+            "count": 564,
+            "mean_return_pct": -1.1556916891501483,
+            "median_return_pct": -1.1412982996894916,
+            "positive_rate": 0.33687943262411346
+          }
+        }
+      },
+      "strongest_selector": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 186,
+            "mean_return_pct": 0.3013601753875135,
+            "median_return_pct": -0.09356015765312198,
+            "positive_rate": 0.478494623655914
+          },
+          "3": {
+            "count": 186,
+            "mean_return_pct": 0.25392157663161796,
+            "median_return_pct": -0.3821241658314656,
+            "positive_rate": 0.46774193548387094
+          },
+          "6": {
+            "count": 185,
+            "mean_return_pct": 0.33400073317235895,
+            "median_return_pct": -0.4933574100348337,
+            "positive_rate": 0.4648648648648649
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 39,
+            "mean_return_pct": -0.202965703220781,
+            "median_return_pct": -0.22657172232587452,
+            "positive_rate": 0.46153846153846156
+          },
+          "3": {
+            "count": 39,
+            "mean_return_pct": -0.0999403927110256,
+            "median_return_pct": -0.3488070539419019,
+            "positive_rate": 0.46153846153846156
+          },
+          "6": {
+            "count": 39,
+            "mean_return_pct": -1.2390805294484966,
+            "median_return_pct": -0.8668395185944755,
+            "positive_rate": 0.358974358974359
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 40,
+            "mean_return_pct": 0.011954171647117484,
+            "median_return_pct": -0.06364023057853219,
+            "positive_rate": 0.475
+          },
+          "3": {
+            "count": 38,
+            "mean_return_pct": 0.2913344539164657,
+            "median_return_pct": -0.2095362803222145,
+            "positive_rate": 0.42105263157894735
+          },
+          "6": {
+            "count": 36,
+            "mean_return_pct": 1.902186617687439,
+            "median_return_pct": 0.31384390529701767,
+            "positive_rate": 0.5277777777777778
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 20,
+            "mean_return_pct": -0.6667479431856582,
+            "median_return_pct": -0.2825896552040519,
+            "positive_rate": 0.45
+          },
+          "3": {
+            "count": 20,
+            "mean_return_pct": -1.34420128012945,
+            "median_return_pct": -0.9702878460187969,
+            "positive_rate": 0.35
+          },
+          "6": {
+            "count": 20,
+            "mean_return_pct": -2.620335767363366,
+            "median_return_pct": -2.448622359297614,
+            "positive_rate": 0.35
+          }
+        }
+      },
+      "strongest_selector_transitions": {
+        "high_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 153,
+            "mean_return_pct": 0.28380684176024507,
+            "median_return_pct": -0.11118713650358769,
+            "positive_rate": 0.47058823529411764
+          },
+          "3": {
+            "count": 153,
+            "mean_return_pct": 0.23493113212368993,
+            "median_return_pct": -0.3807297949336541,
+            "positive_rate": 0.477124183006536
+          },
+          "6": {
+            "count": 153,
+            "mean_return_pct": 0.24319635919434415,
+            "median_return_pct": -0.4933574100348337,
+            "positive_rate": 0.45751633986928103
+          }
+        },
+        "high_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 4,
+            "mean_return_pct": 0.28618667585021684,
+            "median_return_pct": 0.05732838313855515,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 4,
+            "mean_return_pct": 1.8167120807769055,
+            "median_return_pct": 2.319154411291835,
+            "positive_rate": 0.75
+          },
+          "6": {
+            "count": 4,
+            "mean_return_pct": 3.315357378766187,
+            "median_return_pct": 3.290034242429185,
+            "positive_rate": 1.0
+          }
+        },
+        "high_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 18,
+            "mean_return_pct": -0.21759884174749117,
+            "median_return_pct": -0.41188719257138073,
+            "positive_rate": 0.3888888888888889
+          },
+          "3": {
+            "count": 18,
+            "mean_return_pct": -0.09781199773212419,
+            "median_return_pct": -0.2415228884595111,
+            "positive_rate": 0.2777777777777778
+          },
+          "6": {
+            "count": 17,
+            "mean_return_pct": 1.8037503864400533,
+            "median_return_pct": 0.41960334371413666,
+            "positive_rate": 0.5882352941176471
+          }
+        },
+        "high_volume_high_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": -4.61538461538461,
+            "median_return_pct": -4.61538461538461,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": -6.225402504472266,
+            "median_return_pct": -6.225402504472266,
+            "positive_rate": 0.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": -5.967799642218241,
+            "median_return_pct": -5.967799642218241,
+            "positive_rate": 0.0
+          }
+        },
+        "high_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 11,
+            "mean_return_pct": 0.28584584909050675,
+            "median_return_pct": 0.005713632727677442,
+            "positive_rate": 0.5454545454545454
+          },
+          "3": {
+            "count": 11,
+            "mean_return_pct": 0.6110752851011078,
+            "median_return_pct": -0.5014948403896269,
+            "positive_rate": 0.45454545454545453
+          },
+          "6": {
+            "count": 11,
+            "mean_return_pct": 1.6390703691286166,
+            "median_return_pct": 0.24886546625677575,
+            "positive_rate": 0.5454545454545454
+          }
+        },
+        "high_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 28,
+            "mean_return_pct": 0.15969918486709628,
+            "median_return_pct": 0.17018829183462758,
+            "positive_rate": 0.5357142857142857
+          },
+          "3": {
+            "count": 28,
+            "mean_return_pct": 0.2516515737875436,
+            "median_return_pct": -0.02598057033170731,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 28,
+            "mean_return_pct": -1.3087554241194783,
+            "median_return_pct": -0.6795018730130831,
+            "positive_rate": 0.32142857142857145
+          }
+        },
+        "high_volume_low_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": 1.2382172437125916,
+            "median_return_pct": 1.2382172437125916,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": -0.26060930795529513,
+            "median_return_pct": -0.26060930795529513,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": -0.08706254397770063,
+            "median_return_pct": -0.08706254397770063,
+            "positive_rate": 0.5
+          }
+        },
+        "high_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 8,
+            "mean_return_pct": 0.4691676991486038,
+            "median_return_pct": 0.4160532689737151,
+            "positive_rate": 0.75
+          },
+          "3": {
+            "count": 8,
+            "mean_return_pct": 0.2815333176329607,
+            "median_return_pct": 0.2402718882845989,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 8,
+            "mean_return_pct": -1.8059810739276845,
+            "median_return_pct": -0.7342765546673846,
+            "positive_rate": 0.375
+          }
+        },
+        "low_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 17,
+            "mean_return_pct": -0.2664093647985327,
+            "median_return_pct": -0.40669806818417475,
+            "positive_rate": 0.47058823529411764
+          },
+          "3": {
+            "count": 17,
+            "mean_return_pct": -0.04346623527938275,
+            "median_return_pct": -0.33940343319628363,
+            "positive_rate": 0.4117647058823529
+          },
+          "6": {
+            "count": 16,
+            "mean_return_pct": 0.4191249729714165,
+            "median_return_pct": -0.6952677627334591,
+            "positive_rate": 0.5
+          }
+        },
+        "low_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 20,
+            "mean_return_pct": 0.09592557649571787,
+            "median_return_pct": -0.0267039528452917,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 18,
+            "mean_return_pct": 0.7418079902174733,
+            "median_return_pct": 0.1310939139533729,
+            "positive_rate": 0.5555555555555556
+          },
+          "6": {
+            "count": 17,
+            "mean_return_pct": 2.2346521620718995,
+            "median_return_pct": -0.06913580246914464,
+            "positive_rate": 0.47058823529411764
+          }
+        },
+        "low_volume_high_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": -4.657320196189074,
+            "median_return_pct": -4.657320196189074,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": -1.8707409175745537,
+            "median_return_pct": -1.8707409175745537,
+            "positive_rate": 0.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": -4.045314466773742,
+            "median_return_pct": -4.045314466773742,
+            "positive_rate": 0.0
+          }
+        },
+        "low_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 5,
+            "mean_return_pct": 2.8030401388678983,
+            "median_return_pct": 0.8252063015754096,
+            "positive_rate": 0.6
+          },
+          "3": {
+            "count": 5,
+            "mean_return_pct": 1.0604095804387415,
+            "median_return_pct": -1.3404282741986018,
+            "positive_rate": 0.4
+          },
+          "6": {
+            "count": 5,
+            "mean_return_pct": -0.030936189561141525,
+            "median_return_pct": -1.1894459685883207,
+            "positive_rate": 0.4
+          }
+        },
+        "low_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 7,
+            "mean_return_pct": -1.9331409007557174,
+            "median_return_pct": -1.1113028472821362,
+            "positive_rate": 0.14285714285714285
+          },
+          "3": {
+            "count": 7,
+            "mean_return_pct": -2.6015382435555487,
+            "median_return_pct": -1.8947368421052602,
+            "positive_rate": 0.14285714285714285
+          },
+          "6": {
+            "count": 7,
+            "mean_return_pct": -3.562916898315817,
+            "median_return_pct": -3.8918396909705444,
+            "positive_rate": 0.14285714285714285
+          }
+        },
+        "low_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 10,
+            "mean_return_pct": -0.7815595645328309,
+            "median_return_pct": -0.40570038010578346,
+            "positive_rate": 0.3
+          },
+          "3": {
+            "count": 10,
+            "mean_return_pct": -2.1040148721605867,
+            "median_return_pct": -1.50594190196508,
+            "positive_rate": 0.3
+          },
+          "6": {
+            "count": 10,
+            "mean_return_pct": -2.794575264685386,
+            "median_return_pct": -2.448622359297614,
+            "positive_rate": 0.4
+          }
+        }
+      },
+      "transitions": {
+        "high_volume_high_volatility": {
+          "high_volume_high_volatility": 1850,
+          "high_volume_low_volatility": 121,
+          "low_volume_high_volatility": 945,
+          "low_volume_low_volatility": 94
+        },
+        "high_volume_low_volatility": {
+          "high_volume_high_volatility": 209,
+          "high_volume_low_volatility": 1290,
+          "low_volume_high_volatility": 53,
+          "low_volume_low_volatility": 990
+        },
+        "low_volume_high_volatility": {
+          "high_volume_high_volatility": 765,
+          "high_volume_low_volatility": 102,
+          "low_volume_high_volatility": 1324,
+          "low_volume_low_volatility": 218
+        },
+        "low_volume_low_volatility": {
+          "high_volume_high_volatility": 175,
+          "high_volume_low_volatility": 1032,
+          "low_volume_high_volatility": 72,
+          "low_volume_low_volatility": 2160
+        }
+      }
+    },
+    "development_3": {
+      "coin_opportunities": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 1512,
+            "mean_return_pct": 0.07540172544873515,
+            "median_return_pct": -0.09837428734561504,
+            "positive_rate": 0.4623015873015873
+          },
+          "3": {
+            "count": 1512,
+            "mean_return_pct": 0.04200928455189875,
+            "median_return_pct": -0.3545421763984147,
+            "positive_rate": 0.4351851851851852
+          },
+          "6": {
+            "count": 1512,
+            "mean_return_pct": 0.23492891010928738,
+            "median_return_pct": -0.2852915723181304,
+            "positive_rate": 0.45965608465608465
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 684,
+            "mean_return_pct": 0.04647189983199794,
+            "median_return_pct": -0.03218732520732792,
+            "positive_rate": 0.4868421052631579
+          },
+          "3": {
+            "count": 684,
+            "mean_return_pct": -0.07178645253814699,
+            "median_return_pct": -0.13055012017725853,
+            "positive_rate": 0.4692982456140351
+          },
+          "6": {
+            "count": 684,
+            "mean_return_pct": 0.1461380770908451,
+            "median_return_pct": -0.3031956535845537,
+            "positive_rate": 0.46637426900584794
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 826,
+            "mean_return_pct": -0.03327472270100843,
+            "median_return_pct": -0.10758542448496833,
+            "positive_rate": 0.4467312348668281
+          },
+          "3": {
+            "count": 826,
+            "mean_return_pct": 0.06952119001102396,
+            "median_return_pct": -0.11222977346225238,
+            "positive_rate": 0.47578692493946734
+          },
+          "6": {
+            "count": 826,
+            "mean_return_pct": 0.26686523710310117,
+            "median_return_pct": -0.13721226376143258,
+            "positive_rate": 0.46973365617433416
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 720,
+            "mean_return_pct": -0.03871196180898648,
+            "median_return_pct": 0.012234174986314184,
+            "positive_rate": 0.5055555555555555
+          },
+          "3": {
+            "count": 720,
+            "mean_return_pct": 0.061044053708832376,
+            "median_return_pct": 0.006549594982263596,
+            "positive_rate": 0.5013888888888889
+          },
+          "6": {
+            "count": 720,
+            "mean_return_pct": -0.11898506836993067,
+            "median_return_pct": -0.16823117362794182,
+            "positive_rate": 0.45694444444444443
+          }
+        }
+      },
+      "strongest_selector": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 188,
+            "mean_return_pct": 0.6067322951730335,
+            "median_return_pct": -0.08425675569139757,
+            "positive_rate": 0.48404255319148937
+          },
+          "3": {
+            "count": 187,
+            "mean_return_pct": 0.6627030811857759,
+            "median_return_pct": -0.405595132858394,
+            "positive_rate": 0.44919786096256686
+          },
+          "6": {
+            "count": 185,
+            "mean_return_pct": 1.2181762005420738,
+            "median_return_pct": 0.5088296917090673,
+            "positive_rate": 0.5243243243243243
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 38,
+            "mean_return_pct": 0.7725686851670233,
+            "median_return_pct": -0.03027005814123518,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 38,
+            "mean_return_pct": 2.0818345855139193,
+            "median_return_pct": 1.1690469681786664,
+            "positive_rate": 0.631578947368421
+          },
+          "6": {
+            "count": 38,
+            "mean_return_pct": 3.2830792634774184,
+            "median_return_pct": 0.6155011025812285,
+            "positive_rate": 0.5263157894736842
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 57,
+            "mean_return_pct": -0.35380590650900434,
+            "median_return_pct": -0.09980039920159944,
+            "positive_rate": 0.43859649122807015
+          },
+          "3": {
+            "count": 57,
+            "mean_return_pct": 1.0473880543970535,
+            "median_return_pct": 0.34735623311461516,
+            "positive_rate": 0.543859649122807
+          },
+          "6": {
+            "count": 56,
+            "mean_return_pct": 1.7963383936973394,
+            "median_return_pct": 0.7483352630953788,
+            "positive_rate": 0.5357142857142857
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 12,
+            "mean_return_pct": -0.12339457708259356,
+            "median_return_pct": 0.006171964032780641,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 11,
+            "mean_return_pct": 1.1399453904693586,
+            "median_return_pct": 0.8349415147099304,
+            "positive_rate": 0.6363636363636364
+          },
+          "6": {
+            "count": 11,
+            "mean_return_pct": 2.8564857804986783,
+            "median_return_pct": 0.26014713698285785,
+            "positive_rate": 0.5454545454545454
+          }
+        }
+      },
+      "strongest_selector_transitions": {
+        "high_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 157,
+            "mean_return_pct": 0.47938956081622025,
+            "median_return_pct": -0.09784994578584394,
+            "positive_rate": 0.46496815286624205
+          },
+          "3": {
+            "count": 157,
+            "mean_return_pct": 0.4518157008970173,
+            "median_return_pct": -0.5065183093913461,
+            "positive_rate": 0.4267515923566879
+          },
+          "6": {
+            "count": 155,
+            "mean_return_pct": 1.0456202277546562,
+            "median_return_pct": 0.2238190599599621,
+            "positive_rate": 0.5096774193548387
+          }
+        },
+        "high_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": 0.845882419265398,
+            "median_return_pct": 0.845882419265398,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": 0.5627867460205604,
+            "median_return_pct": 0.5627867460205604,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": -0.5900097592662856,
+            "median_return_pct": -0.5900097592662856,
+            "positive_rate": 0.5
+          }
+        },
+        "high_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 31,
+            "mean_return_pct": -0.2884258934866739,
+            "median_return_pct": -0.09980039920159944,
+            "positive_rate": 0.41935483870967744
+          },
+          "3": {
+            "count": 31,
+            "mean_return_pct": -0.2758786667857904,
+            "median_return_pct": 0.22691314847198552,
+            "positive_rate": 0.5161290322580645
+          },
+          "6": {
+            "count": 30,
+            "mean_return_pct": 0.3491573485716711,
+            "median_return_pct": -0.052499906396363816,
+            "positive_rate": 0.4666666666666667
+          }
+        },
+        "high_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 6,
+            "mean_return_pct": -0.4089723938112651,
+            "median_return_pct": -0.9680932384998009,
+            "positive_rate": 0.3333333333333333
+          },
+          "3": {
+            "count": 6,
+            "mean_return_pct": 0.1944916374241712,
+            "median_return_pct": -0.9922672833174384,
+            "positive_rate": 0.3333333333333333
+          },
+          "6": {
+            "count": 6,
+            "mean_return_pct": 0.4537745660968688,
+            "median_return_pct": 0.5830522718215048,
+            "positive_rate": 0.5
+          }
+        },
+        "high_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 26,
+            "mean_return_pct": 0.6229635064705299,
+            "median_return_pct": 0.337139749270321,
+            "positive_rate": 0.5384615384615384
+          },
+          "3": {
+            "count": 26,
+            "mean_return_pct": 2.07668379034421,
+            "median_return_pct": 0.8489381846586208,
+            "positive_rate": 0.6153846153846154
+          },
+          "6": {
+            "count": 26,
+            "mean_return_pct": 3.5518881344681135,
+            "median_return_pct": 0.03537106341800489,
+            "positive_rate": 0.5
+          }
+        },
+        "high_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 10,
+            "mean_return_pct": -0.1493078853056684,
+            "median_return_pct": 0.11397075834885251,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 10,
+            "mean_return_pct": 1.3049425360881395,
+            "median_return_pct": 0.8751906516547114,
+            "positive_rate": 0.7
+          },
+          "6": {
+            "count": 10,
+            "mean_return_pct": 3.0965706617318465,
+            "median_return_pct": 0.1272506235953097,
+            "positive_rate": 0.5
+          }
+        },
+        "low_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 24,
+            "mean_return_pct": 1.3993973777622954,
+            "median_return_pct": 0.738166823121944,
+            "positive_rate": 0.625
+          },
+          "3": {
+            "count": 23,
+            "mean_return_pct": 1.9801487322076168,
+            "median_return_pct": 1.6663454293774471,
+            "positive_rate": 0.6086956521739131
+          },
+          "6": {
+            "count": 23,
+            "mean_return_pct": 2.4532526020968284,
+            "median_return_pct": 1.9925868802706415,
+            "positive_rate": 0.6086956521739131
+          }
+        },
+        "low_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 26,
+            "mean_return_pct": -0.431758998958706,
+            "median_return_pct": -0.076241938521171,
+            "positive_rate": 0.46153846153846156
+          },
+          "3": {
+            "count": 26,
+            "mean_return_pct": 2.625129145038137,
+            "median_return_pct": 0.5534176402033686,
+            "positive_rate": 0.5769230769230769
+          },
+          "6": {
+            "count": 26,
+            "mean_return_pct": 3.466162676534649,
+            "median_return_pct": 1.7050545878560586,
+            "positive_rate": 0.6153846153846154
+          }
+        },
+        "low_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": 7.669807740956225,
+            "median_return_pct": 7.669807740956225,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 6.280040475588167,
+            "median_return_pct": 6.280040475588167,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": 4.144004553503677,
+            "median_return_pct": 4.144004553503677,
+            "positive_rate": 1.0
+          }
+        },
+        "low_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 10,
+            "mean_return_pct": 1.1468794029582308,
+            "median_return_pct": -0.17608639932740755,
+            "positive_rate": 0.4
+          },
+          "3": {
+            "count": 10,
+            "mean_return_pct": 2.399036220853835,
+            "median_return_pct": 2.4733066413797244,
+            "positive_rate": 0.7
+          },
+          "6": {
+            "count": 10,
+            "mean_return_pct": 3.3587940034503534,
+            "median_return_pct": 2.575410305487713,
+            "positive_rate": 0.6
+          }
+        },
+        "low_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": 0.006171964032780641,
+            "median_return_pct": 0.006171964032780641,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": -0.5100260657184497,
+            "median_return_pct": -0.5100260657184497,
+            "positive_rate": 0.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": 0.4556369681669947,
+            "median_return_pct": 0.4556369681669947,
+            "positive_rate": 1.0
+          }
+        }
+      },
+      "transitions": {
+        "high_volume_high_volatility": {
+          "high_volume_high_volatility": 2026,
+          "high_volume_low_volatility": 136,
+          "low_volume_high_volatility": 977,
+          "low_volume_low_volatility": 113
+        },
+        "high_volume_low_volatility": {
+          "high_volume_high_volatility": 243,
+          "high_volume_low_volatility": 1236,
+          "low_volume_high_volatility": 48,
+          "low_volume_low_volatility": 946
+        },
+        "low_volume_high_volatility": {
+          "high_volume_high_volatility": 857,
+          "high_volume_low_volatility": 95,
+          "low_volume_high_volatility": 1241,
+          "low_volume_low_volatility": 142
+        },
+        "low_volume_low_volatility": {
+          "high_volume_high_volatility": 145,
+          "high_volume_low_volatility": 1003,
+          "low_volume_high_volatility": 77,
+          "low_volume_low_volatility": 2115
+        }
+      }
+    },
+    "known_benchmark_diagnostic_only": {
+      "coin_opportunities": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 831,
+            "mean_return_pct": 0.08981527440557634,
+            "median_return_pct": -0.12463313633257478,
+            "positive_rate": 0.45607701564380265
+          },
+          "3": {
+            "count": 831,
+            "mean_return_pct": -0.0700494361675491,
+            "median_return_pct": -0.4614440799125097,
+            "positive_rate": 0.42478941034897716
+          },
+          "6": {
+            "count": 831,
+            "mean_return_pct": -0.1867869658153158,
+            "median_return_pct": -0.6486232314990348,
+            "positive_rate": 0.4223826714801444
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 583,
+            "mean_return_pct": -0.06090907688110533,
+            "median_return_pct": -0.1288362694441103,
+            "positive_rate": 0.4614065180102916
+          },
+          "3": {
+            "count": 583,
+            "mean_return_pct": -0.19432352050182067,
+            "median_return_pct": -0.2925547793898198,
+            "positive_rate": 0.444253859348199
+          },
+          "6": {
+            "count": 583,
+            "mean_return_pct": -0.08091199338105697,
+            "median_return_pct": -0.015099657741091121,
+            "positive_rate": 0.4922813036020583
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 494,
+            "mean_return_pct": -0.035275484161938986,
+            "median_return_pct": 0.004327870132980749,
+            "positive_rate": 0.5020242914979757
+          },
+          "3": {
+            "count": 494,
+            "mean_return_pct": 0.049499060638293145,
+            "median_return_pct": -0.10745910468881181,
+            "positive_rate": 0.4716599190283401
+          },
+          "6": {
+            "count": 494,
+            "mean_return_pct": -0.38880326874662774,
+            "median_return_pct": -0.7805732543183785,
+            "positive_rate": 0.3825910931174089
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 708,
+            "mean_return_pct": 0.12685342076275574,
+            "median_return_pct": 0.002853353100223943,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 708,
+            "mean_return_pct": 0.3186785026713928,
+            "median_return_pct": 0.06651845727714267,
+            "positive_rate": 0.5127118644067796
+          },
+          "6": {
+            "count": 708,
+            "mean_return_pct": 0.5469287190191002,
+            "median_return_pct": 0.10388374160971159,
+            "positive_rate": 0.5211864406779662
+          }
+        }
+      },
+      "strongest_selector": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 176,
+            "mean_return_pct": 0.3448109024116767,
+            "median_return_pct": -0.07491194720870564,
+            "positive_rate": 0.48295454545454547
+          },
+          "3": {
+            "count": 175,
+            "mean_return_pct": 0.3717869832400606,
+            "median_return_pct": -0.7694452188458434,
+            "positive_rate": 0.4057142857142857
+          },
+          "6": {
+            "count": 173,
+            "mean_return_pct": 0.5313545830032977,
+            "median_return_pct": -0.818145739841869,
+            "positive_rate": 0.4277456647398844
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 39,
+            "mean_return_pct": -0.8350332738917313,
+            "median_return_pct": -0.5038155631986285,
+            "positive_rate": 0.358974358974359
+          },
+          "3": {
+            "count": 38,
+            "mean_return_pct": -1.4636574852606725,
+            "median_return_pct": -0.41871006653664833,
+            "positive_rate": 0.3684210526315789
+          },
+          "6": {
+            "count": 38,
+            "mean_return_pct": -2.008126649824132,
+            "median_return_pct": -1.2738244061155202,
+            "positive_rate": 0.3684210526315789
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 47,
+            "mean_return_pct": -0.10463427997002507,
+            "median_return_pct": -0.02427331755566753,
+            "positive_rate": 0.48936170212765956
+          },
+          "3": {
+            "count": 47,
+            "mean_return_pct": -0.7364482878336384,
+            "median_return_pct": -1.0866954851104782,
+            "positive_rate": 0.3617021276595745
+          },
+          "6": {
+            "count": 46,
+            "mean_return_pct": -1.5024636573984143,
+            "median_return_pct": -0.48430928304218357,
+            "positive_rate": 0.32608695652173914
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 27,
+            "mean_return_pct": -0.3801577136788435,
+            "median_return_pct": -0.24570024570024218,
+            "positive_rate": 0.4074074074074074
+          },
+          "3": {
+            "count": 27,
+            "mean_return_pct": -0.5668490115338711,
+            "median_return_pct": -0.7899320793443021,
+            "positive_rate": 0.37037037037037035
+          },
+          "6": {
+            "count": 27,
+            "mean_return_pct": -1.4034916789810807,
+            "median_return_pct": -1.5499710672067457,
+            "positive_rate": 0.4074074074074074
+          }
+        }
+      },
+      "strongest_selector_transitions": {
+        "high_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 143,
+            "mean_return_pct": 0.36207925063739693,
+            "median_return_pct": -0.012968066137142298,
+            "positive_rate": 0.4965034965034965
+          },
+          "3": {
+            "count": 143,
+            "mean_return_pct": 0.5343201635184988,
+            "median_return_pct": -0.6896551724137834,
+            "positive_rate": 0.4125874125874126
+          },
+          "6": {
+            "count": 141,
+            "mean_return_pct": 0.92265706510502,
+            "median_return_pct": -0.7420371735036402,
+            "positive_rate": 0.44680851063829785
+          }
+        },
+        "high_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 4,
+            "mean_return_pct": -2.1349192019049057,
+            "median_return_pct": -2.0441614427835098,
+            "positive_rate": 0.25
+          },
+          "3": {
+            "count": 4,
+            "mean_return_pct": -1.6513453293038745,
+            "median_return_pct": -0.3556642421269185,
+            "positive_rate": 0.25
+          },
+          "6": {
+            "count": 4,
+            "mean_return_pct": -0.3121783044642168,
+            "median_return_pct": 0.8874570067499699,
+            "positive_rate": 0.75
+          }
+        },
+        "high_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 21,
+            "mean_return_pct": -0.5664772148112848,
+            "median_return_pct": -0.7604386432661814,
+            "positive_rate": 0.3333333333333333
+          },
+          "3": {
+            "count": 21,
+            "mean_return_pct": -1.4407780978501292,
+            "median_return_pct": -2.1460560995992917,
+            "positive_rate": 0.2857142857142857
+          },
+          "6": {
+            "count": 20,
+            "mean_return_pct": -2.4030494772487274,
+            "median_return_pct": -1.936790182070558,
+            "positive_rate": 0.3
+          }
+        },
+        "high_volume_high_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": -2.4262213772009655,
+            "median_return_pct": -2.4262213772009655,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 1.5830371166404955,
+            "median_return_pct": 1.5830371166404955,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": -1.5499710672067457,
+            "median_return_pct": -1.5499710672067457,
+            "positive_rate": 0.0
+          }
+        },
+        "high_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 10,
+            "mean_return_pct": 2.5036360293535664,
+            "median_return_pct": -0.13891426880114355,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 10,
+            "mean_return_pct": 0.6430867624846814,
+            "median_return_pct": -0.26053648623517445,
+            "positive_rate": 0.4
+          },
+          "6": {
+            "count": 10,
+            "mean_return_pct": 2.7681232981120276,
+            "median_return_pct": 1.828059821057837,
+            "positive_rate": 0.7
+          }
+        },
+        "high_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 24,
+            "mean_return_pct": -0.24856724211529818,
+            "median_return_pct": -0.5456039438644755,
+            "positive_rate": 0.4166666666666667
+          },
+          "3": {
+            "count": 24,
+            "mean_return_pct": -1.2504524234772834,
+            "median_return_pct": -0.6237142272700946,
+            "positive_rate": 0.4166666666666667
+          },
+          "6": {
+            "count": 24,
+            "mean_return_pct": -2.0893852223103835,
+            "median_return_pct": -1.6901451225763697,
+            "positive_rate": 0.2916666666666667
+          }
+        },
+        "high_volume_low_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": 0.2762688188731932,
+            "median_return_pct": 0.2762688188731932,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 0.034145584355105285,
+            "median_return_pct": 0.034145584355105285,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": 0.8970976253298124,
+            "median_return_pct": 0.8970976253298124,
+            "positive_rate": 1.0
+          }
+        },
+        "high_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 12,
+            "mean_return_pct": -0.3245204453092704,
+            "median_return_pct": -0.5074187482402626,
+            "positive_rate": 0.3333333333333333
+          },
+          "3": {
+            "count": 12,
+            "mean_return_pct": -1.7243360798673069,
+            "median_return_pct": -0.9342407880106096,
+            "positive_rate": 0.25
+          },
+          "6": {
+            "count": 12,
+            "mean_return_pct": -3.0844735734414543,
+            "median_return_pct": -1.517762943671841,
+            "positive_rate": 0.4166666666666667
+          }
+        },
+        "low_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 20,
+            "mean_return_pct": -0.46814893311978134,
+            "median_return_pct": -0.13982767184226863,
+            "positive_rate": 0.45
+          },
+          "3": {
+            "count": 19,
+            "mean_return_pct": -0.8896572139356714,
+            "median_return_pct": -1.3189724686096027,
+            "positive_rate": 0.3157894736842105
+          },
+          "6": {
+            "count": 19,
+            "mean_return_pct": -3.046467443927958,
+            "median_return_pct": -2.350642610739684,
+            "positive_rate": 0.15789473684210525
+          }
+        },
+        "low_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": -5.096977898060439,
+            "median_return_pct": -5.096977898060439,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          },
+          "6": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          }
+        },
+        "low_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 24,
+            "mean_return_pct": 0.1887023866209328,
+            "median_return_pct": 0.19007309856662324,
+            "positive_rate": 0.5833333333333334
+          },
+          "3": {
+            "count": 24,
+            "mean_return_pct": -0.2899129274627798,
+            "median_return_pct": -0.9912728493422895,
+            "positive_rate": 0.375
+          },
+          "6": {
+            "count": 24,
+            "mean_return_pct": -0.9795123325396902,
+            "median_return_pct": -0.4324834121598342,
+            "positive_rate": 0.2916666666666667
+          }
+        },
+        "low_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 3,
+            "mean_return_pct": -2.2546652159442333,
+            "median_return_pct": -3.182042915059824,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 3,
+            "mean_return_pct": -0.2908139587345926,
+            "median_return_pct": 0.6042789482279876,
+            "positive_rate": 0.6666666666666666
+          },
+          "6": {
+            "count": 3,
+            "mean_return_pct": -2.656218288908789,
+            "median_return_pct": -1.9286446038038307,
+            "positive_rate": 0.3333333333333333
+          }
+        },
+        "low_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 10,
+            "mean_return_pct": -1.2964029165330304,
+            "median_return_pct": -0.23875633737043822,
+            "positive_rate": 0.3
+          },
+          "3": {
+            "count": 10,
+            "mean_return_pct": -1.9002744959235252,
+            "median_return_pct": -0.4159006225387618,
+            "positive_rate": 0.3
+          },
+          "6": {
+            "count": 10,
+            "mean_return_pct": -2.4914854140010956,
+            "median_return_pct": -1.0625969217663012,
+            "positive_rate": 0.4
+          }
+        },
+        "low_volume_low_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": 2.173084254670221,
+            "median_return_pct": 2.173084254670221,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 2.5670352014233178,
+            "median_return_pct": 2.5670352014233178,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": 1.558859660270251,
+            "median_return_pct": 1.558859660270251,
+            "positive_rate": 1.0
+          }
+        },
+        "low_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 14,
+            "mean_return_pct": -0.28169939631546886,
+            "median_return_pct": 0.3005291547021338,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 14,
+            "mean_return_pct": 0.27171946645376177,
+            "median_return_pct": -0.692677362058941,
+            "positive_rate": 0.42857142857142855
+          },
+          "6": {
+            "count": 14,
+            "mean_return_pct": 0.047812758286786786,
+            "median_return_pct": -2.5612312066335297,
+            "positive_rate": 0.42857142857142855
+          }
+        }
+      },
+      "transitions": {
+        "high_volume_high_volatility": {
+          "high_volume_high_volatility": 1845,
+          "high_volume_low_volatility": 120,
+          "low_volume_high_volatility": 923,
+          "low_volume_low_volatility": 91
+        },
+        "high_volume_low_volatility": {
+          "high_volume_high_volatility": 214,
+          "high_volume_low_volatility": 1251,
+          "low_volume_high_volatility": 57,
+          "low_volume_low_volatility": 1009
+        },
+        "low_volume_high_volatility": {
+          "high_volume_high_volatility": 748,
+          "high_volume_low_volatility": 98,
+          "low_volume_high_volatility": 1333,
+          "low_volume_low_volatility": 210
+        },
+        "low_volume_low_volatility": {
+          "high_volume_high_volatility": 161,
+          "high_volume_low_volatility": 1075,
+          "low_volume_high_volatility": 72,
+          "low_volume_low_volatility": 2193
+        }
+      }
+    },
+    "post_boundary_observation": {
+      "coin_opportunities": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 145,
+            "mean_return_pct": -0.12420976433722589,
+            "median_return_pct": -0.13044612575005,
+            "positive_rate": 0.4068965517241379
+          },
+          "3": {
+            "count": 136,
+            "mean_return_pct": -0.09647226342924146,
+            "median_return_pct": -0.2475581304466512,
+            "positive_rate": 0.4338235294117647
+          },
+          "6": {
+            "count": 121,
+            "mean_return_pct": -0.9776527966226621,
+            "median_return_pct": -1.2152451625023541,
+            "positive_rate": 0.3140495867768595
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 166,
+            "mean_return_pct": 0.15664919496401575,
+            "median_return_pct": 0.13148833935496818,
+            "positive_rate": 0.5783132530120482
+          },
+          "3": {
+            "count": 159,
+            "mean_return_pct": 0.09000093024363907,
+            "median_return_pct": 0.08666158650469935,
+            "positive_rate": 0.5345911949685535
+          },
+          "6": {
+            "count": 135,
+            "mean_return_pct": 0.1704799029363109,
+            "median_return_pct": -0.05371313719373383,
+            "positive_rate": 0.4962962962962963
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 79,
+            "mean_return_pct": -0.21159721362847983,
+            "median_return_pct": -0.05302508086325597,
+            "positive_rate": 0.4810126582278481
+          },
+          "3": {
+            "count": 73,
+            "mean_return_pct": -0.8143737073377675,
+            "median_return_pct": -0.7332357580322024,
+            "positive_rate": 0.3698630136986301
+          },
+          "6": {
+            "count": 73,
+            "mean_return_pct": -1.3300010731862262,
+            "median_return_pct": -1.2870290480299307,
+            "positive_rate": 0.3698630136986301
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 133,
+            "mean_return_pct": -0.13951472419008573,
+            "median_return_pct": -0.1308955791073707,
+            "positive_rate": 0.40601503759398494
+          },
+          "3": {
+            "count": 126,
+            "mean_return_pct": -0.16699691218882928,
+            "median_return_pct": -0.26041331426270853,
+            "positive_rate": 0.38095238095238093
+          },
+          "6": {
+            "count": 120,
+            "mean_return_pct": -0.05937538329035245,
+            "median_return_pct": -0.5371213118816387,
+            "positive_rate": 0.425
+          }
+        }
+      },
+      "strongest_selector": {
+        "high_volume_high_volatility": {
+          "1": {
+            "count": 27,
+            "mean_return_pct": -0.04762412782589844,
+            "median_return_pct": -0.17852795585490133,
+            "positive_rate": 0.4444444444444444
+          },
+          "3": {
+            "count": 27,
+            "mean_return_pct": 0.2722295395067228,
+            "median_return_pct": -0.056200824278751504,
+            "positive_rate": 0.48148148148148145
+          },
+          "6": {
+            "count": 26,
+            "mean_return_pct": -0.7941985722830528,
+            "median_return_pct": 0.7218720601149697,
+            "positive_rate": 0.5769230769230769
+          }
+        },
+        "high_volume_low_volatility": {
+          "1": {
+            "count": 9,
+            "mean_return_pct": 0.06751088783162082,
+            "median_return_pct": 0.13159291096254133,
+            "positive_rate": 0.6666666666666666
+          },
+          "3": {
+            "count": 8,
+            "mean_return_pct": -0.14938535804950442,
+            "median_return_pct": 0.20113753156724146,
+            "positive_rate": 0.625
+          },
+          "6": {
+            "count": 6,
+            "mean_return_pct": 1.3998109601582729,
+            "median_return_pct": 0.12303380201071912,
+            "positive_rate": 0.5
+          }
+        },
+        "low_volume_high_volatility": {
+          "1": {
+            "count": 9,
+            "mean_return_pct": -0.5455059522598578,
+            "median_return_pct": 0.03953545836423711,
+            "positive_rate": 0.5555555555555556
+          },
+          "3": {
+            "count": 8,
+            "mean_return_pct": -2.63599023401261,
+            "median_return_pct": -2.9065350029198855,
+            "positive_rate": 0.375
+          },
+          "6": {
+            "count": 8,
+            "mean_return_pct": -2.8648210058699775,
+            "median_return_pct": -4.970335417342114,
+            "positive_rate": 0.375
+          }
+        },
+        "low_volume_low_volatility": {
+          "1": {
+            "count": 3,
+            "mean_return_pct": 0.06389890118052577,
+            "median_return_pct": 0.5754774664604723,
+            "positive_rate": 0.6666666666666666
+          },
+          "3": {
+            "count": 3,
+            "mean_return_pct": 3.147895737285015,
+            "median_return_pct": 0.030572240405724038,
+            "positive_rate": 0.6666666666666666
+          },
+          "6": {
+            "count": 3,
+            "mean_return_pct": 1.6110458798120342,
+            "median_return_pct": -1.719238931050593,
+            "positive_rate": 0.3333333333333333
+          }
+        }
+      },
+      "strongest_selector_transitions": {
+        "high_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 22,
+            "mean_return_pct": -0.057666644332485,
+            "median_return_pct": -0.1254188056603378,
+            "positive_rate": 0.45454545454545453
+          },
+          "3": {
+            "count": 22,
+            "mean_return_pct": 0.3858262684446122,
+            "median_return_pct": 0.03867837693859455,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 21,
+            "mean_return_pct": -0.9553504859535322,
+            "median_return_pct": 0.8899348102464177,
+            "positive_rate": 0.5714285714285714
+          }
+        },
+        "high_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": -0.032474832005202625,
+            "median_return_pct": -0.032474832005202625,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 0.044965152007203635,
+            "median_return_pct": 0.044965152007203635,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          }
+        },
+        "high_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": -0.7367996278154321,
+            "median_return_pct": -0.7367996278154321,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": -2.9065350029198855,
+            "median_return_pct": -2.9065350029198855,
+            "positive_rate": 0.0
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": -6.42340759353322,
+            "median_return_pct": -6.42340759353322,
+            "positive_rate": 0.0
+          }
+        },
+        "high_volume_low_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 2,
+            "mean_return_pct": 1.0078207359502656,
+            "median_return_pct": 1.0078207359502656,
+            "positive_rate": 0.5
+          },
+          "3": {
+            "count": 2,
+            "mean_return_pct": 0.7871984097177764,
+            "median_return_pct": 0.7871984097177764,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 2,
+            "mean_return_pct": 0.8378657569174441,
+            "median_return_pct": 0.8378657569174441,
+            "positive_rate": 0.5
+          }
+        },
+        "high_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 6,
+            "mean_return_pct": -0.07271479092725297,
+            "median_return_pct": 0.14746393879205844,
+            "positive_rate": 0.6666666666666666
+          },
+          "3": {
+            "count": 5,
+            "mean_return_pct": -0.8732232356116776,
+            "median_return_pct": -0.34550734468066224,
+            "positive_rate": 0.4
+          },
+          "6": {
+            "count": 4,
+            "mean_return_pct": 1.5436491138089288,
+            "median_return_pct": 0.12303380201071912,
+            "positive_rate": 0.5
+          }
+        },
+        "high_volume_low_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": -0.8739294364403571,
+            "median_return_pct": -0.8739294364403571,
+            "positive_rate": 0.0
+          },
+          "3": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          },
+          "6": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          }
+        },
+        "low_volume_high_volatility->high_volume_high_volatility": {
+          "1": {
+            "count": 3,
+            "mean_return_pct": -0.6776089159617065,
+            "median_return_pct": -0.3285638579756056,
+            "positive_rate": 0.3333333333333333
+          },
+          "3": {
+            "count": 3,
+            "mean_return_pct": -0.9041257195118354,
+            "median_return_pct": -0.6401695813460506,
+            "positive_rate": 0.3333333333333333
+          },
+          "6": {
+            "count": 3,
+            "mean_return_pct": -0.7541780627233614,
+            "median_return_pct": 0.004239533651295702,
+            "positive_rate": 0.6666666666666666
+          }
+        },
+        "low_volume_high_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": 0.13159291096254133,
+            "median_return_pct": 0.13159291096254133,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 0.6579645548126845,
+            "median_return_pct": 0.6579645548126845,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": -0.3926562665817701,
+            "median_return_pct": -0.3926562665817701,
+            "positive_rate": 0.0
+          }
+        },
+        "low_volume_high_volatility->low_volume_high_volatility": {
+          "1": {
+            "count": 6,
+            "mean_return_pct": -0.42700414637791656,
+            "median_return_pct": 0.4990822291151664,
+            "positive_rate": 0.6666666666666666
+          },
+          "3": {
+            "count": 6,
+            "mean_return_pct": -2.5458086443768515,
+            "median_return_pct": -1.6604634980945443,
+            "positive_rate": 0.5
+          },
+          "6": {
+            "count": 6,
+            "mean_return_pct": -1.6786254766488966,
+            "median_return_pct": -1.0789531628916604,
+            "positive_rate": 0.5
+          }
+        },
+        "low_volume_high_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          },
+          "3": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          },
+          "6": {
+            "count": 0,
+            "mean_return_pct": null,
+            "median_return_pct": null,
+            "positive_rate": null
+          }
+        },
+        "low_volume_low_volatility->high_volume_low_volatility": {
+          "1": {
+            "count": 1,
+            "mean_return_pct": 0.9447686570907665,
+            "median_return_pct": 0.9447686570907665,
+            "positive_rate": 1.0
+          },
+          "3": {
+            "count": 1,
+            "mean_return_pct": 2.4681036068424644,
+            "median_return_pct": 2.4681036068424644,
+            "positive_rate": 1.0
+          },
+          "6": {
+            "count": 1,
+            "mean_return_pct": 2.616925572295692,
+            "median_return_pct": 2.616925572295692,
+            "positive_rate": 1.0
+          }
+        },
+        "low_volume_low_volatility->low_volume_low_volatility": {
+          "1": {
+            "count": 3,
+            "mean_return_pct": 0.06389890118052577,
+            "median_return_pct": 0.5754774664604723,
+            "positive_rate": 0.6666666666666666
+          },
+          "3": {
+            "count": 3,
+            "mean_return_pct": 3.147895737285015,
+            "median_return_pct": 0.030572240405724038,
+            "positive_rate": 0.6666666666666666
+          },
+          "6": {
+            "count": 3,
+            "mean_return_pct": 1.6110458798120342,
+            "median_return_pct": -1.719238931050593,
+            "positive_rate": 0.3333333333333333
+          }
+        }
+      },
+      "transitions": {
+        "high_volume_high_volatility": {
+          "high_volume_high_volatility": 219,
+          "high_volume_low_volatility": 17,
+          "low_volume_high_volatility": 107,
+          "low_volume_low_volatility": 31
+        },
+        "high_volume_low_volatility": {
+          "high_volume_high_volatility": 39,
+          "high_volume_low_volatility": 297,
+          "low_volume_high_volatility": 10,
+          "low_volume_low_volatility": 215
+        },
+        "low_volume_high_volatility": {
+          "high_volume_high_volatility": 84,
+          "high_volume_low_volatility": 9,
+          "low_volume_high_volatility": 142,
+          "low_volume_low_volatility": 26
+        },
+        "low_volume_low_volatility": {
+          "high_volume_high_volatility": 33,
+          "high_volume_low_volatility": 226,
+          "low_volume_high_volatility": 6,
+          "low_volume_low_volatility": 439
+        }
+      }
+    }
+  },
+  "source_timeframe": "1h",
+  "state_definition": {
+    "states": [
+      "high_volume_high_volatility",
+      "high_volume_low_volatility",
+      "low_volume_high_volatility",
+      "low_volume_low_volatility"
+    ],
+    "volatility": "current 12-bar realized volatility >= median of prior 42 realized-volatility values",
+    "volume": "current volume >= median of prior 24 completed bars"
+  }
+}
