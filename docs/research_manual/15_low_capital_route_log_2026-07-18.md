@@ -337,3 +337,77 @@ drawdown.  A 25 USDC account also skipped hundreds of scaled entries below the
 minimum; 50 USDC is the first tested balance with zero skips.  The artifact is
 therefore research-only (`execution_authorized=false`) and does not alter the
 live 38-coin or existing three-candidate paper configuration.
+
+## Route 26: Hyperliquid-native replay of the Binance 4h route
+
+Decision: rejected in development; holdout locked.
+
+The frozen live universe was fetched directly from Hyperliquid's public
+`candleSnapshot` endpoint for completed 1h candles through 2026-07-22 07:00
+UTC.  All 38 coins were present.  The common resampled 4h history was tested
+with 300-bar development folds, and the five Route 25 candidates were replayed
+with the same next-open execution, 10 USDC minimum, two-position cap, and
+volatility-scaled sizing.
+
+The selected development candidate, `ma_3_24_btc252_top2_vol015`, returned
+ -14.75%, -8.11%, and +55.57% in the three 10 bps development folds at 50
+USDC, with drawdowns of about -16.5%, -14.4%, and -14.8%.  It had no $50
+minimum-order skips, but it failed the absolute return gate in two folds.  All
+five candidates failed the strict development gate.  The earlier Binance
+result therefore does not transfer to the actual venue data; the holdout was
+not opened and no paper/live setting changed.
+
+The fetched fixture and rejected artifact are retained as venue-transfer
+evidence.  `execution_authorized` remains false.
+
+## Route 27: Hyperliquid-native 4h breadth state plus momentum
+
+Decision: rejected in development; route closed.
+
+This route classified market state from the fraction of the 38 coins with
+positive momentum, went long only in a broad-positive state, short only in a
+broad-negative state, and stayed flat in the neutral state.  It tested 96
+predeclared combinations of 6/12/24/42-bar momentum, raw or volatility-
+normalized scores, 50/55/60% breadth thresholds, top one or two coins, and
+1.0%/1.5% per-4h volatility targets.  It used only the three 300-bar
+development folds and never inspected holdout.
+
+No candidate passed all six checks (positive return and positive executable
+buy-and-hold delta at 6.5 and 10 bps in every fold, plus zero $50 minimum-order
+skips).  The ranked leader (`12` bars, raw score, 50/50 thresholds, top two,
+1.5% target) made +45.38%, +6.55%, and +5.28% under 10 bps, but its final fold
+lagged executable buy-and-hold by 8.30 percentage points.  This is regime
+instability, not a reason to tune against holdout; the route is closed.
+
+## Route 28: Hyperliquid-native 4h cross-sectional momentum grid
+
+Decision: rejected in development; route closed.
+
+The broader grid removed the breadth gate and varied 5 momentum windows,
+4 BTC-regime windows, raw/volatility-normalized scoring, top one or two
+positions, and two volatility targets (136 valid combinations).  This was
+still a development-only scan with the same costs, capital, and no-time-exit
+rules.  Zero candidates passed the strict development gate.  The best ranked
+candidate (`42`-bar momentum, `84`-bar regime, raw score, top two, 1.0% target)
+returned +38.03%, -3.70%, and -5.93% under 10 bps and lagged buy-and-hold in
+folds two and three.  The route is closed without unlocking holdout.
+
+## Route 29: Hyperliquid-native 1h cross-sectional momentum
+
+Decision: rejected in development; route closed.
+
+To test the requested hourly cadence, the same 38-coin Hyperliquid fixture was
+kept at 1h resolution.  The bounded grid covered 3/6/12/24-hour momentum,
+24/48/168-hour BTC regimes, top one or two positions, and 0.3%/0.5% hourly
+volatility targets (44 valid combinations after warm-up constraints).  Every
+candidate used next-open execution, 6.5/10 bps costs, two positions, the 10
+USDC minimum, and no elapsed-time exit.  Only three 600-bar development folds
+were evaluated.
+
+No candidate passed all development checks.  The best ranked candidate (24h
+momentum, 48h BTC regime, top one, 0.3% target) returned +25.53%, -1.77%, and
+-12.39% under 10 bps in the three folds; it lagged executable buy-and-hold in
+the third fold by 10.90 percentage points.  The failure is consistent with the
+4h routes: performance changes sign by market segment before costs or minimum
+order constraints become the primary issue.  Holdout stayed locked and the
+route is not paper/live eligible.

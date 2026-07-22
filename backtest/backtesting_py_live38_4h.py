@@ -65,15 +65,17 @@ def _resample_4h(frame):
     )
 
 
-def load_frames(path: Path):
+def load_frames(path: Path, *, bars_per_fold=BARS_PER_FOLD):
     payload = json.loads(path.read_text(encoding="utf-8"))
+    if "coins" in payload and isinstance(payload["coins"], dict):
+        payload = payload["coins"]
     missing = sorted(set(LIVE_UNIVERSE) - set(payload))
     if missing:
         raise ValueError(f"fixture is missing live-universe coins: {', '.join(missing)}")
     hourly = {coin: _frame(payload[coin]) for coin in LIVE_UNIVERSE}
     frames = {coin: _resample_4h(frame) for coin, frame in hourly.items()}
     common_index = sorted(set.intersection(*(set(frame.index) for frame in frames.values())))
-    needed = BARS_PER_FOLD * 4
+    needed = bars_per_fold * 4
     if len(common_index) < needed:
         raise ValueError(f"4h fixture has only {len(common_index)} common bars; need {needed}")
     return {coin: frame.loc[common_index].copy() for coin, frame in frames.items()}
@@ -235,20 +237,23 @@ def main(argv=None):
     parser.add_argument("--data-path", type=Path, default=DEFAULT_DATA_PATH)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
     parser.add_argument("--unlock-holdout", action="store_true")
+    parser.add_argument("--bars-per-fold", type=int, default=BARS_PER_FOLD)
     args = parser.parse_args(argv)
+    if args.bars_per_fold <= 0:
+        raise SystemExit("--bars-per-fold must be positive")
 
-    frames = load_frames(args.data_path)
+    frames = load_frames(args.data_path, bars_per_fold=args.bars_per_fold)
     closes = pd.DataFrame({coin: frame["Close"] for coin, frame in frames.items()})
     volatility = build_volatility(closes)
-    needed = BARS_PER_FOLD * 4
+    needed = args.bars_per_fold * 4
     if len(closes) < needed:
         raise ValueError(f"4h fixture needs at least {needed} common bars")
     folds = [
-        ("development_1", 0, BARS_PER_FOLD),
-        ("development_2", BARS_PER_FOLD, BARS_PER_FOLD * 2),
-        ("development_3", BARS_PER_FOLD * 2, BARS_PER_FOLD * 3),
+        ("development_1", 0, args.bars_per_fold),
+        ("development_2", args.bars_per_fold, args.bars_per_fold * 2),
+        ("development_3", args.bars_per_fold * 2, args.bars_per_fold * 3),
     ]
-    holdout = ("holdout", BARS_PER_FOLD * 3, BARS_PER_FOLD * 4)
+    holdout = ("holdout", args.bars_per_fold * 3, args.bars_per_fold * 4)
     candidates = [
         {
             "name": "ma_3_24_btc252_top2_vol015",
@@ -363,6 +368,7 @@ def main(argv=None):
         ),
         "development_folds": folds,
         "holdout": holdout,
+        "bars_per_fold": args.bars_per_fold,
         "candidates": evaluated,
         "selected": selected,
         "holdout_result": holdout_result,
