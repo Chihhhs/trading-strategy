@@ -14,6 +14,7 @@ if SRC not in sys.path:
 
 from trading_strategy.live.research_paper import (  # noqa: E402
     INTERVAL_MS,
+    ROUTE_CONFIGS,
     _empty_state,
     _validate_replay_continuity,
     compute_selector_decision,
@@ -61,6 +62,33 @@ class ResearchPaperSelectorTests(unittest.TestCase):
         decision = compute_selector_decision(rows, "31")
         self.assertEqual(decision["target"], "SLOW")
         self.assertGreaterEqual(decision["volume_ratio"], 1.10)
+
+    def test_route38_requires_two_consecutive_leader_bars(self):
+        decisions = compute_selector_decisions(_bars(("FAST", "SLOW", "FLAT")), "38")
+        self.assertIsNone(decisions[0]["target"])
+        self.assertEqual(decisions[0]["entry_confirmation_streak"], 1)
+        self.assertEqual(decisions[1]["target"], "FAST")
+        self.assertTrue(decisions[1]["entry_confirmed"])
+
+    def test_route38_confirmation_streak_can_resume_after_restart(self):
+        rows = _bars(("FAST", "SLOW", "FLAT"))
+        after = rows["FAST"][-2]["time"]
+        decisions = compute_selector_decisions(
+            rows,
+            "38",
+            after_bar_time=after,
+            initial_pending_candidate="FAST",
+            initial_pending_streak=1,
+        )
+        self.assertEqual(decisions[-1]["target"], "FAST")
+        self.assertEqual(decisions[-1]["entry_confirmation_streak"], 2)
+
+    def test_new_entry_quality_routes_have_distinct_predeclared_hypotheses(self):
+        self.assertEqual(ROUTE_CONFIGS["38"]["entry_confirmation_bars"], 2)
+        self.assertEqual(ROUTE_CONFIGS["39"]["switch_margin"], 0.02)
+        self.assertEqual(ROUTE_CONFIGS["40"]["trend_bars"], 84)
+        for route_id in ("38", "39", "40"):
+            self.assertFalse(ROUTE_CONFIGS[route_id].get("execution_authorized", False))
 
     def test_forward_gate_never_authorizes_execution(self):
         state = {

@@ -1,4 +1,4 @@
-"""Isolated paper runner for the validated Route30 and Route31 selectors.
+"""Isolated paper runner for the validated and research-only selectors.
 
 This module is intentionally separate from the normal paper/live engine.  It
 only simulates one long Hyperliquid-aligned position from completed 4h bars,
@@ -68,6 +68,48 @@ ROUTE_CONFIGS = {
         "volatility_target": 0.015,
         "state_mode": "high_volume",
         "research_artifact": "data/research_artifacts/backtesting_py_live38_4h_volume_state_state_only.json",
+    },
+    "38": {
+        "name": "selector_m12_t42_raw_s0.0_w0.01_trend0.01_confirm2_vol0.015",
+        "label": "two-bar leader-persistence entry-quality selector",
+        "momentum_bars": 12,
+        "trend_bars": 42,
+        "score_mode": "raw",
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "switch_margin": 0.01,
+        "entry_confirmation_bars": 2,
+        "volatility_target": 0.015,
+        "state_mode": "any",
+        "research_artifact": "data/research_artifacts/backtesting_py_live38_4h_single_selector.json",
+    },
+    "39": {
+        "name": "selector_m12_t42_raw_s0.0_w0.02_trend0.01_vol0.015",
+        "label": "higher-switch-margin entry-quality selector",
+        "momentum_bars": 12,
+        "trend_bars": 42,
+        "score_mode": "raw",
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "switch_margin": 0.02,
+        "entry_confirmation_bars": 1,
+        "volatility_target": 0.015,
+        "state_mode": "any",
+        "research_artifact": "data/research_artifacts/backtesting_py_live38_4h_single_selector.json",
+    },
+    "40": {
+        "name": "selector_m12_t84_raw_s0.0_w0.01_trend0.01_vol0.015",
+        "label": "longer-trend-confirmation entry-quality selector",
+        "momentum_bars": 12,
+        "trend_bars": 84,
+        "score_mode": "raw",
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "switch_margin": 0.01,
+        "entry_confirmation_bars": 1,
+        "volatility_target": 0.015,
+        "state_mode": "any",
+        "research_artifact": "data/research_artifacts/backtesting_py_live38_4h_single_selector.json",
     },
 }
 
@@ -160,7 +202,15 @@ def _state_allows(volume_ratio, volatility_ratio, state_mode):
     raise ValueError(f"unsupported state mode: {state_mode}")
 
 
-def compute_selector_decisions(bars_by_coin, route_id, *, initial_incumbent=None, after_bar_time=None):
+def compute_selector_decisions(
+    bars_by_coin,
+    route_id,
+    *,
+    initial_incumbent=None,
+    after_bar_time=None,
+    initial_pending_candidate=None,
+    initial_pending_streak=0,
+):
     """Compute chronological causal targets after an optional processed bar."""
     route = ROUTE_CONFIGS[str(route_id)]
     times, closes, volumes = _common_bars(bars_by_coin)
@@ -171,6 +221,7 @@ def compute_selector_decisions(bars_by_coin, route_id, *, initial_incumbent=None
     momentum_bars = int(route["momentum_bars"])
     trend_bars = int(route["trend_bars"])
     state_mode = route["state_mode"]
+    confirmation_bars = max(1, int(route.get("entry_confirmation_bars", 1)))
     warmup = max(momentum_bars, trend_bars, VOLATILITY_LOOKBACK)
     if state_mode != "any":
         warmup = max(warmup, VOLUME_LOOKBACK, VOLATILITY_STATE_LOOKBACK)
@@ -180,6 +231,12 @@ def compute_selector_decisions(bars_by_coin, route_id, *, initial_incumbent=None
         for coin in coins
     }
     incumbent = str(initial_incumbent).upper() if initial_incumbent in coins else None
+    pending_candidate = (
+        str(initial_pending_candidate).upper()
+        if initial_pending_candidate in coins
+        else None
+    )
+    pending_streak = max(0, int(initial_pending_streak or 0))
     decisions = []
     for index, timestamp in enumerate(times):
         scores = {}
@@ -208,14 +265,20 @@ def compute_selector_decisions(bars_by_coin, route_id, *, initial_incumbent=None
 
         ranked = sorted((coin for coin in coins if eligible.get(coin, False)), key=lambda coin: scores[coin], reverse=True)
         best = ranked[0] if ranked else None
+        if best is not None and best == pending_candidate:
+            pending_streak += 1
+        else:
+            pending_candidate = best
+            pending_streak = 1 if best is not None else 0
+        confirmed_best = best if pending_streak >= confirmation_bars else None
         if incumbent is None:
-            incumbent = best
+            incumbent = confirmed_best
         elif not bool(trends.get(incumbent, float("-inf")) >= float(route["min_trend"])):
-            incumbent = best
-        elif best is not None and best != incumbent:
-            lead = scores[best] - scores.get(incumbent, float("-inf"))
+            incumbent = confirmed_best
+        elif confirmed_best is not None and confirmed_best != incumbent:
+            lead = scores[confirmed_best] - scores.get(incumbent, float("-inf"))
             if lead >= float(route["switch_margin"]):
-                incumbent = best
+                incumbent = confirmed_best
 
         decisions.append(
             {
@@ -229,6 +292,10 @@ def compute_selector_decisions(bars_by_coin, route_id, *, initial_incumbent=None
                 "volatility": _finite(volatilities.get(incumbent, [None] * len(times))[index]) if incumbent else None,
                 "eligible": bool(eligible.get(incumbent, False)) if incumbent else False,
                 "ranked": ranked[:5],
+                "entry_confirmed": bool(confirmed_best == best and best is not None),
+                "entry_confirmation_streak": pending_streak if best is not None else 0,
+                "entry_confirmation_required": confirmation_bars,
+                "pending_candidate": pending_candidate,
                 "common_bars": len(times),
             }
         )
@@ -279,6 +346,8 @@ def _empty_state(route_id, capital):
         "skipped_entries_below_min_order": 0,
         "realized_pnl": 0.0,
         "last_decision": None,
+        "pending_candidate": None,
+        "pending_candidate_streak": 0,
         "last_snapshot": None,
         "events": [],
     }
@@ -559,6 +628,8 @@ def run_once(route_id, *, capital=DEFAULT_CAPITAL):
             route_id,
             initial_incumbent=incumbent,
             after_bar_time=last_processed_bar,
+            initial_pending_candidate=state.get("pending_candidate"),
+            initial_pending_streak=state.get("pending_candidate_streak", 0),
         )
         _validate_replay_continuity(last_processed_bar, decisions)
     prices = get_current_prices([{"name": coin, "symbol": f"{coin}USDT"} for coin in universe]) or {}
@@ -601,6 +672,8 @@ def run_once(route_id, *, capital=DEFAULT_CAPITAL):
         _update_drawdown(state, execution_prices)
         state["last_processed_bar"] = replay_bar_time
         state["last_decision"] = replay_decision
+        state["pending_candidate"] = replay_decision.get("pending_candidate")
+        state["pending_candidate_streak"] = int(replay_decision.get("entry_confirmation_streak", 0))
         _save_state(route_id, state)
 
     equity = _update_drawdown(state, latest_prices)

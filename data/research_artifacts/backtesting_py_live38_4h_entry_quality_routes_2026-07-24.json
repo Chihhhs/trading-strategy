@@ -1,0 +1,760 @@
+{
+  "bars_per_fold": 300,
+  "capital": 50.0,
+  "data_path": "data\\research_artifacts\\hyperliquid_live38_1h.json",
+  "data_sha256": "5076ec93cdfd5da838d63fdf2509c882bb7b1d7b9c82f45c5e095bafe2367620",
+  "decision": "diagnostic_only_no_promotion",
+  "decision_timeframe": "4h",
+  "execution_authorized": false,
+  "normal_fee_bps": 10.0,
+  "routes": {
+    "30": {
+      "candidate": {
+        "entry_confirmation_bars": 1,
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route30_baseline",
+        "score_mode": "raw",
+        "switch_margin": 0.01,
+        "trend_bars": 42,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 58,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 81.0,
+            "max_drawdown_pct": -12.698822119256349,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 23.418904861147038,
+            "total_fees": 2.3497743993608218
+          },
+          "development_2": {
+            "entries": 62,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -11.523004768930544,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 9.678075295664335,
+            "total_fees": 2.390057832048504
+          },
+          "development_3": {
+            "entries": 67,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -10.214494221455517,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 30.59229280586766,
+            "total_fees": 3.257300055535535
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 58,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 81.0,
+            "max_drawdown_pct": -13.291663805169263,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 20.76896755919906,
+            "total_fees": 3.486278449822868
+          },
+          "development_2": {
+            "entries": 62,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -12.494531939986597,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 7.036636823972353,
+            "total_fees": 3.542632742349805
+          },
+          "development_3": {
+            "entries": 67,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -10.661104852586767,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 26.988588569721017,
+            "total_fees": 4.8169092208310165
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 63,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 96.66666666666667,
+          "max_drawdown_pct": -18.440695545484843,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 2.721989975743022,
+          "total_fees": 2.5041888473690523
+        },
+        "stressed": {
+          "entries": 63,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 96.66666666666667,
+          "max_drawdown_pct": -20.033734599797626,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 0.4334544806027685,
+          "total_fees": 3.715438106030689
+        }
+      }
+    },
+    "38": {
+      "candidate": {
+        "entry_confirmation_bars": 2,
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route38_leader_persistence_2bar",
+        "score_mode": "raw",
+        "switch_margin": 0.01,
+        "trend_bars": 42,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 32,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 73.33333333333333,
+            "max_drawdown_pct": -11.642018444568759,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 17.437337182589175,
+            "total_fees": 1.2459750179862326
+          },
+          "development_2": {
+            "entries": 40,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 85.33333333333334,
+            "max_drawdown_pct": -12.829815676640955,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 2.3052309842745533,
+            "total_fees": 1.4721210306444537
+          },
+          "development_3": {
+            "entries": 38,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 92.66666666666666,
+            "max_drawdown_pct": -10.389654977369467,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 22.45057599703717,
+            "total_fees": 1.834690483843767
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 32,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 73.33333333333333,
+            "max_drawdown_pct": -12.189384770045875,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 16.089645164756373,
+            "total_fees": 1.8583190461809105
+          },
+          "development_2": {
+            "entries": 40,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 85.33333333333334,
+            "max_drawdown_pct": -13.149214683681942,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 0.7342280543140234,
+            "total_fees": 2.1915621274105304
+          },
+          "development_3": {
+            "entries": 38,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 92.66666666666666,
+            "max_drawdown_pct": -10.758670296954097,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 20.547134317855754,
+            "total_fees": 2.7308135291127025
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 41,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 91.66666666666666,
+          "max_drawdown_pct": -23.180875181848293,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": -6.375957918364028,
+          "total_fees": 1.471611708551786
+        },
+        "stressed": {
+          "entries": 41,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 91.66666666666666,
+          "max_drawdown_pct": -23.847572509489247,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": -7.734545731823528,
+          "total_fees": 2.1922051216450287
+        }
+      }
+    },
+    "39": {
+      "candidate": {
+        "entry_confirmation_bars": 1,
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route39_switch_margin_2pct",
+        "score_mode": "raw",
+        "switch_margin": 0.02,
+        "trend_bars": 42,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 47,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 81.0,
+            "max_drawdown_pct": -13.09896107456896,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 22.032761176096205,
+            "total_fees": 1.8137903057870832
+          },
+          "development_2": {
+            "entries": 56,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -13.552177151350019,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 8.27635627951886,
+            "total_fees": 2.156439071437134
+          },
+          "development_3": {
+            "entries": 59,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -10.765276898805197,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 28.694653438449393,
+            "total_fees": 2.832444417652451
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 47,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 81.0,
+            "max_drawdown_pct": -13.534604780659365,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 19.96916613915227,
+            "total_fees": 2.6975414742050265
+          },
+          "development_2": {
+            "entries": 56,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -13.847255126530445,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 5.901445710963094,
+            "total_fees": 3.199793480988607
+          },
+          "development_3": {
+            "entries": 59,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -11.208347952466735,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 25.59481588745389,
+            "total_fees": 4.196439280528385
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 57,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 96.66666666666667,
+          "max_drawdown_pct": -19.984547317996327,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 0.7775456556176508,
+          "total_fees": 2.2206008125037817
+        },
+        "stressed": {
+          "entries": 57,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 96.66666666666667,
+          "max_drawdown_pct": -21.354119167627715,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": -1.2248796022305997,
+          "total_fees": 3.2987709888018077
+        }
+      }
+    },
+    "40": {
+      "candidate": {
+        "entry_confirmation_bars": 1,
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route40_trend_84bar",
+        "score_mode": "raw",
+        "switch_margin": 0.01,
+        "trend_bars": 84,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 40,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 67.33333333333333,
+            "max_drawdown_pct": -13.130080331718364,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 2.9521139045014744,
+            "total_fees": 1.4238124288233787
+          },
+          "development_2": {
+            "entries": 71,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -14.558507598245162,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": -2.8104082910597183,
+            "total_fees": 2.6517301232046457
+          },
+          "development_3": {
+            "entries": 60,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -10.770344489355498,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 38.822450130932594,
+            "total_fees": 2.9692264347155244
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 40,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 67.33333333333333,
+            "max_drawdown_pct": -13.635995975363658,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 1.5659750443218545,
+            "total_fees": 2.121647110424119
+          },
+          "development_2": {
+            "entries": 71,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -15.642098474595233,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": -5.5232233104287936,
+            "total_fees": 3.92356257203082
+          },
+          "development_3": {
+            "entries": 60,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -11.180968944098124,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 35.3395937257776,
+            "total_fees": 4.396681406479557
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 72,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 93.0,
+          "max_drawdown_pct": -26.187413067864938,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": -5.140712682507198,
+          "total_fees": 2.663533776746893
+        },
+        "stressed": {
+          "entries": 72,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 93.0,
+          "max_drawdown_pct": -27.7521346333374,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": -7.479950681901471,
+          "total_fees": 3.9478460547466687
+        }
+      }
+    },
+    "41": {
+      "candidate": {
+        "entry_confirmation_bars": 1,
+        "min_score": 0.01,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route41_momentum_floor_1pct",
+        "score_mode": "raw",
+        "switch_margin": 0.01,
+        "trend_bars": 42,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 58,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 79.66666666666666,
+            "max_drawdown_pct": -12.698822119256326,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 26.394395435526064,
+            "total_fees": 2.4219122377897726
+          },
+          "development_2": {
+            "entries": 64,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 91.66666666666666,
+            "max_drawdown_pct": -13.129774176115427,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 9.075894527977901,
+            "total_fees": 2.4717376429310094
+          },
+          "development_3": {
+            "entries": 67,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 97.33333333333334,
+            "max_drawdown_pct": -12.30220507906148,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 28.062193758076724,
+            "total_fees": 3.2380994323730103
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 58,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 79.66666666666666,
+            "max_drawdown_pct": -13.291663805169273,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 23.676939213409476,
+            "total_fees": 3.5930250011262337
+          },
+          "development_2": {
+            "entries": 64,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 91.66666666666666,
+            "max_drawdown_pct": -13.491293806389692,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 6.369906573626194,
+            "total_fees": 3.662396807478499
+          },
+          "development_3": {
+            "entries": 67,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 97.33333333333334,
+            "max_drawdown_pct": -12.694805041932621,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 24.528207464561103,
+            "total_fees": 4.78882588675651
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 56,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 92.33333333333333,
+          "max_drawdown_pct": -13.329382259529055,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 9.15956660338142,
+          "total_fees": 2.2889925242157805
+        },
+        "stressed": {
+          "entries": 56,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 92.33333333333333,
+          "max_drawdown_pct": -14.78777644881497,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 7.022104038351529,
+          "total_fees": 3.400485074887363
+        }
+      }
+    },
+    "42": {
+      "candidate": {
+        "entry_confirmation_bars": 1,
+        "min_score": 0.02,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route42_momentum_floor_2pct",
+        "score_mode": "raw",
+        "switch_margin": 0.01,
+        "trend_bars": 42,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 54,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 74.33333333333333,
+            "max_drawdown_pct": -12.779302307139528,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 28.176033720247595,
+            "total_fees": 2.253965736873862
+          },
+          "development_2": {
+            "entries": 61,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 86.33333333333333,
+            "max_drawdown_pct": -11.56938428525567,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 10.71542243837278,
+            "total_fees": 2.3240881954138177
+          },
+          "development_3": {
+            "entries": 67,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 95.0,
+            "max_drawdown_pct": -11.94489860357757,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 25.867619657567165,
+            "total_fees": 3.235839315486059
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 54,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 74.33333333333333,
+            "max_drawdown_pct": -13.417556305351575,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 25.583954356278404,
+            "total_fees": 3.3460970774767476
+          },
+          "development_2": {
+            "entries": 61,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 86.33333333333333,
+            "max_drawdown_pct": -11.951449813839544,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 8.144875290972076,
+            "total_fees": 3.4462311278234687
+          },
+          "development_3": {
+            "entries": 67,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 95.0,
+            "max_drawdown_pct": -12.306351710614639,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 22.356111565106307,
+            "total_fees": 4.785057519585574
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 56,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 90.66666666666666,
+          "max_drawdown_pct": -13.46801168507048,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 8.984966163173503,
+          "total_fees": 2.2517252335294695
+        },
+        "stressed": {
+          "entries": 56,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 90.66666666666666,
+          "max_drawdown_pct": -14.896250159656777,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 6.885866720707012,
+          "total_fees": 3.3456745850261975
+        }
+      }
+    },
+    "43": {
+      "candidate": {
+        "entry_confirmation_bars": 1,
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route43_volatility_normalized_rank",
+        "score_mode": "vol_normalized",
+        "switch_margin": 0.25,
+        "trend_bars": 42,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 65,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 81.0,
+            "max_drawdown_pct": -8.242490754694531,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 34.096000871628185,
+            "total_fees": 2.887853511971867
+          },
+          "development_2": {
+            "entries": 82,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -15.716397648422632,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 6.8437287391043045,
+            "total_fees": 3.4938100608545892
+          },
+          "development_3": {
+            "entries": 102,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -15.581551352138746,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 8.052909555720245,
+            "total_fees": 4.561626400071646
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 65,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 81.0,
+            "max_drawdown_pct": -8.651460504608554,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 30.78015497416309,
+            "total_fees": 4.275363834548988
+          },
+          "development_2": {
+            "entries": 82,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 95.33333333333334,
+            "max_drawdown_pct": -18.24952162810134,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 3.140066014938081,
+            "total_fees": 5.151323181590745
+          },
+          "development_3": {
+            "entries": 102,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -17.661359666345046,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 3.2726775421176635,
+            "total_fees": 6.69242846325682
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 75,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 96.66666666666667,
+          "max_drawdown_pct": -14.055701681518151,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 8.72461140764167,
+          "total_fees": 3.2557997405368138
+        },
+        "stressed": {
+          "entries": 75,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 96.66666666666667,
+          "max_drawdown_pct": -14.418168335942848,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 5.560796441805715,
+          "total_fees": 4.812555167326444
+        }
+      }
+    },
+    "44": {
+      "candidate": {
+        "entry_confirmation_bars": 1,
+        "min_score": 0.0,
+        "min_trend": 0.01,
+        "momentum_bars": 12,
+        "name": "route44_reentry_cooldown_2bars",
+        "reentry_cooldown_bars": 2,
+        "score_mode": "raw",
+        "switch_margin": 0.01,
+        "trend_bars": 42,
+        "volatility_target": 0.015
+      },
+      "development": {
+        "normal": {
+          "development_1": {
+            "entries": 52,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 80.33333333333333,
+            "max_drawdown_pct": -11.686333381629089,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 27.641200930191488,
+            "total_fees": 2.1635748935130903
+          },
+          "development_2": {
+            "entries": 62,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 94.66666666666667,
+            "max_drawdown_pct": -11.523004768930567,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 9.12308902503991,
+            "total_fees": 2.392505145102029
+          },
+          "development_3": {
+            "entries": 70,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -10.214494221455517,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 23.832501482752157,
+            "total_fees": 3.337892713869206
+          }
+        },
+        "stressed": {
+          "development_1": {
+            "entries": 52,
+            "equal_weight_buy_hold_return_pct": -15.572010825759138,
+            "exposure_time_pct": 80.33333333333333,
+            "max_drawdown_pct": -12.217846514603236,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 25.164691894448033,
+            "total_fees": 3.2132823121647003
+          },
+          "development_2": {
+            "entries": 62,
+            "equal_weight_buy_hold_return_pct": -1.7073440931843038,
+            "exposure_time_pct": 94.66666666666667,
+            "max_drawdown_pct": -12.7871184778252,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 6.500339077768302,
+            "total_fees": 3.546435009949111
+          },
+          "development_3": {
+            "entries": 70,
+            "equal_weight_buy_hold_return_pct": 13.582099136673943,
+            "exposure_time_pct": 98.66666666666667,
+            "max_drawdown_pct": -10.661104852586757,
+            "skipped_entries_below_min_order": 0,
+            "strategy_return_pct": 20.225848553918535,
+            "total_fees": 4.932709380974064
+          }
+        }
+      },
+      "holdout": {
+        "normal": {
+          "entries": 63,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 95.33333333333334,
+          "max_drawdown_pct": -17.99274710118398,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 5.85097798370986,
+          "total_fees": 2.580080140803708
+        },
+        "stressed": {
+          "entries": 63,
+          "equal_weight_buy_hold_return_pct": -17.760654019776666,
+          "exposure_time_pct": 95.33333333333334,
+          "max_drawdown_pct": -19.546916161333538,
+          "skipped_entries_below_min_order": 0,
+          "strategy_return_pct": 3.4776060630031136,
+          "total_fees": 3.827575793785001
+        }
+      }
+    }
+  },
+  "schema_version": 1,
+  "stress_fee_bps": 15.0,
+  "universe_size": 38
+}

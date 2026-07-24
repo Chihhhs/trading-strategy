@@ -710,3 +710,55 @@ used to reverse the development decision.  The post-boundary selection was
 also concentrated, choosing its most frequent coin 55.1% of the time.  Route
 36 is closed at measurement, remains `execution_authorized=false`, and no beta
 window or residual threshold may be tuned against the inspected data.
+
+## Route 37: low-capital snowball research
+
+Decision: baseline measured; no Route 37 candidate promoted.
+
+This route studies cost-adjusted geometric equity growth for an account below
+100 USDC. It treats "snowball" as reinvestment of available equity, not as a
+permission to add leverage or weaken protection. Growth is evaluated together
+with mark-to-market drawdown, recovery time, minimum-order skips, fee drag,
+turnover, and coin/direction concentration.
+
+Route 37 inherits the isolated Route 30/31 clean-room contract: fixed live-38
+universe, completed Hyperliquid-native 4h bars, 50 USDC research capital, one
+position maximum, 50% target notional, no leverage multiplier, 10 USDC minimum
+order, next-bar-open execution, and normal/stressed cost models. It reads
+source data without modifying any original fixture, cache, state, or existing
+artifact; all derived outputs must use a new Route 37 path with input
+fingerprints and predeclared boundaries.
+
+No order API, normal live engine, paper/live configuration, or exchange order
+is in scope. Every future Route 37 artifact must retain
+`execution_authorized=false`. A separate input boundary and baseline must be
+declared before any candidate result is interpreted; the known Route 30/31
+benchmark cannot be reused as a fresh holdout.
+
+The first clean-room baseline used a new 38-coin Hyperliquid 1h snapshot ending
+at 2026-07-22 15:00 UTC, resampled to 4h. The fixed 192-candidate grid selected
+12-bar raw momentum, 42-bar positive trend, a 1% switch margin, and a 1.5%
+volatility target. At 50 USDC, all three development folds were positive under
+10 bps stress with drawdowns between -10.21% and -12.70% and zero minimum-order
+skips. The locked 300-bar holdout returned +3.97% under 10 bps stress, with
+-18.44% mark-to-market drawdown, 63 entries, zero skips, and 2.54 USDC fees;
+equal-weight buy-and-hold returned -17.91%.
+
+The 25 USDC holdout returned -5.66% under stress and skipped 200 minimum-order
+entries. The result establishes 50 USDC as a feasibility floor for this
+baseline, not as proof of rapid snowballing. Route 37 remains research-only;
+the next candidate must declare a compounding or sizing hypothesis and use a
+new locked boundary.
+
+The next predeclared hypothesis keeps the selected signal fixed and compares
+25%, 50%, 75%, and 90% current-equity allocation at 50 USDC. It cannot use the
+inspected holdout for selection; a new fingerprinted forward boundary is
+required before any sizing decision.
+
+For context, the canonical `live_trend_baseline_38` was run read-only on its
+existing Binance fixture: net PnL was -39.7%, -49.1%, and -12.6% over 120d,
+180d, and 240d, with MTM drawdowns of 53.09%, 64.22%, and 53.45%. This is not a
+Route 37 promotion comparison because the live baseline uses daily decisions,
+strict 1h exits, 1000 USDC, 5x leverage, and a different fixture. A same-input,
+matched-contract comparison is required before claiming Route 37 is better
+than live.

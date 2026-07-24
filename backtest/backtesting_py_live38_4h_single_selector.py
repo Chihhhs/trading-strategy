@@ -61,6 +61,7 @@ def build_selector_signals(
     min_trend,
     min_score,
     switch_margin,
+    entry_confirmation_bars=1,
 ):
     """Return causal one-hot target states with a stateful incumbent.
 
@@ -82,22 +83,31 @@ def build_selector_signals(
 
     signals = pd.DataFrame(0.0, index=closes.index, columns=closes.columns)
     warmup = max(momentum_bars, trend_bars, VOLATILITY_LOOKBACK)
+    confirmation_bars = max(1, int(entry_confirmation_bars))
     incumbent = None
+    pending_candidate = None
+    pending_streak = 0
     for index in range(warmup, len(closes)):
         scores = score.iloc[index]
         trends = trend.iloc[index]
         eligible = scores.notna() & trends.notna() & (trends >= float(min_trend)) & (scores >= float(min_score))
         ranked = scores[eligible].sort_values(ascending=False)
         best = str(ranked.index[0]) if len(ranked) else None
+        if best is not None and best == pending_candidate:
+            pending_streak += 1
+        else:
+            pending_candidate = best
+            pending_streak = 1 if best is not None else 0
+        confirmed_best = best if pending_streak >= confirmation_bars else None
 
         if incumbent is None:
-            incumbent = best
+            incumbent = confirmed_best
         elif not bool(eligible.get(incumbent, False)):
-            incumbent = best
-        elif best is not None and best != incumbent:
-            lead = float(scores[best]) - float(scores[incumbent])
+            incumbent = confirmed_best
+        elif confirmed_best is not None and confirmed_best != incumbent:
+            lead = float(scores[confirmed_best]) - float(scores[incumbent])
             if lead >= float(switch_margin):
-                incumbent = best
+                incumbent = confirmed_best
 
         if incumbent is not None:
             signals.iloc[index, signals.columns.get_loc(incumbent)] = 1.0
@@ -107,8 +117,16 @@ def build_selector_signals(
 def evaluate_portfolio(candidate, frames, closes, volatility, folds, *, fee_bps):
     signal_parameters = {
         key: candidate[key]
-        for key in ("momentum_bars", "trend_bars", "score_mode", "min_trend", "min_score", "switch_margin")
+        for key in (
+            "momentum_bars",
+            "trend_bars",
+            "score_mode",
+            "min_trend",
+            "min_score",
+            "switch_margin",
+        )
     }
+    signal_parameters["entry_confirmation_bars"] = candidate.get("entry_confirmation_bars", 1)
     signals = build_selector_signals(closes, **signal_parameters)
     target = float(candidate["volatility_target"])
     return {
@@ -136,8 +154,16 @@ def evaluate_portfolio(candidate, frames, closes, volatility, folds, *, fee_bps)
 def evaluate_backtesting_py(candidate, frames, closes, volatility, folds, *, fee_bps):
     signal_parameters = {
         key: candidate[key]
-        for key in ("momentum_bars", "trend_bars", "score_mode", "min_trend", "min_score", "switch_margin")
+        for key in (
+            "momentum_bars",
+            "trend_bars",
+            "score_mode",
+            "min_trend",
+            "min_score",
+            "switch_margin",
+        )
     }
+    signal_parameters["entry_confirmation_bars"] = candidate.get("entry_confirmation_bars", 1)
     signals = build_selector_signals(closes, **signal_parameters)
     sizes = {
         coin: build_position_sizes(volatility[coin], float(candidate["volatility_target"]))
